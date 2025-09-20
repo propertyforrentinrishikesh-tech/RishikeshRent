@@ -93,7 +93,6 @@ const CreatePropertyType = ({ propertyTypes = [], locationType = [], setProperty
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
             });
-
             const data = await response.json();
 
             if (response.ok) {
