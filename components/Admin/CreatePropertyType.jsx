@@ -75,12 +75,10 @@ const CreatePropertyType = ({ propertyTypes = [], locationType = [], setProperty
             property.propertyType.toLowerCase() === formData.propertyType.trim().toLowerCase() &&
             (!editProperty || property._id !== editProperty) // Skip current item when editing
         );
-
         if (isDuplicate) {
             toast.error("This property type already exists");
             return;
         }
-
         try {
             const method = editProperty ? "PATCH" : "POST";
             // Compose payload with coupon details
