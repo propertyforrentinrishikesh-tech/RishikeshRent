@@ -132,7 +132,7 @@ const ReturnPolicy = () => {
             <p>PAN Number: AAKCA0262D</p>
             <p>GST Registration Number: 05AAKCA0262D1Z8</p>
             <p>Working Hours: 9:30 - 18:30 pm</p>
-            <p className="font-semibold mt-2">Adventure Axis Equipments (Pvt.) Ltd.</p>
+            <p className="font-semibold mt-2">Rishikesh Rent Equipments (Pvt.) Ltd.</p>
             <p>Address: 162, Badrinath Road (Opp. Divine Lakshmi Ganga Hotel)</p>
             <p>Tapovan Luxman Jhoola, RISHIKESH-249 192 (UK)</p>
             <p>Ph.: +91-135-2442822 | Mo.: 7669280002, 9897468886</p>

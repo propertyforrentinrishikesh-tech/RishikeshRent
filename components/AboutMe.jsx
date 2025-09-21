@@ -6,7 +6,7 @@ import Link from "next/link";
 const accordionData = [
   {
     title: "What Makes Us Unique?",
-    content: `At Adventure Axis, we don’t just sell gear — we build expedition readiness from the ground up. Here's what sets us apart:
+    content: `At Rishikesh Rent, we don’t just sell gear — we build expedition readiness from the ground up. Here's what sets us apart:
 
 ✅ Legacy of Trust & Experience
 With 25+ years in the adventure equipment industry, we bring unmatched field knowledge, technical expertise, and proven reliability to every product and solution we offer.
@@ -26,11 +26,11 @@ We are a preferred supplier for India’s top adventure tour operators, rescue t
 ✅ Recognized Workplace Excellence
 Proud recipient of the Great Place to Work® Certification (2025), reflecting our commitment to ethical practices, team spirit, and professional excellence.
 
-🎯 Adventure Axis – Where Every Expedition Begins with the Right Gear and the Right People.`
+🎯 Rishikesh Rent – Where Every Expedition Begins with the Right Gear and the Right People.`
   },
   {
     title: "Sustainable & Eco-Friendly",
-    content: `At Adventure Axis, sustainability isn’t just a trend — it’s a commitment woven into everything we do. As a responsible adventure gear provider, we recognize the importance of preserving the very landscapes we help people explore.
+    content: `At Rishikesh Rent, sustainability isn’t just a trend — it’s a commitment woven into everything we do. As a responsible adventure gear provider, we recognize the importance of preserving the very landscapes we help people explore.
 
 🌱 Eco-Conscious Product Selection
 We prioritize partnerships with brands that focus on sustainable manufacturing, eco-friendly materials, and low-impact packaging. Many of our products are made from recycled, biodegradable, or responsibly sourced components — built to last, without costing the planet.
@@ -40,7 +40,7 @@ We actively promote the "Leave No Trace" principles across our community. Whethe
   },
   {
     title: "Global Accessibility with Local Roots",
-    content: `At Adventure Axis, we proudly operate at the intersection of global standards and local soul. While our store is rooted in Tapovan, Rishikesh — the gateway to the Himalayas — our reach extends across India and beyond, serving adventurers, expedition teams, and outdoor professionals worldwide.
+    content: `At Rishikesh Rent, we proudly operate at the intersection of global standards and local soul. While our store is rooted in Tapovan, Rishikesh — the gateway to the Himalayas — our reach extends across India and beyond, serving adventurers, expedition teams, and outdoor professionals worldwide.
 
 We offer globally recognized brands like NRS, Camp, Wiley X, and Lafuma, ensuring world-class quality and performance.
 
@@ -96,18 +96,18 @@ const AboutMe = () => {
               <div className="mb-8">
                 <h2 className="text-xl md:text-5xl font-bold mb-6 text-gray-800">"Certified to Inspire – Where Passion, People & Purpose Meet."</h2>
                 <p className="text-md text-gray-700 leading-relaxed mb-6">
-                  Adventure Axis is not just a store — it’s a legacy in the making. Based in Tapovan, Rishikesh, on the scenic Badrinath Highway, we have grown to become a complete outdoor adventure equipment hub and a recognized name across the expedition and outdoor gear industry in India.
+                  Rishikesh Rent is not just a store — it’s a legacy in the making. Based in Tapovan, Rishikesh, on the scenic Badrinath Highway, we have grown to become a complete outdoor adventure equipment hub and a recognized name across the expedition and outdoor gear industry in India.
                   <br />
 
-                  With over 25 years of relentless innovation and experience, Adventure Axis has become synonymous with trust, durability, and cutting-edge gear solutions for every kind of adventurer — from rafting guides and mountain trekkers to rescue professionals and global expedition teams.
+                  With over 25 years of relentless innovation and experience, Rishikesh Rent has become synonymous with trust, durability, and cutting-edge gear solutions for every kind of adventurer — from rafting guides and mountain trekkers to rescue professionals and global expedition teams.
                   <br />
                   We are proud to be authorized dealers for some of the most respected international brands in the world, including NRS, Camp, Wiley X, and Lafuma. Our extensive catalog features water sports gear, high-altitude expedition equipment, camping essentials, helmets, oars, dry bags, harnesses, safety & rescue tools, and professional trekking gear — everything you need for a safe and successful adventure.
                   <br />
                   Our goal is more than just supplying equipment — we deliver practical, innovative, and complete outdoor solutions tailored to meet the demands of today’s adventure businesses and extreme-condition professionals. Through our field-tested expertise and global sourcing, we help clients streamline operations, improve safety, and perform at the highest level.
                   <br />
-                  Recognized for our excellence in service and work culture, Adventure Axis earned the prestigious Great Place to Work® Certification in 2025. This reflects our deep-rooted commitment to quality, service integrity, and continuous growth in the adventure equipment sector.
+                  Recognized for our excellence in service and work culture, Rishikesh Rent earned the prestigious Great Place to Work® Certification in 2025. This reflects our deep-rooted commitment to quality, service integrity, and continuous growth in the adventure equipment sector.
                   <br />
-                  🌍 Adventure Axis — Where Exploration Meets Innovation.
+                  🌍 Rishikesh Rent — Where Exploration Meets Innovation.
                   The trusted partner of India's adventure community for complete expedition solutions.<br /><br />
                 </p>
               </div>

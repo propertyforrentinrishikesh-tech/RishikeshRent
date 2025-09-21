@@ -17,7 +17,7 @@ const RefundCancellation = () => {
             <p className="text-justify mt-1">
               We have a customer friendly return policy. You will have to just write us on <a href="mailto:info@adventureaxis.in" className="text-blue-600 underline font-semibold">info@adventureaxis.in</a> within 24 hrs from time of delivery &amp; return steps will given from our customer support. <br />
               1)- Provide us with the tracking details of the product. Without this packages could get lost and replacement might be cancelled. <br />
-              2)- Mention the Company Name www.adventureaxis.in (E Commerce Website Of Adventure Axis) and Order Number (starting with B) on the return package.<br />
+              2)- Mention the Company Name www.adventureaxis.in (E Commerce Website Of Rishikesh Rent) and Order Number (starting with B) on the return package.<br />
               Last date of return shipping: 14 days from date of delivery. We will not be able to accept returns if dispatched after 14 days from date of delivery.
             </p>
           </div>
@@ -72,7 +72,7 @@ const RefundCancellation = () => {
           <div>
             <strong>8. Damage :-</strong>
             <p className="text-justify mt-1">
-              At Adventure Axis, we strive to ensure every product reaches you in perfect condition. However, in rare
+              At Rishikesh Rent, we strive to ensure every product reaches you in perfect condition. However, in rare
               instances where a product is delivered in a damaged or defective state, we sincerely apologize for the
               inconvenience caused.
               <br />
@@ -175,7 +175,7 @@ const RefundCancellation = () => {
               PAN Number :- AAKCA0262D <br />
               GST Registration Number :-  05AAKCA0262D1Z8  <br />
               Working Hours : 9:30 - 18:30 pm  <br />
-              Adventure Axis Equipments (Pvt.) Ltd.
+              Rishikesh Rent Equipments (Pvt.) Ltd.
               <br />
               Address: 162, Badrinath Road (Opp. Divine Lakshmi Ganga Hotel)
               <br />

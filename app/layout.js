@@ -10,33 +10,33 @@ import GoogleTranslate from "@/components/GoogleTranslate";
 
 
 export const metadata = {
-  metadataBase: new URL("https://adventureaxis.com/"),
+  metadataBase: new URL("https://rishikeshrent.com/"),
   title: {
-    default: "Adventure Axis is an complete outdoor shop.",
-    template: "%s | Adventure Axis",
+    default: "Rishikesh Rent is a wide range of properties for rent in the beautiful city of Rishikesh, catering to various needs and preferences.",
+    template: "%s | Rishikesh Rent",
   },
   description:
-    "Adventure Axis is an complete outdoor shop.Adventure Sports Equipment Store 👉 Water Sports Equipment 👉 Safety & Rescue Equipment 👉 Clothing & Footwear 👉 Camping & Outdoor 👉 Expedition GearRaft-Inflatables👉 Apparel, Dry Bag-Boxes, Life Jackets, Frame-Oars, Helmets, Raft Repair – Accessosries, Pumps, Gloves, Dry Wear, Kayaks-Accessories, Paddles, Base Layer, Fleece, Insulation, Leg Wear Safety-Rescue 👉 Rescue Devices, Retractable fall arresters, Ropes & Cords, Carabiner, Traction, Rope Tools, Harness, Harnesses accessories, Pulleys, Rope fall arresters, Protective Visors, Helmets Tactical Eye Wear 👉 Brand Footwear 👉 Clothing 👉 Camping & Outdoor Regd. Or Branch Office: Badrinath Road, Tapovan, Laxmanjhula, Uttarakhand Text : 0766-928-0002, 989-7468-886​ Email:info@adventureaxis.in Accounts@adventureaxis.in Sales@adventureaxis.in",
+    "We provide a wide range of properties for rent in the beautiful city of Rishikesh, catering to various needs and preferences. Whether you're looking for cozy apartments, spacious villas, or serene cottages with a view of the Ganges, we have something for everyone. Our rental options are ideal for short-term stays, long-term living, or even for those seeking a peaceful retreat in this spiritual hub. With flexible leasing options and prime locations across Rishikesh, we ensure you find the perfect place that suits your lifestyle and budget.",
   keywords:
-    "Adventure Sports Equipment Store, Safety & Rescue Equipment, Clothing & Footwear, Camping & Outdoor, Expedition GearRaft-Inflatables, india, India",
+    "Rishikesh Rent, Properties for rent in Rishikesh, Cozy apartments, Spacious villas, Serene cottages, Ganges view, Flexible leasing options, Prime locations, Spiritual hub, Rishikesh, India",
   icons: { apple: "/apple-touch-icon.png" },
   manifest: "/site.webmanifest",
   openGraph: {
-    title: "Adventure Axis is an complete outdoor shop.",
+    title: "Rishikesh Rent is a wide range of properties for rent in the beautiful city of Rishikesh, catering to various needs and preferences.",
     description:
-      "Adventure Axis is an complete outdoor shop.",
+      "Rishikesh Rent is a wide range of properties for rent in the beautiful city of Rishikesh, catering to various needs and preferences.",
     images: ["/logo.png"],
-    url: "https://adventureaxis.com/",
-    site_name: "Adventure Axis",
+    url: "https://rishikeshrent.com/",
+    site_name: "Rishikesh Rent",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Adventure Axis is an complete outdoor shop.",
-    description:"Adventure Axis is an complete outdoor shop.Adventure Sports Equipment Store 👉 Water Sports Equipment 👉 Safety & Rescue Equipment 👉 Clothing & Footwear 👉 Camping & Outdoor 👉 Expedition GearRaft-Inflatables👉 Apparel, Dry Bag-Boxes, Life Jackets, Frame-Oars, Helmets, Raft Repair – Accessosries, Pumps, Gloves, Dry Wear, Kayaks-Accessories, Paddles, Base Layer, Fleece, Insulation, Leg Wear Safety-Rescue 👉 Rescue Devices, Retractable fall arresters, Ropes & Cords, Carabiner, Traction, Rope Tools",
+    title: "Rishikesh Rent is a wide range of properties for rent in the beautiful city of Rishikesh, catering to various needs and preferences.",
+    description:"We provide a wide range of properties for rent in the beautiful city of Rishikesh, catering to various needs and preferences. Whether you're looking for cozy apartments, spacious villas, or serene cottages with a view of the Ganges, we have something for everyone. Our rental options are ideal for short-term stays, long-term living, or even for those seeking a peaceful retreat in this spiritual hub. With flexible leasing options and prime locations across Rishikesh, we ensure you find the perfect place that suits your lifestyle and budget.",
     images: ["/logo.png"],
   },
   other: {
-    "author": "Adventure Axis",
+    "author": "Rishikesh Rent",
     "robots": "index, follow",
     "viewport": "width=device-width, initial-scale=1",
   },

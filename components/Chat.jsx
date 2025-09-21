@@ -26,7 +26,7 @@ export default function Chat({
     className,
     userId,
     isAdmin = false,
-    recipientName = "Adventure Axis",
+    recipientName = "Rishikesh Rent",
     showBackButton = false,
     onBack,
     type = "chatbot",

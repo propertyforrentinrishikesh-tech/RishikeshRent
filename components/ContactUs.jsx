@@ -104,7 +104,7 @@ const ContactUs = () => {
                     <div className="lg:w-1/2 w-full flex flex-col justify-center text-black">
                         <h2 className="text-2xl md:text-5xl font-bold mb-4">DISCOVER US</h2>
                         <p className="mb-6 text-base w-[90%] ">
-                            <span className="underline text-xl md:text-3xl">Adventure Axis is an complete outdoor shop. </span>
+                            <span className="underline text-xl md:text-3xl">Rishikesh Rent is an complete outdoor shop. </span>
                             <br />
                             <span className='text-xl md:text-3xl'> Our experts are available to answer any questions you might have. We’ve got the answers.</span>
                         </p>

@@ -13,7 +13,7 @@ const ShippingPolicy = () => {
             <strong>1. Delivery charge varies with each Seller :-</strong>
             <p className="text-justify mt-1">
               Sellers incur relatively higher shipping costs on low value items. In such cases, charging a nominal delivery charge helps them offset logistics costs. Please check your order summary to understand the delivery charges for individual products.<br />
-              For Products listed as www.adventureaxis.in (E Commerce Website Of Adventure Axis), a Rs 200 charge for delivery per item may be applied if the order value is less than Rs 1,000=00 to 2,000=00. While, orders of Rs 10,000=00 or above are delivered free based on delivery partner's fee.
+              For Products listed as www.adventureaxis.in (E Commerce Website Of Rishikesh Rent), a Rs 200 charge for delivery per item may be applied if the order value is less than Rs 1,000=00 to 2,000=00. While, orders of Rs 10,000=00 or above are delivered free based on delivery partner's fee.
             </p>
           </div>
           <div>
@@ -69,7 +69,7 @@ const ShippingPolicy = () => {
             <div>
               <p className="text-justify" style={{ textAlign: 'justify' }}><b>8. I need to return an item, how do I arrange for a pick-up? :- </b>
                 Returns are easy. Contact Us to initiate a return. You will receive a call explaining the process, once you have initiated a return.<br />
-                Wherever possible www.adventureaxis.in (E Commerce Website Of Adventure Axis) delivery partner's Logistics will facilitate the pick-up of the item. In case, the pick-up cannot be arranged through www.adventureaxis.in (E Commerce Website Of Adventure Axis)-delivery partner's, you can return the item through a third-party courier service. Return fees are borne by the Seller.
+                Wherever possible www.adventureaxis.in (E Commerce Website Of Rishikesh Rent) delivery partner's Logistics will facilitate the pick-up of the item. In case, the pick-up cannot be arranged through www.adventureaxis.in (E Commerce Website Of Rishikesh Rent)-delivery partner's, you can return the item through a third-party courier service. Return fees are borne by the Seller.
               </p>
             </div>
             <div>
@@ -100,7 +100,7 @@ const ShippingPolicy = () => {
               </p>
             </div>
             <div>
-              <p className="text-justify" style={{ textAlign: 'justify' }}><b>11. www.adventureaxis.in (E Commerce Website Of Adventure Axis) :- </b>
+              <p className="text-justify" style={{ textAlign: 'justify' }}><b>11. www.adventureaxis.in (E Commerce Website Of Rishikesh Rent) :- </b>
                 is an Internet based content and e-commerce portal, a company
                 incorporated under the laws of India. Use of the Website is offered to you conditioned on acceptance
                 without modification of all the terms, conditions and notices contained in these Terms, as may be posted
@@ -116,7 +116,7 @@ const ShippingPolicy = () => {
                 PAN Number :- AAKCA0262D <br />
                 GST Registration Number :-  05AAKCA0262D1Z8  <br />
                 Working Hours : 9:30 - 18:30 pm  <br />
-                Adventure Axis Equipments (Pvt.) Ltd.
+                Rishikesh Rent Equipments (Pvt.) Ltd.
                 <br />
                 Address: 162, Badrinath Road (Opp. Divine Lakshmi Ganga Hotel)
                 <br />

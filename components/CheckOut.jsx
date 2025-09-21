@@ -435,7 +435,7 @@ const CheckOut = () => {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: Math.round(Number(finalAmount) * 100), // Convert to paise
         currency: "INR",
-        name: "Adventure Axis",
+        name: "Rishikesh Rent",
         description: "Order Payment",
         order_id: razorpayOrderId,
         handler: createPaymentHandler(cart, checkoutData, formFields, user, orderId, setError, setShowConfirmationModal, setOrderId, routerInstance, formFields, customerData, isBuyNow), // Pass customer data for email
@@ -1788,7 +1788,7 @@ const CheckOut = () => {
       <div className="flex-1 bg-white rounded-lg shadow p-4 md:p-8">
         <div className="border-b border-gray-200 pb-4 mb-6">
           <h2 className="text-xl py-5 md:text-2xl font-bold">Thanks for being a loyal customer,</h2>
-          <p className="text-md md:text-xl font-semibold"> Your cart is ready. Adventure Axis is a trusted growth partner to millions of everyday entrepreneurs.</p>
+          <p className="text-md md:text-xl font-semibold"> Your cart is ready. Rishikesh Rent is a trusted growth partner to millions of everyday entrepreneurs.</p>
           <br />
           <p className="text-sm md:text-lg font-semibold">Dear Customer,To proceed with your order and ensure smooth delivery, we kindly request you to provide the following basic information:</p>
         </div>

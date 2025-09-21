@@ -40,7 +40,7 @@ const VisionMission = () => {
               <p className="text-gray-700 text-base">
                 To become India’s most trusted and innovative adventure equipment brand — empowering explorers, protecting the planet, and uplifting local communities — one expedition at a time.
                 <br />
-                We envision a world where adventure is safe, sustainable, and accessible to all. Through global-quality gear, eco-conscious practices, and strong community partnerships, Adventure Axis strives to lead the outdoor industry with integrity, impact, and inspiration — from the Himalayan trails to the farthest frontiers of exploration.
+                We envision a world where adventure is safe, sustainable, and accessible to all. Through global-quality gear, eco-conscious practices, and strong community partnerships, Rishikesh Rent strives to lead the outdoor industry with integrity, impact, and inspiration — from the Himalayan trails to the farthest frontiers of exploration.
               </p>
             </div>
             {/* Mission */}
@@ -49,7 +49,7 @@ const VisionMission = () => {
               <ul className="list-disc pl-6 text-gray-700 text-base space-y-2">
                 To deliver high-performance, safety-tested adventure equipment that empowers every explorer — from professionals to enthusiasts — with reliability, innovation, and responsibility.
                 <br />
-                At Adventure Axis, our mission is to:
+                At Rishikesh Rent, our mission is to:
                 <br />
                 Equip adventure seekers with world-class gear suited for extreme environments
                 <br />

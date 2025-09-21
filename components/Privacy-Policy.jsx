@@ -86,7 +86,7 @@ const PrivacyPolicy = () => {
             </div>
             <div>
               <p className="text-justify" style={{ textAlign: 'justify' }}><b>9. Introduction to www.adventureaxis.in (Website)  :- </b>
-                Adventure Axis is a premier outdoor gear store
+                Rishikesh Rent is a premier outdoor gear store
                 based in Tapovan, Rishikesh, on the Badrinath Highway. As an authorized dealer for top global brands
                 like NRS, Camp, Wiley X, and Lafuma, we specialize in high-quality equipment for water sports, camping,
                 trekking, high-altitude expeditions, and safety needs.
@@ -100,7 +100,7 @@ const PrivacyPolicy = () => {
                 We don’t just provide equipment — we deliver complete outdoor solutions, backed by expert leadership
                 and a vision to elevate the adventure gear industry.
                 <br />
-                Adventure Axis offers a comprehensive range of adventure sports equipment under one roof. Our
+                Rishikesh Rent offers a comprehensive range of adventure sports equipment under one roof. Our
                 categories include Water Sports Equipment such as rafts, kayaks, dry bags, paddles, life jackets,
                 helmets, and repair kits. In Safety & Rescue, we provide harnesses, carabiners, ropes, pulleys, fall
                 arresters, rescue devices, and helmets. Our Clothing & Footwear range features tactical eyewear, base
@@ -122,7 +122,7 @@ const PrivacyPolicy = () => {
                 PAN Number :- AAKCA0262D <br />
                 GST Registration Number :-  05AAKCA0262D1Z8  <br />
                 Working Hours : 9:30 - 18:30 pm  <br />
-                Adventure Axis Equipments (Pvt.) Ltd.
+                Rishikesh Rent Equipments (Pvt.) Ltd.
                 <br />
                 Address: 162, Badrinath Road (Opp. Divine Lakshmi Ganga Hotel)
                 <br />

@@ -44,7 +44,7 @@ const Team = () => {
           <div className="flex flex-col lg:flex-row gap-8 mb-10 items-start">
             {/* Left: Heading and Paragraph */}
             <div className="w-full lg:w-[57%]">
-              <h2 className="text-xl md:text-3xl font-semibold mb-4 text-gray-800 leading-tight">At Adventure Axis, our strength lies in our people. Our team is a dynamic blend of seasoned mountaineers, certified adventure trainers, outdoor gear specialists, and logistics professionals</h2>
+              <h2 className="text-xl md:text-3xl font-semibold mb-4 text-gray-800 leading-tight">At Rishikesh Rent, our strength lies in our people. Our team is a dynamic blend of seasoned mountaineers, certified adventure trainers, outdoor gear specialists, and logistics professionals</h2>
               <p className="text-md md:text-xl text-gray-700 mb-4">
                 each bringing deep field knowledge and a passion for exploration. With decades of hands-on experience across the Himalayas and beyond, our experts ensure that every product we recommend is tested, trusted, and tailored for real-world adventure.
                 <br />
@@ -111,7 +111,7 @@ const Team = () => {
           </div>
 
           <div className="mb-10 text-base text-gray-700">
-            At Adventure Axis, our greatest asset is our people — a dedicated team of seasoned professionals who live and breathe the spirit of adventure. Our crew includes experienced mountaineers, certified adventure instructors, technical gear specialists, field logisticians, and customer support leaders — all united by a shared mission: to equip, guide, and empower every explorer.
+            At Rishikesh Rent, our greatest asset is our people — a dedicated team of seasoned professionals who live and breathe the spirit of adventure. Our crew includes experienced mountaineers, certified adventure instructors, technical gear specialists, field logisticians, and customer support leaders — all united by a shared mission: to equip, guide, and empower every explorer.
             <br />
 
             Beyond individual expertise, it is our team spirit that sets us apart. We operate with a culture of collaboration, trust, and continuous learning, where ideas are shared freely and challenges are met collectively. From basecamp to boardroom, every member plays a vital role in ensuring smooth operations, quick decision-making, and responsive service.

@@ -45,7 +45,7 @@ export async function POST(req) {
     const emailRecipients = uniqueEmails.map(email => ({ email }));
 
     const emailData = {
-      sender: { name: "Adventure Axis", email: "info@adventureaxis.in" },
+      sender: { name: "Rishikesh Rent", email: "info@adventureaxis.in" },
       to: emailRecipients,
       subject,
       htmlContent: `
@@ -95,7 +95,7 @@ export async function POST(req) {
                     <tr>
                         <td style="padding: 30px 0; text-align: center; background-color:rgb(176, 176, 176); border-top-left-radius: 8px; border-top-right-radius: 8px;">
                             <a href="https://adventureaxis.in/" class="header">
-            <img src="https://adventureaxis.in/logo.png" alt="Adventure Axis Logo">
+            <img src="https://adventureaxis.in/logo.png" alt="Rishikesh Rent Logo">
         </a>
                             <h1 style="color: #ffffff; margin: 0; margin-top:12px; font-size: 24px;">Promotional Email</h1>
                         </td>
@@ -115,7 +115,7 @@ export async function POST(req) {
                             <p>MON to SAT : 9:30AM - 08:00 PM</p>
                             <p>Sunday Closed</p>
             <p>If you have any questions, feel free to contact: <a href="mailto:info@adventureaxis.in">info@adventureaxis.in</a>.</p>
-            <p>&copy; ${new Date().getFullYear()} Adventure Axis. All rights reserved.</p>
+            <p>&copy; ${new Date().getFullYear()} Rishikesh Rent. All rights reserved.</p>
         </div>
                         </td>
                     </tr>

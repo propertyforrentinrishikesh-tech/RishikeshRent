@@ -132,7 +132,7 @@ export default function ChatBot() {
           {
             from: "Bot",
             sender: "bot",
-            text: "Hi there! 👋 Welcome to Adventure Axis!\n\nI’m AI Support Intelligence from our online store – your virtual assistant here to help you with anything you need.\n\nHow can I assist you today?",
+            text: "Hi there! 👋 Welcome to Rishikesh Rent!\n\nI’m AI Support Intelligence from our online store – your virtual assistant here to help you with anything you need.\n\nHow can I assist you today?",
             createdAt: new Date().toISOString(),
           },
         ]);
@@ -147,7 +147,7 @@ export default function ChatBot() {
       {
         from: "Bot",
         sender: "bot",
-        text: "Hi there! 👋 Welcome to Adventure Axis!\n\nI’m AI Support Intelligence from our online store – your virtual assistant here to help you with anything you need.\n\nHow can I assist you today?",
+        text: "Hi there! 👋 Welcome to Rishikesh Rent!\n\nI’m AI Support Intelligence from our online store – your virtual assistant here to help you with anything you need.\n\nHow can I assist you today?",
         createdAt: new Date().toISOString(),
       },
     ]);
@@ -178,7 +178,7 @@ export default function ChatBot() {
           {
             from: "Bot",
             sender: "bot",
-            text: `Hi there! 👋 Welcome to Adventure Axis!\n\nI’m AI Support Intelligence from our online store – your virtual assistant here to help you with anything you need.\n\nHow can I assist you today?`,
+            text: `Hi there! 👋 Welcome to Rishikesh Rent!\n\nI’m AI Support Intelligence from our online store – your virtual assistant here to help you with anything you need.\n\nHow can I assist you today?`,
             createdAt: new Date().toISOString()
           }
         ]);
@@ -335,7 +335,7 @@ export default function ChatBot() {
         {
           from: "Bot",
           sender: "bot",
-          text: `Hi there! 👋 Welcome to Adventure Axis!\n\nI’m AI Support Intelligence from our online store – your virtual assistant here to help you with anything you need.\n\nHow can I assist you today?`,
+          text: `Hi there! 👋 Welcome to Rishikesh Rent!\n\nI’m AI Support Intelligence from our online store – your virtual assistant here to help you with anything you need.\n\nHow can I assist you today?`,
           createdAt: new Date().toISOString()
         }
       ]);

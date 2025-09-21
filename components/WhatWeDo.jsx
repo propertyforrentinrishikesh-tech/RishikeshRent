@@ -7,7 +7,7 @@ import React from 'react'
 const accordionData = [
   {
     title: "What Sets Us Apart:",
-    content: `At Adventure Axis, we’re more than an equipment supplier — we’re your adventure partner. Here’s what makes us truly unique:
+    content: `At Rishikesh Rent, we’re more than an equipment supplier — we’re your adventure partner. Here’s what makes us truly unique:
 
 ✅ Experience That Speaks Volumes
 With over 25 years of hands-on expertise in the adventure industry, we understand what it takes to perform in extreme conditions — because we’ve been there ourselves.
@@ -30,11 +30,11 @@ As a Great Place to Work®-Certified company, we foster a team culture built on 
 ✅ Customer Commitment
 We believe in personalized service, honest advice, and long-term relationships. Your journey is our priority — from basecamp planning to summit success.
 
-🧗 Adventure Axis — Where Experience Meets Innovation, and Passion Meets Performance.`
+🧗 Rishikesh Rent — Where Experience Meets Innovation, and Passion Meets Performance.`
   },
   {
     title: "Fair Trade:",
-    content: `At Adventure Axis, fairness isn't just a principle — it's part of our purpose. We are proud to support and promote Fair Trade practices that ensure transparency, equity, and dignity throughout our supply chain.
+    content: `At Rishikesh Rent, fairness isn't just a principle — it's part of our purpose. We are proud to support and promote Fair Trade practices that ensure transparency, equity, and dignity throughout our supply chain.
 
 We collaborate with local artisans, grassroots suppliers, and ethical manufacturers, ensuring they receive fair compensation, safe working conditions, and respectful partnerships. By choosing Fair Trade, we contribute to:
 
@@ -46,7 +46,7 @@ Reducing exploitation in the outdoor gear industry
 
 Promoting ethical sourcing and responsible consumption
 
-When you shop with Adventure Axis, you’re not just buying gear — you’re supporting a movement that values people over profit and helps build a more just and sustainable adventure economy.`
+When you shop with Rishikesh Rent, you’re not just buying gear — you’re supporting a movement that values people over profit and helps build a more just and sustainable adventure economy.`
   },
 ];
 
@@ -94,13 +94,13 @@ const WhatWeDo = () => {
                 <h4 className="text-xl md:text-3xl font-bold mb-4 text-amber-700">The Difference is in the Detail — Crafted for the Wild, Built on Trust.</h4>
                 <p className="text-sm md:text-base text-gray-700 mb-4">
                   What Makes the Difference
-                  At Adventure Axis, we go beyond just supplying gear — we create complete outdoor solutions rooted in experience, precision, and purpose. What sets us apart is our deep understanding of the adventure world — not just as suppliers, but as explorers ourselves.
+                  At Rishikesh Rent, we go beyond just supplying gear — we create complete outdoor solutions rooted in experience, precision, and purpose. What sets us apart is our deep understanding of the adventure world — not just as suppliers, but as explorers ourselves.
                   <br />
                   Every product we offer is handpicked, field-tested, and quality-assured to perform in the toughest terrains — from roaring rivers to snow-capped summits. Our commitment to excellence lies in the details: customized equipment kits, expert guidance, reliable logistics, and ongoing support that makes our service truly expedition-ready.
                   <br />
                   We don’t just sell world-class brands — we build long-term partnerships with our customers by providing honest advice, responsive service, and a team that stands by you before, during, and after the journey. With a foundation built on local roots and global reach, we’re proud to be the trusted choice for India’s adventure community.
                   <br />
-                  That’s the Adventure Axis difference — where gear meets grit, and trust powers every trail.
+                  That’s the Rishikesh Rent difference — where gear meets grit, and trust powers every trail.
                 </p>
 
                 {/* Accordion */}

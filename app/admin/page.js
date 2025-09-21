@@ -48,7 +48,16 @@ const Page = () => {
   const menuItems = [
     {
       title: "Properties",
-      icon: <Home className="h-10 w-10 mb-2" />,
+      icon: (
+        <div className="h-16 w-16 mb-2 relative">
+          <Image
+            src="/Property.jpg"
+            alt="Properties"
+            fill
+            className="object-cover rounded-full"
+          />
+        </div>
+      ),
       description: "Manage all properties",
       link: "/admin/properties_dashboard",
       count: counts.properties,
@@ -57,7 +66,16 @@ const Page = () => {
     },
     {
       title: "Hotel Business",
-      icon: <Users className="h-10 w-10 mb-2" />,
+      icon: (
+        <div className="h-16 w-16 mb-2 relative">
+          <Image
+            src="/Hotel.jpg"
+            alt="Hotel Business"
+            fill
+            className="object-cover rounded-full"
+          />
+        </div>
+      ),
       description: "Manage hotel listings",
       link: "#",
       count: 18,
@@ -66,7 +84,16 @@ const Page = () => {
     },
     {
       title: "Pilgrimage",
-      icon: <Calendar className="h-10 w-10 mb-2" />,
+      icon: (
+        <div className="h-16 w-16 mb-2 relative">
+          <Image
+            src="/Pilgrimage.jpg"
+            alt="Pilgrimage"
+            fill
+            className="object-cover rounded-full"
+          />
+        </div>
+      ),
       description: "Manage pilgrimage services",
       link: "#",
       count: 27,
@@ -75,7 +102,16 @@ const Page = () => {
     },
     {
       title: "Food Chain",
-      icon: <Settings className="h-10 w-10 mb-2" />,
+      icon: (
+        <div className="h-16 w-16 mb-2 relative">
+          <Image
+            src="/FoodChain.jpg"
+            alt="Food Chain"
+            fill
+            className="object-cover rounded-full"
+          />
+        </div>
+      ),
       description: "Manage food services",
       link: "#",
       count: 15,
@@ -118,7 +154,7 @@ const Page = () => {
               <Link href={item.link}>
               <CardHeader className="pb-2">
                 <div className="flex flex-col items-center text-center">
-                  <div className="p-3 bg-white/20 rounded-full text-white">
+                  <div className="rounded-full text-white">
                     {item.icon}
                   </div>
                   <CardTitle className="mt-4">{item.title}</CardTitle>
