@@ -11,6 +11,7 @@ export async function POST(request) {
         // Parse the request body
         const formData = await request.json();
         
+
         // Basic validation
         if (!formData.propertyType || !formData.propertyName) {
             return NextResponse.json(
@@ -21,22 +22,44 @@ export async function POST(request) {
 
         // Create a new property
         const property = new PropertyDetails(formData);
-        
+
         // Save to database
         await property.save();
 
         return NextResponse.json(
-            { 
-                success: true, 
+            {
+                success: true,
                 data: property,
-                message: 'Property details saved successfully' 
+                message: 'Property details saved successfully'
             },
             { status: 201 }
         );
 
     } catch (error) {
         console.error('Error saving property details:', error);
-        
+        console.error('Error details:', {
+            name: error.name,
+            message: error.message,
+            code: error.code,
+            errors: error.errors
+        });
+
+        // Handle validation errors
+        if (error.name === 'ValidationError') {
+            const validationErrors = Object.keys(error.errors).map(key => ({
+                field: key,
+                message: error.errors[key].message
+            }));
+            return NextResponse.json(
+                { 
+                    success: false, 
+                    error: 'Validation failed', 
+                    validationErrors 
+                },
+                { status: 400 }
+            );
+        }
+
         // Handle duplicate key errors
         if (error.code === 11000) {
             return NextResponse.json(
@@ -44,12 +67,12 @@ export async function POST(request) {
                 { status: 400 }
             );
         }
-        
+
         return NextResponse.json(
-            { 
-                success: false, 
+            {
+                success: false,
                 error: 'Failed to save property details',
-                details: error.message 
+                details: error.message
             },
             { status: 500 }
         );
@@ -71,8 +94,8 @@ export async function GET() {
 
 async function deleteFromCloudinary(publicId, resourceType = 'image') {
     try {
-   
-            
+
+
         const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/cloudinary`, {
             method: 'DELETE',
             headers: {
@@ -83,7 +106,7 @@ async function deleteFromCloudinary(publicId, resourceType = 'image') {
                 resourceType
             })
         });
-        
+
         const data = await response.json();
         if (!response.ok) {
             throw new Error(data.error || 'Failed to delete from Cloudinary');
@@ -98,10 +121,10 @@ async function deleteFromCloudinary(publicId, resourceType = 'image') {
 export async function DELETE(request) {
     try {
         await connectDB();
-        
+
         const { searchParams } = new URL(request.url);
         const id = searchParams.get('id');
-        
+
         if (!id) {
             return NextResponse.json(
                 { success: false, error: 'Property ID is required' },
@@ -176,10 +199,10 @@ export async function DELETE(request) {
     } catch (error) {
         console.error('Error deleting property:', error);
         return NextResponse.json(
-            { 
-                success: false, 
+            {
+                success: false,
                 error: 'Failed to delete property',
-                details: error.message 
+                details: error.message
             },
             { status: 500 }
         );
@@ -189,10 +212,10 @@ export async function DELETE(request) {
 export async function PUT(request) {
     try {
         await connectDB();
-        
+
         const { searchParams } = new URL(request.url);
         const id = searchParams.get('id');
-        
+
         if (!id) {
             return NextResponse.json(
                 { success: false, error: 'Property ID is required' },
@@ -201,13 +224,13 @@ export async function PUT(request) {
         }
 
         const updates = await request.json();
-        
+
         const updatedProperty = await PropertyDetails.findByIdAndUpdate(
             id,
             updates,
             { new: true, runValidators: true }
         );
-        
+
         if (!updatedProperty) {
             return NextResponse.json(
                 { success: false, error: 'Property not found' },

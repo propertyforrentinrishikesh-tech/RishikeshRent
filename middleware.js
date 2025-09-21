@@ -9,7 +9,11 @@ export async function middleware(req) {
   });
 
   const { pathname } = req.nextUrl;
-
+  
+  // Allow access to create-first-admin without authentication
+  if (pathname === '/api/admin/create-first-admin') {
+    return NextResponse.next();
+  }
   // Allow access to public routes (e.g., /sign-in, /admin/login)
   if (pathname.startsWith("/admin/login")) {
     if (token) {

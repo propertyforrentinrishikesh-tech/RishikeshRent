@@ -6,18 +6,22 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Plus, X, Upload } from "lucide-react";
 import Image from "next/image";
 import { Trash2, Edit } from 'lucide-react';
 import { useRef } from 'react';
 import toast from 'react-hot-toast';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-const CreatePropertyDetails = () => {
+const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
     const [loading, setLoading] = useState(false);
-    const [propertyTypes, setPropertyTypes] = useState([]);
     const [propertyDetails, setPropertyDetails] = useState([]);
-    const [locations, setLocations] = useState([]);
     const [videoUploading, setVideoUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [retryAttempt, setRetryAttempt] = useState(0);
+    const [uploadError, setUploadError] = useState(null);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [propertyToDelete, setPropertyToDelete] = useState(null);
     const videoRef = useRef(null);
     const mainImageRef = useRef(null);
     const galleryImagesRef = useRef(null);
@@ -37,22 +41,7 @@ const CreatePropertyDetails = () => {
         propertyName: "",
         highlights: []
     });
-    // console.log(propertyDetails)
-    // Fetch property types and locations
-    const fetchData = async () => {
-        try {
-            const [propertyRes, locationRes] = await Promise.all([
-                fetch('/api/createProperty'),
-                fetch('/api/createLocation'),
-            ]);
-            const propertyData = await propertyRes.json();
-            const locationData = await locationRes.json();
-            setPropertyTypes(propertyData);
-            setLocations(locationData)
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
-    };
+    console.log(propertyDetails)
     const fetchPropertyDetails = async () => {
         try {
             const response = await fetch("/api/createPropertyDetails");
@@ -63,10 +52,18 @@ const CreatePropertyDetails = () => {
         }
     };
     useEffect(() => {
-        fetchData();
         fetchPropertyDetails();
     }, []);
-  
+
+    useEffect(() => {
+        if (propertyTypes.length > 0 && locationType.length > 0) {
+            setFormData(prev => ({
+                ...prev,
+                propertyType: propertyTypes[0]?.propertyType || "",
+                locationType: locationType[0]?.locationType || ""
+            }));
+        }
+    }, [propertyTypes, locationType]);
 
     // Handle input changes
     const handleChange = (e) => {
@@ -177,6 +174,7 @@ const CreatePropertyDetails = () => {
             }
         }
     };
+
     // Add this utility function at the top of your component, with other utility functions
     const deleteFromCloudinary = async (publicId, resourceType = 'image') => {
         try {
@@ -204,8 +202,11 @@ const CreatePropertyDetails = () => {
         }
     };
 
-    // Handle video upload
-    const handleVideoChange = async (e) => {
+    // Handle video upload with retry logic
+    const handleVideoChange = async (e, retryCount = 0) => {
+        const MAX_RETRIES = 3;
+        const RETRY_DELAY = 2000; // 2 seconds
+        
         // Make sure we have files
         if (!e?.target?.files?.[0]) {
             console.error('No file selected or invalid event');
@@ -229,29 +230,53 @@ const CreatePropertyDetails = () => {
         }
 
         setVideoUploading(true);
+        setUploadProgress(0);
+        setUploadError(null); // Clear any previous error
+        if (retryCount === 0) {
+            setRetryAttempt(0);
+        } else {
+            setRetryAttempt(retryCount);
+        }
         const formData = new FormData();
         formData.append('file', file);
 
         try {
+            // Create AbortController for timeout
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 minutes timeout
+
             const response = await fetch('/api/cloudinary', {
                 method: 'POST',
                 body: formData,
-                signal: AbortSignal.timeout(300000) // 5 minutes timeout
+                signal: controller.signal
             });
+
+            clearTimeout(timeoutId);
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || 'Failed to upload video');
+                throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
             }
 
             const data = await response.json();
+            
+            // If there was a previous video, delete it from Cloudinary
+            if (formData.video?.file?.key) {
+                try {
+                    await deleteFromCloudinary(formData.video.file.key, 'video');
+                } catch (err) {
+                    console.error('Error deleting old video:', err);
+                    // Continue even if deletion fails
+                }
+            }
+
             setFormData(prev => ({
                 ...prev,
                 video: {
                     type: 'upload',
                     file: {
-                        url: data.url,
-                        key: data.key,
+                        url: data.secure_url || data.url,
+                        key: data.public_id || data.key,
                         name: file.name,
                         type: file.type,
                         size: file.size
@@ -259,14 +284,49 @@ const CreatePropertyDetails = () => {
                     youtubeLink: ''
                 }
             }));
+            setActiveTab('upload'); // Ensure we're on the upload tab
             toast.success('Video uploaded successfully!');
+            
         } catch (error) {
             console.error('Video upload error:', error);
-            toast.error(`Video upload failed: ${error.message || 'Unknown error'}`);
+            
+            // Handle different types of errors
+            if (error.name === 'AbortError') {
+                toast.error('Video upload timed out. Please try again with a smaller file.');
+            } else if (error.message.includes('ECONNRESET') || error.message.includes('network') || error.message.includes('fetch')) {
+                // Network-related errors - attempt retry
+                if (retryCount < MAX_RETRIES) {
+                    toast.error(`Upload failed due to network error. Retrying in ${RETRY_DELAY/1000} seconds... (Attempt ${retryCount + 1}/${MAX_RETRIES})`);
+                    
+                    setTimeout(() => {
+                        // Reset the file input and retry
+                        const newEvent = {
+                            target: {
+                                files: [file]
+                            }
+                        };
+                        handleVideoChange(newEvent, retryCount + 1);
+                    }, RETRY_DELAY * (retryCount + 1)); // Exponential backoff
+                    
+                    return; // Don't reset loading state yet
+                } else {
+                    toast.error(`Video upload failed after ${MAX_RETRIES} attempts. Please check your internet connection and try again.`);
+                }
+            } else {
+                toast.error(`Video upload failed: ${error.message || 'Unknown error'}`);
+            }
         } finally {
+            // Reset loading state unless we're retrying
             setVideoUploading(false);
+            setUploadProgress(0);
+            setRetryAttempt(0);
+            // Reset the file input to allow re-uploading the same file
+            if (e.target) {
+                e.target.value = '';
+            }
         }
     };
+
     const removeMainImage = async () => {
         try {
             // If there's a key (Cloudinary public ID), delete the file from Cloudinary
@@ -307,6 +367,11 @@ const CreatePropertyDetails = () => {
                 video: { type: 'upload', file: null, youtubeLink: '' }
             }));
 
+            // Reset upload states
+            setVideoUploading(false);
+            setUploadProgress(0);
+            setRetryAttempt(0);
+
             if (videoRef.current) {
                 videoRef.current.value = '';
             }
@@ -338,12 +403,14 @@ const CreatePropertyDetails = () => {
             toast.error('Failed to remove gallery image');
         }
     };
+
     // Handle contact number changes
     const handleContactNumberChange = (index, value) => {
         const newContactNumbers = [...formData.contactNumbers];
         newContactNumbers[index] = value;
         setFormData(prev => ({ ...prev, contactNumbers: newContactNumbers }));
     };
+
     const getYouTubeId = (url) => {
         if (!url) return '';
         const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
@@ -386,12 +453,36 @@ const CreatePropertyDetails = () => {
         setLoading(true);
 
         try {
-            console.log('Form Data:', formData);
+            // console.log('Form Data:', formData);
+            // console.log('Video Data being submitted:', videoData);
+            // console.log('Final Form Data:', formDataToSubmit);
+            // Get the selected property type and location type objects
+            const selectedPropertyType = propertyTypes.find(type => type.propertyType === formData.propertyType);
+            const selectedLocationType = locationType.find(loc => loc.locationType === formData.locationType);
+
+            // Transform video data to match database schema
+            let videoData = {};
+            if (formData.video?.type === 'upload' && formData.video?.file) {
+                videoData = {
+                    type: 'upload',
+                    url: formData.video.file.url,
+                    key: formData.video.file.key
+                };
+            } else if (formData.video?.type === 'youtube' && formData.video?.youtubeLink) {
+                videoData = {
+                    type: 'youtube',
+                    youtubeLink: formData.video.youtubeLink
+                };
+            }
+
             const formDataToSubmit = {
                 ...formData,
+                propertyType: selectedPropertyType?.propertyType || formData.propertyType,
+                locationType: selectedLocationType?.locationType || formData.locationType,
                 contactNumbers: formData.contactNumbers
                     .map(num => num ? num.trim() : '')
-                    .filter(num => num !== '')
+                    .filter(num => num !== ''),
+                video: Object.keys(videoData).length > 0 ? videoData : undefined
             };    
             // Validate at least one contact number
             if (!formData.contactNumbers || formData.contactNumbers.length === 0) {
@@ -444,6 +535,7 @@ const CreatePropertyDetails = () => {
             setLoading(false);
         }
     };
+
     const resetForm = () => {
         setFormData({
             propertyType: "",
@@ -458,51 +550,114 @@ const CreatePropertyDetails = () => {
             propertyName: "",
             highlights: []
         });
+        
+        // Reset all upload states
+        setVideoUploading(false);
+        setUploadProgress(0);
+        setRetryAttempt(0);
+        setUploadError(null);
+        setActiveTab('upload'); // Reset to upload tab
         setEditingProperty(null);
+        
+        // Clear file inputs
+        if (mainImageRef.current) {
+            mainImageRef.current.value = '';
+        }
+        if (galleryImagesRef.current) {
+            galleryImagesRef.current.value = '';
+        }
+        if (videoRef.current) {
+            videoRef.current.value = '';
+        }
     };
+
     const handleEdit = (property) => {
+        // Transform video data from database format to form format
+        let videoData = { type: "upload", file: null, youtubeLink: "" };
+        
+        if (property.video) {
+            if (property.video.type === 'upload' && property.video.url) {
+                // Database stores video as { type: 'upload', url: '...', key: '...' }
+                // Form expects { type: 'upload', file: { url: '...', key: '...' }, youtubeLink: '' }
+                videoData = {
+                    type: 'upload',
+                    file: {
+                        url: property.video.url,
+                        key: property.video.key || '',
+                        name: 'Existing Video',
+                        type: 'video/*',
+                        size: 0
+                    },
+                    youtubeLink: ''
+                };
+            } else if (property.video.type === 'youtube' && property.video.youtubeLink) {
+                videoData = {
+                    type: 'youtube',
+                    file: null,
+                    youtubeLink: property.video.youtubeLink
+                };
+            }
+        }
+
         setFormData({
             propertyType: property.propertyType || "",
             mainImage: property.mainImage || { url: "", key: "", loading: false },
             galleryImages: property.galleryImages || [],
-            video: property.video || { type: "upload", file: null, youtubeLink: "" },
+            video: videoData,
             locationType: property.locationType || "",
             contactAddress: property.contactAddress || "",
             brokerName: property.brokerName || "",
             contactNumbers: property.contactNumbers?.length ? [...property.contactNumbers] : [""],
-            rentPrice: property.rentPrice?.toString() || "",
+            rentPrice: property.rentPrice || "",
             propertyName: property.propertyName || "",
-            highlights: property.highlights?.length ? [...property.highlights] : []
+            highlights: property.highlights?.length ? [...property.highlights] : [""]
         });
+        
+        // Set the correct active tab based on video type
+        if (videoData.type === 'youtube' && videoData.youtubeLink) {
+            setActiveTab('youtube');
+        } else if (videoData.type === 'upload' && videoData.file) {
+            setActiveTab('upload');
+        } else {
+            setActiveTab('upload'); // Default to upload tab
+        }
+        
         setEditingProperty(property);
         // Scroll to form
         document.getElementById('property-form')?.scrollIntoView({ behavior: 'smooth' });
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to delete this property?')) {
-            try {
-                const response = await fetch(`/api/createPropertyDetails?id=${id}`, {
-                    method: 'DELETE',
-                });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.error || 'Failed to delete property');
-                }
-
-                // Refresh the properties list
-                await fetchPropertyDetails();
-                toast.success('Property deleted successfully');
-            } catch (error) {
-                console.error('Error deleting property:', error);
-                toast.error(error.message || 'Failed to delete property');
-            }
-        }
+    const handleDelete = (id) => {
+        const property = propertyDetails.find(p => p._id === id);
+        setPropertyToDelete(property);
+        setIsDeleteDialogOpen(true);
     };
 
-   
+    const confirmDelete = async () => {
+        if (!propertyToDelete) return;
+        
+        try {
+            const response = await fetch(`/api/createPropertyDetails?id=${propertyToDelete._id}`, {
+                method: 'DELETE',
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to delete property');
+            }
+
+            // Refresh the properties list
+            setPropertyDetails(propertyDetails.filter(property => property._id !== propertyToDelete._id));
+            toast.success('Property deleted successfully');
+        } catch (error) {
+            console.error('Error deleting property:', error);
+            toast.error(error.message || 'Failed to delete property');
+        } finally {
+            setIsDeleteDialogOpen(false);
+            setPropertyToDelete(null);
+        }
+    };
 
     return (
         <div className="container mx-auto p-6">
@@ -685,8 +840,13 @@ const CreatePropertyDetails = () => {
                                     </span>
                                 </Button>
                                 {videoUploading && (
-                                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                                        <div className="text-white text-xs">Uploading...</div>
+                                    <div className="flex items-center gap-2">
+                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                                        <div className="text-blue-600 text-sm">
+                                            {retryAttempt > 0 
+                                                ? `Retry attempt ${retryAttempt} of 3...`
+                                                : 'Uploading video...'}
+                                        </div>
                                     </div>
                                 )}
                                 {formData.video?.file && (
@@ -727,17 +887,15 @@ const CreatePropertyDetails = () => {
                                 value={formData.video?.youtubeLink || ''}
                                 onChange={(e) => {
                                     const youtubeLink = e.target.value;
-                                    if (youtubeLink) {
-                                        setFormData(prev => ({
-                                            ...prev,
-                                            video: {
-                                                ...prev.video,
-                                                type: 'youtube',
-                                                youtubeLink,
-                                                file: null
-                                            }
-                                        }));
-                                    }
+                                    setFormData(prev => ({
+                                        ...prev,
+                                        video: {
+                                            type: 'youtube',
+                                            youtubeLink,
+                                            file: null
+                                        }
+                                    }));
+                                    setActiveTab('youtube'); // Ensure we're on the youtube tab
                                 }}
                                 
                             />
@@ -769,7 +927,7 @@ const CreatePropertyDetails = () => {
                             <SelectValue placeholder="Select location" />
                         </SelectTrigger>
                         <SelectContent>
-                            {locations.map((location) => (
+                            {locationType.map((location) => (
                                 <SelectItem key={location._id} value={location.locationType}>
                                     {location.locationType}
                                 </SelectItem>
@@ -998,6 +1156,35 @@ const CreatePropertyDetails = () => {
                     )}
                 </TableBody>
             </Table>
+            
+            {/* Delete Confirmation Dialog */}
+            <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Confirm Delete</DialogTitle>
+                        <DialogDescription>
+                            Are you sure you want to delete the property "{propertyToDelete?.propertyName}"? This action cannot be undone.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex justify-end gap-3 mt-6">
+                        <Button
+                            variant="outline"
+                            onClick={() => {
+                                setIsDeleteDialogOpen(false);
+                                setPropertyToDelete(null);
+                            }}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={confirmDelete}
+                        >
+                            Delete Property
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
 
     );

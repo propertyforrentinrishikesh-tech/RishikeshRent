@@ -3,29 +3,28 @@
 import { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Search, Eye } from 'lucide-react';
+import { Search, Eye, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'react-hot-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { format } from 'date-fns';
-const PropertyDetails = () => {
+const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [filters, setFilters] = useState({
     propertyType: '',
-    location: '',
+    locationType: '',
   });
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-  console.log(propertyTypes, locations)
-  console.log(searchResults)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [propertyToDelete, setPropertyToDelete] = useState(null);
 
   const handleSearch = async () => {
-    if (!filters.propertyType && !filters.location) {
+    if (!filters.propertyType && !filters.locationType) {
       toast.error('Please select at least one filter');
       return;
     }
@@ -34,7 +33,7 @@ const PropertyDetails = () => {
     try {
       const queryParams = new URLSearchParams();
       if (filters.propertyType) queryParams.append('propertyType', filters.propertyType);
-      if (filters.location) queryParams.append('location', filters.location);
+      if (filters.locationType) queryParams.append('locationType', filters.locationType);
 
       const response = await fetch(`/api/searchPropertyDetails?${queryParams}`);
       if (!response.ok) {
@@ -69,6 +68,38 @@ const PropertyDetails = () => {
       setIsDialogOpen(true);
     } else {
       toast.error('Property details not found');
+    }
+  };
+
+  const handleDelete = (propertyId) => {
+    const property = searchResults.find(p => p._id === propertyId);
+    setPropertyToDelete(property);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!propertyToDelete) return;
+    
+    try {
+      const response = await fetch(`/api/createPropertyDetails?id=${propertyToDelete._id}`, {
+        method: 'DELETE',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to delete property');
+      }
+
+      // Remove the property from search results
+      setSearchResults(searchResults.filter(property => property._id !== propertyToDelete._id));
+      toast.success('Property deleted successfully');
+    } catch (error) {
+      console.error('Error deleting property:', error);
+      toast.error(error.message || 'Failed to delete property');
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setPropertyToDelete(null);
     }
   };
   const getYouTubeId = (url) => {
@@ -113,7 +144,7 @@ const PropertyDetails = () => {
                 <SelectValue placeholder="Select location" />
               </SelectTrigger>
               <SelectContent>
-                {locations.map((location) => (
+                {locationType.map((location) => (
                   <SelectItem key={location._id} value={location.locationType}>
                     {location.locationType}
                   </SelectItem>
@@ -151,23 +182,36 @@ const PropertyDetails = () => {
                 <TableBody>
                   {searchResults.map((property, index) => (
                     <TableRow key={property._id}>
-                      <TableCell>
+                      <TableCell className="border border-black">
                         {index + 1}
                       </TableCell>
-                      <TableCell className="font-medium">
+                      <TableCell className="font-medium border border-black">
                         {property.propertyName}
                       </TableCell>
-                      <TableCell>{property.contactPerson}</TableCell>
-                      <TableCell>{property.contactNumbers}</TableCell>
-                      <TableCell>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => handleViewDetails(property._id)}
-                          title="View Details"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
+                      <TableCell className="border border-black">
+                        {property.contactNumbers?.join(', ') || 'N/A'}
+                      </TableCell>
+                      <TableCell className="border border-black mx-auto">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => handleViewDetails(property._id)}
+                            className="text-blue-600 hover:bg-blue-50"
+                            title="View Details "
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                      </TableCell>
+                      <TableCell className="border border-black ">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => handleDelete(property._id)}
+                            title="Delete Property"
+                            className="text-red-600 hover:bg-red-50 mx-auto"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -189,13 +233,13 @@ const PropertyDetails = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <p><span className="font-medium">Property Name:</span> {selectedProperty.propertyName}</p>
-                      <p><span className="font-medium">Type:</span> {selectedProperty.propertyType}</p>
+                      <p><span className="font-medium">Property Type:</span> {selectedProperty.propertyType}</p>
                       <p><span className="font-medium">Location:</span> {selectedProperty.locationType}</p>
                       <p><span className="font-medium">Rent Price:</span> ₹{selectedProperty.rentPrice?.toLocaleString()}</p>
-                      <p><span className="font-medium">Broker:</span> {selectedProperty.brokerName || 'N/A'}</p>
+                      <p><span className="font-medium">Broker Name:</span> {selectedProperty.brokerName || 'N/A'}</p>
                     </div>
                     <div className="space-y-2">
-                      <h4 className="font-medium">Contact Information</h4>
+                      <h4 className="font-medium underline">Contact Information</h4>
                       <p><span className="font-medium">Address:</span> {selectedProperty.contactAddress || 'N/A'}</p>
                       <p><span className="font-medium">Contact Numbers:</span> {selectedProperty.contactNumbers?.join(', ') || 'N/A'}</p>
                     </div>
@@ -210,7 +254,7 @@ const PropertyDetails = () => {
                       <img
                         src={selectedProperty.mainImage.url}
                         alt="Main property"
-                        className="max-w-full h-auto max-h-48 rounded-lg object-contain border"
+                        className="max-w-full h-auto max-h-44 rounded-lg object-contain border"
                       />
                     </div>
                   </div>
@@ -220,7 +264,7 @@ const PropertyDetails = () => {
                 {selectedProperty.galleryImages?.length > 0 && (
                   <div className="bg-white p-4 rounded-lg border shadow-sm">
                     <h3 className="text-lg font-semibold mb-3 pb-2 border-b">Gallery Images</h3>
-                    <div className="flex space-x-4 overflow-x-auto pb-4" style={{ height: '100px' }}>
+                    <div className="flex space-x-4 overflow-y-auto pb-4" style={{ height: '100px' }}>
                       {selectedProperty.galleryImages.map((img, idx) => (
                         <div key={idx} className="flex-shrink-0 w-42 h-full">
                           <img
@@ -235,12 +279,12 @@ const PropertyDetails = () => {
                 )}
 
                 {/* Video Box */}
-                {selectedProperty.video?.type === 'upload' && selectedProperty.video?.file?.url && (
+                {selectedProperty.video?.type === 'upload' && selectedProperty.video?.url && (
                   <div className="bg-white p-4 rounded-lg border shadow-sm">
                     <h3 className="text-lg font-semibold mb-3 pb-2 border-b">Property Video</h3>
                     <div className="aspect-video w-full">
                       <video
-                        src={selectedProperty.video.file.url}
+                        src={selectedProperty.video.url}
                         controls
                         className="w-full h-full rounded-lg"
                       />
@@ -269,13 +313,42 @@ const PropertyDetails = () => {
                     <h3 className="text-lg font-semibold mb-3 pb-2 border-b">Highlights</h3>
                     <ul className="list-disc pl-5 space-y-1">
                       {selectedProperty.highlights.map((highlight, idx) => (
-                        <li key={idx} className="text-gray-700">{highlight}</li>
+                        <li key={idx} className="text-gray-700 text-wrap">{highlight}</li>
                       ))}
                     </ul>
                   </div>
                 )}
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+        
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Confirm Delete</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete the property "{propertyToDelete?.propertyName}"? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-end gap-3 mt-6">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsDeleteDialogOpen(false);
+                  setPropertyToDelete(null);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={confirmDelete}
+              >
+                Delete Property
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>
