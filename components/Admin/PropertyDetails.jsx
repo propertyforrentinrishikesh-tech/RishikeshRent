@@ -39,19 +39,20 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
       if (!response.ok) {
         throw new Error('Failed to fetch properties');
       }
-
+      
       const data = await response.json();
+      console.log(data)
       setSearchResults(data.data || []);
       if (data.data.length === 0) {
         toast('No properties found matching your search criteria', {
-            icon: 'ℹ️',
-            style: {
-                borderRadius: '10px',
-                background: '#333',
-                color: '#fff',
-            },
+          icon: 'ℹ️',
+          style: {
+            borderRadius: '10px',
+            background: '#333',
+            color: '#fff',
+          },
         });
-    }
+      }
     } catch (error) {
       console.error('Search error:', error);
       toast.error(error.message || 'Failed to search properties');
@@ -79,7 +80,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
 
   const confirmDelete = async () => {
     if (!propertyToDelete) return;
-    
+
     try {
       const response = await fetch(`/api/createPropertyDetails?id=${propertyToDelete._id}`, {
         method: 'DELETE',
@@ -108,7 +109,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
     return (match && match[2].length === 11) ? match[2] : null;
   };
 
-
+console.log(selectedProperty)
   return (
     <div className="container mx-auto p-6">
       <div className="bg-white rounded-lg shadow p-6 mb-6 border border-black">
@@ -192,26 +193,26 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                         {property.contactNumbers?.join(', ') || 'N/A'}
                       </TableCell>
                       <TableCell className="border border-black mx-auto">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => handleViewDetails(property._id)}
-                            className="text-blue-600 hover:bg-blue-50"
-                            title="View Details "
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => handleViewDetails(property._id)}
+                          className="text-blue-600 hover:bg-blue-50"
+                          title="View Details "
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
                       </TableCell>
                       <TableCell className="border border-black ">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => handleDelete(property._id)}
-                            title="Delete Property"
-                            className="text-red-600 hover:bg-red-50 mx-auto"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => handleDelete(property._id)}
+                          title="Delete Property"
+                          className="text-red-600 hover:bg-red-50 mx-auto"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -242,6 +243,8 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                       <h4 className="font-medium underline">Contact Information</h4>
                       <p><span className="font-medium">Address:</span> {selectedProperty.contactAddress || 'N/A'}</p>
                       <p><span className="font-medium">Contact Numbers:</span> {selectedProperty.contactNumbers?.join(', ') || 'N/A'}</p>
+                      <p><span className="font-medium">Property Avaliable:</span> {selectedProperty.isActive ? 'Yes' : 'No'}</p>
+                      <p><span className="font-medium">Trending:</span> {selectedProperty.isTrending ? 'Yes' : 'No'}</p>
                     </div>
                   </div>
                 </div>
@@ -250,7 +253,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                 {selectedProperty.mainImage?.url && (
                   <div className="bg-white p-4 rounded-lg border shadow-sm">
                     <h3 className="text-lg font-semibold mb-3 pb-2 border-b">Main Image</h3>
-                    <div className="flex justify-center">
+                    <div className="flex justify-center items-center">
                       <img
                         src={selectedProperty.mainImage.url}
                         alt="Main property"
@@ -259,14 +262,13 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                     </div>
                   </div>
                 )}
-
                 {/* Gallery Images Box */}
                 {selectedProperty.galleryImages?.length > 0 && (
                   <div className="bg-white p-4 rounded-lg border shadow-sm">
                     <h3 className="text-lg font-semibold mb-3 pb-2 border-b">Gallery Images</h3>
-                    <div className="flex space-x-4 overflow-y-auto pb-4" style={{ height: '100px' }}>
+                    <div className=" flex flex-wrap items-center gap-5 max-h-64 overflow-y-auto">
                       {selectedProperty.galleryImages.map((img, idx) => (
-                        <div key={idx} className="flex-shrink-0 w-42 h-full">
+                        <div key={idx} className="w-44 h-32 overflow-hidden">
                           <img
                             src={img.url}
                             alt={`Gallery ${idx + 1}`}
@@ -277,6 +279,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                     </div>
                   </div>
                 )}
+
 
                 {/* Video Box */}
                 {selectedProperty.video?.type === 'upload' && selectedProperty.video?.url && (
@@ -322,7 +325,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
             )}
           </DialogContent>
         </Dialog>
-        
+
         {/* Delete Confirmation Dialog */}
         <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
           <DialogContent className="max-w-md">

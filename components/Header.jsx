@@ -1,6 +1,7 @@
 "use client"
 import { usePathname } from "next/navigation";
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import TopAdvertisementMarquee from "./TopAdvertisementMarquee";
 import { ChevronDown, LogOutIcon, Mail, Phone, Truck, User2Icon } from "lucide-react"
 import Link from "next/link"
 import MenuBar from "./MenuBar"
@@ -17,7 +18,6 @@ import { ArrowDown, Menu, X } from "lucide-react";
 import * as NavigationMenu from "@radix-ui/react-navigation-menu";
 import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
-import BrandCarousel from "./BrandCarousel";
 const Header = () => {
   const authDropdownRef = useRef(null);
   const profileMenuRef = useRef(null);
@@ -94,42 +94,29 @@ const Header = () => {
   const isUser = session && !session.user.isAdmin;
 
   return (
-    <header
-      className={`print:hidden ${pathName.includes("admin") ||
-        // pathName.includes("category") ||
-        pathName.includes("page") ||
-        // pathName.includes("about-us") ||
-        // pathName.includes("contact") ||
-        // pathName.includes("privacy-policy") ||
-        // pathName.includes("refund-cancellation") ||
-        // pathName.includes("terms-condition") ||
-        // pathName.includes("shipping-policy") ||
-        // pathName.includes("product") ||
-        // pathName.includes("artisan") ||
-        // pathName.includes("cartDetails") ||
-        // pathName.includes("checkout") ||
-        // pathName.includes("search") ||
-        pathName.includes("sign-up") ||
-        pathName.includes("sign-in") ||
-        pathName.includes("customEnquiry")
-        ? "hidden"
-        : "block"
-        } bg-white text-black border-b sticky top-0 left-0 right-0 transition-all duration-300 font-barlow tracking-wider ease-in-out z-50 mx-auto w-full py-2
-         ${showHeader ? "translate-y-0" : "-translate-y-full"}`}
-    >
-      <div className="md:flex hidden items-center justify-between gap-8 border-b border-gray-400 md:px-8 overflow-hidden bg-white">
-        <div className="w-full">
-          <BrandCarousel />
-        </div>
-      </div>
-      <div className="md:flex hidden items-center justify-between gap-8 border-b py-1 border-gray-400 md:px-8 ">
-        <Link href={"/"}>
-          <img className="w-56 hover:scale-105 transition-all duration-300 ease-in-out object-contain drop-shadow-xl" src="/HeaderLogo.png" alt="Rishikesh Handmade" />
-        </Link>
-        <div className="flex flex-row justify-center items-center gap-4">
-          <div className="items-center z-50 gap-4 flex">
-            <div className="flex items-center gap-3">
+    <>
+      <header
+        className={`print:hidden ${pathName.includes("admin") ||
+          pathName.includes("page") ||
+          pathName.includes("sign-up") ||
+          pathName.includes("sign-in") ||
+          pathName.includes("customEnquiry")
+          ? "hidden"
+          : "block"
+          } bg-[#fcf7f1] text-black border-b font-barlow tracking-wider w-full`}
+      >
+        <TopAdvertisementMarquee />
+        <div className="md:flex hidden items-center justify-between gap-8 border-b py-1 border-gray-400 md:px-8 ">
+          <div className="flex flex-row justify-between w-full items-center px-8">
+            {/* Logo on the left */}
+            <div className="flex-shrink-0">
+              <Link href={"/"}>
+                <img className="w-48 object-contain drop-shadow-xl" src="/HeaderLogo.png" alt="Rishikesh Handmade" />
+              </Link>
+            </div>
 
+            {/* Login/Cart section on the right */}
+            <div className="flex items-center gap-3">
               <div className="relative" ref={profileMenuRef}>
                 {status === "loading" ? (
                   <Loader2 className="animate-spin text-blue-600" size={36} />
@@ -151,10 +138,11 @@ const Header = () => {
                         className="rounded-full cursor-pointer"
                       />
                     </button>
+
                     {/* Dropdown Menu */}
                     {isProfileOpen && (
                       <div
-                        className="absolute top-14 right-0 mt-2 w-fit text-black bg-white shadow-lg rounded-lg border z-[9999]"
+                        className="absolute top-14 right-0 mt-2 w-fit text-black bg-white shadow-lg rounded-lg border z-50"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <p className="px-4 pt-2 text-sm font-bold text-gray-700">{session.user.name}</p>
@@ -219,7 +207,7 @@ const Header = () => {
                 )}
               </div>
               {/* Wishlist Button */}
-              <div className="relative group">
+              {/* <div className="relative group">
                 <button
                   onClick={() => { setInitialCartTab('wishlist'); setIsCartOpen(true); }}
                   className="flex flex-col items-center p-2 rounded-lg hover:bg-neutral-100 transition-colors"
@@ -235,10 +223,10 @@ const Header = () => {
                   </div>
                   <span className="text-xs font-medium mt-1">Wishlist</span>
                 </button>
-              </div>
+              </div> */}
 
               {/* Cart Button */}
-              <div className="relative group">
+              {/* <div className="relative group">
                 <button
                   onClick={() => { setInitialCartTab('cart'); setIsCartOpen(true); }}
                   className="flex flex-col items-center p-2 rounded-lg hover:bg-neutral-100 transition-colors"
@@ -254,10 +242,10 @@ const Header = () => {
                   </div>
                   <span className="text-xs font-medium mt-1">Cart</span>
                 </button>
-              </div>
+              </div> */}
 
               {/* Track Order Button */}
-              <div className="group">
+              {/* <div className="group">
                 <Link
                   href="/dashboard?section=track"
                   className="flex flex-col items-center p-2 rounded-lg hover:bg-neutral-100 transition-colors"
@@ -265,36 +253,26 @@ const Header = () => {
                   <Truck size={20} />
                   <span className="text-xs font-medium mt-1">Track Order</span>
                 </Link>
-              </div>
-              {/* SearchBar aligned to the right */}
-              <div className="group">
-                <SearchBar />
-              </div>
-
-              {/* Language Selector */}
-              {/* Language Selector */}
-              <div className="group relative">
-                <div
-                  className="flex items-center p-2 z-55"
-                  aria-label="Language"
-                >
-                  <LanguageSelector />
-                </div>
-              </div>
+              </div> */}
+              <SearchBar />
             </div>
           </div>
         </div>
-
+      </header>
+      {/* Show only on md and larger screens, and only if not in admin section */}
+      <div className="hidden md:block sticky top-0 z-50">
+        {!pathName.includes("admin") && (
+          <div className="w-full print:hidden">
+            <div className={`bg-white py-2 border-b border-gray-200 transition-all duration-300 ${showHeader ? "translate-y-0" : "-translate-y-full"}`}>
+              <div className="container mx-auto px-4">
+                <MenuBar menuItems={menuItems} />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-      <div className="lg:flex hidden items-center justify-center relative z-10 py-6 md:px-4 w-full">
-        {/* MenuBar in center */}
-        <div className="absolute left-1/2 transform -translate-x-1/2">
-          <MenuBar menuItems={menuItems} />
-        </div>
 
-
-      </div>
-      <div className="lg:hidden flex items-center z-50 justify-between md:justify-between py-1 px-2">
+      <div className="lg:hidden flex items-center justify-between md:justify-between py-1 px-2">
         <div className="relative flex items-center">
           {/* <MenuBar menuItems={menuItems.filter(item => item.active)} /> */}
           <MenuBar menuItems={menuItems} />
@@ -318,7 +296,7 @@ const Header = () => {
             )}
           </button>
           {/* Cart & Wishlist Icons */}
-          <button
+          {/* <button
             className="relative p-2 rounded-full hover:bg-neutral-100 transition"
             onClick={() => { setInitialCartTab('cart'); setIsCartOpen(true); }}
             aria-label="Open Cart"
@@ -329,9 +307,9 @@ const Header = () => {
                 {cart.length}
               </span>
             )}
-          </button>
+          </button> */}
 
-          <Cart open={isCartOpen} onClose={() => setIsCartOpen(false)} initialTab={initialCartTab} />
+          {/* <Cart open={isCartOpen} onClose={() => setIsCartOpen(false)} initialTab={initialCartTab} /> */}
           {/* <Truck /> */}
 
           <div className="relative">
@@ -427,7 +405,8 @@ const Header = () => {
 
         </div>
       </div>
-    </header>
+
+    </>
   )
 }
 

@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Plus, X, Upload } from "lucide-react";
 import Image from "next/image";
 import { Trash2, Edit } from 'lucide-react';
+import { Switch } from "@/components/ui/switch";
 import { useRef } from 'react';
 import toast from 'react-hot-toast';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -39,13 +40,18 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
         contactNumbers: [""],
         rentPrice: "",
         propertyName: "",
-        highlights: []
+        highlights: [],
+        propertyFor: "",
+        isAvailable: true,
+        isTrending: false,
+        isActive: true
     });
-    console.log(propertyDetails)
+    // console.log(propertyDetails)
     const fetchPropertyDetails = async () => {
         try {
             const response = await fetch("/api/createPropertyDetails");
             const data = await response.json();
+            // console.log(data)
             setPropertyDetails(data.data);
         } catch (error) {
             toast.error("Failed to fetch property type");
@@ -57,11 +63,17 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
 
     useEffect(() => {
         if (propertyTypes.length > 0 && locationType.length > 0) {
-            setFormData(prev => ({
-                ...prev,
-                propertyType: propertyTypes[0]?.propertyType || "",
-                locationType: locationType[0]?.locationType || ""
-            }));
+            setFormData(prev => {
+                // Only update if the property type is not already set
+                if (!prev.propertyType && propertyTypes[0]?.propertyType) {
+                    return {
+                        ...prev,
+                        propertyType: propertyTypes[0].propertyType,
+                        locationType: locationType[0]?.locationType || ""
+                    };
+                }
+                return prev;
+            });
         }
     }, [propertyTypes, locationType]);
 
@@ -69,6 +81,65 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    // Update property status
+    const updatePropertyStatus = async (id, updates) => {
+        try {
+            // console.log('Sending update request with:', { id, updates });
+            const response = await fetch(`/api/createPropertyDetails?id=${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updates),
+            });
+
+            const responseData = await response.json();
+            // console.log('Update response:', { status: response.status, data: responseData });
+
+            if (!response.ok) {
+                throw new Error(responseData.error || 'Failed to update property');
+            }
+
+            if (responseData.success) {
+                toast.success('Property updated successfully');
+                fetchPropertyDetails(); // Refresh the list
+                return responseData.data; // Return the updated property
+            } else {
+                throw new Error(responseData.error || 'Failed to update property');
+            }
+        } catch (error) {
+            console.error('Error updating property:', { error, message: error.message });
+            toast.error(error.message || 'Failed to update property');
+            throw error; // Re-throw to be caught by the calling function
+        }
+    };
+
+    // Toggle isAvailable status
+    const toggleAvailable = async (property) => {
+        try {
+            await updatePropertyStatus(property._id, {
+                isActive: !property.isActive
+            });
+        } catch (error) {
+            console.error('Error toggling availability:', error);
+        }
+    };
+
+    // Toggle isTrending status
+    const toggleTrending = async (property) => {
+        try {
+            await updatePropertyStatus(property._id, {
+                isTrending: !property.isTrending
+            });
+            // Refresh the property details after update
+            fetchPropertyDetails();
+            toast.success(`Property ${!property.isTrending ? 'added to' : 'removed from'} trending`);
+        } catch (error) {
+            console.error('Error toggling trending status:', error);
+            toast.error('Failed to update trending status');
+        }
     };
 
     // Update handleMainImageUpload
@@ -180,13 +251,13 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
         try {
             const response = await fetch('/api/cloudinary', {
                 method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
                     publicId,
                     resourceType
-                })
+            })
             });
 
             const data = await response.json();
@@ -453,12 +524,13 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
         setLoading(true);
 
         try {
-            // console.log('Form Data:', formData);
-            // console.log('Video Data being submitted:', videoData);
-            // console.log('Final Form Data:', formDataToSubmit);
-            // Get the selected property type and location type objects
+            // Get the selected property type object
             const selectedPropertyType = propertyTypes.find(type => type.propertyType === formData.propertyType);
             const selectedLocationType = locationType.find(loc => loc.locationType === formData.locationType);
+
+            if (!selectedPropertyType) {
+                throw new Error('Please select a valid property type');
+            }
 
             // Transform video data to match database schema
             let videoData = {};
@@ -475,9 +547,11 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                 };
             }
 
+            // Prepare the data to be submitted
             const formDataToSubmit = {
                 ...formData,
-                propertyType: selectedPropertyType?.propertyType || formData.propertyType,
+                // Ensure we're using the exact property type from the selected type
+                propertyType: selectedPropertyType.propertyType,
                 locationType: selectedLocationType?.locationType || formData.locationType,
                 contactNumbers: formData.contactNumbers
                     .map(num => num ? num.trim() : '')
@@ -548,6 +622,8 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
             contactNumbers: [""],
             rentPrice: "",
             propertyName: "",
+            propertyFor: "",
+            isTrending: false,
             highlights: []
         });
         
@@ -610,7 +686,8 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
             contactNumbers: property.contactNumbers?.length ? [...property.contactNumbers] : [""],
             rentPrice: property.rentPrice || "",
             propertyName: property.propertyName || "",
-            highlights: property.highlights?.length ? [...property.highlights] : [""]
+            highlights: property.highlights?.length ? [...property.highlights] : [""],
+            propertyFor: property.propertyFor || "",
         });
         
         // Set the correct active tab based on video type
@@ -660,7 +737,7 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
     };
 
     return (
-        <div className="container mx-auto p-6">
+        <div className="container mx-auto p-2">
             <h1 className="text-2xl font-bold mb-6">Add New Property</h1>
 
             <form onSubmit={handleSubmit} id="property-form" className="space-y-6 border border-black p-4 rounded-md shadow-md  bg-gray-100">
@@ -1070,6 +1147,22 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                         </div>
                     ))}
                 </div>
+                <hr className="my-6" />
+                <div className="space-y-2">
+                    <Label>Property For</Label>
+                    <Select 
+                        value={formData.propertyFor}
+                        onValueChange={(value) => setFormData(prev => ({ ...prev, propertyFor: value }))}
+                    >
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select Property For" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="residential">Residential</SelectItem>
+                            <SelectItem value="commercial">Commercial</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
 
                 <div className="flex justify-start gap-4">
                     <Button
@@ -1106,6 +1199,8 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                         <TableHead className="border border-black text-center">Property Type</TableHead>
                         <TableHead className="border border-black text-center">Location Type</TableHead>
                         <TableHead className="border border-black text-center">Price</TableHead>
+                        <TableHead className="border border-black text-center">Is Available</TableHead>
+                        <TableHead className="border border-black text-center">Is Trending</TableHead>
                         <TableHead className="border border-black text-center">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -1134,21 +1229,42 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                                 <TableCell className="border border-black text-center">{property.propertyType}</TableCell>
                                 <TableCell className="border border-black text-center">{property.locationType}</TableCell>
                                 <TableCell className="border border-black text-center">₹{property.rentPrice?.toLocaleString()}</TableCell>
-                                <TableCell className="text-center space-x-2 border border-black">
+                                <TableCell className="border border-black text-center">
+                                    <div className="flex justify-center">
+                                        <Switch 
+                                            checked={property.isActive}
+                                            onCheckedChange={() => toggleAvailable(property)}
+                                            className="data-[state=checked]:bg-blue-600"
+                                        />
+                                    </div>
+                                </TableCell>
+                                <TableCell className="border border-black text-center">
+                                    <div className="flex justify-center">
+                                        <Switch 
+                                            checked={property.isTrending}
+                                            onCheckedChange={() => toggleTrending(property)}
+                                            className="data-[state=checked]:bg-green-600"
+                                        />
+                                    </div>
+                                </TableCell>
+                                <TableCell className="text-center border border-black">
                                     <Button
                                         variant="outline"
                                         size="icon"
+                                        className="text-blue-600 hover:bg-blue-50 px-10 py-2 border"
                                         onClick={() => handleEdit(property)}
                                     >
                                         <Edit className="h-4 w-4" />
+                                        Edit
                                     </Button>
                                     <Button
                                         variant="outline"
                                         size="icon"
+                                        className="text-red-600 hover:bg-red-50 px-10 py-2 border"
                                         onClick={() => handleDelete(property._id)}
-                                        className="text-red-600 hover:bg-red-50"
                                     >
                                         <Trash2 className="h-4 w-4" />
+                                        Delete
                                     </Button>
                                 </TableCell>
                             </TableRow>

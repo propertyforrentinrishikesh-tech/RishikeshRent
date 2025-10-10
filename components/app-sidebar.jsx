@@ -117,6 +117,11 @@ const data = {
     },
     { divider: true },
     {
+      name: "Top Advertisment Banner",
+      url: "/admin/top_advertisment_banner",
+      icon: Image
+    },
+    {
       name: "Promotional Banner",
       url: "/admin/promotional_banner",
       icon: Image

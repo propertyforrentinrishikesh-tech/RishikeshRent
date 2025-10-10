@@ -26,6 +26,8 @@ const propertyDetailsSchema = new mongoose.Schema({
     rentPrice: { type: Number, required: true },
     propertyName: { type: String, required: true },
     highlights: [{ type: String }],
+    propertyFor: { type: String, enum: ['residential', 'commercial'] },
+    isTrending: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
     
     // Timestamps

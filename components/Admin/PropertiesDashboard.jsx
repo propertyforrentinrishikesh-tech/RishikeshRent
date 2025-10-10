@@ -101,7 +101,7 @@ const PropertiesDashboard = ({ productId }) => {
               ))}
             </TabsList>
             {/* Section Content */}
-            <div className="flex-1 p-4 rounded-r-lg shadow-sm min-h-[400px]">
+            <div className="flex-1 p-2 rounded-r-lg shadow-sm min-h-[400px]">
               {sectionConfig.map(section => (
                 <TabsContent key={section.key} value={section.key} className="h-full">
                   {section.component()}

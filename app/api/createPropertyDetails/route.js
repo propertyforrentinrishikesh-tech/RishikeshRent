@@ -36,7 +36,6 @@ export async function POST(request) {
         );
 
     } catch (error) {
-        console.error('Error saving property details:', error);
         console.error('Error details:', {
             name: error.name,
             message: error.message,
