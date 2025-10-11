@@ -164,23 +164,51 @@ const SearchSection = () => {
     try {
       // Build query parameters
       const params = new URLSearchParams();
+      
+      // Add only non-empty values to the query params
       if (location) params.append('location', location);
       if (propertyFor) params.append('propertyFor', propertyFor);
       if (propertyType) params.append('propertyType', propertyType);
-
-      const response = await fetch(`/api/searchProperty?${params.toString()}`);
-      const data = await response.json();
-
-      if (data.success) {
-        setSearchResults(data.data.properties || []);
-        console.log('Search results:', data.data.properties);
+      if (checkInDate) {
+        const formattedDate = new Date(checkInDate).toISOString().split('T')[0];
+        params.append('checkInDate', formattedDate);
       }
+      if (guestCount && guestCount > 1) params.append('guests', guestCount);
+
+      // Always use window.location for navigation to avoid hook issues
+      window.location.href = `/property?${params.toString()}`;
+
     } catch (error) {
       console.error('Search error:', error);
+      toast.error('Failed to perform search. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Handle input changes to update state
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    if (name === 'location') setLocation(value);
+    if (name === 'checkInDate') setCheckInDate(value);
+  };
+
+  // Handle select changes
+  const handleSelectChange = (name, value) => {
+    if (name === 'propertyFor') setPropertyFor(value);
+    if (name === 'propertyType') setPropertyType(value);
+  };
+
+  // Add useEffect to handle initial load with URL params
+  useEffect(() => {
+    // Parse URL params on component mount
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('location')) setLocation(params.get('location'));
+    if (params.get('propertyFor')) setPropertyFor(params.get('propertyFor'));
+    if (params.get('propertyType')) setPropertyType(params.get('propertyType'));
+    if (params.get('checkInDate')) setCheckInDate(params.get('checkInDate'));
+    if (params.get('guests')) setGuestCount(parseInt(params.get('guests')));
+  }, []);
 
   return (
     <section className="p-5 bg-gray-100 w-[80%] mx-auto my-10 rounded-lg shadow-md border border-gray-400">
@@ -420,45 +448,51 @@ const SearchSection = () => {
               <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-5 gap-4">
                 {/* Location Select */}
                 <div className="w-full">
-                <Select
-                  // value={propertyFor}
-                  onValueChange={(value) => setPropertyFor(value)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Pilgrimage Type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {pilgrimType.map((option, index) => (
-                      <SelectItem key={`for-${index}`} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  <Select
+                    value={propertyType}
+                    onValueChange={(value) => handleSelectChange('propertyType', value)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Pilgrimage Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {pilgrimType.map((option, index) => (
+                        <SelectItem key={`pilgrim-${index}`} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Property For Select */}
                 <div className="w-full">
-                <Select
-                  value={propertyFor}
-                  onValueChange={(value) => setPropertyFor(value)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Yatra Type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {yatraType.map((option, index) => (
-                      <SelectItem key={`for-${index}`} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  <Select
+                    value={propertyFor}
+                    onValueChange={(value) => handleSelectChange('propertyFor', value)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Yatra Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {yatraType.map((option, index) => (
+                        <SelectItem key={`yatra-${index}`} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                {/* Property Type Select */}
+                {/* Check-in Date */}
                 <div className="w-full">
-                <Input type="date" value={checkInDate} onChange={(e) => setCheckInDate(e.target.value)} />
+                  <Input 
+                    type="date" 
+                    name="checkInDate"
+                    value={checkInDate} 
+                    onChange={handleInputChange}
+                    min={new Date().toISOString().split('T')[0]}
+                  />
                 </div>
 
                 <div className="flex items-center gap-2">

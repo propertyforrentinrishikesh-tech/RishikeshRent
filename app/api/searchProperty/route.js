@@ -46,7 +46,7 @@ export async function GET(request) {
 
         // Search for properties with the given filters
         const properties = await PropertyDetails.find(query)
-            .select('propertyName propertyType locationType mainImage rentPrice isActive isTrending')
+            .select('propertyName propertyType locationType mainImage rentPrice isActive isTrending propertyNameSlug')
             .sort({ isTrending: -1, createdAt: -1 });
 
         return NextResponse.json({
