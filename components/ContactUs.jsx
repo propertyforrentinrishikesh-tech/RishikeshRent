@@ -112,8 +112,9 @@ const ContactUs = () => {
                             <h3 className="font-bold text-xl md:text-2xl mb-2">Call Us</h3>
                             <ul className="mb-2">
                                 <li className='flex flex-row gap-2'>
-                                    <a href="tel:+9107669280002" className="hover:underline text-xl">+91 07669280002</a>
-                                    <a href="tel:+919897468886" className="hover:underline text-xl">+91 9897468886</a>
+                                    <a href="tel:+9101169266090 " className="hover:underline text-xl">+91 01169266090 </a>
+                                    <a href="tel:+917060320678" className="hover:underline text-xl">+91 7060320678</a>
+                                    <a href="tel:+919557839999" className="hover:underline text-xl">+91 9557839999</a>
                                 </li>
                             </ul>
                         </div>
@@ -122,15 +123,21 @@ const ContactUs = () => {
                             <ul className="mb-2">
                                 <li className='text-xl'>
                                     For Sales:
-                                    <a href="mailto:info@adventureaxis.in" className="hover:underline text-md md:text-xl"> info@adventureaxis.in</a>
+                                    <a href="mailto:info@rishikeshrent.com" className="hover:underline text-md md:text-xl"> info@rishikeshrent.com</a>
                                 </li>
                                 <li className='text-xl'>
                                     For Support:
-                                    <a href="mailto:Accounts@adventureaxis.in" className="hover:underline text-md md:text-xl"> Accounts@adventureaxis.in</a>
+                                    <a href="mailto:care@rishikeshrent.com" className="hover:underline text-md md:text-xl"> care@rishikeshrent.com</a>
                                 </li>
+                            </ul>
+                        </div>
+                        <div className=''>
+                            <h3 className="font-bold text-xl md:text-2xl mb-2 ">Address</h3>
+                            <ul className="mb-2">
                                 <li className='text-xl'>
-                                    For Official:
-                                    <a href="mailto:Sales@adventureaxis.in" className="hover:underline text-md md:text-xl"> Sales@adventureaxis.in</a>
+                                    Jai Ram Ashram Complex, First Floor
+                                    <br />
+                                    Rishikesh 249201
                                 </li>
                             </ul>
                         </div>
@@ -210,7 +217,7 @@ const ContactUs = () => {
             </div>
             {/* Google Maps */}
             <div className="w-full mt-10 flex justify-center">
-                <div className="w-full h-[200px md:h-[400px]  overflow-hidden ">
+                <div className="w-full h-[200px] md:h-[400px]  overflow-hidden ">
                     <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3450.807271918314!2d78.32066657501376!3d30.128327914592454!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39093e6896b55a3f%3A0xe5c76dc9610b2d2d!2sAdventure%20Axis!5e0!3m2!1sen!2sin!4v1753099742860!5m2!1sen!2sin" width="100%"
                         height="100%"
                         style={{ border: 0 }} allowFullScreen="" loading="lazy" 

@@ -7,15 +7,19 @@ import Banner from "@/components/Banner";
 import ChatBot from "@/components/ChatBot";
 import PopUpBanner from "@/components/PopUpBanner";
 import Social from "@/components/Social";
+import SearchSection from "@/components/SearchSection";
+import PropertyShow from "@/components/PropertyShow";
 
 export default async function Home() {
   return (
     <>
       <PopUpBanner />
       <HeroSection />
+      <SearchSection />
       <Boxes />
       <AboutUsSection />
       <Banner />
+      <PropertyShow/>
       <RandomTourPackageSection />
       <InstaBlog />
       <Social/>

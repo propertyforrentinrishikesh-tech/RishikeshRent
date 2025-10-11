@@ -28,7 +28,6 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
     const galleryImagesRef = useRef(null);
     const [activeTab, setActiveTab] = useState('youtube');
     const [editingProperty, setEditingProperty] = useState(null);
-
     const [formData, setFormData] = useState({
         propertyType: "",
         mainImage: { url: "", key: "", loading: false },
@@ -44,8 +43,10 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
         propertyFor: "",
         isAvailable: true,
         isTrending: false,
-        isActive: true
+        isActive: true,
+        propertyNameSlug: ""
     });
+
     // console.log(propertyDetails)
     const fetchPropertyDetails = async () => {
         try {

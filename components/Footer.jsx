@@ -83,12 +83,15 @@ const Footer = () => {
                 <div className="flex flex-col gap-1">
                     <h1 className="font-semibold text-xl flex items-center gap-2"> More Inquiry</h1>
                     <div className="flex items-start gap-2">
-                        <Link href={'tel:+9107669280002'} className="my-2 block rounded-full py-1 font-barlow text-white flex items-center gap-2">
+                        <Link href={'tel:+9101169266090'} className="my-2 rounded-full py-1 font-barlow text-white flex items-center gap-2">
                             <Phone size={20} className="text-blue-600" />
-                            +91 07669280002
+                            +91 01169266090
                         </Link>
-                        <Link href={'tel:+919897468886'} className="my-2  block rounded-full py-1 font-barlow text-white flex items-center gap-2">
-                            +91 9897468886
+                        <Link href={'tel:+917060320678'} className="my-2  rounded-full py-1 font-barlow text-white flex items-center gap-2">
+                            +91 7060320678
+                        </Link>
+                        <Link href={'tel:+919557839999'} className="my-2  rounded-full py-1 font-barlow text-white flex items-center gap-2">
+                            +91 9557839999
                         </Link>
                     </div>
                     <div className="flex items-start  gap-2">
@@ -96,23 +99,31 @@ const Footer = () => {
                             <Send className="text-blue-600" size={20} />
                         </div>
                         <div className="flex items-start flex-col gap-1 py-2">
-                            <Link href={'mailto:support@adventureaxis.in'} className="block rounded-full font-barlow text-white flex items-center gap-2">
-                                support@adventureaxis.in
+                            <Link href={'mailto:Info@rishikeshrent.com'} className="rounded-full font-barlow text-white flex items-center gap-2">
+                                Info@rishikeshrent.com
                             </Link>
-                            <Link href={'mailto:Accounts@adventureaxis.in'} className=" block rounded-full font-barlow text-white flex items-center gap-2">
-                                Accounts@adventureaxis.in
-                            </Link>
-                            <Link href={'mailto:Sales@adventureaxis.in'} className="block rounded-full font-barlow text-white flex items-center gap-2">
-                                Sales@adventureaxis.in
+                            <Link href={'mailto:Care@rishikeshrent.com'} className="rounded-full font-barlow text-white flex items-center gap-2">
+                                Care@rishikeshrent.com
                             </Link>
                         </div>
                     </div>
-                    <p className="gap-2 my-2 font-barlow text-white mb-5 flex items-center">
-                        <MapPin className="text-blue-600" size={20} />
-                        Regd. Or Branch Office: Badrinath Road,
-                        <br />
-                        Tapovan, Laxmanjhula, Uttarakhand
-                    </p>
+                    <div className="flex items-start flex-row gap-2">
+                        <div className="py-2">
+
+                            <MapPin className="text-blue-600" size={18} />
+                        </div>
+                        <div className="flex items-start flex-col gap-2">
+                            <p className="gap-2 font-barlowtext-white flex items-start">
+                                <span className="text-nowrap font-semibold">Corporate
+                                    <br />
+                                    Address :
+                                </span> Jai Ram Ashram Complex, First Floor
+                                <br />
+                                Rishikesh 249201
+                            </p>
+
+                        </div>
+                    </div>
                 </div>
             </div>
             <div className="md:hidden flex items-center gap-2 justify-start px-5">
@@ -140,12 +151,15 @@ const Footer = () => {
             <div className="md:hidden flex flex-col gap-1 p-5">
                 <h1 className="font-semibold text-xl flex items-center gap-2"> More Inquiry</h1>
                 <div className="flex items-start gap-2">
-                    <Link href={'tel:+9107669280002'} className="my-2 text-sm block rounded-full py-1 font-barlow text-white flex items-center gap-2">
+                    <Link href={'tel:+9101169266090'} className="my-2 text-sm rounded-full py-1 font-barlow text-white flex items-center gap-2">
                         <Phone size={20} className="text-blue-600" />
-                        +91 07669280002
+                        +91 01169266090
                     </Link>
-                    <Link href={'tel:+919897468886'} className="my-2 text-sm block rounded-full py-1 font-barlow text-white flex items-center gap-2">
-                        +91 9897468886
+                    <Link href={'tel:+91917060320678'} className="my-2 text-sm rounded-full py-1 font-barlow text-white flex items-center gap-2">
+                        +91 917060320678
+                    </Link>
+                    <Link href={'tel:+919557839999'} className="my-2 text-sm rounded-full py-1 font-barlow text-white flex items-center gap-2">
+                        +91 9557839999
                     </Link>
                 </div>
                 <div className="flex items-start  gap-2">
@@ -155,25 +169,26 @@ const Footer = () => {
                     </div>
                     <div className="flex items-start flex-col gap-1 py-2">
 
-                        <Link href={'mailto:support@adventureaxis.in'} className="text-sm block rounded-full font-barlow text-white flex items-center gap-2">
-                            support@adventureaxis.in
+                        <Link href={'mailto:info@rishikeshrent.com'} className="text-sm rounded-full font-barlow text-white flex items-center gap-2">
+                            info@rishikeshrent.com
                         </Link>
-                        <Link href={'mailto:Accounts@adventureaxis.in'} className=" text-sm block rounded-full font-barlow text-white flex items-center gap-2">
+                        <Link href={'mailto:care@rishikeshrent.com'} className=" text-sm rounded-full font-barlow text-white flex items-center gap-2">
 
-                            Accounts@adventureaxis.in
-                        </Link>
-                        <Link href={'mailto:Sales@adventureaxis.in'} className=" text-sm block rounded-full font-barlow text-white flex items-center gap-2">
-
-                            Sales@adventureaxis.in
+                            care@rishikeshrent.com
                         </Link>
                     </div>
                 </div>
-                <p className="my-2 text-sm font-barlow text-white mb-5 flex items-center gap-2">
-                    <MapPin className="text-blue-600" size={20} />
-                    Regd. Or Branch Office: Badrinath Road,
-                    <br />
-                    Tapovan, Laxmanjhula, Uttarakhand
-                </p>
+                <div className="flex items-start flex-col gap-2">
+                    <p className="gap-2 font-barlowtext-white flex items-start">
+                        <span className="text-nowrap font-semibold">Corporate
+                            <br />
+                            Address :
+                        </span> Jai Ram Ashram Complex, First Floor
+                        <br />
+                        Rishikesh 249201
+                    </p>
+
+                </div>
             </div>
 
             {/* Accordance Section */}
@@ -261,7 +276,7 @@ const Footer = () => {
                                         <strong>9. Customer Support</strong>
                                         <ul className="list-disc list-inside ml-4">
                                             <li>📧 Email: support@adventureaxis.in</li>
-                                            <li>☎ Call/WhatsApp: +91 07669280002</li>
+                                            <li>☎ Call/WhatsApp: +91 01169266090</li>
                                             <li>🕒 Hours: Monday to Saturday, 10:00 AM – 6:00 PM IST</li>
                                         </ul>
                                     </li>
@@ -282,7 +297,9 @@ const Footer = () => {
                 <CardContent className="flex flex-col lg:flex-row items-start justify-between">
                     <div className="text-justify">
                         <Image src="/HeaderLogo.png" priority width={250} height={250} alt="footer" />
-                        <p className="text-black text-sm lg:w-[40vw] xl:w-[35vw] font-barlow mt-6">Rishikesh Rent offers a comprehensive range of adventure sports equipment under one roof. Our categories include Water Sports Equipment such as rafts, kayaks, dry bags, paddles, life jackets, helmets, and repair kits. In Safety & Rescue, we provide harnesses, carabiners, ropes, pulleys, fall arresters, rescue devices, and helmets. Our Clothing & Footwear range features tactical eyewear, base layers, fleece, insulated wear, and high-performance outdoor footwear. We also specialize in Camping & Outdoor gear and Expedition Equipment, ensuring you're fully equipped for any terrain or challenge.</p>
+                        <p className="text-black text-sm lg:w-[40vw] xl:w-[35vw] font-barlow mt-6">Premium Rental Solutions in Rishikesh
+                            <br />
+                            Welcome to a world where comfort meets class and every address tells a story of elegance. At Find Your Best Choice, we specialize in offering exclusive residential and commercial rental properties across the divine city of Rishikesh. From serene riverside homes to premium business spaces in prime locations, we bring you handpicked properties that reflect quality, value, and distinction. Our deep understanding of the local market allows us to deliver the best deals with complete transparency and trust. Whether you seek a peaceful retreat or a dynamic workplace, our mission is to help you find a space that truly complements your lifestyle and ambition in the heart of the Himalayas.</p>
                         <p className="text-black text-sm lg:w-[40vw] xl:w-[35vw] font-barlow mt-6">Our website is your gateway to the heart of Rishikesh, offering rich and soulful handmade creations crafted by local artisans.</p>
                     </div>
                     <div className="font-barlow mt-10 lg:mt-0">
