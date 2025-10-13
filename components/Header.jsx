@@ -103,7 +103,7 @@ const Header = () => {
           pathName.includes("customEnquiry")
           ? "hidden"
           : "block"
-          } bg-[#fcf7f1] text-black border-b font-barlow tracking-wider w-full`}
+          } border-b font-barlow tracking-wider w-full bg-black text-white`}
       >
         <TopAdvertisementMarquee />
         <div className="md:flex hidden items-center justify-between gap-8 border-b py-1 border-gray-400 md:px-8 ">
@@ -114,7 +114,16 @@ const Header = () => {
                 <img className="w-48 object-contain drop-shadow-xl" src="/HeaderLogo.png" alt="Rishikesh Handmade" />
               </Link>
             </div>
-
+            <div className="flex-shrink-0 flex item-center gap-2">
+              <img src="/Hotel.jpg" className="w-12 object-contain" alt="" />
+              <div className="flex flex-col items-center">
+                <p className="text-yellow-400 text-md">List Your Property</p>
+                <p className="text-white text-md">Grow your Business</p>
+              </div>
+            </div>
+            <div>
+              <SearchBar />
+            </div>
             {/* Login/Cart section on the right */}
             <div className="flex items-center gap-3">
               <div className="relative" ref={profileMenuRef}>
@@ -152,8 +161,7 @@ const Header = () => {
                           href="/dashboard?section=orders"
                           className="flex items-center rounded-lg w-full text-left px-4 py-2 hover:bg-blue-100"
                           onClick={() => setIsProfileOpen(false)}
-                        >
-                          <User2Icon size={20} className="mr-2" /> Dashboard
+                        >Dashboard
                         </Link>
                         <button
                           className="flex items-center rounded-lg w-full text-red-600 text-left px-4 py-2 hover:bg-blue-100"
@@ -173,8 +181,8 @@ const Header = () => {
                       }}
                       className="flex flex-col items-center py-2"
                     >
-                      <User className="ml-2" size={20} />
-                      <h2 className="text-xs font-semibold">Sign In / Login</h2>
+
+                      <h2 className="text-sm">Sign In / Login</h2>
                     </button>
                     <AnimatePresence>
                       {isAuthDropdownOpen && (
@@ -206,56 +214,38 @@ const Header = () => {
                   </div>
                 )}
               </div>
-              {/* Wishlist Button */}
-              {/* <div className="relative group">
-                <button
-                  onClick={() => { setInitialCartTab('wishlist'); setIsCartOpen(true); }}
-                  className="flex flex-col items-center p-2 rounded-lg hover:bg-neutral-100 transition-colors"
-                  aria-label="Wishlist"
+              <div className="w-[2px] bg-white h-6"></div>
+              <div className="flex items-center gap-2">
+                <Link href="#"
+                  className="text-white texts-sm"
                 >
-                  <div className="relative">
-                    <Heart size={20} />
-                    {wishlist.length > 0 && (
-                      <span className="absolute -top-3 -right-3 bg-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow">
-                        {wishlist.length}
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-xs font-medium mt-1">Wishlist</span>
-                </button>
-              </div> */}
-
-              {/* Cart Button */}
-              {/* <div className="relative group">
-                <button
-                  onClick={() => { setInitialCartTab('cart'); setIsCartOpen(true); }}
-                  className="flex flex-col items-center p-2 rounded-lg hover:bg-neutral-100 transition-colors"
-                  aria-label="Cart"
-                >
-                  <div className="relative">
-                    <ShoppingCart size={20} />
-                    {cart.length > 0 && (
-                      <span className="absolute -top-3 -right-3 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow">
-                        {cart.length}
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-xs font-medium mt-1">Cart</span>
-                </button>
-              </div> */}
-
-              {/* Track Order Button */}
-              {/* <div className="group">
-                <Link
-                  href="/dashboard?section=track"
-                  className="flex flex-col items-center p-2 rounded-lg hover:bg-neutral-100 transition-colors"
-                >
-                  <Truck size={20} />
-                  <span className="text-xs font-medium mt-1">Track Order</span>
+                  Property Extranet
                 </Link>
-              </div> */}
-              <SearchBar />
+                <div className="w-[2px] bg-white h-6"></div>
+                <Link
+                  href="#"
+                  className="text-white text-sm">
+                  Travel Partner
+                </Link>
+              </div>
             </div>
+            <div className="flex flex-col items-center bg-black text-white py-2 rounded-md w-fit px-4">
+              {/* WhatsApp Logo + Main Number */}
+              <div className="flex items-center space-x-2">
+                <img
+                  src="/whatapp.png"
+                  alt="WhatsApp"
+                  className="w-12 h-8"
+                />
+                <span className="text-green-500 text-xl font-bold">01169266090</span>
+              </div>
+
+              {/* Secondary Numbers */}
+              <div className="text-sm mt-1">
+                +91 7060320678, 9557839999
+              </div>
+            </div>
+
           </div>
         </div>
       </header>

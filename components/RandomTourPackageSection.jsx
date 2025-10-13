@@ -56,7 +56,7 @@ const RandomTourPackageSection = () => {
       price: Math.round(discountedPrice),
       size: item?.quantity?.variants[0]?.size,
       weight: item?.quantity?.variants[0]?.weight ? item.quantity.variants[0].weight / 1000 : 0, // Convert grams to kg
-      color:item?.quantity?.variants[0].color,
+      color: item?.quantity?.variants[0].color,
       originalPrice: price,
       qty: 1,
       couponApplied,
@@ -93,7 +93,7 @@ const RandomTourPackageSection = () => {
 
 
 
-
+  console.log(products)
   // Fetch Artisan 
   const fetchArtisan = async () => {
     try {
@@ -117,12 +117,12 @@ const RandomTourPackageSection = () => {
   // Fetch Prouducts
   const fetchProducts = async () => {
     try {
-      const res = await fetch("/api/product");
+      const res = await fetch("/api/createPropertyDetails");
       const data = await res.json();
       // console.log("Product API response:", data);
 
-      if (data && data.length > 0) {
-        setProducts(data);
+      if (data.data && data.data.length > 0) {
+        setProducts(data.data);
       } else {
         setProducts([]);
       }
@@ -152,7 +152,7 @@ const RandomTourPackageSection = () => {
       <div className=" w-full h-full overflow-hidden max-w-screen">
         {/* Product Section */}
         <div className="w-full py-10 px-2 bg-[#FCF7F1]">
-          <h1 className="text-xl md:text-3xl lg:text-4xl font-bold text-center md:mt-10 uppercase">
+          {/* <h1 className="text-xl md:text-3xl lg:text-4xl font-bold text-center md:mt-10 uppercase">
           Equip Your Next Adventure.
           </h1>
           <p className=" text-gray-600 py-4 text-center font-barlow md:w-[50%] w-full mx-auto">
@@ -160,7 +160,7 @@ const RandomTourPackageSection = () => {
             daily, these top-rated picks offer the best value and quality —
             handpicked for professionals who demand the best, today. Don’t miss
             out — elevate your experience now!
-          </p>
+          </p> */}
           <Carousel
             className={`w-full md:w-[95%] mx-auto my-4 ${products.length > 0 ? "block" : "hidden"}`}
           >
@@ -196,7 +196,7 @@ const RandomTourPackageSection = () => {
                         })()}
 
                         {/* Heart/Wishlist & Cart Buttons - Top Right */}
-                        <div className="absolute top-6 right-6 z-10 flex flex-col gap-4 items-end">
+                        {/* <div className="absolute top-6 right-6 z-10 flex flex-col gap-4 items-end">
                           <Button
                             variant="ghost"
                             size="icon"
@@ -269,9 +269,9 @@ const RandomTourPackageSection = () => {
                               <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
                             </svg>
                           </Button>
-                        </div>
+                        </div> */}
                         <Image
-                          src={item?.gallery?.mainImage?.url || "/placeholder.jpeg"}
+                          src={item?.mainImage?.url || "/placeholder.jpeg"}
                           alt={item?.title || "Tour package image"}
                           width={400}
                           height={500}
@@ -293,39 +293,12 @@ const RandomTourPackageSection = () => {
                       {/* Name and Price Section */}
                       <div className="flex flex-col items-start px-1 pt-4 pb-2 mt-0">
                         <Link
-                          href={`/product/${item.slug}`}
+                          href={`/property/${item.propertyNameSlug}`}
                           className="font-bold hover:underline text-md xl:text-xl text-gray-900 leading-tight truncate cursor-pointer break-words whitespace-normal"
                         >
-                          {item?.title}
+                          {item?.propertyName}
                         </Link>
-
-                        {(() => {
-                          const price = item?.quantity?.variants[0].price;
-                          const coupon = item.coupon || item.coupons?.coupon;
-                          let discountedPrice = price;
-                          let hasDiscount = false;
-
-                          if (coupon && typeof coupon.percent === 'number' && coupon.percent > 0) {
-                            discountedPrice = price - (price * coupon.percent) / 100;
-                            hasDiscount = true;
-                          } else if (coupon && typeof coupon.amount === 'number' && coupon.amount > 0) {
-                            discountedPrice = price - coupon.amount;
-                            hasDiscount = true;
-                          }
-
-                          if (hasDiscount && discountedPrice < price) {
-                            return (
-                              <span>
-                                <del className="text-black font-bold text-md xl:text-xl line-through">₹{formatNumeric(price)}</del>
-                                <span className="font-bold text-md text-black px-2 xl:text-xl">₹{formatNumeric(Math.round(discountedPrice))}</span>
-                              </span>
-                            );
-                          } else {
-                            return (
-                              <span className="font-bold text-md text-black xl:text-xl">₹{formatNumeric(price)}</span>
-                            );
-                          }
-                        })()}
+                        <p className="text-black text-xl font-semibold">{item?.locationType}</p>
                       </div>
                     </div>
                   </CarouselItem>
@@ -347,9 +320,9 @@ const RandomTourPackageSection = () => {
                 <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-start mb-5 uppercase">Our Industry Experts</h2>
                 {/* <h2 className="text-xl font-bold mb-2">Celebrating the Art of Craftsmanship. Honoring the Hands That Shape Beauty</h2> */}
                 <div className="text-md text-gray-700 text-justify mb-6">
-                At the heart of every great expedition is dependable gear—and that’s where we come in. As a leading provider of adventure and expedition equipment, we specialize in supplying high-performance, safety-tested gear for professionals, outdoor enthusiasts, rescue teams, and expedition leaders. Our commitment goes beyond products; we offer end-to-end gear solutions designed for extreme conditions, rugged terrains, and mission-critical operations. Backed by trusted global brands and decades of field experience, our management philosophy focuses on quality, innovation, and reliability. Whether you're preparing for a Himalayan ascent, a wilderness survival course, or a high-altitude rescue mission, we ensure you’re equipped to go further—safely, efficiently, and confidently.
+                  At the heart of every great expedition is dependable gear—and that’s where we come in. As a leading provider of adventure and expedition equipment, we specialize in supplying high-performance, safety-tested gear for professionals, outdoor enthusiasts, rescue teams, and expedition leaders. Our commitment goes beyond products; we offer end-to-end gear solutions designed for extreme conditions, rugged terrains, and mission-critical operations. Backed by trusted global brands and decades of field experience, our management philosophy focuses on quality, innovation, and reliability. Whether you're preparing for a Himalayan ascent, a wilderness survival course, or a high-altitude rescue mission, we ensure you’re equipped to go further—safely, efficiently, and confidently.
                 </div>
-              
+
               </div>
               {/* Right: Top 2 artisan cards in new style */}
               <div className="hidden md:flex flex-row gap-4 justify-end">
@@ -396,8 +369,8 @@ const RandomTourPackageSection = () => {
                   };
                   return (
                     <div key={card.id} className="relative rounded-2xl shadow-md group transition-all h-full w-[340px] flex flex-col bg-[#fbeff2] overflow-hidden">
-                  
-                  
+
+
                       {/* Card Image */}
                       <div className="relative w-full h-96">
                         <img
@@ -464,7 +437,7 @@ const RandomTourPackageSection = () => {
                     {artisan.slice(2).map((item, idx) => {
                       const card = {
                         id: item._id || idx,
-                        slug:item.slug,
+                        slug: item.slug,
                         name: `${item.title ? item.title + " " : ""}${item.firstName || ''} ${item.lastName || ''}`.trim() || "Unknown Artisan",
                         date: item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase() : "N/A",
                         image: item.profileImage?.url || item.image || "/bg-custom-1.jpg",
@@ -505,8 +478,8 @@ const RandomTourPackageSection = () => {
                       return (
                         <CarouselItem key={card.id} className="pl-5 md:basis-1/2 lg:basis-1/4 min-w-0 snap-start">
                           <div className="relative rounded-2xl overflow-hidden shadow-md group transition-all h-full flex flex-col bg-[#fbeff2]">
-                          
-                        
+
+
                             {/* Card Image */}
                             <div className="relative w-full h-96">
                               <img
@@ -621,7 +594,7 @@ const RandomTourPackageSection = () => {
                       return (
                         <CarouselItem key={card.id} className="pl-5 md:basis-1/2 lg:basis-1/4 min-w-0 snap-start">
                           <div className="relative rounded-2xl overflow-hidden shadow-md group transition-all h-full flex flex-col bg-[#fbeff2]">
-                       
+
                             {/* Card Image */}
                             <div className="relative w-full h-96">
                               <img
@@ -681,8 +654,8 @@ const RandomTourPackageSection = () => {
                     })}
                   </CarouselContent>
                   <div className="flex items-center gap-3 mt-4 justify-center">
-                  <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 p-5" />
-                  <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 p-5" />
+                    <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 p-5" />
+                    <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 p-5" />
                   </div>
                 </Carousel>
               </div>

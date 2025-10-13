@@ -211,7 +211,7 @@ const SearchSection = () => {
   }, []);
 
   return (
-    <section className="p-5 bg-gray-100 w-[80%] mx-auto my-10 rounded-lg shadow-md border border-gray-400">
+    <section className="p-5 bg-gray-100 w-full md:w-[80%] mx-auto my-10 rounded-lg shadow-md border border-gray-400">
       <div className="container mx-auto px-4">
         {/* Tabs */}
         <Tabs
@@ -232,14 +232,14 @@ const SearchSection = () => {
               className="flex items-center gap-2 py-4 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 border border-gray-400"
             >
               <Hotel className="h-4 w-4" />
-              Search Hotels
+              Search Hotels And Home Stay
             </TabsTrigger>
             <TabsTrigger
               value="homestay"
               className="flex items-center gap-2 py-4 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 border border-gray-400"
             >
               <Home className="h-4 w-4" />
-              Home Stay
+              Tours & Attractions
             </TabsTrigger>
           </TabsList>
 

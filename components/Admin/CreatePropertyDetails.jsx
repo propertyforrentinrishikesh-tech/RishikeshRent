@@ -50,7 +50,7 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
     // console.log(propertyDetails)
     const fetchPropertyDetails = async () => {
         try {
-            const response = await fetch("/api/createPropertyDetails");
+            const response = await fetch("/api/createPropertyDetails?limit=10");
             const data = await response.json();
             // console.log(data)
             setPropertyDetails(data.data);
@@ -742,6 +742,21 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
             <h1 className="text-2xl font-bold mb-6">Add New Property</h1>
 
             <form onSubmit={handleSubmit} id="property-form" className="space-y-6 border border-black p-4 rounded-md shadow-md  bg-gray-100">
+                  <div className="space-y-2">
+                    <Label>Property Be Like</Label>
+                    <Select 
+                        value={formData.propertyFor}
+                        onValueChange={(value) => setFormData(prev => ({ ...prev, propertyFor: value }))}
+                    >
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select Property Be Like" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="residential">Residential</SelectItem>
+                            <SelectItem value="commercial">Commercial</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
                 {/* Property Type Select */}
                 <div className="space-y-2">
                     <Label>Property Type</Label>
@@ -1149,21 +1164,7 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                     ))}
                 </div>
                 <hr className="my-6" />
-                <div className="space-y-2">
-                    <Label>Property For</Label>
-                    <Select 
-                        value={formData.propertyFor}
-                        onValueChange={(value) => setFormData(prev => ({ ...prev, propertyFor: value }))}
-                    >
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select Property For" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="residential">Residential</SelectItem>
-                            <SelectItem value="commercial">Commercial</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
+              
 
                 <div className="flex justify-start gap-4">
                     <Button

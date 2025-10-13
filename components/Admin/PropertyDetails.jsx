@@ -1,15 +1,20 @@
 "use client";
-
-import { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Search, Eye, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'react-hot-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { format } from 'date-fns';
+import { Textarea } from "@/components/ui/textarea";
+// Add these imports at the top
+import { useState, useEffect, useRef } from 'react';
+import { useForm } from 'react-hook-form';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Upload, Trash2, Edit, X, Plus, Search, Eye } from 'lucide-react';
+import Image from 'next/image';
 const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -22,7 +27,297 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [propertyToDelete, setPropertyToDelete] = useState(null);
+  const [editingProperty, setEditingProperty] = useState(null);
+  const [videoUploading, setVideoUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadError, setUploadError] = useState(null);
+  const [retryAttempt, setRetryAttempt] = useState(0);
+  const [activeTab, setActiveTab] = useState('upload');
+  const [formData, setFormData] = useState({
+    propertyType: "",
+    mainImage: { url: "", key: "", loading: false },
+    galleryImages: [],
+    video: { type: "upload", file: null, youtubeLink: "" },
+    locationType: "",
+    contactAddress: "",
+    brokerName: "",
+    contactNumbers: [""],
+    rentPrice: "",
+    propertyName: "",
+    highlights: [],
+    propertyFor: "",
+    isAvailable: true,
+    isTrending: false,
+    isActive: true,
+    propertyNameSlug: ""
+  });
 
+  const mainImageRef = useRef(null);
+  const galleryImagesRef = useRef(null);
+  const deleteFromCloudinary = async (publicId, resourceType = 'image') => {
+    try {
+      const response = await fetch('/api/cloudinary', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          publicId,
+          resourceType
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to delete from Cloudinary');
+      }
+      return data;
+    } catch (error) {
+      console.error('Error deleting from Cloudinary:', error);
+      throw error;
+    }
+  };
+  const handleMainImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setFormData(prev => ({
+      ...prev,
+      mainImage: { ...prev.mainImage, loading: true }
+    }));
+
+    const formDataUpload = new FormData();
+    formDataUpload.append('file', file);
+
+    try {
+      const res = await fetch('/api/cloudinary', {
+        method: 'POST',
+        body: formDataUpload
+      });
+      const data = await res.json();
+
+      if (res.ok && data.url) {
+        // If there was a previous image, delete it from Cloudinary
+        if (formData.mainImage?.key) {
+          try {
+            await deleteFromCloudinary(formData.mainImage.key);
+          } catch (err) {
+            console.error('Error deleting old image:', err);
+          }
+        }
+
+        setFormData(prev => ({
+          ...prev,
+          mainImage: {
+            url: data.url,
+            key: data.key || '',
+            loading: false
+          }
+        }));
+        toast.success('Main image uploaded successfully!');
+      } else {
+        throw new Error(data.error || 'Failed to upload image');
+      }
+    } catch (err) {
+      console.error('Upload error:', err);
+      toast.error('Failed to upload image');
+      setFormData(prev => ({
+        ...prev,
+        mainImage: { ...prev.mainImage, loading: false }
+      }));
+    }
+  };
+
+  const handleGalleryUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    const newImages = files.map(file => ({
+      file,
+      url: URL.createObjectURL(file),
+      key: '',
+      loading: true
+    }));
+
+    // Add new images to the gallery
+    setFormData(prev => ({
+      ...prev,
+      galleryImages: [...prev.galleryImages, ...newImages]
+    }));
+
+    // Upload each file
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const formDataUpload = new FormData();
+      formDataUpload.append('file', file);
+
+      try {
+        const res = await fetch('/api/cloudinary', {
+          method: 'POST',
+          body: formDataUpload
+        });
+        const data = await res.json();
+
+        if (res.ok && data.url) {
+          setFormData(prev => {
+            const updatedImages = [...prev.galleryImages];
+            const index = updatedImages.findIndex(img => img.file === file);
+            if (index !== -1) {
+              updatedImages[index] = {
+                ...updatedImages[index],
+                url: data.url,
+                key: data.key || '',
+                loading: false
+              };
+            }
+            return { ...prev, galleryImages: updatedImages };
+          });
+        }
+      } catch (err) {
+        console.error('Error uploading image:', err);
+        // Remove the failed upload
+        setFormData(prev => ({
+          ...prev,
+          galleryImages: prev.galleryImages.filter(img => img.file !== file)
+        }));
+        toast.error(`Failed to upload ${file.name}`);
+      }
+    }
+  };
+  const handleVideoChange = async (e, retryCount = 0) => {
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY = 2000;
+
+    if (!e?.target?.files?.[0]) {
+      console.error('No file selected or invalid event');
+      return;
+    }
+
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('video/')) {
+      toast.error('Please upload a valid video file');
+      return;
+    }
+
+    // 50MB limit
+    const maxSize = 50 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast.error('Video file is too large. Maximum size is 50MB');
+      return;
+    }
+
+    setVideoUploading(true);
+    setUploadProgress(0);
+    setUploadError(null);
+    setRetryAttempt(retryCount);
+
+    const formDataUpload = new FormData();
+    formDataUpload.append('file', file);
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 minutes timeout
+
+      const response = await fetch('/api/cloudinary', {
+        method: 'POST',
+        body: formDataUpload,
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      // If there was a previous video, delete it from Cloudinary
+      if (formData.video?.file?.key) {
+        try {
+          await deleteFromCloudinary(formData.video.file.key, 'video');
+        } catch (err) {
+          console.error('Error deleting old video:', err);
+        }
+      }
+
+      setFormData(prev => ({
+        ...prev,
+        video: {
+          type: 'upload',
+          file: {
+            url: data.secure_url || data.url,
+            key: data.public_id || data.key,
+            name: file.name,
+            type: file.type,
+            size: file.size
+          },
+          youtubeLink: ''
+        }
+      }));
+      setActiveTab('upload');
+      toast.success('Video uploaded successfully!');
+
+    } catch (error) {
+      console.error('Video upload error:', error);
+
+      if (error.name === 'AbortError') {
+        toast.error('Video upload timed out. Please try again with a smaller file.');
+      } else if ((error.message.includes('ECONNRESET') ||
+        error.message.includes('network') ||
+        error.message.includes('fetch')) &&
+        retryCount < MAX_RETRIES) {
+
+        toast.error(`Upload failed due to network error. Retrying in ${RETRY_DELAY / 1000} seconds... (Attempt ${retryCount + 1}/${MAX_RETRIES})`);
+
+        setTimeout(() => {
+          const newEvent = {
+            target: {
+              files: [file]
+            }
+          };
+          handleVideoChange(newEvent, retryCount + 1);
+        }, RETRY_DELAY);
+        return;
+      } else {
+        toast.error(error.message || 'Failed to upload video');
+        setUploadError(error.message || 'Upload failed');
+      }
+    } finally {
+      setVideoUploading(false);
+    }
+  };
+  const removeMainImage = async () => {
+    if (formData.mainImage?.key) {
+      try {
+        await deleteFromCloudinary(formData.mainImage.key);
+      } catch (err) {
+        console.error('Error deleting image from Cloudinary:', err);
+      }
+    }
+    setFormData(prev => ({
+      ...prev,
+      mainImage: { url: '', loading: false }
+    }));
+  };
+
+  const removeGalleryImage = async (index) => {
+    const imageToRemove = formData.galleryImages[index];
+    if (imageToRemove?.key) {
+      try {
+        await deleteFromCloudinary(imageToRemove.key);
+      } catch (err) {
+        console.error('Error deleting image from Cloudinary:', err);
+      }
+    }
+    setFormData(prev => ({
+      ...prev,
+      galleryImages: prev.galleryImages.filter((_, i) => i !== index)
+    }));
+  };
   const handleSearch = async () => {
     if (!filters.propertyType && !filters.locationType) {
       toast.error('Please select at least one filter');
@@ -39,7 +334,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
       if (!response.ok) {
         throw new Error('Failed to fetch properties');
       }
-      
+
       const data = await response.json();
       console.log(data)
       setSearchResults(data.data || []);
@@ -70,6 +365,15 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
     } else {
       toast.error('Property details not found');
     }
+  };
+  const handleEdit = (propertyId) => {
+    const property = searchResults.find(p => p._id === propertyId);
+    setEditingProperty(property);
+    setFormData({
+      ...property,
+      mainImage: property.mainImage || { url: property.mainImageUrl, loading: false },
+      galleryImages: property.galleryImages || []
+    });
   };
 
   const handleDelete = (propertyId) => {
@@ -108,8 +412,102 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
     const match = url.match(regExp);
     return (match && match[2].length === 11) ? match[2] : null;
   };
+  const extractYoutubeId = (url) => {
+    const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[7].length === 11) ? match[7] : null;
+  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!editingProperty) return; // Only proceed if we're editing
 
-console.log(selectedProperty)
+    try {
+      const response = await fetch(`/api/createPropertyDetails?id=${editingProperty._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update property');
+      }
+
+      toast.success('Property updated successfully!');
+
+      // Update the property in the list
+      setSearchResults(prev =>
+        prev.map(p => p._id === editingProperty._id ? data.data : p)
+      );
+
+      // Reset form and editing state
+      setFormData({
+        propertyFor: '',
+        propertyType: '',
+        mainImage: { url: '', loading: false },
+        galleryImages: [],
+        video: { type: 'upload', file: null, youtubeLink: '' },
+        // Add other initial form fields here
+        locationType: '',
+        contactAddress: '',
+        brokerName: '',
+        contactNumbers: [''],
+        rentPrice: '',
+        propertyName: '',
+        highlights: ['']
+      });
+
+      setEditingProperty(null);
+
+    } catch (error) {
+      console.error('Error updating property:', error);
+      toast.error(error.message || 'Failed to update property');
+    }
+  };
+  // Handle contact number changes
+  const handleContactNumberChange = (index, value) => {
+    const newContactNumbers = [...formData.contactNumbers];
+    newContactNumbers[index] = value;
+    setFormData(prev => ({ ...prev, contactNumbers: newContactNumbers }));
+  };
+  const addHighlight = () => {
+    setFormData(prev => ({
+      ...prev,
+      highlights: [...(prev.highlights || []), '']
+    }));
+  };
+
+  const handleHighlightChange = (index, value) => {
+    const newHighlights = [...(formData.highlights || [])];
+    newHighlights[index] = value;
+
+    // Remove the last empty highlight if there are multiple empty ones
+    if (newHighlights.length > 1 &&
+      index === newHighlights.length - 2 &&
+      value === '' &&
+      newHighlights[newHighlights.length - 1] === '') {
+      newHighlights.pop();
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      highlights: newHighlights
+    }));
+  };
+
+  const removeHighlight = (index) => {
+    const newHighlights = formData.highlights.filter((_, i) => i !== index);
+    setFormData(prev => ({ ...prev, highlights: newHighlights }));
+  };
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+  console.log(selectedProperty)
+  console.log(editingProperty)
   return (
     <div className="container mx-auto p-6">
       <div className="bg-white rounded-lg shadow p-6 mb-6 border border-black">
@@ -176,7 +574,7 @@ console.log(selectedProperty)
                   <TableHead className="border border-black text-black">Property Name</TableHead>
                   <TableHead className="border border-black text-black">Contact Number</TableHead>
                   <TableHead className="border border-black text-black">View</TableHead>
-                  <TableHead className="border border-black text-black">Actions</TableHead>
+                  <TableHead className="border border-black text-black text-center">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               {searchResults.length > 0 && (
@@ -203,13 +601,22 @@ console.log(selectedProperty)
                           <Eye className="h-4 w-4" />
                         </Button>
                       </TableCell>
-                      <TableCell className="border border-black ">
+                      <TableCell className="border border-black">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => handleEdit(property._id)}
+                          title="Edit Property"
+                          className="text-green-600 hover:bg-red-50 mx-2"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
                         <Button
                           variant="outline"
                           size="icon"
                           onClick={() => handleDelete(property._id)}
                           title="Delete Property"
-                          className="text-red-600 hover:bg-red-50 mx-auto"
+                          className="text-red-600 hover:bg-red-50 "
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -235,6 +642,7 @@ console.log(selectedProperty)
                     <div className="space-y-2">
                       <p><span className="font-medium">Property Name:</span> {selectedProperty.propertyName}</p>
                       <p><span className="font-medium">Property Type:</span> {selectedProperty.propertyType}</p>
+                      <p><span className="font-medium">Property Be Like:</span> {selectedProperty.propertyFor}</p>
                       <p><span className="font-medium">Location:</span> {selectedProperty.locationType}</p>
                       <p><span className="font-medium">Rent Price:</span> ₹{selectedProperty.rentPrice?.toLocaleString()}</p>
                       <p><span className="font-medium">Broker Name:</span> {selectedProperty.brokerName || 'N/A'}</p>
@@ -355,6 +763,438 @@ console.log(selectedProperty)
           </DialogContent>
         </Dialog>
       </div>
+      {editingProperty && (
+        <div className="mb-8 p-6 border rounded-lg bg-white shadow-md">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold">Edit Property</h2>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setEditingProperty(null)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Copy the form fields from CreatePropertyDetails.jsx here */}
+            {/* Property For */}
+            <div className="space-y-2">
+              <Label>Property Be Like</Label>
+              <Select
+                value={formData.propertyFor}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, propertyFor: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Property Be Like" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="residential">Residential</SelectItem>
+                  <SelectItem value="commercial">Commercial</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Property Type */}
+            <div className="space-y-2">
+              <Label>Property Type</Label>
+              <Select
+                value={formData.propertyType}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, propertyType: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select property type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {propertyTypes.map((type) => (
+                    <SelectItem key={type._id} value={type.propertyType}>
+                      {type.propertyType}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Main Image Upload */}
+            <div className="space-y-2">
+              <Label>Main Property Image</Label>
+              <div className="flex items-center gap-4">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleMainImageUpload}
+                  className="hidden"
+                  ref={mainImageRef}
+                  id="main-image-input"
+                  disabled={formData.mainImage.loading}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex items-center gap-2 bg-blue-500 text-white hover:bg-blue-600"
+                  onClick={() => mainImageRef.current?.click()}
+                  disabled={formData.mainImage.loading}
+                >
+                  <Upload className="w-4 h-4" />
+                  <span>{formData.mainImage.loading ? 'Uploading...' : 'Select Main Image'}</span>
+                </Button>
+              </div>
+              {formData.mainImage.url && (
+                <div className="relative w-48 h-32 mt-2 border rounded overflow-hidden">
+                  <Image
+                    src={formData.mainImage.url}
+                    alt="Main property"
+                    fill
+                    className="object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={removeMainImage}
+                    className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 hover:bg-red-100"
+                    title="Remove image"
+                  >
+                    <Trash2 className="w-4 h-4 text-red-600" />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Gallery Images */}
+            <div className="space-y-2">
+              <Label>Gallery Images</Label>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleGalleryUpload}
+                className="hidden"
+                ref={galleryImagesRef}
+                id="gallery-images-input"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                className="flex items-center gap-2 bg-blue-500 text-white hover:bg-blue-600"
+                onClick={() => galleryImagesRef.current?.click()}
+              >
+                <Upload className="w-4 h-4" />
+                <span>Select Gallery Images</span>
+              </Button>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {formData.galleryImages.map((img, index) => (
+                  <div key={index} className="relative w-24 h-24 border rounded overflow-hidden">
+                    <Image
+                      src={img.url}
+                      alt={`Gallery ${index + 1}`}
+                      fill
+                      className="object-cover"
+                    />
+                    {img.loading && (
+                      <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                        <div className="text-white text-xs">Uploading...</div>
+                      </div>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => removeGalleryImage(index)}
+                      className="absolute top-0.5 right-0.5 bg-white bg-opacity-80 rounded-full p-0.5 hover:bg-red-100"
+                      title="Remove image"
+                      disabled={img.loading}
+                    >
+                      <X className="w-3.5 h-3.5 text-red-600" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* Video Section */}
+            <div className="space-y-2">
+              <Label>Property Video</Label>
+              <Tabs
+                value={activeTab}
+                onValueChange={(value) => {
+                  setActiveTab(value);
+                  if (value === 'youtube' && formData.video?.file) {
+                    setFormData(prev => ({
+                      ...prev,
+                      video: { type: 'youtube', file: null, youtubeLink: '' }
+                    }));
+                  }
+                }}
+                className="w-full"
+              >
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="upload" className="border border-black">Upload Video</TabsTrigger>
+                  <TabsTrigger value="youtube" className="border border-black">YouTube Link</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="upload" className="pt-4 space-y-4">
+                  <div className="space-y-2">
+                    <Input
+                      type="file"
+                      accept="video/*"
+                      onChange={handleVideoChange}
+                      disabled={videoUploading}
+                      className="hidden"
+                      id="video-upload"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="flex items-center gap-2"
+                      onClick={() => document.getElementById('video-upload').click()}
+                      disabled={videoUploading}
+                    >
+                      <Upload className="w-4 h-4" />
+                      <span>{videoUploading ? 'Uploading...' : 'Select Video'}</span>
+                    </Button>
+                    {videoUploading && (
+                      <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div
+                          className="bg-blue-600 h-2.5 rounded-full"
+                          style={{ width: `${uploadProgress}%` }}
+                        ></div>
+                      </div>
+                    )}
+                    {formData.video?.file?.url && (
+                      <div className="mt-2">
+                        <video
+                          src={formData.video.file.url}
+                          controls
+                          className="max-w-full h-auto max-h-64 rounded"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-600 mt-2"
+                          onClick={() => {
+                            if (formData.video?.file?.key) {
+                              deleteFromCloudinary(formData.video.file.key, 'video').catch(console.error);
+                            }
+                            setFormData(prev => ({
+                              ...prev,
+                              video: { type: 'upload', file: null, youtubeLink: '' }
+                            }));
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Remove Video
+                        </Button>
+                      </div>
+                    )}
+                    {uploadError && (
+                      <p className="text-sm text-red-600">{uploadError}</p>
+                    )}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="youtube" className="pt-4 space-y-4">
+                  <div className="space-y-2">
+                    <Input
+                      type="text"
+                      placeholder="Enter YouTube video URL"
+                      value={formData.video?.youtubeLink || ''}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        video: {
+                          ...prev.video,
+                          type: 'youtube',
+                          youtubeLink: e.target.value,
+                          file: null
+                        }
+                      }))}
+                    />
+                    {formData.video?.youtubeLink && (
+                      <div className="mt-2">
+                        <div className="aspect-w-16 aspect-h-9">
+                          <iframe
+                            src={`https://www.youtube.com/embed/${extractYoutubeId(formData.video.youtubeLink)}`}
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            className="w-full h-64 rounded"
+                          ></iframe>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </div>
+            {/* Location Select */}
+            <div className="space-y-2">
+              <Label>Location</Label>
+              <Select
+                value={formData.locationType}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, locationType: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select location" />
+                </SelectTrigger>
+                <SelectContent>
+                  {locationType.map((location) => (
+                    <SelectItem key={location._id} value={location.locationType}>
+                      {location.locationType}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Address */}
+            <div className="space-y-2">
+              <Label>Address</Label>
+              <Textarea
+                className="bg-white border border-black rounded-md p-2"
+                name="contactAddress"
+                value={formData.contactAddress || ''}
+                onChange={handleChange}
+                rows={3}
+                placeholder="Enter property address"
+              />
+            </div>
+
+            <hr className="my-6" />
+
+            {/* Broker Info */}
+            <div className="space-y-4">
+              <h3 className="text-xl font-medium underline">Broker Information</h3>
+
+              <div className="space-y-2">
+                <Label>Broker Name</Label>
+                <Input
+                  className="bg-white border border-black rounded-md p-2"
+                  name="brokerName"
+                  value={formData.brokerName}
+                  onChange={handleChange}
+                  placeholder="Enter broker name"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Contact Numbers</Label>
+                {formData.contactNumbers.map((number, index) => (
+                  <div key={index} className="flex gap-2">
+                    <Input
+                      className="bg-white border border-black rounded-md p-2"
+                      type="number"
+                      value={number || ''}  // Changed from formData.contactNumbers to just number
+                      onChange={(e) => handleContactNumberChange(index, e.target.value)}
+                      placeholder={`Contact ${index + 1}`}
+                    />
+                    {formData.contactNumbers.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        onClick={() => {
+                          const newNumbers = formData.contactNumbers.filter((_, i) => i !== index);
+                          setFormData(prev => ({ ...prev, contactNumbers: newNumbers }));
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    )}
+                  </div>
+                ))}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setFormData(prev => ({
+                      ...prev,
+                      contactNumbers: [...prev.contactNumbers, '']
+                    }));
+                  }}
+                  className="mt-2"
+                >
+                  + Add Another Number
+                </Button>
+              </div>
+            </div>
+            <div className="flex items-center gap-5 w-full">
+              <div className="w-full">
+                <Label>Accept Rent Amount</Label>
+                <Input
+                  className="bg-white border border-black rounded-md p-2"
+                  name="rentPrice"
+                  type="number"
+                  value={formData.rentPrice}
+                  onChange={handleChange}
+                  placeholder="Enter Rent Price"
+                />
+              </div>
+              <div className="w-full">
+                <Label>Property Name</Label>
+                <Input
+                  className="bg-white border border-black rounded-md p-2"
+                  name="propertyName"
+                  value={formData.propertyName}
+                  onChange={handleChange}
+                  placeholder="Enter Property Name"
+                />
+              </div>
+            </div>
+
+
+            {/* Property Info */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>Property Highlights</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="p-2 text-md bg-red-500 text-white hover:bg-red-600"
+                  onClick={addHighlight}
+                >
+                  <Plus className="w-4 h-4 mr-2" /> Add Highlight
+                </Button>
+              </div>
+
+              {/* Always show at least one input field */}
+              {(formData.highlights?.length === 0 ? [''] : formData.highlights || []).map((highlight, index, array) => (
+                <div key={index} className="flex gap-2 items-center">
+                  <Input
+                    className="bg-white border border-black rounded-md p-2 flex-1"
+                    value={highlight || ''}
+                    onChange={(e) => handleHighlightChange(index, e.target.value)}
+                    placeholder={`Highlight ${index + 1}`}
+                  />
+                  {/* Show remove button if there's more than one highlight or if it's not the only empty one */}
+                  {(array.length > 1 || (array.length === 1 && array[0] !== '')) && (
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      onClick={() => removeHighlight(index)}
+                      className="flex-shrink-0"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+            <hr className="my-6" />
+
+
+            <div className="flex justify-end space-x-4 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setEditingProperty(null)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={formData.mainImage.loading}>
+                Update Property
+              </Button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 };

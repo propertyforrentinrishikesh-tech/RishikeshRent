@@ -18,7 +18,7 @@ export async function GET(request) {
 
         // Search for properties
         const properties = await PropertyDetails.find(query)
-            .select('propertyName propertyType locationType mainImage galleryImages video contactAddress brokerName contactNumbers rentPrice highlights isActive isTrending')
+            .select('propertyName propertyType locationType mainImage galleryImages video contactAddress brokerName contactNumbers rentPrice highlights isActive isTrending propertyFor propertyNameSlug')
             .sort({ createdAt: -1 })
             .lean();
 

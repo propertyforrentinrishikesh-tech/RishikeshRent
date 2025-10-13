@@ -24,7 +24,7 @@ export default function PropertySection() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
                 {/* Left: Big Card */}
-                <Card className="overflow-hidden shadow-lg h-full">
+                <Card className="overflow-hidden h-full border-0 shadow-none">
                     <div className="relative">
                         <img
                             src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c"

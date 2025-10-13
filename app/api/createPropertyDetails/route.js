@@ -10,7 +10,7 @@ export async function POST(request) {
 
         // Parse the request body
         const formData = await request.json();
-        
+
 
         // Basic validation
         if (!formData.propertyType || !formData.propertyName) {
@@ -50,10 +50,10 @@ export async function POST(request) {
                 message: error.errors[key].message
             }));
             return NextResponse.json(
-                { 
-                    success: false, 
-                    error: 'Validation failed', 
-                    validationErrors 
+                {
+                    success: false,
+                    error: 'Validation failed',
+                    validationErrors
                 },
                 { status: 400 }
             );
@@ -78,10 +78,19 @@ export async function POST(request) {
     }
 }
 
-export async function GET() {
+export async function GET(request) {
     try {
         await connectDB();
-        const properties = await PropertyDetails.find({}).sort({ createdAt: -1 });
+        const { searchParams } = new URL(request.url);
+        const limit = searchParams.get('limit');
+
+        let query = PropertyDetails.find({}).sort({ createdAt: -1 });
+
+        if (limit && !isNaN(limit)) {
+            query = query.limit(parseInt(limit));
+        }
+
+        const properties = await query.exec();
         return NextResponse.json({ success: true, data: properties });
     } catch (error) {
         return NextResponse.json(
