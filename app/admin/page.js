@@ -69,7 +69,7 @@ const Page = () => {
       icon: (
         <div className="h-16 w-16 mb-2 relative">
           <Image
-            src="/Hotel.jpg"
+            src="/Hotel.png"
             alt="Hotel Business"
             fill
             className="object-cover rounded-full"

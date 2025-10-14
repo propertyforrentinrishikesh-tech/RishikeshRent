@@ -95,7 +95,7 @@ export default function QuickViewProductCard({ product, onClose }) {
 
             {/* Thumbnail navigation */}
             {images.length > 1 && (
-              <div className="absolute bottom-0 w-full h-8 md:h-20 flex items-center justify-center bg-white/90">
+              <div className="absolute bottom-0 w-full md:h-20 flex items-center justify-center bg-white/90">
                 <Carousel
                   opts={{
                     align: 'start',

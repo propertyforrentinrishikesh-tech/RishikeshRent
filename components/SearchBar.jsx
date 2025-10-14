@@ -75,7 +75,7 @@ export default function SearchBar() {
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setTimeout(() => setIsFocused(false), 200)}
                     placeholder="Search properties..."
-                    className="px-4 py-1 border border-black rounded-full focus:outline-none focus:ring-2 w-64 text-black"
+                    className="px-4 py-1 rounded-full w-full text-black"
                 />
                 <button
                     type="submit"

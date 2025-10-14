@@ -105,137 +105,150 @@ const Header = () => {
           : "block"
           } border-b font-barlow tracking-wider w-full bg-black text-white`}
       >
-        <TopAdvertisementMarquee />
+        <div className="hidden md:flex items-center">
+
+          <TopAdvertisementMarquee />
+          {/* Login/Cart section on the right */}
+          <div className="flex items-center justify-center gap-3 bg-orange-500 w-[30%] px-5 py-[4px]">
+            <div className="relative" ref={profileMenuRef}>
+              {status === "loading" ? (
+                <Loader2 className="animate-spin text-blue-600" size={25} />
+              ) : isUser ? (
+                <>
+                  {/* Profile Picture Button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsProfileOpen(!isProfileOpen);
+                    }}
+                    className="focus:outline-none border-dashed border-4 border-blue-600 rounded-full"
+                  >
+                    <Image
+                      src={session.user.image || "/user.png"}
+                      alt="Profile"
+                      width={44}
+                      height={44}
+                      className="rounded-full cursor-pointer w-8 h-8"
+                    />
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  {isProfileOpen && (
+                    <div
+                      className="absolute top-10 right-0 mt-2 w-fit text-black bg-white shadow-lg rounded-lg border z-[999]"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <p className="px-4 pt-2 text-sm font-bold text-gray-700">{session.user.name}</p>
+                      <p className="px-4 pb-2 text-sm text-gray-700">{session.user.email}</p>
+                      <div className="h-px bg-gray-200" />
+                      <Link
+                        href="/dashboard?section=orders"
+                        className="flex items-center rounded-lg w-full text-left px-4 py-2 hover:bg-blue-100"
+                        onClick={() => setIsProfileOpen(false)}
+                      >Dashboard
+                      </Link>
+                      <button
+                        className="flex items-center rounded-lg w-full text-red-600 text-left px-4 py-2 hover:bg-blue-100 hover:underline"
+                        onClick={() => signOut()}
+                      >
+                        <LogOutIcon size={15} className="mr-2" /> Sign Out
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="relative" ref={authDropdownRef}>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsAuthDropdownOpen(!isAuthDropdownOpen);
+                    }}
+                    className="flex flex-col items-center py-2 hover:underline"
+                  >
+
+                    <h2 className="text-sm">Sign In / Login</h2>
+                  </button>
+                  <AnimatePresence>
+                    {isAuthDropdownOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute top-12 right-0 w-48 text-black bg-white shadow-lg rounded-lg border z-[9999]"
+                        
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Link
+                          href="/sign-in"
+                          onClick={() => setIsAuthDropdownOpen(false)}
+                          className="block px-4 py-2 hover:bg-blue-100 text-sm"
+                        >
+                          Sign In
+                        </Link>
+                        <Link
+                          href="/sign-up"
+                          onClick={() => setIsAuthDropdownOpen(false)}
+                          className="block px-4 py-2 hover:bg-blue-100 text-sm border-t border-gray-100"
+                        >
+                          Create Account
+                        </Link>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
+            </div>
+            <div className="w-[2px] bg-white h-6"></div>
+            <div className="flex items-center gap-3">
+              <Link href="#"
+                className="text-white text-sm hover:underline"
+              >
+                Property Extranet
+              </Link>
+              <div className="w-[2px] bg-white h-6"></div>
+              <Link
+                href="#"
+                className="text-white text-sm hover:underline">
+                Travel Partner
+              </Link>
+            </div>
+          </div>
+        </div>
         <div className="md:flex hidden items-center justify-between gap-8 border-b py-1 border-gray-400 md:px-8 ">
           <div className="flex flex-row justify-between w-full items-center px-8">
             {/* Logo on the left */}
-            <div className="flex-shrink-0">
+            <div className="flex item-center gap-5">
               <Link href={"/"}>
                 <img className="w-48 object-contain drop-shadow-xl" src="/HeaderLogo.png" alt="Rishikesh Handmade" />
               </Link>
-            </div>
-            <div className="flex-shrink-0 flex item-center gap-2">
-              <img src="/Hotel.jpg" className="w-12 object-contain" alt="" />
-              <div className="flex flex-col items-center">
-                <p className="text-yellow-400 text-md">List Your Property</p>
-                <p className="text-white text-md">Grow your Business</p>
+
+                <div className="w-[2px] bg-white h-18"></div>
+              <div className="flex item-center gap-2 justify-center">
+                <Link href="/" 
+                className="flex items-center gap-2"
+                >
+                <div>
+                  <img src="/Hotel.png" className="w-12 object-contain" alt="" />
+                </div>
+                <div className="flex flex-col items-center">
+                  <p className="text-yellow-400 text-sm">List Your Property</p>
+                  <p className="text-white text-sm">Grow your Business</p>
+                </div>
+                </Link>
               </div>
             </div>
-            <div>
+            <div className="w-[40%]">
               <SearchBar />
             </div>
-            {/* Login/Cart section on the right */}
-            <div className="flex items-center gap-3">
-              <div className="relative" ref={profileMenuRef}>
-                {status === "loading" ? (
-                  <Loader2 className="animate-spin text-blue-600" size={36} />
-                ) : isUser ? (
-                  <>
-                    {/* Profile Picture Button */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setIsProfileOpen(!isProfileOpen);
-                      }}
-                      className="focus:outline-none border-dashed border-4 border-blue-600 rounded-full"
-                    >
-                      <Image
-                        src={session.user.image || "/user.png"}
-                        alt="Profile"
-                        width={44}
-                        height={44}
-                        className="rounded-full cursor-pointer"
-                      />
-                    </button>
 
-                    {/* Dropdown Menu */}
-                    {isProfileOpen && (
-                      <div
-                        className="absolute top-14 right-0 mt-2 w-fit text-black bg-white shadow-lg rounded-lg border z-50"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <p className="px-4 pt-2 text-sm font-bold text-gray-700">{session.user.name}</p>
-                        <p className="px-4 pb-2 text-sm text-gray-700">{session.user.email}</p>
-                        <div className="h-px bg-gray-200" />
-                        <Link
-                          href="/dashboard?section=orders"
-                          className="flex items-center rounded-lg w-full text-left px-4 py-2 hover:bg-blue-100"
-                          onClick={() => setIsProfileOpen(false)}
-                        >Dashboard
-                        </Link>
-                        <button
-                          className="flex items-center rounded-lg w-full text-red-600 text-left px-4 py-2 hover:bg-blue-100"
-                          onClick={() => signOut()}
-                        >
-                          <LogOutIcon size={20} className="mr-2" /> Sign Out
-                        </button>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="relative" ref={authDropdownRef}>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setIsAuthDropdownOpen(!isAuthDropdownOpen);
-                      }}
-                      className="flex flex-col items-center py-2"
-                    >
-
-                      <h2 className="text-sm">Sign In / Login</h2>
-                    </button>
-                    <AnimatePresence>
-                      {isAuthDropdownOpen && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: 10 }}
-                          transition={{ duration: 0.2 }}
-                          className="absolute top-12 right-0 w-48 text-black bg-white shadow-lg rounded-lg border z-[9999]"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <Link
-                            href="/sign-in"
-                            onClick={() => setIsAuthDropdownOpen(false)}
-                            className="block px-4 py-2 hover:bg-blue-100 text-sm"
-                          >
-                            Sign In
-                          </Link>
-                          <Link
-                            href="/sign-up"
-                            onClick={() => setIsAuthDropdownOpen(false)}
-                            className="block px-4 py-2 hover:bg-blue-100 text-sm border-t border-gray-100"
-                          >
-                            Create Account
-                          </Link>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                )}
-              </div>
-              <div className="w-[2px] bg-white h-6"></div>
-              <div className="flex items-center gap-2">
-                <Link href="#"
-                  className="text-white texts-sm"
-                >
-                  Property Extranet
-                </Link>
-                <div className="w-[2px] bg-white h-6"></div>
-                <Link
-                  href="#"
-                  className="text-white text-sm">
-                  Travel Partner
-                </Link>
-              </div>
-            </div>
             <div className="flex flex-col items-center bg-black text-white py-2 rounded-md w-fit px-4">
               {/* WhatsApp Logo + Main Number */}
               <div className="flex items-center space-x-2">
                 <img
                   src="/whatapp.png"
                   alt="WhatsApp"
-                  className="w-12 h-8"
+                  className="w-6 h-6"
                 />
                 <span className="text-green-500 text-xl font-bold">01169266090</span>
               </div>

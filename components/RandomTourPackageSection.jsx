@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { CalendarClock, MapPin, Heart, Bookmark, ArrowRight, Globe } from "lucide-react";
+import { CalendarClock, MapPin, Heart, Bookmark, ArrowRight, Globe, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Carousel,
@@ -327,11 +327,11 @@ const RandomTourPackageSection = () => {
                       <div className="flex flex-col items-start px-1 pt-4 pb-2 mt-0">
                         <Link
                           href={`/property/${item.propertyNameSlug}`}
-                          className="font-bold hover:underline text-md xl:text-xl text-gray-900 leading-tight truncate cursor-pointer break-words whitespace-normal"
+                          className="font-bold hover:underline text-md text-gray-900 leading-tight truncate cursor-pointer break-words whitespace-normal"
                         >
                           {item?.propertyName}
                         </Link>
-                        <p className="text-black text-xl font-semibold">{item?.locationType}</p>
+                        <p className="text-black text-md font-semibold">{item?.locationType}</p>
                       </div>
                     </div>
                   </CarouselItem>
@@ -830,7 +830,7 @@ const RandomTourPackageSection = () => {
                 onClick={() => setQuickViewProduct(null)}
                 aria-label="Close quick view"
               >
-                &times;
+             <X/>
               </button>
               <QuickViewProductCard product={quickViewProduct} onClose={() => setQuickViewProduct(null)} />
             </div>
