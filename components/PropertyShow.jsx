@@ -22,7 +22,7 @@ export default function PropertySection() {
                 making your rental experience in Rishikesh smooth, safe, and reliable.
             </p>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:p-6">
                 {/* Left: Big Card */}
                 <Card className="overflow-hidden h-full border-0 shadow-none">
                     <div className="relative">

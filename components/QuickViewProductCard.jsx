@@ -74,7 +74,7 @@ export default function QuickViewProductCard({ product, onClose }) {
             >
               <CarouselContent>
                 {images.map((img, idx) => (
-                  <CarouselItem key={idx} className="relative h-[100px] md:h-[450px]">
+                  <CarouselItem key={idx} className="relative h-[500px] md:h-[450px]">
                     <Image
                       src={img}
                       alt={`Property image ${idx + 1}`}
@@ -95,7 +95,7 @@ export default function QuickViewProductCard({ product, onClose }) {
 
             {/* Thumbnail navigation */}
             {images.length > 1 && (
-              <div className="absolute bottom-0 w-full h-20 flex items-center justify-center bg-white/90">
+              <div className="absolute bottom-0 w-full h-8 md:h-20 flex items-center justify-center bg-white/90">
                 <Carousel
                   opts={{
                     align: 'start',

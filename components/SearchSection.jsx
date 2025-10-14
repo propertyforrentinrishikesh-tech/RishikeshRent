@@ -64,7 +64,7 @@ const SearchSection = () => {
     );
   };
 
-  console.log(trendingSearches)
+  // console.log(trendingSearches)
   // Property types for the second dropdown
   const propertyForOptions = [
     { value: 'residential', label: 'Residential' },
@@ -211,7 +211,7 @@ const SearchSection = () => {
   }, []);
 
   return (
-    <section className="p-5 bg-gray-100 w-full md:w-[80%] mx-auto my-10 rounded-lg shadow-md border border-gray-400">
+    <section className="md:p-5 bg-gray-100 w-full md:w-[80%] mx-auto my-10 rounded-lg shadow-md border border-gray-400">
       <div className="container mx-auto px-4">
         {/* Tabs */}
         <Tabs
@@ -219,7 +219,7 @@ const SearchSection = () => {
           className="w-full"
           onValueChange={setActiveTab}
         >
-          <TabsList className="grid w-full grid-cols-3 mb-8 bg-white rounded-lg shadow-sm">
+          <TabsList className="grid w-full grid-cols-1 gap-2 md:grid-cols-3 mb-8 bg-white rounded-lg shadow-sm">
             <TabsTrigger
               value="property"
               className="flex items-center gap-2 py-4 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 border border-gray-400"
@@ -236,7 +236,7 @@ const SearchSection = () => {
             </TabsTrigger>
             <TabsTrigger
               value="homestay"
-              className="flex items-center gap-2 py-4 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 border border-gray-400"
+              className="flex items-center gap-2 py-4 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 border border-gray-400 "
             >
               <Home className="h-4 w-4" />
               Tours & Attractions

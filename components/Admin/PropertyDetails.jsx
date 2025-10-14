@@ -336,7 +336,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
       }
 
       const data = await response.json();
-      console.log(data)
+      // console.log(data)
       setSearchResults(data.data || []);
       if (data.data.length === 0) {
         toast('No properties found matching your search criteria', {
@@ -506,8 +506,8 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
-  console.log(selectedProperty)
-  console.log(editingProperty)
+  // console.log(selectedProperty)
+  // console.log(editingProperty)
   return (
     <div className="container mx-auto p-6">
       <div className="bg-white rounded-lg shadow p-6 mb-6 border border-black">
