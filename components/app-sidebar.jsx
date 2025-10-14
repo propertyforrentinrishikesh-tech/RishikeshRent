@@ -45,9 +45,9 @@ const data = {
     },
     { divider: true },
     {
-    name: "Properties Dashboard",
-    url: "/admin/properties_dashboard",
-    icon: Plus,
+      name: "Properties Dashboard",
+      url: "/admin/properties_dashboard",
+      icon: Plus,
     },
     { divider: true },
     {
@@ -77,18 +77,6 @@ const data = {
     {
       name: "Add Direct Product",
       url: "/admin/add_direct_product",
-      icon: Plus,
-    },
-    { divider: true },
-
-    {
-      name: "Add Brand Name",
-      url: "/admin/add_brand_name",
-      icon: Plus,
-    },
-    {
-      name: "Link Product To Brand Category",
-      url: "/admin/link_product_to_brand",
       icon: Plus,
     },
     { divider: true },
@@ -139,6 +127,26 @@ const data = {
     {
       name: "PopUp Banner",
       url: "/admin/popup_banner",
+      icon: Image
+    },
+    {
+      name: "Consultancy Banner",
+      url: "/admin/consultancy_banner",
+      icon: Image
+    },
+    {
+      name: "Banner Section 1st",
+      url: "/admin/banner_section_1st",
+      icon: Image
+    },
+    {
+      name: "Banner Section 2nd",
+      url: "/admin/banner_section_2nd",
+      icon: Image
+    },
+    {
+      name: "Banner Section 3rd",
+      url: "/admin/banner_section_3rd",
       icon: Image
     },
 
