@@ -84,7 +84,7 @@ export default function TopAdvertisementMarquee() {
         }
 
         .animate-marquee {
-          animation: marquee 40s linear infinite;
+          animation: marquee 10s linear infinite;
           display: flex;
           align-items: center;
           min-width: max-content;
@@ -93,7 +93,7 @@ export default function TopAdvertisementMarquee() {
 
         @media (min-width: 768px) {
           .animate-marquee {
-            animation-duration: 60s;
+            animation-duration: 10s;
             gap: 2rem;
           }
         }

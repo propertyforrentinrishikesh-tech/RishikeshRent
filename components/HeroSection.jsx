@@ -84,7 +84,9 @@ const HeroSection = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-
+if(banners.length === 0){
+  return null;
+}
   if (isLoading) {
     return (
       <section className="relative h-[100px] md:h-[430px] w-full overflow-hidden z-[160]">

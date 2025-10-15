@@ -163,10 +163,10 @@ const Header = () => {
                       e.stopPropagation();
                       setIsAuthDropdownOpen(!isAuthDropdownOpen);
                     }}
-                    className="flex flex-col items-center py-2 hover:underline"
+                    className="flex flex-col items-center py-2 hover:underline hover:scale-105 transition-all duration-300"
                   >
 
-                    <h2 className="text-sm">Sign In / Login</h2>
+                    <h2 className="text-sm">Login</h2>
                   </button>
                   <AnimatePresence>
                     {isAuthDropdownOpen && (
@@ -202,14 +202,14 @@ const Header = () => {
             <div className="w-[2px] bg-white h-6"></div>
             <div className="flex items-center gap-3">
               <Link href="#"
-                className="text-white text-sm hover:underline"
+                className="text-white text-sm hover:underline  hover:scale-105 transition-all duration-300"
               >
                 Property Extranet
               </Link>
               <div className="w-[2px] bg-white h-6"></div>
               <Link
                 href="#"
-                className="text-white text-sm hover:underline">
+                className="text-white text-sm hover:underline hover:scale-105 transition-all duration-300">
                 Travel Partner
               </Link>
             </div>

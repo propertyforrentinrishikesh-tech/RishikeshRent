@@ -324,14 +324,18 @@ const RandomTourPackageSection = () => {
                         </div>
                       </div>
                       {/* Name and Price Section */}
-                      <div className="flex flex-col items-start px-1 pt-4 pb-2 mt-0">
+                      <div className="flex flex-col items-start px-1 pt-4 pb-2 mt-0 gap-2">
                         <Link
                           href={`/property/${item.propertyNameSlug}`}
                           className="font-bold hover:underline text-md text-gray-900 leading-tight truncate cursor-pointer break-words whitespace-normal"
                         >
                           {item?.propertyName}
                         </Link>
-                        <p className="text-black text-md font-semibold">{item?.locationType}</p>
+                        <div className="flex items-center gap-2 justify-between w-full">
+
+                          <p className="text-black text-md font-semibold">{item?.locationType}</p>
+                          <Link href={`/property/${item.propertyNameSlug}`} className="text-md font-semibold px-4 py-1 hover:bg-gray-800 hover:text-white bg-black rounded-full text-white">View Details </Link>
+                        </div>
                       </div>
                     </div>
                   </CarouselItem>
@@ -830,7 +834,7 @@ const RandomTourPackageSection = () => {
                 onClick={() => setQuickViewProduct(null)}
                 aria-label="Close quick view"
               >
-             <X/>
+                <X />
               </button>
               <QuickViewProductCard product={quickViewProduct} onClose={() => setQuickViewProduct(null)} />
             </div>

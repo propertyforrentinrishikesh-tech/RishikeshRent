@@ -187,7 +187,7 @@ export default function QuickViewProductCard({ product, onClose }) {
                 </div>
               )}
 
-              {product.contactNumbers?.map((number, idx) => (
+              {/* {product.contactNumbers?.map((number, idx) => (
                 <a
                   key={idx}
                   href={`tel:${number}`}
@@ -196,7 +196,7 @@ export default function QuickViewProductCard({ product, onClose }) {
                   <span className="text-lg">📞</span>
                   <span>{number}</span>
                 </a>
-              ))}
+              ))} */}
 
               <button className="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
                 Contact Owner
