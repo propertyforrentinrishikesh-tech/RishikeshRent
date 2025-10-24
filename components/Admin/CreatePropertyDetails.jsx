@@ -252,13 +252,13 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
         try {
             const response = await fetch('/api/cloudinary', {
                 method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
                     publicId,
                     resourceType
-            })
+                })
             });
 
             const data = await response.json();
@@ -278,7 +278,7 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
     const handleVideoChange = async (e, retryCount = 0) => {
         const MAX_RETRIES = 3;
         const RETRY_DELAY = 2000; // 2 seconds
-        
+
         // Make sure we have files
         if (!e?.target?.files?.[0]) {
             console.error('No file selected or invalid event');
@@ -331,7 +331,7 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
             }
 
             const data = await response.json();
-            
+
             // If there was a previous video, delete it from Cloudinary
             if (formData.video?.file?.key) {
                 try {
@@ -358,18 +358,18 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
             }));
             setActiveTab('upload'); // Ensure we're on the upload tab
             toast.success('Video uploaded successfully!');
-            
+
         } catch (error) {
             console.error('Video upload error:', error);
-            
+
             // Handle different types of errors
             if (error.name === 'AbortError') {
                 toast.error('Video upload timed out. Please try again with a smaller file.');
             } else if (error.message.includes('ECONNRESET') || error.message.includes('network') || error.message.includes('fetch')) {
                 // Network-related errors - attempt retry
                 if (retryCount < MAX_RETRIES) {
-                    toast.error(`Upload failed due to network error. Retrying in ${RETRY_DELAY/1000} seconds... (Attempt ${retryCount + 1}/${MAX_RETRIES})`);
-                    
+                    toast.error(`Upload failed due to network error. Retrying in ${RETRY_DELAY / 1000} seconds... (Attempt ${retryCount + 1}/${MAX_RETRIES})`);
+
                     setTimeout(() => {
                         // Reset the file input and retry
                         const newEvent = {
@@ -379,7 +379,7 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                         };
                         handleVideoChange(newEvent, retryCount + 1);
                     }, RETRY_DELAY * (retryCount + 1)); // Exponential backoff
-                    
+
                     return; // Don't reset loading state yet
                 } else {
                     toast.error(`Video upload failed after ${MAX_RETRIES} attempts. Please check your internet connection and try again.`);
@@ -519,7 +519,15 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
         const newHighlights = formData.highlights.filter((_, i) => i !== index);
         setFormData(prev => ({ ...prev, highlights: newHighlights }));
     };
-
+    const slugify = (text) => {
+        return text
+            .toString()
+            .toLowerCase()
+            .trim()
+            .replace(/\s+/g, '-')
+            .replace(/[^a-z0-9\-]/g, '')
+            .replace(/\-+/g, '-');
+    }
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -551,6 +559,7 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
             // Prepare the data to be submitted
             const formDataToSubmit = {
                 ...formData,
+                propertyNameSlug: slugify(formData.propertyName),
                 // Ensure we're using the exact property type from the selected type
                 propertyType: selectedPropertyType.propertyType,
                 locationType: selectedLocationType?.locationType || formData.locationType,
@@ -558,7 +567,7 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                     .map(num => num ? num.trim() : '')
                     .filter(num => num !== ''),
                 video: Object.keys(videoData).length > 0 ? videoData : undefined
-            };    
+            };
             // Validate at least one contact number
             if (!formData.contactNumbers || formData.contactNumbers.length === 0) {
                 throw new Error('At least one contact number is required');
@@ -595,7 +604,7 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
             if (!response.ok) {
                 throw new Error(data.error || 'Failed to save property details');
             }
-            
+
             // Show success message
             toast.success(editingProperty ? 'Property updated successfully!' : 'Property created successfully!');
 
@@ -627,7 +636,7 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
             isTrending: false,
             highlights: []
         });
-        
+
         // Reset all upload states
         setVideoUploading(false);
         setUploadProgress(0);
@@ -635,7 +644,7 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
         setUploadError(null);
         setActiveTab('upload'); // Reset to upload tab
         setEditingProperty(null);
-        
+
         // Clear file inputs
         if (mainImageRef.current) {
             mainImageRef.current.value = '';
@@ -651,7 +660,7 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
     const handleEdit = (property) => {
         // Transform video data from database format to form format
         let videoData = { type: "upload", file: null, youtubeLink: "" };
-        
+
         if (property.video) {
             if (property.video.type === 'upload' && property.video.url) {
                 // Database stores video as { type: 'upload', url: '...', key: '...' }
@@ -690,7 +699,7 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
             highlights: property.highlights?.length ? [...property.highlights] : [""],
             propertyFor: property.propertyFor || "",
         });
-        
+
         // Set the correct active tab based on video type
         if (videoData.type === 'youtube' && videoData.youtubeLink) {
             setActiveTab('youtube');
@@ -699,7 +708,7 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
         } else {
             setActiveTab('upload'); // Default to upload tab
         }
-        
+
         setEditingProperty(property);
         // Scroll to form
         document.getElementById('property-form')?.scrollIntoView({ behavior: 'smooth' });
@@ -713,7 +722,7 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
 
     const confirmDelete = async () => {
         if (!propertyToDelete) return;
-        
+
         try {
             const response = await fetch(`/api/createPropertyDetails?id=${propertyToDelete._id}`, {
                 method: 'DELETE',
@@ -737,14 +746,17 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
         }
     };
 
+
+
+
     return (
         <div className="container mx-auto p-2">
             <h1 className="text-2xl font-bold mb-6">Add New Property</h1>
 
             <form onSubmit={handleSubmit} id="property-form" className="space-y-6 border border-black p-4 rounded-md shadow-md  bg-gray-100">
-                  <div className="space-y-2">
+                <div className="space-y-2">
                     <Label>Property Be Like</Label>
-                    <Select 
+                    <Select
                         value={formData.propertyFor}
                         onValueChange={(value) => setFormData(prev => ({ ...prev, propertyFor: value }))}
                     >
@@ -936,7 +948,7 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                                     <div className="flex items-center gap-2">
                                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
                                         <div className="text-blue-600 text-sm">
-                                            {retryAttempt > 0 
+                                            {retryAttempt > 0
                                                 ? `Retry attempt ${retryAttempt} of 3...`
                                                 : 'Uploading video...'}
                                         </div>
@@ -990,7 +1002,7 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                                     }));
                                     setActiveTab('youtube'); // Ensure we're on the youtube tab
                                 }}
-                                
+
                             />
                             {formData.video?.youtubeLink && (
                                 <div className="mt-2">
@@ -1067,7 +1079,7 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                                     className="bg-white border border-black rounded-md p-2"
                                     type="number"
                                     value={number || ''}  // Changed from formData.contactNumbers to just number
-                                    onChange={(e) => handleContactNumberChange(index, e.target.value)}                                   
+                                    onChange={(e) => handleContactNumberChange(index, e.target.value)}
                                     placeholder={`Contact ${index + 1}`}
                                 />
                                 {formData.contactNumbers.length > 1 && (
@@ -1164,7 +1176,7 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                     ))}
                 </div>
                 <hr className="my-6" />
-              
+
 
                 <div className="flex justify-start gap-4">
                     <Button
@@ -1233,7 +1245,7 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                                 <TableCell className="border border-black text-center">₹{property.rentPrice?.toLocaleString()}</TableCell>
                                 <TableCell className="border border-black text-center">
                                     <div className="flex justify-center">
-                                        <Switch 
+                                        <Switch
                                             checked={property.isActive}
                                             onCheckedChange={() => toggleAvailable(property)}
                                             className="data-[state=checked]:bg-blue-600"
@@ -1242,7 +1254,7 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                                 </TableCell>
                                 <TableCell className="border border-black text-center">
                                     <div className="flex justify-center">
-                                        <Switch 
+                                        <Switch
                                             checked={property.isTrending}
                                             onCheckedChange={() => toggleTrending(property)}
                                             className="data-[state=checked]:bg-green-600"
@@ -1274,7 +1286,7 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                     )}
                 </TableBody>
             </Table>
-            
+
             {/* Delete Confirmation Dialog */}
             <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
                 <DialogContent className="max-w-md">

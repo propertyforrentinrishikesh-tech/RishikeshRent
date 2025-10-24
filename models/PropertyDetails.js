@@ -66,31 +66,7 @@ propertyDetailsSchema.index({
     },
     name: 'property_search_index'
 });
-// Add pre-save middleware to handle slug generation
-propertyDetailsSchema.pre('save', function(next) {
-    if (this.isModified('propertyName') || !this.propertyNameSlug) {
-        // Generate slug from propertyName if it's modified or slug doesn't exist
-        const baseSlug = slugify(this.propertyName);
-        this.propertyNameSlug = baseSlug;
-        
-        // Make slug unique if needed
-        const model = this.constructor;
-        const slugRegEx = new RegExp(`^(${baseSlug})((-[0-9]*$)?)$`, 'i');
-        
-        model.find({ propertyNameSlug: slugRegEx })
-            .then((properties) => {
-                if (properties.length) {
-                    // If slug exists, add a number to make it unique
-                    const lastSlug = properties[properties.length - 1].propertyNameSlug;
-                    const lastNumber = parseInt(lastSlug.split('-').pop(), 10) || 0;
-                    this.propertyNameSlug = `${baseSlug}-${lastNumber + 1}`;
-                }
-                next();
-            });
-    } else {
-        next();
-    }
-});
+
 
 const PropertyDetails = mongoose.models.PropertyDetails || mongoose.model('PropertyDetails', propertyDetailsSchema);
 
