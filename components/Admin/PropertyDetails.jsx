@@ -15,8 +15,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, Trash2, Edit, X, Plus, Search, Eye } from 'lucide-react';
 import Image from 'next/image';
+import { Switch } from "@/components/ui/switch";
+
 const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [filters, setFilters] = useState({
@@ -506,8 +507,86 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
-  // console.log(selectedProperty)
-  // console.log(editingProperty)
+  // Update property status
+  const updatePropertyStatus = async (id, updates) => {
+    try {
+      // console.log('Sending update request with:', { id, updates });
+      const response = await fetch(`/api/createPropertyDetails?id=${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updates),
+      });
+
+      const responseData = await response.json();
+      // console.log('Update response:', { status: response.status, data: responseData });
+
+      if (!response.ok) {
+        throw new Error(responseData.error || 'Failed to update property');
+      }
+
+      if (responseData.success) {
+        // toast.success('Property updated successfully');
+        // fetchPropertyDetails(); // Refresh the list
+        return responseData.data; // Return the updated property
+      } else {
+        throw new Error(responseData.error || 'Failed to update property');
+      }
+    } catch (error) {
+      console.error('Error updating property:', { error, message: error.message });
+      toast.error(error.message || 'Failed to update property');
+      throw error; // Re-throw to be caught by the calling function
+    }
+  };
+  // Toggle isAvailable status
+  const toggleAvailable = async (property) => {
+    const newStatus = !property.isActive;
+    // Optimistically update the UI
+    const updatedProperties = searchResults.map(p => 
+      p._id === property._id ? { ...p, isActive: newStatus } : p
+    );
+    setSearchResults(updatedProperties);
+    
+    try {
+      await updatePropertyStatus(property._id, {
+        isActive: newStatus
+      });
+      toast.success(`Property marked as ${newStatus ? 'active' : 'inactive'}`);
+    } catch (error) {
+      // Revert on error
+      const revertedProperties = searchResults.map(p => 
+        p._id === property._id ? { ...p, isActive: property.isActive } : p
+      );
+      setSearchResults(revertedProperties);
+      console.error('Error toggling availability:', error);
+      toast.error('Failed to update property status');
+    }
+  };
+  // Toggle isTrending status
+  const toggleTrending = async (property) => {
+    const newStatus = !property.isTrending;
+    // Optimistically update the UI
+    const updatedProperties = searchResults.map(p => 
+      p._id === property._id ? { ...p, isTrending: newStatus } : p
+    );
+    setSearchResults(updatedProperties);
+    
+    try {
+      await updatePropertyStatus(property._id, {
+        isTrending: newStatus
+      });
+      toast.success(`Property ${newStatus ? 'added to' : 'removed from'} trending`);
+    } catch (error) {
+      // Revert on error
+      const revertedProperties = searchResults.map(p => 
+        p._id === property._id ? { ...p, isTrending: property.isTrending } : p
+      );
+      setSearchResults(revertedProperties);
+      console.error('Error toggling trending status:', error);
+      toast.error('Failed to update trending status');
+    }
+  };
   return (
     <div className="container mx-auto p-6">
       <div className="bg-white rounded-lg shadow p-6 mb-6 border border-black">
@@ -573,6 +652,8 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                   <TableHead className="border border-black text-black">No</TableHead>
                   <TableHead className="border border-black text-black">Property Name</TableHead>
                   <TableHead className="border border-black text-black">Contact Number</TableHead>
+                  <TableHead className="border border-black text-black">is Avaliable</TableHead>
+                  <TableHead className="border border-black text-black">is Trending</TableHead>
                   <TableHead className="border border-black text-black">View</TableHead>
                   <TableHead className="border border-black text-black text-center">Actions</TableHead>
                 </TableRow>
@@ -589,6 +670,24 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                       </TableCell>
                       <TableCell className="border border-black">
                         {property.contactNumbers?.join(', ') || 'N/A'}
+                      </TableCell>
+                      <TableCell className="border border-black text-center">
+                        <div className="flex justify-center">
+                          <Switch
+                            checked={property.isActive}
+                            onCheckedChange={() => toggleAvailable(property)}
+                            className="data-[state=checked]:bg-blue-600"
+                          />
+                        </div>
+                      </TableCell>
+                      <TableCell className="border border-black text-center">
+                        <div className="flex justify-center">
+                          <Switch
+                            checked={property.isTrending}
+                            onCheckedChange={() => toggleTrending(property)}
+                            className="data-[state=checked]:bg-green-600"
+                          />
+                        </div>
                       </TableCell>
                       <TableCell className="border border-black mx-auto">
                         <Button
