@@ -77,7 +77,7 @@ const Page = () => {
         </div>
       ),
       description: "Manage hotel listings",
-      link: "#",
+      link: "/admin/hotel_business_dashboard",
       count: 18,
       bgColor: "bg-blue-500",
       hoverBgColor: "hover:bg-blue-600"
@@ -96,6 +96,7 @@ const Page = () => {
       ),
       description: "Manage pilgrimage services",
       link: "#",
+      // link: "/admin/pilgrimage_dashboard",
       count: 27,
       bgColor: "bg-sky-500",
       hoverBgColor: "hover:bg-sky-600"
@@ -114,6 +115,7 @@ const Page = () => {
       ),
       description: "Manage food services",
       link: "#",
+      // link: "/admin/food_chain_dashboard",
       count: 15,
       bgColor: "bg-purple-500",
       hoverBgColor: "hover:bg-purple-600"
@@ -144,7 +146,7 @@ const Page = () => {
 
       {/* Navigation Cards */}
       <div className="px-4 py-8">
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6 px-5">
           {menuItems.map((item, index) => (
             <Card
               key={index}
