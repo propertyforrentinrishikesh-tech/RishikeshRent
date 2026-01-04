@@ -12,6 +12,34 @@ const PropertyRegistration = () => {
     const [customFacilities, setCustomFacilities] = useState([])
     const [newFacilityName, setNewFacilityName] = useState('')
     const [isSavingFacility, setIsSavingFacility] = useState(false)
+    const [isBreakfastModalOpen, setIsBreakfastModalOpen] = useState(false)
+    const [customBreakfastTypes, setCustomBreakfastTypes] = useState([])
+    const [newBreakfastType, setNewBreakfastType] = useState('')
+    const [isSavingBreakfast, setIsSavingBreakfast] = useState(false)
+
+    // Room Amenities States
+    const [isBathroomModalOpen, setIsBathroomModalOpen] = useState(false)
+    const [customBathroomItems, setCustomBathroomItems] = useState([])
+    const [newBathroomItem, setNewBathroomItem] = useState('')
+    const [isSavingBathroom, setIsSavingBathroom] = useState(false)
+
+    const [isGeneralAmenityModalOpen, setIsGeneralAmenityModalOpen] = useState(false)
+    const [customGeneralAmenities, setCustomGeneralAmenities] = useState([])
+    const [newGeneralAmenity, setNewGeneralAmenity] = useState('')
+    const [isSavingGeneralAmenity, setIsSavingGeneralAmenity] = useState(false)
+
+    const [isOutdoorModalOpen, setIsOutdoorModalOpen] = useState(false)
+    const [customOutdoorItems, setCustomOutdoorItems] = useState([])
+    const [newOutdoorItem, setNewOutdoorItem] = useState('')
+    const [isSavingOutdoor, setIsSavingOutdoor] = useState(false)
+
+    const [isFoodDrinkModalOpen, setIsFoodDrinkModalOpen] = useState(false)
+    const [customFoodDrinkItems, setCustomFoodDrinkItems] = useState([])
+    const [newFoodDrinkItem, setNewFoodDrinkItem] = useState('')
+    const [isSavingFoodDrink, setIsSavingFoodDrink] = useState(false)
+
+    // Bed types visibility
+    const [showAllBeds, setShowAllBeds] = useState(false)
 
     const { register, handleSubmit, watch, control, setValue, formState: { errors } } = useForm({
         defaultValues: {
@@ -57,20 +85,56 @@ const PropertyRegistration = () => {
     const parkingAvailable = watch('parkingAvailable')
     const allowPets = watch('allowPets')
 
-    // Fetch custom facilities on component mount
+    // Fetch custom facilities and breakfast types on component mount
     useEffect(() => {
-        const fetchCustomFacilities = async () => {
+        const fetchCustomData = async () => {
             try {
-                const response = await fetch('/api/customFacilities')
-                if (response.ok) {
-                    const data = await response.json()
-                    setCustomFacilities(data.facilities || [])
+                // Fetch custom facilities
+                const facilitiesResponse = await fetch('/api/customFacilities')
+                if (facilitiesResponse.ok) {
+                    const facilitiesData = await facilitiesResponse.json()
+                    setCustomFacilities(facilitiesData.facilities || [])
+                }
+
+                // Fetch custom breakfast types
+                const breakfastResponse = await fetch('/api/customBreakfastTypes')
+                if (breakfastResponse.ok) {
+                    const breakfastData = await breakfastResponse.json()
+                    setCustomBreakfastTypes(breakfastData.breakfastTypes || [])
+                }
+
+                // Fetch custom bathroom items
+                const bathroomResponse = await fetch('/api/customRoomAmenities/bathroom')
+                if (bathroomResponse.ok) {
+                    const bathroomData = await bathroomResponse.json()
+                    setCustomBathroomItems(bathroomData.items || [])
+                }
+
+                // Fetch custom general amenities
+                const generalResponse = await fetch('/api/customRoomAmenities/general')
+                if (generalResponse.ok) {
+                    const generalData = await generalResponse.json()
+                    setCustomGeneralAmenities(generalData.items || [])
+                }
+
+                // Fetch custom outdoor items
+                const outdoorResponse = await fetch('/api/customRoomAmenities/outdoor')
+                if (outdoorResponse.ok) {
+                    const outdoorData = await outdoorResponse.json()
+                    setCustomOutdoorItems(outdoorData.items || [])
+                }
+
+                // Fetch custom food/drink items
+                const foodDrinkResponse = await fetch('/api/customRoomAmenities/fooddrink')
+                if (foodDrinkResponse.ok) {
+                    const foodDrinkData = await foodDrinkResponse.json()
+                    setCustomFoodDrinkItems(foodDrinkData.items || [])
                 }
             } catch (error) {
-                console.error('Error fetching custom facilities:', error)
+                console.error('Error fetching custom data:', error)
             }
         }
-        fetchCustomFacilities()
+        fetchCustomData()
     }, [])
 
     const propertyCategories = [
@@ -161,32 +225,18 @@ const PropertyRegistration = () => {
 
 
     const roomTypesList = ['Studio', 'Suite', 'Twin/Double', 'Triple/Quad', 'Family', 'Dorm', 'Shared Room', 'Bunk Room']
-
-    const cities = ['Rishikesh', 'Haridwar', 'Dehradun', 'Mussoorie', 'Nainital', 'Delhi', 'Mumbai', 'Bangalore', 'Other']
     const ownershipTypes = ['Primary Property Ownership', 'Freehold', 'Leasehold', 'Strata Title', 'Partnership', 'Fractional Ownership', 'Joint Ownership (Co-ownership)']
-
-    const facilities = [
-        { id: 'restaurant', label: 'Restaurant' }, { id: 'bar', label: 'Bar' }, { id: 'free-wifi', label: 'Free Wi-Fi' },
-        { id: 'room-service', label: 'Room service' }, { id: 'swimming-pool', label: 'Swimming pool' }, { id: 'parking', label: 'Parking' },
-        { id: 'fitness-center', label: 'Fitness center' }, { id: 'spa', label: 'Spa' }, { id: 'hot-tub', label: 'Hot tub/Jacuzzi' },
-        { id: 'sauna', label: 'Sauna' }, { id: 'air-conditioning', label: 'Air conditioning' }, { id: 'water-park', label: 'Water park' },
-        { id: 'ev-charging', label: 'Electric vehicle charging station' }, { id: 'beach', label: 'Beach' },
-        { id: 'terrace', label: 'Terrace' }, { id: 'garden', label: 'Garden' }, { id: 'non-smoking', label: 'Non-smoking rooms' },
-        { id: 'airport-shuttle', label: 'Airport shuttle' }, { id: 'family-rooms', label: 'Family rooms' }
-    ]
-
-    const breakfastTypes = [
-        'À la carte', 'American', 'Asian', 'Breakfast to go', 'Buffet', 'Continental',
-        'Full English/Irish', 'Gluten-free', 'Halal', 'Italian', 'Kosher', 'Vegan', 'Vegetarian'
-    ]
     const languages = [
-        'English', 'Hindi', 'Arabic', 'Bulgarian', 'Catalan', 'Chinese', 'Croatian', 'Czech',
-        'Danish', 'Dutch', 'Finnish', 'French', 'German', 'Greek', 'Hebrew', 'Hungarian',
-        'Indonesian', 'Italian', 'Japanese', 'Korean', 'Malay', 'Norwegian', 'Polish',
-        'Portuguese', 'Romanian', 'Russian', 'Spanish', 'Swedish', 'Thai', 'Turkish', 'Ukrainian', 'Vietnamese'
-    ]
+        'English', 'Hindi', 'Arabic', 'Bengali', 'Bulgarian', 'Catalan', 'Chinese', 'Croatian',
+        'Czech', 'Danish', 'Dutch', 'Finnish', 'French', 'German', 'Greek', 'Hebrew', 'Hungarian',
+        'Indonesian', 'Italian', 'Japanese', 'Korean', 'Malay', 'Marathi', 'Norwegian', 'Persian',
+        'Polish', 'Portuguese', 'Punjabi', 'Romanian', 'Russian', 'Serbian', 'Slovak', 'Slovenian',
+        'Spanish', 'Swahili', 'Swedish', 'Tamil', 'Telugu', 'Thai', 'Turkish', 'Ukrainian',
+        'Urdu', 'Vietnamese', 'Welsh', 'Xhosa', 'Yoruba', 'Zulu', 'Nepali', 'Sinhala',
+        'Kannada', 'Gujarati', 'Odia', 'Assamese', 'Burmese', 'Khmer'
+    ];
 
-    // ADD THESE ARRAYS:
+
     const roomFacilitiesList = [
         'Clothes rack', 'Flat-screen TV', 'Air conditioning', 'Towels', 'Linens', 'Wake-up service/Alarm clock',
         'Towels/sheets (extra fee)', 'Heating', 'Fan', 'Safe', 'Toilet paper', 'Socket near the bed',
@@ -270,7 +320,7 @@ const PropertyRegistration = () => {
         else if (currentStep === 8) setCurrentStep(9)
         else if (currentStep === 9) setCurrentStep(10)
         else if (currentStep === 10) setCurrentStep(11)
-        else if (currentStep === 11) setCurrentStep(12)
+        else if (currentStep === 11) setCurrentStep(10) // Return to overview after room management
         else if (currentStep === 12) setCurrentStep(13)
         else if (currentStep === 13) handleSubmit(onSubmit)()
     }
@@ -332,6 +382,166 @@ const PropertyRegistration = () => {
         } catch (error) {
             console.error('Error deleting facility:', error)
             alert('Error deleting facility')
+        }
+    }
+
+    // Custom Breakfast Types Modal Handlers
+    const openBreakfastModal = () => setIsBreakfastModalOpen(true)
+    const closeBreakfastModal = () => {
+        setIsBreakfastModalOpen(false)
+        setNewBreakfastType('')
+    }
+
+    const handleAddCustomBreakfast = async () => {
+        if (!newBreakfastType.trim()) return
+
+        setIsSavingBreakfast(true)
+        try {
+            const response = await fetch('/api/customBreakfastTypes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: newBreakfastType.trim() })
+            })
+
+            if (response.ok) {
+                const data = await response.json()
+                setCustomBreakfastTypes([...customBreakfastTypes, data.breakfastType])
+                setNewBreakfastType('')
+                closeBreakfastModal()
+            } else {
+                alert('Failed to add custom breakfast type')
+            }
+        } catch (error) {
+            console.error('Error adding custom breakfast type:', error)
+            alert('Error adding custom breakfast type')
+        } finally {
+            setIsSavingBreakfast(false)
+        }
+    }
+
+    const deleteCustomBreakfast = async (breakfastId) => {
+        try {
+            const response = await fetch(`/api/customBreakfastTypes?id=${breakfastId}`, {
+                method: 'DELETE'
+            })
+
+            if (response.ok) {
+                setCustomBreakfastTypes(customBreakfastTypes.filter(b => b.id !== breakfastId))
+            } else {
+                alert('Failed to delete breakfast type')
+            }
+        } catch (error) {
+            console.error('Error deleting breakfast type:', error)
+            alert('Error deleting breakfast type')
+        }
+    }
+
+    // Room Amenities Modal Handlers
+    // Bathroom Items
+    const openBathroomModal = () => setIsBathroomModalOpen(true)
+    const closeBathroomModal = () => {
+        setIsBathroomModalOpen(false)
+        setNewBathroomItem('')
+    }
+    const handleAddBathroomItem = async () => {
+        if (!newBathroomItem.trim()) return
+        setIsSavingBathroom(true)
+        try {
+            const response = await fetch('/api/customRoomAmenities/bathroom', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: newBathroomItem.trim() })
+            })
+            if (response.ok) {
+                const data = await response.json()
+                setCustomBathroomItems([...customBathroomItems, data.item])
+                closeBathroomModal()
+            }
+        } catch (error) {
+            console.error('Error:', error)
+        } finally {
+            setIsSavingBathroom(false)
+        }
+    }
+
+    // General Amenities
+    const openGeneralAmenityModal = () => setIsGeneralAmenityModalOpen(true)
+    const closeGeneralAmenityModal = () => {
+        setIsGeneralAmenityModalOpen(false)
+        setNewGeneralAmenity('')
+    }
+    const handleAddGeneralAmenity = async () => {
+        if (!newGeneralAmenity.trim()) return
+        setIsSavingGeneralAmenity(true)
+        try {
+            const response = await fetch('/api/customRoomAmenities/general', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: newGeneralAmenity.trim() })
+            })
+            if (response.ok) {
+                const data = await response.json()
+                setCustomGeneralAmenities([...customGeneralAmenities, data.item])
+                closeGeneralAmenityModal()
+            }
+        } catch (error) {
+            console.error('Error:', error)
+        } finally {
+            setIsSavingGeneralAmenity(false)
+        }
+    }
+
+    // Outdoors and Views
+    const openOutdoorModal = () => setIsOutdoorModalOpen(true)
+    const closeOutdoorModal = () => {
+        setIsOutdoorModalOpen(false)
+        setNewOutdoorItem('')
+    }
+    const handleAddOutdoorItem = async () => {
+        if (!newOutdoorItem.trim()) return
+        setIsSavingOutdoor(true)
+        try {
+            const response = await fetch('/api/customRoomAmenities/outdoor', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: newOutdoorItem.trim() })
+            })
+            if (response.ok) {
+                const data = await response.json()
+                setCustomOutdoorItems([...customOutdoorItems, data.item])
+                closeOutdoorModal()
+            }
+        } catch (error) {
+            console.error('Error:', error)
+        } finally {
+            setIsSavingOutdoor(false)
+        }
+    }
+
+    // Food and Drink
+    const openFoodDrinkModal = () => setIsFoodDrinkModalOpen(true)
+    const closeFoodDrinkModal = () => {
+        setIsFoodDrinkModalOpen(false)
+        setNewFoodDrinkItem('')
+    }
+    const handleAddFoodDrinkItem = async () => {
+        if (!newFoodDrinkItem.trim()) return
+        setIsSavingFoodDrink(true)
+        try {
+            const response = await fetch('/api/customRoomAmenities/fooddrink', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: newFoodDrinkItem.trim() })
+            })
+            if (response.ok) {
+                const data = await response.json()
+                setCustomFoodDrinkItems([...customFoodDrinkItems, data.item])
+                closeFoodDrinkModal()
+            }
+        } catch (error) {
+            console.error('Error:', error)
+        } finally {
+            setIsSavingFoodDrink(false)
         }
     }
 
@@ -869,13 +1079,6 @@ const PropertyRegistration = () => {
                                     <div className="lg:col-span-2">
                                         <label className="block text-xl font-semibold text-gray-900 mb-3">What can guests use at your {getSelectedPropertyTypeLabel()}?</label>
                                         <div className="grid grid-cols-2 gap-1 mb-4">
-                                            {facilities.map((facility) => (
-                                                <label key={facility.id} className="flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-50 rounded">
-                                                    <input type="checkbox" value={facility.id} {...register('facilities')}
-                                                        className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
-                                                    <span className="text-sm text-gray-800">{facility.label}</span>
-                                                </label>
-                                            ))}
                                             {/* Custom Facilities */}
                                             {customFacilities.map((facility) => (
                                                 <div key={facility.id} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded">
@@ -926,7 +1129,8 @@ const PropertyRegistration = () => {
                             <div className="space-y-8 max-w-2xl">
                                 {/* Breakfast Section */}
                                 <div className="border-b border-gray-200 pb-6">
-                                    <h2 className="text-xl font-semibold text-gray-900 mb-6">Breakfast</h2>
+                                    <h2 className="text-xl font-semibold text-gray-900 mb-4">Breakfast</h2>
+                                    <hr className='mb-2 border-black' />
 
                                     <div className="mb-6">
                                         <label className="block text-xl font-semibold text-gray-900 mb-3">Do you serve guests breakfast?</label>
@@ -971,14 +1175,22 @@ const PropertyRegistration = () => {
                                             <div className="mb-6">
                                                 <label className="block text-base font-semibold text-gray-900 mb-3">What type of breakfast do you offer?</label>
                                                 <p className="text-sm text-gray-600 mb-3">Select all that apply</p>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {breakfastTypes.map((type) => (
-                                                        <label key={type} className="inline-flex items-center px-4 py-2 border-2 border-gray-300 rounded-full cursor-pointer hover:border-blue-500 hover:bg-blue-50 has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50">
-                                                            <input type="checkbox" value={type} {...register('breakfastTypes')} className="sr-only" />
-                                                            <span className="text-sm text-gray-800">{type}</span>
+                                                <div className="flex flex-wrap gap-2 mb-3">
+                                                    {/* Custom Breakfast Types */}
+                                                    {customBreakfastTypes.map((type) => (
+                                                        <label key={type._id} className="inline-flex items-center px-4 py-2 border-2 border-gray-300 rounded-full cursor-pointer hover:border-blue-500 hover:bg-blue-50 has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50">
+                                                            <input type="checkbox" value={type.name} {...register('breakfastTypes')} className="sr-only" />
+                                                            <span className="text-sm text-gray-800">{type.name}</span>
                                                         </label>
                                                     ))}
                                                 </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={openBreakfastModal}
+                                                    className="w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center gap-2"
+                                                >
+                                                    <span className="text-xl">+</span> Add More Breakfast Options
+                                                </button>
                                             </div>
                                         </>
                                     )}
@@ -1237,7 +1449,7 @@ const PropertyRegistration = () => {
                                             <h3 className="font-semibold text-gray-900">Step 1 - Property details</h3>
                                             <p className="text-sm text-gray-600">The basics: Add your property name, address, facilities, and more</p>
                                         </div>
-                                        <button type="button" onClick={() => setCurrentStep(1)} className="text-blue-600 font-semibold hover:underline">Edit</button>
+                                        <button type="button" onClick={() => setCurrentStep(1)} className="px-6 py-2 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition-colors">Edit</button>
                                     </div>
                                     <div className="flex items-center gap-4 p-4 bg-white border-2 border-blue-400 rounded-lg">
                                         <div className="flex-shrink-0 w-10 h-10 bg-white border-2 border-gray-300 rounded-full flex items-center justify-center text-gray-600 font-bold">🛏️</div>
@@ -1245,7 +1457,7 @@ const PropertyRegistration = () => {
                                             <h3 className="font-semibold text-gray-900">Step 2 - Rooms</h3>
                                             <p className="text-sm text-gray-600">Tell us about your first room. Once you set one up you can add more</p>
                                         </div>
-                                        <button type="button" onClick={() => openRoomModal()}
+                                        <button type="button" onClick={() => setCurrentStep(11)}
                                             className="px-6 py-2 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition-colors">
                                             Add room
                                         </button>
@@ -1256,7 +1468,7 @@ const PropertyRegistration = () => {
                                             <h3 className="font-semibold text-gray-900">Step 3 - Photos</h3>
                                             <p className="text-sm text-gray-600">Show some photos of your property so guests know what to expect</p>
                                         </div>
-                                        <button type="button" onClick={() => setCurrentStep(11)}
+                                        <button type="button" onClick={() => setCurrentStep(12)}
                                             className="px-6 py-2 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition-colors">
                                             Add photos
                                         </button>
@@ -1267,24 +1479,44 @@ const PropertyRegistration = () => {
                                             <h3 className="font-semibold text-gray-900">Step 4 - Final steps</h3>
                                             <p className="text-sm text-gray-600">Set up payments and invoices before you open for bookings</p>
                                         </div>
-                                        <button type="button" onClick={() => setCurrentStep(13)}
+                                        <button type="button" onClick={() => setCurrentStep(12)}
                                             className="px-6 py-2 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition-colors">
                                             Add final details
                                         </button>
                                     </div>
                                 </div>
-                                {/* Rooms List */}
-                                {roomFields.length > 0 && (
-                                    <div className="mt-8">
+                            </div>
+                        </div>
+                    )}
+                    {/* Step 11: Room Management */}
+                    {currentStep === 11 && (
+                        <div className="mb-8">
+                            <div className="bg-white rounded-lg p-6">
+                                <h2 className="text-2xl font-bold text-gray-900 mb-2">Manage Your Rooms</h2>
+                                <p className="text-gray-600 mb-6">Add and manage all the rooms for your property</p>
+
+                                {/* Add Room Button */}
+                                <button
+                                    type="button"
+                                    onClick={() => openRoomModal()}
+                                    className="w-full mb-6 py-4 px-6 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-lg"
+                                >
+                                    <span className="text-2xl">+</span> Add New Room
+                                </button>
+
+                                {/* Existing Rooms List */}
+                                {roomFields.length > 0 ? (
+                                    <div>
                                         <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Rooms ({roomFields.length})</h3>
                                         <div className="space-y-3">
                                             {roomFields.map((room, index) => (
                                                 <div key={room.id} className="flex items-center justify-between p-4 bg-gray-50 border-2 border-gray-200 rounded-lg hover:border-blue-400 transition-colors">
                                                     <div className="flex-grow">
-                                                        <h4 className="font-semibold text-gray-900">{room.roomName || `Room ${index + 1}`}</h4>
+                                                        <h4 className="font-semibold text-gray-900">{room.roomName || room.roomType || `Room ${index + 1}`}</h4>
                                                         <p className="text-sm text-gray-600">
                                                             {room.bedTypes?.length > 0 && `${room.bedTypes.map(b => `${b.quantity}x ${bedTypesList.find(bt => bt.id === b.id)?.label}`).join(', ')} • `}
-                                                            {room.roomSize && `${room.roomSize} m² • `}
+                                                            {room.roomSize && `${room.roomSize} ${room.roomSizeUnit === 'square-feet' ? 'sq ft' : 'm²'} • `}
+                                                            {room.maxGuests && `${room.maxGuests} guests • `}
                                                             ₹{room.pricePerNight}/night
                                                         </p>
                                                     </div>
@@ -1302,62 +1534,11 @@ const PropertyRegistration = () => {
                                             ))}
                                         </div>
                                     </div>
-                                )}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Step 11: Room Images */}
-                    {currentStep === 11 && (
-                        <div className="mb-8">
-                            <div className="bg-white rounded-lg p-6">
-                                <h2 className="text-2xl font-bold text-gray-900 mb-6">Room Images</h2>
-                                <p className="text-gray-600 mb-6">Upload images for each room you've added</p>
-
-                                {roomFields.length > 0 ? (
-                                    <div className="space-y-6">
-                                        {roomFields.map((room, index) => (
-                                            <div key={room.id} className="border-2 border-gray-200 rounded-lg p-6 hover:border-blue-400 transition-colors">
-                                                <div className="flex items-center justify-between mb-4">
-                                                    <div>
-                                                        <h3 className="text-lg font-semibold text-gray-900">
-                                                            {room.roomType || `Room ${index + 1}`}
-                                                        </h3>
-                                                        <p className="text-sm text-gray-600">₹{room.pricePerNight}/night</p>
-                                                    </div>
-                                                    <div className="flex gap-2">
-                                                        <button type="button" className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">View</button>
-                                                        <button type="button" className="px-4 py-2 text-sm bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200">Edit</button>
-                                                        <button type="button" className="px-4 py-2 text-sm bg-red-100 text-red-700 rounded-md hover:bg-red-200">Delete</button>
-                                                    </div>
-                                                </div>
-
-                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                                    <div>
-                                                        <label className="block text-sm font-semibold text-gray-700 mb-2">Primary Image</label>
-                                                        <button type="button" className="w-full px-4 py-3 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors">
-                                                            Upload Image
-                                                        </button>
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-sm font-semibold text-gray-700 mb-2">Room Image</label>
-                                                        <button type="button" className="w-full px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
-                                                            Upload Image
-                                                        </button>
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-sm font-semibold text-gray-700 mb-2">Bathroom Image</label>
-                                                        <button type="button" className="w-full px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
-                                                            Upload Image
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
                                 ) : (
-                                    <div className="text-center py-12 bg-gray-50 rounded-lg">
-                                        <p className="text-gray-600">No rooms added yet. Please add rooms in Step 10.</p>
+                                    <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                                        <div className="text-6xl mb-4">🛏️</div>
+                                        <h3 className="text-xl font-semibold text-gray-900 mb-2">No rooms added yet</h3>
+                                        <p className="text-gray-600">Click the "Add New Room" button above to add your first room</p>
                                     </div>
                                 )}
                             </div>
@@ -1605,8 +1786,8 @@ const PropertyRegistration = () => {
                             )}
                         </button>
                     </div>
-                </form>
-            </div>
+                </form >
+            </div >
 
             {isRoomModalOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
@@ -1630,14 +1811,6 @@ const PropertyRegistration = () => {
                                             {roomTypesList.map(type => <option key={type} value={type}>{type}</option>)}
                                         </select>
                                     </div>
-
-                                    {/* Room Name */}
-                                    {/* <div>
-                                <label className="block text-base font-semibold text-gray-900 mb-3">Room name (optional)</label>
-                                <input type="text" value={currentRoomData.roomName} onChange={(e) => updateRoomField('roomName', e.target.value)}
-                                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="e.g., Deluxe Double Room" />
-                            </div> */}
 
                                     {/* How many guests can stay */}
                                     <div>
@@ -1710,20 +1883,21 @@ const PropertyRegistration = () => {
                                         <div>
                                             <label className="block text-base font-semibold text-gray-900 mb-3">What bathroom items are available in this room?</label>
                                             <div className="grid grid-cols-2 gap-3">
-                                                {['Toilet paper', 'Towels', 'Toilet', 'Shower', 'Bathtub', 'Free toiletries', 'Hairdryer', 'Slippers', 'Bathrobe', 'Spa tub'].map(item => (
-                                                    <label key={item} className="flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-50 rounded">
-                                                        <input type="checkbox" checked={currentRoomData.bathroomItems?.includes(item) || false}
+                                                {customBathroomItems.map(item => (
+                                                    <label key={item._id} className="flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-50 rounded">
+                                                        <input type="checkbox" checked={currentRoomData.bathroomItems?.includes(item.name) || false}
                                                             onChange={() => {
                                                                 const items = currentRoomData.bathroomItems || []
-                                                                updateRoomField('bathroomItems', items.includes(item)
-                                                                    ? items.filter(i => i !== item)
-                                                                    : [...items, item])
+                                                                updateRoomField('bathroomItems', items.includes(item.name)
+                                                                    ? items.filter(i => i !== item.name)
+                                                                    : [...items, item.name])
                                                             }}
                                                             className="w-5 h-5 text-blue-600 border-gray-300 rounded" />
-                                                        <span className="text-sm text-gray-800">{item}</span>
+                                                        <span className="text-sm text-gray-800">{item.name}</span>
                                                     </label>
                                                 ))}
                                             </div>
+                                            <button type="button" onClick={openBathroomModal} className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-semibold hover:bg-blue-700">+ Add More</button>
                                         </div>
                                     )}
                                 </div>
@@ -1740,7 +1914,7 @@ const PropertyRegistration = () => {
                                     <div>
                                         <label className="block text-base font-semibold text-gray-900 mb-3">What beds are available in this room?</label>
                                         <div className="space-y-3">
-                                            {bedTypesList.map(bed => (
+                                            {bedTypesList.slice(0, showAllBeds ? bedTypesList.length : 4).map(bed => (
                                                 <div key={bed.id} className="flex items-center justify-between p-3 border-2 border-gray-200 rounded-lg">
                                                     <div className="flex items-center gap-3">
                                                         <span className="text-2xl">🛏️</span>
@@ -1759,7 +1933,13 @@ const PropertyRegistration = () => {
                                                 </div>
                                             ))}
                                         </div>
-                                        <button type="button" className="mt-3 text-blue-600 text-sm font-semibold hover:underline">+ Fewer bed options</button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowAllBeds(!showAllBeds)}
+                                            className="mt-3 text-blue-600 text-sm font-semibold hover:underline"
+                                        >
+                                            {showAllBeds ? '- Show fewer bed options' : '+ Show more bed options'}
+                                        </button>
                                     </div>
 
                                     {/* Room Details Section */}
@@ -1778,8 +1958,16 @@ const PropertyRegistration = () => {
                                                         <span className="text-sm text-gray-800">{item}</span>
                                                     </label>
                                                 ))}
+                                                {customGeneralAmenities.map(item => (
+                                                    <label key={item._id} className="flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-50 rounded">
+                                                        <input type="checkbox" checked={currentRoomData.roomFacilities?.includes(item.name) || false}
+                                                            onChange={() => toggleRoomFacility(item.name)}
+                                                            className="w-5 h-5 text-blue-600 border-gray-300 rounded" />
+                                                        <span className="text-sm text-gray-800">{item.name}</span>
+                                                    </label>
+                                                ))}
                                             </div>
-                                            <button type="button" className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-semibold hover:bg-blue-700">+ Add More</button>
+                                            <button type="button" onClick={openGeneralAmenityModal} className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-semibold hover:bg-blue-700">+ Add More</button>
                                         </div>
 
                                         {/* Outdoors and views */}
@@ -1799,8 +1987,21 @@ const PropertyRegistration = () => {
                                                         <span className="text-sm text-gray-800">{item}</span>
                                                     </label>
                                                 ))}
+                                                {customOutdoorItems.map(item => (
+                                                    <label key={item._id} className="flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-50 rounded">
+                                                        <input type="checkbox" checked={currentRoomData.outdoorViews?.includes(item.name) || false}
+                                                            onChange={() => {
+                                                                const items = currentRoomData.outdoorViews || []
+                                                                updateRoomField('outdoorViews', items.includes(item.name)
+                                                                    ? items.filter(i => i !== item.name)
+                                                                    : [...items, item.name])
+                                                            }}
+                                                            className="w-5 h-5 text-blue-600 border-gray-300 rounded" />
+                                                        <span className="text-sm text-gray-800">{item.name}</span>
+                                                    </label>
+                                                ))}
                                             </div>
-                                            <button type="button" className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-semibold hover:bg-blue-700">+ Add More</button>
+                                            <button type="button" onClick={openOutdoorModal} className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-semibold hover:bg-blue-700">+ Add More</button>
                                         </div>
 
                                         {/* Food and drink */}
@@ -1820,8 +2021,21 @@ const PropertyRegistration = () => {
                                                         <span className="text-sm text-gray-800">{item}</span>
                                                     </label>
                                                 ))}
+                                                {customFoodDrinkItems.map(item => (
+                                                    <label key={item._id} className="flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-50 rounded">
+                                                        <input type="checkbox" checked={currentRoomData.foodDrink?.includes(item.name) || false}
+                                                            onChange={() => {
+                                                                const items = currentRoomData.foodDrink || []
+                                                                updateRoomField('foodDrink', items.includes(item.name)
+                                                                    ? items.filter(i => i !== item.name)
+                                                                    : [...items, item.name])
+                                                            }}
+                                                            className="w-5 h-5 text-blue-600 border-gray-300 rounded" />
+                                                        <span className="text-sm text-gray-800">{item.name}</span>
+                                                    </label>
+                                                ))}
                                             </div>
-                                            <button type="button" className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-semibold hover:bg-blue-700">+ Add More</button>
+                                            <button type="button" onClick={openFoodDrinkModal} className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-semibold hover:bg-blue-700">+ Add More</button>
                                         </div>
                                     </div>
                                 </div>
@@ -1829,23 +2043,60 @@ const PropertyRegistration = () => {
                             {/* Price Per Night */}
                             <div className="border-t border-gray-200 pt-6">
                                 <h3 className="text-xl font-bold text-gray-900 mb-4">Set the price per night for this room</h3>
-                                <div>
-                                    <label className="block text-base font-semibold text-gray-900 mb-3">How much do you want to charge per night?</label>
-                                    <div className="mb-4">
-                                        <p className="text-sm text-gray-600 mb-2">Price guests pay</p>
-                                        <div className="flex gap-3">
-                                            <div className="relative flex-1">
-                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 font-semibold">INR</span>
-                                                <input type="number" min="0" value={currentRoomData.pricePerNight}
-                                                    onChange={(e) => updateRoomField('pricePerNight', e.target.value)}
-                                                    className="w-full pl-16 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg font-semibold"
-                                                    placeholder="0" />
+
+                                <div className="grid grid-cols-3 w-full items-center gap-6 space-x-2">
+                                    {/* Left Column - Price Input */}
+                                    <div className="w-full">
+                                        <label className="block text-base font-semibold text-gray-900 mb-3">How much do you want to charge per night?</label>
+                                        <div className="mb-4">
+                                            <p className="text-sm text-gray-600 mb-2">Price guests pay</p>
+                                            <div className="flex gap-3">
+                                                <div className="relative flex-1">
+                                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 font-semibold">INR</span>
+                                                    <input type="number" min="0" value={currentRoomData.pricePerNight}
+                                                        onChange={(e) => updateRoomField('pricePerNight', e.target.value)}
+                                                        className="w-full pl-16 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg font-semibold"
+                                                        placeholder="0" />
+                                                </div>
+                                                <select className="px-4 py-3 border-2 border-gray-300 rounded-lg bg-white">
+                                                    <option>%</option>
+                                                </select>
                                             </div>
-                                            <select className="px-4 py-3 border-2 border-gray-300 rounded-lg bg-white">
-                                                <option>%</option>
-                                            </select>
+                                            <p className="text-xs text-gray-500 mt-2">Including taxes, commission, and fees</p>
                                         </div>
-                                        <p className="text-xs text-gray-500 mt-2">Including taxes, commission, and fees</p>
+                                    </div>
+                                    <div className="bg-gray-50 border-2 border-gray-200 rounded-lg p-5">
+                                        <p className="text-sm text-gray-700 mb-2">
+                                            <span className="font-semibold">15.0%</span> www.rishikeshrent.com commission
+                                        </p>
+                                        <div className="space-y-2">
+                                            <div className="flex items-start gap-2">
+                                                <span className="text-green-600 mt-0.5">✓</span>
+                                                <p className="text-sm text-gray-700">24/7 help in your language</p>
+                                            </div>
+                                            <div className="flex items-start gap-2">
+                                                <span className="text-green-600 mt-0.5">✓</span>
+                                                <p className="text-sm text-gray-700">Save time with automatically confirmed bookings</p>
+                                            </div>
+                                            <div className="flex items-start gap-2">
+                                                <span className="text-green-600 mt-0.5">✓</span>
+                                                <p className="text-sm text-gray-700">We promote your place on Google</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Right Column - Info Box */}
+                                    <div className="w-80">
+                                        <div className="bg-gray-50 border-2 border-gray-200 rounded-lg p-5">
+                                            <div className="flex items-start justify-between mb-3">
+                                                <h4 className="font-semibold text-gray-900">What if I'm not sure about my price?</h4>
+                                                <button type="button" className="text-gray-400 hover:text-gray-600">✕</button>
+                                            </div>
+                                            <p className="text-sm text-gray-700 mb-4">
+                                                Don't worry, you can always change it later. You can even set weekend, midweek, and seasonal prices, giving you complete control over what you earn.
+                                            </p>
+
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1930,6 +2181,175 @@ const PropertyRegistration = () => {
                 </div>
             )}
 
+            {/* Custom Breakfast Type Modal */}
+            {isBreakfastModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative">
+                        {/* Close button */}
+                        <button
+                            onClick={closeBreakfastModal}
+                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl"
+                        >
+                            ✕
+                        </button>
+
+                        {/* Modal Header */}
+                        <h2 className="text-2xl font-bold text-gray-900 mb-2">Add Custom Breakfast Type</h2>
+                        <p className="text-sm text-gray-600 mb-6">
+                            Add a breakfast type that's not in the default list. It will be saved to the database for future use.
+                        </p>
+
+                        {/* Input Field */}
+                        <div className="mb-6">
+                            <label className="block text-sm font-semibold text-gray-900 mb-2">
+                                Breakfast Type Name *
+                            </label>
+                            <input
+                                type="text"
+                                value={newBreakfastType}
+                                onChange={(e) => setNewBreakfastType(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && handleAddCustomBreakfast()}
+                                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="e.g., Mediterranean, Organic, etc."
+                                autoFocus
+                            />
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex gap-3">
+                            <button
+                                type="button"
+                                onClick={closeBreakfastModal}
+                                className="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors duration-200"
+                                disabled={isSavingBreakfast}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleAddCustomBreakfast}
+                                disabled={!newBreakfastType.trim() || isSavingBreakfast}
+                                className="flex-1 px-4 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center gap-2"
+                            >
+                                {isSavingBreakfast ? (
+                                    <>
+                                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        Saving...
+                                    </>
+                                ) : (
+                                    'Save Breakfast Type'
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Custom Room Amenity Modals */}
+            {/* Bathroom Items Modal */}
+            {isBathroomModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative">
+                        <button onClick={closeBathroomModal} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl">✕</button>
+                        <h2 className="text-2xl font-bold text-gray-900 mb-2">Add Bathroom Item</h2>
+                        <p className="text-sm text-gray-600 mb-6">Add a custom bathroom item for your rooms.</p>
+                        <div className="mb-6">
+                            <label className="block text-sm font-semibold text-gray-900 mb-2">Item Name *</label>
+                            <input type="text" value={newBathroomItem} onChange={(e) => setNewBathroomItem(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && handleAddBathroomItem()}
+                                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="e.g., Bidet, Shower cap" autoFocus />
+                        </div>
+                        <div className="flex gap-3">
+                            <button type="button" onClick={closeBathroomModal} disabled={isSavingBathroom}
+                                className="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50">Cancel</button>
+                            <button type="button" onClick={handleAddBathroomItem} disabled={!newBathroomItem.trim() || isSavingBathroom}
+                                className="flex-1 px-4 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-300 flex items-center justify-center gap-2">
+                                {isSavingBathroom ? <><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>Saving...</> : 'Save Item'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* General Amenities Modal */}
+            {isGeneralAmenityModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative">
+                        <button onClick={closeGeneralAmenityModal} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl">✕</button>
+                        <h2 className="text-2xl font-bold text-gray-900 mb-2">Add General Amenity</h2>
+                        <p className="text-sm text-gray-600 mb-6">Add a custom general amenity for your rooms.</p>
+                        <div className="mb-6">
+                            <label className="block text-sm font-semibold text-gray-900 mb-2">Amenity Name *</label>
+                            <input type="text" value={newGeneralAmenity} onChange={(e) => setNewGeneralAmenity(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && handleAddGeneralAmenity()}
+                                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="e.g., Iron, Ironing board" autoFocus />
+                        </div>
+                        <div className="flex gap-3">
+                            <button type="button" onClick={closeGeneralAmenityModal} disabled={isSavingGeneralAmenity}
+                                className="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50">Cancel</button>
+                            <button type="button" onClick={handleAddGeneralAmenity} disabled={!newGeneralAmenity.trim() || isSavingGeneralAmenity}
+                                className="flex-1 px-4 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-300 flex items-center justify-center gap-2">
+                                {isSavingGeneralAmenity ? <><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>Saving...</> : 'Save Amenity'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Outdoors and Views Modal */}
+            {isOutdoorModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative">
+                        <button onClick={closeOutdoorModal} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl">✕</button>
+                        <h2 className="text-2xl font-bold text-gray-900 mb-2">Add Outdoor/View Item</h2>
+                        <p className="text-sm text-gray-600 mb-6">Add a custom outdoor or view feature for your rooms.</p>
+                        <div className="mb-6">
+                            <label className="block text-sm font-semibold text-gray-900 mb-2">Feature Name *</label>
+                            <input type="text" value={newOutdoorItem} onChange={(e) => setNewOutdoorItem(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && handleAddOutdoorItem()}
+                                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="e.g., Garden view, Patio" autoFocus />
+                        </div>
+                        <div className="flex gap-3">
+                            <button type="button" onClick={closeOutdoorModal} disabled={isSavingOutdoor}
+                                className="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50">Cancel</button>
+                            <button type="button" onClick={handleAddOutdoorItem} disabled={!newOutdoorItem.trim() || isSavingOutdoor}
+                                className="flex-1 px-4 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-300 flex items-center justify-center gap-2">
+                                {isSavingOutdoor ? <><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>Saving...</> : 'Save Feature'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Food and Drink Modal */}
+            {isFoodDrinkModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative">
+                        <button onClick={closeFoodDrinkModal} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl">✕</button>
+                        <h2 className="text-2xl font-bold text-gray-900 mb-2">Add Food/Drink Item</h2>
+                        <p className="text-sm text-gray-600 mb-6">Add a custom food or drink amenity for your rooms.</p>
+                        <div className="mb-6">
+                            <label className="block text-sm font-semibold text-gray-900 mb-2">Item Name *</label>
+                            <input type="text" value={newFoodDrinkItem} onChange={(e) => setNewFoodDrinkItem(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && handleAddFoodDrinkItem()}
+                                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="e.g., Microwave, Refrigerator" autoFocus />
+                        </div>
+                        <div className="flex gap-3">
+                            <button type="button" onClick={closeFoodDrinkModal} disabled={isSavingFoodDrink}
+                                className="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50">Cancel</button>
+                            <button type="button" onClick={handleAddFoodDrinkItem} disabled={!newFoodDrinkItem.trim() || isSavingFoodDrink}
+                                className="flex-1 px-4 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-300 flex items-center justify-center gap-2">
+                                {isSavingFoodDrink ? <><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>Saving...</> : 'Save Item'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <style jsx>{`
         @keyframes checkmark {
                     0 % { transform: scale(0) rotate(- 45deg); opacity: 0; }
@@ -1938,7 +2358,7 @@ const PropertyRegistration = () => {
         }
                 .animate-checkmark {animation: checkmark 0.3s ease-in-out; }
       `}</style>
-        </div>
+        </div >
     )
 }
 
