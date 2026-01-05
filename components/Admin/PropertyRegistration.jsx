@@ -4,7 +4,7 @@ import { useForm, Controller, useFieldArray } from 'react-hook-form'
 import toast from 'react-hot-toast'
 
 const PropertyRegistration = () => {
-    const [currentStep, setCurrentStep] = useState(12)
+    const [currentStep, setCurrentStep] = useState(1)
     const [isRoomModalOpen, setIsRoomModalOpen] = useState(false)
     const [editingRoomIndex, setEditingRoomIndex] = useState(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
