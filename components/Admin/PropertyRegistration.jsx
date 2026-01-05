@@ -1,13 +1,14 @@
 "use client"
 import React, { useState, useEffect } from 'react'
 import { useForm, Controller, useFieldArray } from 'react-hook-form'
-import toast, { Toaster } from 'react-hot-toast'
+import toast from 'react-hot-toast'
 
 const PropertyRegistration = () => {
-    const [currentStep, setCurrentStep] = useState(1)
+    const [currentStep, setCurrentStep] = useState(12)
     const [isRoomModalOpen, setIsRoomModalOpen] = useState(false)
     const [editingRoomIndex, setEditingRoomIndex] = useState(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [allowReload, setAllowReload] = useState(false) // Flag to allow reload after successful submission
     const [submitStatus, setSubmitStatus] = useState(null)
     const [isFacilityModalOpen, setIsFacilityModalOpen] = useState(false)
     const [customFacilities, setCustomFacilities] = useState([])
@@ -79,7 +80,6 @@ const PropertyRegistration = () => {
     })
 
     const [currentRoomData, setCurrentRoomData] = useState({
-        roomName: '',
         roomType: '',
         bedTypes: [],
         roomSize: '',
@@ -270,6 +270,11 @@ const PropertyRegistration = () => {
         const hasFormData = selectedCategory || watch('propertyName') || roomFields.length > 0
 
         const handleBeforeUnload = (e) => {
+            // Don't show warning if reload is allowed (after successful submission)
+            if (allowReload) {
+                return
+            }
+
             if (hasFormData && currentStep > 1 && !isSubmitting) {
                 e.preventDefault()
                 e.returnValue = '' // Chrome requires returnValue to be set
@@ -282,7 +287,7 @@ const PropertyRegistration = () => {
         return () => {
             window.removeEventListener('beforeunload', handleBeforeUnload)
         }
-    }, [selectedCategory, watch, roomFields, currentStep, isSubmitting])
+    }, [selectedCategory, watch, roomFields, currentStep, isSubmitting, allowReload])
 
     const onSubmit = async (data) => {
         setIsSubmitting(true)
@@ -328,8 +333,11 @@ const PropertyRegistration = () => {
                 parkingLocation: data.parkingLocation,
                 parkingType: data.parkingType,
 
-                // Step 8 - Languages
-                languagesSpoken: data.languagesSpoken,
+                // Step 8 - Languages (combine languages and additionalLanguages)
+                languagesSpoken: [
+                    ...(data.languages || []),
+                    ...(data.additionalLanguages || [])
+                ],
 
                 // Step 9 - House Rules
                 checkInFrom: data.checkInFrom,
@@ -346,20 +354,29 @@ const PropertyRegistration = () => {
                 // Step 11 - Room Images (Transform to match model)
                 roomImages: Object.entries(roomImages).map(([roomIndex, photos]) => ({
                     roomIndex: parseInt(roomIndex),
-                    primaryImage: photos.primary ? [photos.primary.url || photos.primary] : [],
-                    roomImage: Array.isArray(photos.room) ? photos.room.map(p => p.url || p) : [],
-                    bathroomImage: Array.isArray(photos.bathroom) ? photos.bathroom.map(p => p.url || p) : []
+                    primaryImage: photos.primary ? [{
+                        url: photos.primary.url || photos.primary,
+                        key: photos.primary.key || ''
+                    }] : [],
+                    roomImage: Array.isArray(photos.room) ? photos.room.map(p => ({
+                        url: p.url || p,
+                        key: p.key || ''
+                    })) : [],
+                    bathroomImage: Array.isArray(photos.bathroom) ? photos.bathroom.map(p => ({
+                        url: p.url || p,
+                        key: p.key || ''
+                    })) : []
                 })),
 
                 // Step 12 - Property Images
                 propertyImages: {
-                    primary: propertyImages.primary ? (Array.isArray(propertyImages.primary) ? propertyImages.primary.map(p => p.url || p) : [propertyImages.primary.url || propertyImages.primary]) : [],
-                    exterior: propertyImages.exterior ? (Array.isArray(propertyImages.exterior) ? propertyImages.exterior.map(p => p.url || p) : [propertyImages.exterior.url || propertyImages.exterior]) : [],
-                    interior: propertyImages.interior ? (Array.isArray(propertyImages.interior) ? propertyImages.interior.map(p => p.url || p) : [propertyImages.interior.url || propertyImages.interior]) : [],
-                    reception: propertyImages.reception ? (Array.isArray(propertyImages.reception) ? propertyImages.reception.map(p => p.url || p) : [propertyImages.reception.url || propertyImages.reception]) : [],
-                    restaurant: propertyImages.restaurant ? (Array.isArray(propertyImages.restaurant) ? propertyImages.restaurant.map(p => p.url || p) : [propertyImages.restaurant.url || propertyImages.restaurant]) : [],
-                    parking: propertyImages.parking ? (Array.isArray(propertyImages.parking) ? propertyImages.parking.map(p => p.url || p) : [propertyImages.parking.url || propertyImages.parking]) : [],
-                    other: propertyImages.other ? (Array.isArray(propertyImages.other) ? propertyImages.other.map(p => p.url || p) : [propertyImages.other.url || propertyImages.other]) : []
+                    primary: propertyImages.primary ? (Array.isArray(propertyImages.primary) ? propertyImages.primary.map(p => ({ url: p.url || p, key: p.key || '' })) : [{ url: propertyImages.primary.url || propertyImages.primary, key: propertyImages.primary.key || '' }]) : [],
+                    exterior: propertyImages.exterior ? (Array.isArray(propertyImages.exterior) ? propertyImages.exterior.map(p => ({ url: p.url || p, key: p.key || '' })) : [{ url: propertyImages.exterior.url || propertyImages.exterior, key: propertyImages.exterior.key || '' }]) : [],
+                    interior: propertyImages.interior ? (Array.isArray(propertyImages.interior) ? propertyImages.interior.map(p => ({ url: p.url || p, key: p.key || '' })) : [{ url: propertyImages.interior.url || propertyImages.interior, key: propertyImages.interior.key || '' }]) : [],
+                    reception: propertyImages.reception ? (Array.isArray(propertyImages.reception) ? propertyImages.reception.map(p => ({ url: p.url || p, key: p.key || '' })) : [{ url: propertyImages.reception.url || propertyImages.reception, key: propertyImages.reception.key || '' }]) : [],
+                    restaurant: propertyImages.restaurant ? (Array.isArray(propertyImages.restaurant) ? propertyImages.restaurant.map(p => ({ url: p.url || p, key: p.key || '' })) : [{ url: propertyImages.restaurant.url || propertyImages.restaurant, key: propertyImages.restaurant.key || '' }]) : [],
+                    parking: propertyImages.parking ? (Array.isArray(propertyImages.parking) ? propertyImages.parking.map(p => ({ url: p.url || p, key: p.key || '' })) : [{ url: propertyImages.parking.url || propertyImages.parking, key: propertyImages.parking.key || '' }]) : [],
+                    other: propertyImages.other ? (Array.isArray(propertyImages.other) ? propertyImages.other.map(p => ({ url: p.url || p, key: p.key || '' })) : [{ url: propertyImages.other.url || propertyImages.other, key: propertyImages.other.key || '' }]) : []
                 },
 
                 // Step 13 - Personal Info (Fix key mapping)
@@ -367,24 +384,24 @@ const PropertyRegistration = () => {
                 ownerEmail: data.ownerEmail,
                 ownerContact: data.ownerContact,
                 panNumber: data.panNumber,
-                panDocument: documents.ownerPanDoc?.url || '',
+                panDocument: documents.ownerPanDoc ? { url: documents.ownerPanDoc.url, key: documents.ownerPanDoc.key } : null,
                 aadhaarNumber: data.aadhaarNumber,
-                profilePhoto: profilePhoto?.url || '',
+                profilePhoto: profilePhoto ? { url: profilePhoto.url, key: profilePhoto.key } : null,
 
                 officialPropertyName: data.officialPropertyName,
                 officialEmail: data.officialEmail,
                 officialContact: data.officialContact,
                 alternativeContact: data.alternativeContact,
                 propertyPanNumber: data.propertyPanNumber,
-                propertyPanDocument: documents.propertyPanDoc?.url || '',
+                propertyPanDocument: documents.propertyPanDoc ? { url: documents.propertyPanDoc.url, key: documents.propertyPanDoc.key } : null,
                 gstNumber: data.gstNumber,
-                gstDocument: documents.gstDoc?.url || '',
+                gstDocument: documents.gstDoc ? { url: documents.gstDoc.url, key: documents.gstDoc.key } : null,
 
                 accountNumber: data.accountNumber,
                 accountHolderName: data.accountHolderName,
                 ifscCode: data.ifscCode,
                 bankAddress: data.bankAddress,
-                cancelledCheque: documents.bankChequeDoc?.url || ''
+                cancelledCheque: documents.bankChequeDoc ? { url: documents.bankChequeDoc.url, key: documents.bankChequeDoc.key } : null
             }
 
             const response = await fetch('/api/addPropertyRegistration', {
@@ -399,7 +416,7 @@ const PropertyRegistration = () => {
 
             if (response.ok && result.success) {
                 // Show success toast
-                toast.success('Property registered successfully! Redirecting...')
+                toast.success('Property registered successfully!')
 
                 setSubmitStatus({
                     type: 'success',
@@ -407,7 +424,8 @@ const PropertyRegistration = () => {
                     propertyId: result.data?.id
                 })
 
-                // Reload after 2 seconds
+                // Allow reload and then reload after 2 seconds
+                setAllowReload(true)
                 setTimeout(() => {
                     window.location.reload();
                 }, 2000);
@@ -440,10 +458,6 @@ const PropertyRegistration = () => {
     const handleContinue = () => {
         // Step 1: Category selection
         if (currentStep === 1) {
-            if (!selectedCategory) {
-                toast.error('Please select a property category')
-                return
-            }
             setCurrentStep(2)
         }
         // Step 2: Property type selection
@@ -1057,7 +1071,6 @@ const PropertyRegistration = () => {
         } else {
             setEditingRoomIndex(null)
             setCurrentRoomData({
-                roomName: '',
                 roomType: '',
                 bedTypes: [],
                 roomSize: '',
@@ -1074,7 +1087,6 @@ const PropertyRegistration = () => {
         setIsRoomModalOpen(false)
         setEditingRoomIndex(null)
         setCurrentRoomData({
-            roomName: '',
             roomType: '',
             bedTypes: [],
             roomSize: '',
@@ -1204,9 +1216,6 @@ const PropertyRegistration = () => {
                                         {submitStatus.type === 'success' ? '✅ Success!' : '❌ Error'}
                                     </h3>
                                     <p className="text-sm">{submitStatus.message}</p>
-                                    {submitStatus.propertyId && (
-                                        <p className="text-xs mt-2">Property ID: {submitStatus.propertyId}</p>
-                                    )}
                                     {submitStatus.details && (
                                         <ul className="text-xs mt-2 list-disc list-inside">
                                             {submitStatus.details.map((detail, idx) => (
@@ -2017,7 +2026,7 @@ const PropertyRegistration = () => {
                                             {roomFields.map((room, index) => (
                                                 <div key={room.id} className="flex items-center justify-between p-4 bg-gray-50 border-2 border-gray-200 rounded-lg hover:border-blue-400 transition-colors">
                                                     <div className="flex-grow">
-                                                        <h4 className="font-semibold text-gray-900">{room.roomName || room.roomType || `Room ${index + 1}`}</h4>
+                                                        <h4 className="font-semibold text-gray-900">{room.roomType || `Room ${index + 1}`}</h4>
                                                         <p className="text-sm text-gray-600">
                                                             {room.bedTypes?.length > 0 && `${room.bedTypes.map(b => `${b.quantity}x ${bedTypesList.find(bt => bt.id === b.id)?.label}`).join(', ')} • `}
                                                             {room.roomSize && `${room.roomSize} ${room.roomSizeUnit === 'square-feet' ? 'sq ft' : 'm²'} • `}
@@ -2112,23 +2121,24 @@ const PropertyRegistration = () => {
                                                 {roomFields.length > 0 ? (
                                                     roomFields.map((room, index) => (
                                                         <div key={room.id} className="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg hover:border-blue-400 transition-colors">
-                                                            <div className="flex-1">
+                                                            <div className="flex-1 ">
+                                                                <h3 className='text-sm font-semibold px-5 py-1 bg-red-400 w-fit rounded-md'>Room {index + 1}</h3>
                                                                 <h4 className="font-semibold text-gray-900 text-lg">
-                                                                    {room.roomName || room.roomType || `Room ${index + 1}`}
+                                                                    {room.roomType || `Room ${index + 1}`}
                                                                 </h4>
                                                             </div>
                                                             <div className="flex gap-3 items-center">
                                                                 <button
                                                                     type="button"
                                                                     onClick={() => openRoomPhotoDetail(index)}
-                                                                    className="px-6 py-2 text-white rounded-lg font-semibold transition-colors"
+                                                                    className="px-10 py-2 text-white rounded-lg font-semibold transition-colors"
                                                                     style={{ backgroundColor: index % 3 === 0 ? '#14b8a6' : index % 3 === 1 ? '#3b82f6' : '#22c55e' }}
                                                                 >
                                                                     Upload Image
                                                                 </button>
-                                                                <button type="button" className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">View</button>
+                                                                {/* <button type="button" className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">View</button>
                                                                 <button type="button" className="px-4 py-2 text-sm bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200">Edit</button>
-                                                                <button type="button" className="px-4 py-2 text-sm bg-red-100 text-red-700 rounded-md hover:bg-red-200">Delete</button>
+                                                                <button type="button" className="px-4 py-2 text-sm bg-red-100 text-red-700 rounded-md hover:bg-red-200">Delete</button> */}
                                                             </div>
                                                         </div>
                                                     ))
@@ -2143,7 +2153,7 @@ const PropertyRegistration = () => {
                                             <div className="space-y-6">
                                                 <div className="flex items-center justify-between mb-4">
                                                     <h4 className="text-lg font-semibold text-gray-900">
-                                                        {roomFields[selectedRoomForPhotos]?.roomName || roomFields[selectedRoomForPhotos]?.roomType || `Room ${selectedRoomForPhotos + 1}`}
+                                                        {roomFields[selectedRoomForPhotos]?.roomType || `Room ${selectedRoomForPhotos + 1}`}
                                                     </h4>
                                                     <button
                                                         type="button"
@@ -2464,15 +2474,37 @@ const PropertyRegistration = () => {
                                                 </div>
                                                 <div>
                                                     <label className="block text-sm font-semibold text-gray-700 mb-2">Contact Number</label>
-                                                    <input type="tel" {...register('ownerContact')}
+                                                    <input type="tel" {...register('ownerContact', {
+                                                        pattern: {
+                                                            value: /^[0-9]{10}$/,
+                                                            message: 'Contact number must be exactly 10 digits'
+                                                        },
+                                                        maxLength: {
+                                                            value: 10,
+                                                            message: 'Contact number must be 10 digits'
+                                                        }
+                                                    })}
                                                         className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                                                        placeholder="Type Here" />
+                                                        placeholder="Type Here"
+                                                        maxLength="10" />
+                                                    {errors.ownerContact && <p className="text-red-600 text-sm mt-1">{errors.ownerContact.message}</p>}
                                                 </div>
                                                 <div>
                                                     <label className="block text-sm font-semibold text-gray-700 mb-2">Aadhar Number</label>
-                                                    <input type="text" {...register('aadhaarNumber')}
+                                                    <input type="tel" {...register('aadhaarNumber', {
+                                                        pattern: {
+                                                            value: /^[0-9]{12}$/, // 12 digits for Aadhar number
+                                                            message: 'Aadhar number must be exactly 12 digits'
+                                                        },
+                                                        maxLength: {
+                                                            value: 12,
+                                                            message: 'Aadhar number must be 12 digits'
+                                                        }
+                                                    })}
                                                         className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                                                        placeholder="Type Here" />
+                                                        placeholder="Type Here"
+                                                        maxLength="12" />
+                                                    {errors.aadhaarNumber && <p className="text-red-600 text-sm mt-1">{errors.aadhaarNumber.message}</p>}
                                                 </div>
                                             </div>
                                         </div>
@@ -2496,15 +2528,44 @@ const PropertyRegistration = () => {
                                                 <div className="grid grid-cols-2 gap-4">
                                                     <div>
                                                         <label className="block text-sm font-semibold text-gray-700 mb-2">Contact Number</label>
-                                                        <input type="tel" {...register('officialContact')}
+                                                        <input type="tel" {...register('officialContact', {
+                                                            pattern: {
+                                                                value: /^[0-9]{10}$/,
+                                                                message: 'Contact number must be exactly 10 digits'
+                                                            },
+                                                            maxLength: {
+                                                                value: 10,
+                                                                message: 'Contact number must be 10 digits'
+                                                            }
+                                                        })}
                                                             className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                                            placeholder="Type Here" />
+                                                            placeholder="Type Here"
+                                                            maxLength="10" />
+                                                        {errors.officialContact && <p className="text-red-600 text-sm mt-1">{errors.officialContact.message}</p>}
                                                     </div>
                                                     <div>
                                                         <label className="block text-sm font-semibold text-gray-700 mb-2">Alternative Contact</label>
-                                                        <input type="tel" {...register('alternativeContact')}
+                                                        <input type="tel" {...register('alternativeContact', {
+                                                            pattern: {
+                                                                value: /^[0-9]{10}$/,
+                                                                message: 'Contact number must be exactly 10 digits'
+                                                            },
+                                                            maxLength: {
+                                                                value: 10,
+                                                                message: 'Contact number must be 10 digits'
+                                                            },
+                                                            validate: (value) => {
+                                                                const officialContact = watch('officialContact')
+                                                                if (value && officialContact && value === officialContact) {
+                                                                    return 'Alternative contact must be different from main contact number'
+                                                                }
+                                                                return true
+                                                            }
+                                                        })}
                                                             className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                                            placeholder="Type Here" />
+                                                            placeholder="Type Here"
+                                                            maxLength="10" />
+                                                        {errors.alternativeContact && <p className="text-red-600 text-sm mt-1">{errors.alternativeContact.message}</p>}
                                                     </div>
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-4">
@@ -2745,28 +2806,58 @@ const PropertyRegistration = () => {
                             </button>
                         )}
 
-                        <button type="button"
-                            className={`${currentStep === 1 ? 'mx-auto' : 'ml-auto'} min-w-[200px] px-12 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg text-base font-semibold transition-all duration-300 shadow-lg hover:from-orange-600 hover:to-orange-700 hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed disabled:shadow-none disabled:opacity-60 disabled:transform-none`}
-                            onClick={handleContinue}
-                            disabled={
-                                isSubmitting ||
-                                (currentStep === 1 && !selectedCategory) ||
-                                (currentStep === 2 && !selectedPropertyType && !customPropertyType) ||
-                                (currentStep === 4 && !propertyConfirmation) ||
-                                (currentStep === 10 && roomFields.length === 0)
-                            }>
-                            {isSubmitting ? (
-                                <span className="flex items-center justify-center gap-2">
-                                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                    </svg>
-                                    Submitting...
-                                </span>
-                            ) : (
-                                currentStep === 10 ? 'Submit' : 'Continue'
-                            )}
-                        </button>
+                        {/* Hide Continue button on Step 1 - users must click category card button */}
+                        {currentStep > 1 && (
+                            <button type="button"
+                                className="ml-auto min-w-[200px] px-12 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg text-base font-semibold transition-all duration-300 shadow-lg hover:from-orange-600 hover:to-orange-700 hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed disabled:shadow-none disabled:opacity-60 disabled:transform-none"
+                                onClick={handleContinue}
+                                disabled={
+                                    isSubmitting ||
+                                    (currentStep === 2 && !selectedPropertyType && !customPropertyType) ||
+                                    (currentStep === 4 && !propertyConfirmation) ||
+                                    (currentStep === 10 && roomFields.length === 0) ||
+                                    // Disable on Step 12 if any images are uploading
+                                    (currentStep === 12 && (() => {
+                                        // Check if any room images are uploading
+                                        const roomImagesUploading = Object.values(roomImages).some(room =>
+                                            room?.primary?.loading ||
+                                            room?.room?.some(img => img?.loading) ||
+                                            room?.bathroom?.some(img => img?.loading)
+                                        );
+
+                                        // Check if any property images are uploading
+                                        const propertyImagesUploading =
+                                            propertyImages?.primary?.loading ||
+                                            propertyImages?.exterior?.some(img => img?.loading) ||
+                                            propertyImages?.interior?.some(img => img?.loading) ||
+                                            propertyImages?.reception?.some(img => img?.loading) ||
+                                            propertyImages?.restaurant?.some(img => img?.loading) ||
+                                            propertyImages?.parking?.some(img => img?.loading) ||
+                                            propertyImages?.other?.some(img => img?.loading);
+
+                                        return roomImagesUploading || propertyImagesUploading;
+                                    })()) ||
+                                    // Disable on Step 13 if any documents or profile photo are uploading
+                                    (currentStep === 13 && (
+                                        documents?.propertyPanDoc?.loading ||
+                                        documents?.gstDoc?.loading ||
+                                        documents?.bankChequeDoc?.loading ||
+                                        profilePhoto?.loading
+                                    ))
+                                }>
+                                {isSubmitting ? (
+                                    <span className="flex items-center justify-center gap-2">
+                                        <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                        </svg>
+                                        Submitting...
+                                    </span>
+                                ) : (
+                                    currentStep === 10 ? 'Submit' : 'Continue'
+                                )}
+                            </button>
+                        )}
                     </div>
                 </form >
             </div >

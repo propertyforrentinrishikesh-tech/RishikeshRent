@@ -18,61 +18,42 @@ const PropertyRegistrationSchema = new mongoose.Schema({
     // Step 3: Property Size
     numberOfRooms: {
         type: Number,
-        required: true,
         min: 1
     },
     numberOfFloors: {
         type: Number,
-        required: true,
         min: 1
     },
 
     // Step 4: Property Confirmation
     propertyConfirmation: {
         type: String,
-        required: true,
         enum: ['yes', 'no']
     },
 
     // Step 5: Property Location
     apartmentOrFloor: String,
-    addressLine1: {
-        type: String,
-        required: true
-    },
+    addressLine1: String,
     addressLine2: String,
-    city: {
-        type: String,
-        required: true
-    },
-    pinCode: {
-        type: String,
-        required: true
-    },
+    city: String,
+    pinCode: String,
     googleLocationCode: String,
     googleBusinessProfileCode: String,
 
     // Step 6: Property Details & Facilities
     propertyName: {
         type: String,
-        required: true
     },
     starRating: {
         type: String,
-        required: true
     },
     isChainProperty: {
         type: String,
         default: 'false'
     },
     chainName: String,
-    ownershipType: {
-        type: String,
-        required: true
-    },
-    facilities: [{
-        type: String
-    }],
+    ownershipType: String,
+    facilities: [String],
 
     // Step 7: Services (Breakfast & Parking)
     servesBreakfast: {
@@ -81,9 +62,7 @@ const PropertyRegistrationSchema = new mongoose.Schema({
     },
     breakfastIncluded: Boolean,
     breakfastPrice: Number,
-    breakfastTypes: [{
-        type: String
-    }],
+    breakfastTypes: [String],
     parkingAvailable: String,
     parkingCost: Number,
     parkingCostPeriod: String,
@@ -92,9 +71,7 @@ const PropertyRegistrationSchema = new mongoose.Schema({
     parkingType: String,
 
     // Step 8: Languages Spoken
-    languagesSpoken: [{
-        type: String
-    }],
+    languagesSpoken: [String],
 
     // Step 9: House Rules
     checkInFrom: String,
@@ -115,7 +92,6 @@ const PropertyRegistrationSchema = new mongoose.Schema({
     // Step 10: Rooms (Array of room objects)
     rooms: [{
         roomType: String,
-        roomName: String,
         numberOfRooms: Number,
         bedTypes: [{
             id: String,
@@ -136,45 +112,43 @@ const PropertyRegistrationSchema = new mongoose.Schema({
     // Step 11: Room Images
     roomImages: [{
         roomIndex: Number,
-        primaryImage: [String],
-        roomImage: [String],
-        bathroomImage: [String]
+        primaryImage: [{ url: String, key: String }],
+        roomImage: [{ url: String, key: String }],
+        bathroomImage: [{ url: String, key: String }]
     }],
 
     // Step 12: Property Images
     propertyImages: {
-        primary: [String],
-        exterior: [String],
-        interior: [String],
-        reception: [String],
-        restaurant: [String],
-        parking: [String],
-        other: [String]
+        primary: [{ url: String, key: String }],
+        exterior: [{ url: String, key: String }],
+        interior: [{ url: String, key: String }],
+        reception: [{ url: String, key: String }],
+        restaurant: [{ url: String, key: String }],
+        parking: [{ url: String, key: String }],
+        other: [{ url: String, key: String }]
     },
 
     // Step 13: Owner, Property & Bank Information
     ownerName: String,
     ownerEmail: String,
     ownerContact: String,
-    panNumber: String,
-    panDocument: String,
     aadhaarNumber: String,
-    profilePhoto: String,
+    profilePhoto: { url: String, key: String },
 
     officialPropertyName: String,
     officialEmail: String,
     officialContact: String,
     alternativeContact: String,
     propertyPanNumber: String,
-    propertyPanDocument: String,
+    propertyPanDocument: { url: String, key: String },
     gstNumber: String,
-    gstDocument: String,
+    gstDocument: { url: String, key: String },
 
     accountNumber: String,
     accountHolderName: String,
     ifscCode: String,
     bankAddress: String,
-    cancelledCheque: String,
+    cancelledCheque: { url: String, key: String },
 
     // Metadata
     status: {
