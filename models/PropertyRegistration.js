@@ -133,12 +133,12 @@ const PropertyRegistrationSchema = new mongoose.Schema({
         pricePerNight: Number
     }],
 
-    // Step 11: Room Images (to be implemented with file uploads)
+    // Step 11: Room Images
     roomImages: [{
         roomIndex: Number,
-        primaryImage: String,
-        roomImage: String,
-        bathroomImage: String
+        primaryImage: [String],
+        roomImage: [String],
+        bathroomImage: [String]
     }],
 
     // Step 12: Property Images

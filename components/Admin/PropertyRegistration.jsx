@@ -1,9 +1,10 @@
 "use client"
 import React, { useState, useEffect } from 'react'
 import { useForm, Controller, useFieldArray } from 'react-hook-form'
+import toast, { Toaster } from 'react-hot-toast'
 
 const PropertyRegistration = () => {
-    const [currentStep, setCurrentStep] = useState(12)
+    const [currentStep, setCurrentStep] = useState(1)
     const [isRoomModalOpen, setIsRoomModalOpen] = useState(false)
     const [editingRoomIndex, setEditingRoomIndex] = useState(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -264,33 +265,157 @@ const PropertyRegistration = () => {
     ]
 
 
+    // Browser refresh protection
+    useEffect(() => {
+        const hasFormData = selectedCategory || watch('propertyName') || roomFields.length > 0
+
+        const handleBeforeUnload = (e) => {
+            if (hasFormData && currentStep > 1 && !isSubmitting) {
+                e.preventDefault()
+                e.returnValue = '' // Chrome requires returnValue to be set
+                return ''
+            }
+        }
+
+        window.addEventListener('beforeunload', handleBeforeUnload)
+
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload)
+        }
+    }, [selectedCategory, watch, roomFields, currentStep, isSubmitting])
 
     const onSubmit = async (data) => {
         setIsSubmitting(true)
         setSubmitStatus(null)
 
         try {
+            // Prepare data with correct field mapping
+            const formData = {
+                // Step 1-4
+                category: selectedCategory,
+                propertyType: selectedPropertyType,
+                customPropertyType: customPropertyType,
+                numberOfRooms: numberOfRooms,
+                numberOfFloors: numberOfFloors,
+                propertyConfirmation: propertyConfirmation,
+
+                // Step 5 - Location
+                apartmentOrFloor: data.apartmentOrFloor,
+                addressLine1: data.addressLine1,
+                addressLine2: data.addressLine2,
+                city: data.city,
+                pinCode: data.pinCode,
+                googleLocationCode: data.googleLocationCode,
+                googleBusinessProfileCode: data.googleBusinessProfileCode,
+
+                // Step 6 - Property Details
+                propertyName: data.propertyName,
+                starRating: data.starRating,
+                isChainProperty: data.isChainProperty,
+                chainName: data.chainName,
+                ownershipType: data.ownershipType,
+                facilities: data.facilities,
+
+                // Step 7 - Services
+                servesBreakfast: data.servesBreakfast,
+                breakfastIncluded: data.breakfastIncluded,
+                breakfastPrice: data.breakfastPrice ? parseFloat(data.breakfastPrice) : undefined,
+                breakfastTypes: data.breakfastTypes,
+                parkingAvailable: data.parkingAvailable,
+                parkingCost: data.parkingCost ? parseFloat(data.parkingCost) : undefined,
+                parkingCostPeriod: data.parkingCostPeriod,
+                parkingReservation: data.parkingReservation,
+                parkingLocation: data.parkingLocation,
+                parkingType: data.parkingType,
+
+                // Step 8 - Languages
+                languagesSpoken: data.languagesSpoken,
+
+                // Step 9 - House Rules
+                checkInFrom: data.checkInFrom,
+                checkInUntil: data.checkInUntil,
+                checkOutFrom: data.checkOutFrom,
+                checkOutUntil: data.checkOutUntil,
+                allowChildren: data.allowChildren,
+                allowPets: data.allowPets,
+                petCharges: data.petCharges ? parseFloat(data.petCharges) : undefined,
+
+                // Step 10 - Rooms
+                rooms: data.rooms,
+
+                // Step 11 - Room Images (Transform to match model)
+                roomImages: Object.entries(roomImages).map(([roomIndex, photos]) => ({
+                    roomIndex: parseInt(roomIndex),
+                    primaryImage: photos.primary ? [photos.primary.url || photos.primary] : [],
+                    roomImage: Array.isArray(photos.room) ? photos.room.map(p => p.url || p) : [],
+                    bathroomImage: Array.isArray(photos.bathroom) ? photos.bathroom.map(p => p.url || p) : []
+                })),
+
+                // Step 12 - Property Images
+                propertyImages: {
+                    primary: propertyImages.primary ? (Array.isArray(propertyImages.primary) ? propertyImages.primary.map(p => p.url || p) : [propertyImages.primary.url || propertyImages.primary]) : [],
+                    exterior: propertyImages.exterior ? (Array.isArray(propertyImages.exterior) ? propertyImages.exterior.map(p => p.url || p) : [propertyImages.exterior.url || propertyImages.exterior]) : [],
+                    interior: propertyImages.interior ? (Array.isArray(propertyImages.interior) ? propertyImages.interior.map(p => p.url || p) : [propertyImages.interior.url || propertyImages.interior]) : [],
+                    reception: propertyImages.reception ? (Array.isArray(propertyImages.reception) ? propertyImages.reception.map(p => p.url || p) : [propertyImages.reception.url || propertyImages.reception]) : [],
+                    restaurant: propertyImages.restaurant ? (Array.isArray(propertyImages.restaurant) ? propertyImages.restaurant.map(p => p.url || p) : [propertyImages.restaurant.url || propertyImages.restaurant]) : [],
+                    parking: propertyImages.parking ? (Array.isArray(propertyImages.parking) ? propertyImages.parking.map(p => p.url || p) : [propertyImages.parking.url || propertyImages.parking]) : [],
+                    other: propertyImages.other ? (Array.isArray(propertyImages.other) ? propertyImages.other.map(p => p.url || p) : [propertyImages.other.url || propertyImages.other]) : []
+                },
+
+                // Step 13 - Personal Info (Fix key mapping)
+                ownerName: data.ownerName,
+                ownerEmail: data.ownerEmail,
+                ownerContact: data.ownerContact,
+                panNumber: data.panNumber,
+                panDocument: documents.ownerPanDoc?.url || '',
+                aadhaarNumber: data.aadhaarNumber,
+                profilePhoto: profilePhoto?.url || '',
+
+                officialPropertyName: data.officialPropertyName,
+                officialEmail: data.officialEmail,
+                officialContact: data.officialContact,
+                alternativeContact: data.alternativeContact,
+                propertyPanNumber: data.propertyPanNumber,
+                propertyPanDocument: documents.propertyPanDoc?.url || '',
+                gstNumber: data.gstNumber,
+                gstDocument: documents.gstDoc?.url || '',
+
+                accountNumber: data.accountNumber,
+                accountHolderName: data.accountHolderName,
+                ifscCode: data.ifscCode,
+                bankAddress: data.bankAddress,
+                cancelledCheque: documents.bankChequeDoc?.url || ''
+            }
+
             const response = await fetch('/api/addPropertyRegistration', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(data)
+                body: JSON.stringify(formData)
             })
 
             const result = await response.json()
 
             if (response.ok && result.success) {
+                // Show success toast
+                toast.success('Property registered successfully! Redirecting...')
+
                 setSubmitStatus({
                     type: 'success',
                     message: result.message || 'Property registration submitted successfully!',
                     propertyId: result.data?.id
                 })
 
-                // Optional: Reset form or redirect
-                // reset()
-                // router.push('/admin/properties')
+                // Reload after 2 seconds
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+
             } else {
+                // Show error toast
+                toast.error(result.error || 'Failed to submit property registration')
+
                 setSubmitStatus({
                     type: 'error',
                     message: result.error || 'Failed to submit property registration',
@@ -299,6 +424,10 @@ const PropertyRegistration = () => {
             }
         } catch (error) {
             console.error('Submission error:', error)
+
+            // Show error toast
+            toast.error('Network error. Please check your connection and try again.')
+
             setSubmitStatus({
                 type: 'error',
                 message: 'Network error. Please check your connection and try again.'
@@ -309,27 +438,62 @@ const PropertyRegistration = () => {
     }
 
     const handleContinue = () => {
-        // All categories now go to Step 2 to select property type
-        if (currentStep === 1 && selectedCategory) setCurrentStep(2)
-        else if (currentStep === 2 && (selectedPropertyType || customPropertyType)) setCurrentStep(3)
-        else if (currentStep === 3) setCurrentStep(4)
+        // Step 1: Category selection
+        if (currentStep === 1) {
+            if (!selectedCategory) {
+                toast.error('Please select a property category')
+                return
+            }
+            setCurrentStep(2)
+        }
+        // Step 2: Property type selection
+        else if (currentStep === 2) {
+            if (!selectedPropertyType && !customPropertyType) {
+                toast.error('Please select a property type')
+                return
+            }
+            setCurrentStep(3)
+        }
+        // Step 3: Property size
+        else if (currentStep === 3) {
+            setCurrentStep(4)
+        }
+        // Step 4: Property confirmation
         else if (currentStep === 4) {
+            if (!propertyConfirmation) {
+                toast.error('Please confirm if this is your property type')
+                return
+            }
             if (propertyConfirmation === 'no') setCurrentStep(2)
             else if (propertyConfirmation === 'yes') setCurrentStep(5)
         }
+        // Step 5: Location - Validate required fields
         else if (currentStep === 5) {
-            const addressLine1 = watch('addressLine1')
-            const city = watch('city')
-            const pinCode = watch('pinCode')
-            if (addressLine1 && city && pinCode) setCurrentStep(6)
+            setCurrentStep(6)
         }
-        else if (currentStep === 6) setCurrentStep(7)
-        else if (currentStep === 7) setCurrentStep(8)
-        else if (currentStep === 8) setCurrentStep(9)
-        else if (currentStep === 9) setCurrentStep(10)
-        else if (currentStep === 10) handleSubmit(onSubmit)()
-        else if (currentStep === 11) setCurrentStep(10) // Return to overview after room management
-        else if (currentStep === 12) setCurrentStep(10) // Return to overview after photo uploads
+        // Step 6: Property details - Validate property name
+        else if (currentStep === 6) {
+            setCurrentStep(7)
+        }
+        // Step 7: Services
+        else if (currentStep === 7) {
+            setCurrentStep(8)
+        }
+        // Step 8: Languages
+        else if (currentStep === 8) {
+            setCurrentStep(9)
+        }
+        // Step 9: House rules - Validate check-in/out times
+        else if (currentStep === 9) {
+            setCurrentStep(10)
+        }
+        // Step 10: Submit form - Validate rooms exist
+        else if (currentStep === 10) {
+            handleSubmit(onSubmit)()
+        }
+        // Navigation from sub-steps back to overview
+        else if (currentStep === 11) setCurrentStep(10)
+        else if (currentStep === 12) setCurrentStep(10)
         else if (currentStep === 13) setCurrentStep(10)
     }
 
@@ -885,8 +1049,6 @@ const PropertyRegistration = () => {
     const handleRemoveProfilePhoto = () => {
         setProfilePhoto(null)
     }
-
-    // ADD THESE FUNCTIONS:
 
     const openRoomModal = (index = null) => {
         if (index !== null) {
@@ -1830,7 +1992,7 @@ const PropertyRegistration = () => {
                             </div>
                         </div>
                     )}
-                    
+
                     {/* Step 11: Room Management */}
                     {currentStep === 11 && (
                         <div className="mb-8">
