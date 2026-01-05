@@ -6,7 +6,7 @@ import CustomRoomAmenity from '@/models/CustomRoomAmenity'
 export async function GET(request, { params }) {
     try {
         await connectDB()
-        const category = params.category
+        const { category } = await params
 
         const items = await CustomRoomAmenity.find({ category }).sort({ createdAt: -1 })
 
@@ -28,7 +28,7 @@ export async function GET(request, { params }) {
 export async function POST(request, { params }) {
     try {
         await connectDB()
-        const category = params.category
+        const { category } = await params
         const { name } = await request.json()
 
         // Validation

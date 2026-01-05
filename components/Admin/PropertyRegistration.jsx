@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react'
 import { useForm, Controller, useFieldArray } from 'react-hook-form'
 
 const PropertyRegistration = () => {
-    const [currentStep, setCurrentStep] = useState(1)
+    const [currentStep, setCurrentStep] = useState(12)
     const [isRoomModalOpen, setIsRoomModalOpen] = useState(false)
     const [editingRoomIndex, setEditingRoomIndex] = useState(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -40,6 +40,22 @@ const PropertyRegistration = () => {
 
     // Bed types visibility
     const [showAllBeds, setShowAllBeds] = useState(false)
+
+    // Photo upload states
+    const [selectedRoomForPhotos, setSelectedRoomForPhotos] = useState(null)
+    const [showRoomPhotoDetail, setShowRoomPhotoDetail] = useState(false)
+    const [roomImages, setRoomImages] = useState({}) // { roomIndex: { primary: url, room: [urls], bathroom: [urls] } }
+    const [propertyImages, setPropertyImages] = useState({}) // { primary: url, exterior: url, etc. }
+    const [photoSectionView, setPhotoSectionView] = useState('selection') // 'selection', 'rooms', 'property'
+
+    // Document upload states for Step 13
+    const [documents, setDocuments] = useState({
+        ownerPanDoc: null,      // { url, key, loading }
+        propertyPanDoc: null,   // { url, key, loading }
+        gstDoc: null,           // { url, key, loading }
+        bankChequeDoc: null     // { url, key, loading }
+    })
+    const [profilePhoto, setProfilePhoto] = useState(null) // { url, key, loading }
 
     const { register, handleSubmit, watch, control, setValue, formState: { errors } } = useForm({
         defaultValues: {
@@ -236,14 +252,6 @@ const PropertyRegistration = () => {
         'Kannada', 'Gujarati', 'Odia', 'Assamese', 'Burmese', 'Khmer'
     ];
 
-
-    const roomFacilitiesList = [
-        'Clothes rack', 'Flat-screen TV', 'Air conditioning', 'Towels', 'Linens', 'Wake-up service/Alarm clock',
-        'Towels/sheets (extra fee)', 'Heating', 'Fan', 'Safe', 'Toilet paper', 'Socket near the bed',
-        'Shower', 'Toilet', 'Bathtub', 'Free toiletries', 'Hairdryer', 'Bathrobe', 'Slippers', 'Bidet',
-        'Minibar', 'Terrace', 'View', 'Balcony', 'Dining table', 'Dining area'
-    ]
-
     const bedTypesList = [
         { id: 'single', label: 'Single bed', size: '90-130 cm wide' },
         { id: 'twin', label: 'Twin bed/s', size: '90-130 cm wide' },
@@ -319,10 +327,10 @@ const PropertyRegistration = () => {
         else if (currentStep === 7) setCurrentStep(8)
         else if (currentStep === 8) setCurrentStep(9)
         else if (currentStep === 9) setCurrentStep(10)
-        else if (currentStep === 10) setCurrentStep(11)
+        else if (currentStep === 10) handleSubmit(onSubmit)()
         else if (currentStep === 11) setCurrentStep(10) // Return to overview after room management
-        else if (currentStep === 12) setCurrentStep(13)
-        else if (currentStep === 13) handleSubmit(onSubmit)()
+        else if (currentStep === 12) setCurrentStep(10) // Return to overview after photo uploads
+        else if (currentStep === 13) setCurrentStep(10)
     }
 
     const handleBack = () => {
@@ -368,22 +376,22 @@ const PropertyRegistration = () => {
         }
     }
 
-    const deleteCustomFacility = async (facilityId) => {
-        try {
-            const response = await fetch(`/api/customFacilities?id=${facilityId}`, {
-                method: 'DELETE'
-            })
+    // const deleteCustomFacility = async (facilityId) => {
+    //     try {
+    //         const response = await fetch(`/api/customFacilities?id=${facilityId}`, {
+    //             method: 'DELETE'
+    //         })
 
-            if (response.ok) {
-                setCustomFacilities(customFacilities.filter(f => f.id !== facilityId))
-            } else {
-                alert('Failed to delete facility')
-            }
-        } catch (error) {
-            console.error('Error deleting facility:', error)
-            alert('Error deleting facility')
-        }
-    }
+    //         if (response.ok) {
+    //             setCustomFacilities(customFacilities.filter(f => f.id !== facilityId))
+    //         } else {
+    //             alert('Failed to delete facility')
+    //         }
+    //     } catch (error) {
+    //         console.error('Error deleting facility:', error)
+    //         alert('Error deleting facility')
+    //     }
+    // }
 
     // Custom Breakfast Types Modal Handlers
     const openBreakfastModal = () => setIsBreakfastModalOpen(true)
@@ -419,22 +427,22 @@ const PropertyRegistration = () => {
         }
     }
 
-    const deleteCustomBreakfast = async (breakfastId) => {
-        try {
-            const response = await fetch(`/api/customBreakfastTypes?id=${breakfastId}`, {
-                method: 'DELETE'
-            })
+    // const deleteCustomBreakfast = async (breakfastId) => {
+    //     try {
+    //         const response = await fetch(`/api/customBreakfastTypes?id=${breakfastId}`, {
+    //             method: 'DELETE'
+    //         })
 
-            if (response.ok) {
-                setCustomBreakfastTypes(customBreakfastTypes.filter(b => b.id !== breakfastId))
-            } else {
-                alert('Failed to delete breakfast type')
-            }
-        } catch (error) {
-            console.error('Error deleting breakfast type:', error)
-            alert('Error deleting breakfast type')
-        }
-    }
+    //         if (response.ok) {
+    //             setCustomBreakfastTypes(customBreakfastTypes.filter(b => b.id !== breakfastId))
+    //         } else {
+    //             alert('Failed to delete breakfast type')
+    //         }
+    //     } catch (error) {
+    //         console.error('Error deleting breakfast type:', error)
+    //         alert('Error deleting breakfast type')
+    //     }
+    // }
 
     // Room Amenities Modal Handlers
     // Bathroom Items
@@ -545,7 +553,341 @@ const PropertyRegistration = () => {
         }
     }
 
+    // Photo Upload Handlers
+    const openRoomPhotoDetail = (roomIndex) => {
+        setSelectedRoomForPhotos(roomIndex)
+        setShowRoomPhotoDetail(true)
+    }
+
+    const closeRoomPhotoDetail = () => {
+        setSelectedRoomForPhotos(null)
+        setShowRoomPhotoDetail(false)
+    }
+
+    const handleRoomImageUpload = async (roomIndex, imageType, files) => {
+        const fileArray = files instanceof FileList ? Array.from(files) : [files]
+        if (imageType === 'primary') {
+            // Primary image: single image only
+            const file = fileArray[0]
+            // Set loading state
+            setRoomImages(prev => ({
+                ...prev,
+                [roomIndex]: {
+                    ...prev[roomIndex],
+                    primary: { url: URL.createObjectURL(file), loading: true }
+                }
+            }))
+            // Upload to Cloudinary
+            const formDataUpload = new FormData()
+            formDataUpload.append('file', file)
+            try {
+                const res = await fetch('/api/cloudinary', {
+                    method: 'POST',
+                    body: formDataUpload
+                })
+                const data = await res.json()
+                if (res.ok && data.url) {
+                    setRoomImages(prev => ({
+                        ...prev,
+                        [roomIndex]: {
+                            ...prev[roomIndex],
+                            primary: { url: data.url, key: data.key || '', loading: false }
+                        }
+                    }))
+                } else {
+                    console.error('Cloudinary upload failed:', data.error || 'Unknown error')
+                    setRoomImages(prev => ({
+                        ...prev,
+                        [roomIndex]: {
+                            ...prev[roomIndex],
+                            primary: null
+                        }
+                    }))
+                }
+            } catch (err) {
+                console.error('Cloudinary upload error:', err.message)
+                setRoomImages(prev => ({
+                    ...prev,
+                    [roomIndex]: {
+                        ...prev[roomIndex],
+                        primary: null
+                    }
+                }))
+            }
+        } else {
+            // Room and Bathroom: multiple images
+            const newImages = fileArray.map(file => ({
+                file,
+                url: URL.createObjectURL(file),
+                key: '',
+                loading: true
+            }))
+            // Add new images with loading state
+            setRoomImages(prev => ({
+                ...prev,
+                [roomIndex]: {
+                    ...prev[roomIndex],
+                    [imageType]: [...(prev[roomIndex]?.[imageType] || []), ...newImages]
+                }
+            }))
+            // Upload each file to Cloudinary
+            for (let i = 0; i < fileArray.length; i++) {
+                const file = fileArray[i]
+                const formDataUpload = new FormData()
+                formDataUpload.append('file', file)
+                try {
+                    const res = await fetch('/api/cloudinary', {
+                        method: 'POST',
+                        body: formDataUpload
+                    })
+                    const data = await res.json()
+                    if (res.ok && data.url) {
+                        setRoomImages(prev => {
+                            const currentImages = [...(prev[roomIndex]?.[imageType] || [])]
+                            const index = currentImages.findIndex(img => img.file === file)
+                            if (index !== -1) {
+                                currentImages[index] = {
+                                    ...currentImages[index],
+                                    url: data.url,
+                                    key: data.key || '',
+                                    loading: false
+                                }
+                            }
+                            return {
+                                ...prev,
+                                [roomIndex]: {
+                                    ...prev[roomIndex],
+                                    [imageType]: currentImages
+                                }
+                            }
+                        })
+                    }
+                } catch (err) {
+                    console.error('Error uploading image:', err)
+                    // Remove the failed upload
+                    setRoomImages(prev => ({
+                        ...prev,
+                        [roomIndex]: {
+                            ...prev[roomIndex],
+                            [imageType]: prev[roomIndex]?.[imageType]?.filter(img => img.file !== file) || []
+                        }
+                    }))
+                }
+            }
+        }
+    }
+    const handleRemoveRoomImage = (roomIndex, imageType, imageData) => {
+        if (imageType === 'primary') {
+            // Remove primary image
+            setRoomImages(prev => ({
+                ...prev,
+                [roomIndex]: {
+                    ...prev[roomIndex],
+                    primary: null
+                }
+            }))
+        } else {
+            // Remove from room or bathroom array
+            setRoomImages(prev => ({
+                ...prev,
+                [roomIndex]: {
+                    ...prev[roomIndex],
+                    [imageType]: prev[roomIndex]?.[imageType]?.filter(img => img.url !== imageData.url) || []
+                }
+            }))
+        }
+    }
+    const handlePropertyImageUpload = async (imageType, files) => {
+        const fileArray = files instanceof FileList ? Array.from(files) : [files]
+        if (imageType === 'primary') {
+            // Primary image: single image only
+            const file = fileArray[0]
+            // Set loading state
+            setPropertyImages(prev => ({
+                ...prev,
+                primary: { url: URL.createObjectURL(file), loading: true }
+            }))
+            // Upload to Cloudinary
+            const formDataUpload = new FormData()
+            formDataUpload.append('file', file)
+            try {
+                const res = await fetch('/api/cloudinary', {
+                    method: 'POST',
+                    body: formDataUpload
+                })
+                const data = await res.json()
+                if (res.ok && data.url) {
+                    setPropertyImages(prev => ({
+                        ...prev,
+                        primary: { url: data.url, key: data.key || '', loading: false }
+                    }))
+                } else {
+                    console.error('Cloudinary upload failed:', data.error || 'Unknown error')
+                    setPropertyImages(prev => ({
+                        ...prev,
+                        primary: null
+                    }))
+                }
+            } catch (err) {
+                console.error('Cloudinary upload error:', err.message)
+                setPropertyImages(prev => ({
+                    ...prev,
+                    primary: null
+                }))
+            }
+        } else {
+            // Other categories: multiple images
+            const newImages = fileArray.map(file => ({
+                file,
+                url: URL.createObjectURL(file),
+                key: '',
+                loading: true
+            }))
+            // Add new images with loading state
+            setPropertyImages(prev => ({
+                ...prev,
+                [imageType]: [...(prev[imageType] || []), ...newImages]
+            }))
+            // Upload each file to Cloudinary
+            for (let i = 0; i < fileArray.length; i++) {
+                const file = fileArray[i]
+                const formDataUpload = new FormData()
+                formDataUpload.append('file', file)
+                try {
+                    const res = await fetch('/api/cloudinary', {
+                        method: 'POST',
+                        body: formDataUpload
+                    })
+                    const data = await res.json()
+                    if (res.ok && data.url) {
+                        setPropertyImages(prev => {
+                            const currentImages = [...(prev[imageType] || [])]
+                            const index = currentImages.findIndex(img => img.file === file)
+                            if (index !== -1) {
+                                currentImages[index] = {
+                                    ...currentImages[index],
+                                    url: data.url,
+                                    key: data.key || '',
+                                    loading: false
+                                }
+                            }
+                            return {
+                                ...prev,
+                                [imageType]: currentImages
+                            }
+                        })
+                    }
+                } catch (err) {
+                    console.error('Error uploading image:', err)
+                    // Remove the failed upload
+                    setPropertyImages(prev => ({
+                        ...prev,
+                        [imageType]: prev[imageType]?.filter(img => img.file !== file) || []
+                    }))
+                }
+            }
+        }
+    }
+    const handleRemovePropertyImage = (imageType, imageData) => {
+        if (imageType === 'primary') {
+            // Remove primary image
+            setPropertyImages(prev => ({
+                ...prev,
+                primary: null
+            }))
+        } else {
+            // Remove from category array
+            setPropertyImages(prev => ({
+                ...prev,
+                [imageType]: prev[imageType]?.filter(img => img.url !== imageData.url) || []
+            }))
+        }
+    }
+
+    // Document upload handlers for Step 13
+    const handleDocumentUpload = async (docType, file) => {
+        if (!file) return
+
+        // Set loading state
+        setDocuments(prev => ({
+            ...prev,
+            [docType]: { url: URL.createObjectURL(file), loading: true }
+        }))
+
+        // Upload to Cloudinary
+        const formDataUpload = new FormData()
+        formDataUpload.append('file', file)
+
+        try {
+            const res = await fetch('/api/cloudinary', {
+                method: 'POST',
+                body: formDataUpload
+            })
+            const data = await res.json()
+
+            if (res.ok && data.url) {
+                setDocuments(prev => ({
+                    ...prev,
+                    [docType]: { url: data.url, key: data.key || '', loading: false }
+                }))
+            } else {
+                console.error('Cloudinary upload failed:', data.error || 'Unknown error')
+                setDocuments(prev => ({
+                    ...prev,
+                    [docType]: null
+                }))
+            }
+        } catch (err) {
+            console.error('Cloudinary upload error:', err.message)
+            setDocuments(prev => ({
+                ...prev,
+                [docType]: null
+            }))
+        }
+    }
+
+    const handleRemoveDocument = (docType) => {
+        setDocuments(prev => ({
+            ...prev,
+            [docType]: null
+        }))
+    }
+
+    const handleProfilePhotoUpload = async (file) => {
+        if (!file) return
+
+        // Set loading state
+        setProfilePhoto({ url: URL.createObjectURL(file), loading: true })
+
+        // Upload to Cloudinary
+        const formDataUpload = new FormData()
+        formDataUpload.append('file', file)
+
+        try {
+            const res = await fetch('/api/cloudinary', {
+                method: 'POST',
+                body: formDataUpload
+            })
+            const data = await res.json()
+
+            if (res.ok && data.url) {
+                setProfilePhoto({ url: data.url, key: data.key || '', loading: false })
+            } else {
+                console.error('Cloudinary upload failed:', data.error || 'Unknown error')
+                setProfilePhoto(null)
+            }
+        } catch (err) {
+            console.error('Cloudinary upload error:', err.message)
+            setProfilePhoto(null)
+        }
+    }
+
+    const handleRemoveProfilePhoto = () => {
+        setProfilePhoto(null)
+    }
+
     // ADD THESE FUNCTIONS:
+
     const openRoomModal = (index = null) => {
         if (index !== null) {
             setEditingRoomIndex(index)
@@ -625,10 +967,10 @@ const PropertyRegistration = () => {
         const titles = {
             1: "To get started, select the type of property you want to list on Booking.com",
             2: "From the list below, which property category is the best fit for your place?",
-            3: "How many hotels are you listing?",
-            4: "One hotel where guests can book a room",
+            3: `How many ${getSelectedPropertyTypeLabel()} are you listing?`,
+            4: `One ${getSelectedPropertyTypeLabel()} where guests can book a room`,
             5: "Where is your property?",
-            6: "Tell us about your hotel",
+            6: `Tell us about your ${getSelectedPropertyTypeLabel()}`,
             7: "Services at your property?",
             8: "What languages do you or your staff speak?",
             9: "House Rules",
@@ -1443,15 +1785,15 @@ const PropertyRegistration = () => {
                             <div className="space-y-6">
                                 {/* Progress Steps */}
                                 <div className="space-y-4">
-                                    <div className="flex items-center gap-4 p-4 bg-green-50 border-2 border-green-300 rounded-lg">
-                                        <div className="flex-shrink-0 w-10 h-10 bg-green-600 rounded-full flex items-center justify-center text-white font-bold">✓</div>
+                                    <div className="flex items-center gap-4 p-4 bg-white border-2 border-gray-300 rounded-lg hover:border-blue-400 transition-colors">
+                                        <div className="flex-shrink-0 w-10 h-10 bg-white border-gray-300 border-2 rounded-full flex items-center justify-center text-green-600 font-bold">🏨</div>
                                         <div className="flex-grow">
                                             <h3 className="font-semibold text-gray-900">Step 1 - Property details</h3>
                                             <p className="text-sm text-gray-600">The basics: Add your property name, address, facilities, and more</p>
                                         </div>
                                         <button type="button" onClick={() => setCurrentStep(1)} className="px-6 py-2 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition-colors">Edit</button>
                                     </div>
-                                    <div className="flex items-center gap-4 p-4 bg-white border-2 border-blue-400 rounded-lg">
+                                    <div className="flex items-center gap-4 p-4 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-400 transition-colors">
                                         <div className="flex-shrink-0 w-10 h-10 bg-white border-2 border-gray-300 rounded-full flex items-center justify-center text-gray-600 font-bold">🛏️</div>
                                         <div className="flex-grow">
                                             <h3 className="font-semibold text-gray-900">Step 2 - Rooms</h3>
@@ -1479,7 +1821,7 @@ const PropertyRegistration = () => {
                                             <h3 className="font-semibold text-gray-900">Step 4 - Final steps</h3>
                                             <p className="text-sm text-gray-600">Set up payments and invoices before you open for bookings</p>
                                         </div>
-                                        <button type="button" onClick={() => setCurrentStep(12)}
+                                        <button type="button" onClick={() => setCurrentStep(13)}
                                             className="px-6 py-2 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition-colors">
                                             Add final details
                                         </button>
@@ -1488,6 +1830,7 @@ const PropertyRegistration = () => {
                             </div>
                         </div>
                     )}
+                    
                     {/* Step 11: Room Management */}
                     {currentStep === 11 && (
                         <div className="mb-8">
@@ -1545,44 +1888,389 @@ const PropertyRegistration = () => {
                         </div>
                     )}
 
-                    {/* Step 12: Property Images */}
+                    {/* Step 12: Photo Uploads */}
                     {currentStep === 12 && (
                         <div className="mb-8">
                             <div className="bg-white rounded-lg p-6">
-                                <h2 className="text-2xl font-bold text-gray-900 mb-6">Property Image Information</h2>
-                                <p className="text-gray-600 mb-6">Upload images for different areas of your property</p>
+                                <h2 className="text-2xl font-bold text-gray-900 mb-6">Upload Photos</h2>
 
-                                <div className="space-y-4">
-                                    {[
-                                        { id: 'primary', label: 'Primary Image', color: 'teal' },
-                                        { id: 'exterior', label: 'Exterior Image', color: 'blue' },
-                                        { id: 'interior', label: 'Interior Image', color: 'green' },
-                                        { id: 'reception', label: 'Reception Image', color: 'green' },
-                                        { id: 'restaurant', label: 'Restaurant Image', color: 'green' },
-                                        { id: 'parking', label: 'Parking Image', color: 'green' },
-                                        { id: 'other', label: 'Other Image', color: 'green' }
-                                    ].map((category) => (
-                                        <div key={category.id} className="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg hover:border-blue-400 transition-colors">
-                                            <label className="text-base font-semibold text-gray-900 flex-1">{category.label}</label>
-                                            <div className="flex gap-3 items-center">
-                                                <button type="button"
-                                                    className={`px-6 py-2 bg-${category.color}-500 text-white rounded-lg hover:bg-${category.color}-600 transition-colors font-semibold`}
-                                                    style={{ backgroundColor: category.color === 'teal' ? '#14b8a6' : category.color === 'blue' ? '#3b82f6' : '#22c55e' }}>
-                                                    Upload Image
-                                                </button>
-                                                <button type="button" className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">View</button>
-                                                <button type="button" className="px-4 py-2 text-sm bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200">Edit</button>
-                                                <button type="button" className="px-4 py-2 text-sm bg-red-100 text-red-700 rounded-md hover:bg-red-200">Delete</button>
-                                            </div>
+                                {photoSectionView === 'selection' ? (
+                                    /* Initial Selection Screen */
+                                    <div className="space-y-6">
+                                        <p className="text-gray-600 mb-8">Choose which type of photos you want to upload</p>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            {/* Add Room Photos Button */}
+                                            <button
+                                                type="button"
+                                                onClick={() => setPhotoSectionView('rooms')}
+                                                className="p-8 border-2 border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all group"
+                                            >
+                                                <div className="text-center">
+                                                    <div className="text-6xl mb-4">🛏️</div>
+                                                    <h3 className="text-xl font-bold text-gray-900 mb-2">Add Room Photos</h3>
+                                                    <p className="text-gray-600">Upload images for each room including primary, room, and bathroom photos</p>
+                                                </div>
+                                            </button>
+
+                                            {/* Add Property Images Button */}
+                                            <button
+                                                type="button"
+                                                onClick={() => setPhotoSectionView('property')}
+                                                className="p-8 border-2 border-gray-300 rounded-lg hover:border-green-500 hover:bg-green-50 transition-all group"
+                                            >
+                                                <div className="text-center">
+                                                    <div className="text-6xl mb-4">🏨</div>
+                                                    <h3 className="text-xl font-bold text-gray-900 mb-2">Add Property Images</h3>
+                                                    <p className="text-gray-600">Upload general property images like exterior, interior, reception, etc.</p>
+                                                </div>
+                                            </button>
                                         </div>
-                                    ))}
-                                </div>
+                                    </div>
+                                ) : photoSectionView === 'rooms' ? (
+                                    /* Room Photos Section */
+                                    <div>
+                                        <div className="flex items-center justify-between mb-6">
+                                            <h3 className="text-xl font-semibold text-gray-900">Room Photos</h3>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setPhotoSectionView('selection')
+                                                    setShowRoomPhotoDetail(false)
+                                                }}
+                                                className="px-4 py-2 text-blue-600 font-semibold hover:underline"
+                                            >
+                                                ← Back to Selection
+                                            </button>
+                                        </div>
 
-                                <div className="mt-8 text-center">
-                                    <button type="button" className="px-8 py-3 bg-gray-900 text-white rounded-lg font-semibold hover:bg-gray-800 transition-colors">
-                                        Data Save
-                                    </button>
-                                </div>
+                                        {!showRoomPhotoDetail ? (
+                                            /* Room Photos Table View */
+                                            <div className="space-y-4">
+                                                {roomFields.length > 0 ? (
+                                                    roomFields.map((room, index) => (
+                                                        <div key={room.id} className="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg hover:border-blue-400 transition-colors">
+                                                            <div className="flex-1">
+                                                                <h4 className="font-semibold text-gray-900 text-lg">
+                                                                    {room.roomName || room.roomType || `Room ${index + 1}`}
+                                                                </h4>
+                                                            </div>
+                                                            <div className="flex gap-3 items-center">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => openRoomPhotoDetail(index)}
+                                                                    className="px-6 py-2 text-white rounded-lg font-semibold transition-colors"
+                                                                    style={{ backgroundColor: index % 3 === 0 ? '#14b8a6' : index % 3 === 1 ? '#3b82f6' : '#22c55e' }}
+                                                                >
+                                                                    Upload Image
+                                                                </button>
+                                                                <button type="button" className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">View</button>
+                                                                <button type="button" className="px-4 py-2 text-sm bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200">Edit</button>
+                                                                <button type="button" className="px-4 py-2 text-sm bg-red-100 text-red-700 rounded-md hover:bg-red-200">Delete</button>
+                                                            </div>
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                                                        <p className="text-gray-600">No rooms added yet. Please add rooms first.</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            /* Room Photo Detail View */
+                                            <div className="space-y-6">
+                                                <div className="flex items-center justify-between mb-4">
+                                                    <h4 className="text-lg font-semibold text-gray-900">
+                                                        {roomFields[selectedRoomForPhotos]?.roomName || roomFields[selectedRoomForPhotos]?.roomType || `Room ${selectedRoomForPhotos + 1}`}
+                                                    </h4>
+                                                    <button
+                                                        type="button"
+                                                        onClick={closeRoomPhotoDetail}
+                                                        className="px-4 py-2 text-blue-600 font-semibold hover:underline"
+                                                    >
+                                                        ← Back to Rooms
+                                                    </button>
+                                                </div>
+
+                                                {/* Primary Image */}
+                                                <div className="p-4 border-2 border-gray-200 rounded-lg">
+                                                    <div className="flex items-center justify-between mb-3">
+                                                        <div className="flex-1">
+                                                            <h5 className="font-semibold text-gray-900">Primary image</h5>
+                                                            <p className="text-sm text-gray-600">exterior or interior image optional (Single image only)</p>
+                                                        </div>
+                                                        <div className="flex gap-3 items-center">
+                                                            <input
+                                                                type="file"
+                                                                accept="image/*"
+                                                                onChange={(e) => e.target.files[0] && handleRoomImageUpload(selectedRoomForPhotos, 'primary', e.target.files[0])}
+                                                                className="hidden"
+                                                                id={`primary-${selectedRoomForPhotos}`}
+                                                                disabled={roomImages[selectedRoomForPhotos]?.primary?.loading}
+                                                            />
+                                                            <label
+                                                                htmlFor={`primary-${selectedRoomForPhotos}`}
+                                                                className={`px-6 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors font-semibold cursor-pointer ${roomImages[selectedRoomForPhotos]?.primary?.loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                            >
+                                                                {roomImages[selectedRoomForPhotos]?.primary?.loading ? 'Uploading...' : 'Upload Image'}
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    {roomImages[selectedRoomForPhotos]?.primary && (
+                                                        <div className="relative inline-block">
+                                                            <img src={roomImages[selectedRoomForPhotos].primary.url} alt="Primary preview" className="w-60 h-36 object-cover rounded-lg border-2 border-gray-300" />
+                                                            {roomImages[selectedRoomForPhotos].primary.loading && (
+                                                                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
+                                                                    <div className="text-white text-xs">Uploading...</div>
+                                                                </div>
+                                                            )}
+                                                            {!roomImages[selectedRoomForPhotos].primary.loading && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => handleRemoveRoomImage(selectedRoomForPhotos, 'primary', roomImages[selectedRoomForPhotos].primary)}
+                                                                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
+                                                                >
+                                                                    ×
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Room Images */}
+                                                <div className="p-4 border-2 border-gray-200 rounded-lg">
+                                                    <div className="flex items-center justify-between mb-3">
+                                                        <div className="flex-1">
+                                                            <h5 className="font-semibold text-gray-900">Room Images</h5>
+                                                            <p className="text-sm text-gray-600">Amenities with interior images (Multiple images allowed)</p>
+                                                        </div>
+                                                        <div className="flex gap-3 items-center">
+                                                            <input
+                                                                type="file"
+                                                                accept="image/*"
+                                                                multiple
+                                                                onChange={(e) => e.target.files.length > 0 && handleRoomImageUpload(selectedRoomForPhotos, 'room', e.target.files)}
+                                                                className="hidden"
+                                                                id={`room-${selectedRoomForPhotos}`}
+                                                            />
+                                                            <label
+                                                                htmlFor={`room-${selectedRoomForPhotos}`}
+                                                                className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-semibold cursor-pointer"
+                                                            >
+                                                                Upload Images
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    {roomImages[selectedRoomForPhotos]?.room && roomImages[selectedRoomForPhotos].room.length > 0 && (
+                                                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                                            {roomImages[selectedRoomForPhotos].room.map((imageData, index) => (
+                                                                <div key={index} className="relative">
+                                                                    <img src={imageData.url} alt={`Room ${index + 1}`} className="h-32 w-full object-cover rounded-lg border-2 border-gray-300" />
+                                                                    {imageData.loading && (
+                                                                        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
+                                                                            <div className="text-white text-xs">Uploading...</div>
+                                                                        </div>
+                                                                    )}
+                                                                    {!imageData.loading && (
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => handleRemoveRoomImage(selectedRoomForPhotos, 'room', imageData)}
+                                                                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
+                                                                        >
+                                                                            ×
+                                                                        </button>
+                                                                    )}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Bathroom Images */}
+                                                <div className="p-4 border-2 border-gray-200 rounded-lg">
+                                                    <div className="flex items-center justify-between mb-3">
+                                                        <div className="flex-1">
+                                                            <h5 className="font-semibold text-gray-900">Bathroom Images</h5>
+                                                            <p className="text-sm text-gray-600">With all modern images (Multiple images allowed)</p>
+                                                        </div>
+                                                        <div className="flex gap-3 items-center">
+                                                            <input
+                                                                type="file"
+                                                                accept="image/*"
+                                                                multiple
+                                                                onChange={(e) => e.target.files.length > 0 && handleRoomImageUpload(selectedRoomForPhotos, 'bathroom', e.target.files)}
+                                                                className="hidden"
+                                                                id={`bathroom-${selectedRoomForPhotos}`}
+                                                            />
+                                                            <label
+                                                                htmlFor={`bathroom-${selectedRoomForPhotos}`}
+                                                                className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-semibold cursor-pointer"
+                                                            >
+                                                                Upload Images
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    {roomImages[selectedRoomForPhotos]?.bathroom && roomImages[selectedRoomForPhotos].bathroom.length > 0 && (
+                                                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                                            {roomImages[selectedRoomForPhotos].bathroom.map((imageData, index) => (
+                                                                <div key={index} className="relative">
+                                                                    <img src={imageData.url} alt={`Bathroom ${index + 1}`} className="w-full h-32 object-cover rounded-lg border-2 border-gray-300" />
+                                                                    {imageData.loading && (
+                                                                        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
+                                                                            <div className="text-white text-xs">Uploading...</div>
+                                                                        </div>
+                                                                    )}
+                                                                    {!imageData.loading && (
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => handleRemoveRoomImage(selectedRoomForPhotos, 'bathroom', imageData)}
+                                                                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
+                                                                        >
+                                                                            ×
+                                                                        </button>
+                                                                    )}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Save Button */}
+                                                <div className="mt-6">
+                                                    <button
+                                                        type="button"
+                                                        onClick={closeRoomPhotoDetail}
+                                                        className="w-full px-8 py-3 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition-colors"
+                                                    >
+                                                        Data Save
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    /* Property Photos Section */
+                                    <div>
+                                        <div className="flex items-center justify-between mb-6">
+                                            <h3 className="text-xl font-semibold text-gray-900">Property Photos</h3>
+                                            <button
+                                                type="button"
+                                                onClick={() => setPhotoSectionView('selection')}
+                                                className="px-4 py-2 text-blue-600 font-semibold hover:underline"
+                                            >
+                                                ← Back to Selection
+                                            </button>
+                                        </div>
+
+                                        <p className="text-gray-600 mb-6">Upload images for different areas of your property</p>
+
+                                        <div className="space-y-6">
+                                            {/* Primary Image - Single Upload */}
+                                            <div className="p-4 border-2 border-gray-200 rounded-lg">
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <div className="flex-1">
+                                                        <h5 className="font-semibold text-gray-900">Primary Image</h5>
+                                                        <p className="text-sm text-gray-600">Main property image (Single image only)</p>
+                                                    </div>
+                                                    <div className="flex gap-3 items-center">
+                                                        <input
+                                                            type="file"
+                                                            accept="image/*"
+                                                            onChange={(e) => e.target.files[0] && handlePropertyImageUpload('primary', e.target.files[0])}
+                                                            className="hidden"
+                                                            id="property-primary"
+                                                            disabled={propertyImages.primary?.loading}
+                                                        />
+                                                        <label
+                                                            htmlFor="property-primary"
+                                                            className={`px-6 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors font-semibold cursor-pointer ${propertyImages.primary?.loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                        >
+                                                            {propertyImages.primary?.loading ? 'Uploading...' : 'Upload Image'}
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                {propertyImages.primary && (
+                                                    <div className="relative inline-block">
+                                                        <img src={propertyImages.primary.url} alt="Primary preview" className="w-48 h-32 object-cover rounded-lg border-2 border-gray-300" />
+                                                        {propertyImages.primary.loading && (
+                                                            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
+                                                                <div className="text-white text-xs">Uploading...</div>
+                                                            </div>
+                                                        )}
+                                                        {!propertyImages.primary.loading && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleRemovePropertyImage('primary', propertyImages.primary)}
+                                                                className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
+                                                            >
+                                                                ×
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Other Categories - Multiple Uploads */}
+                                            {[
+                                                { id: 'exterior', label: 'Exterior Images', color: '#3b82f6' },
+                                                { id: 'interior', label: 'Interior Images', color: '#22c55e' },
+                                                { id: 'reception', label: 'Reception Images', color: '#8b5cf6' },
+                                                { id: 'restaurant', label: 'Restaurant Images', color: '#f59e0b' },
+                                                { id: 'parking', label: 'Parking Images', color: '#6366f1' },
+                                                { id: 'other', label: 'Other Images', color: '#64748b' }
+                                            ].map((category) => (
+                                                <div key={category.id} className="p-4 border-2 border-gray-200 rounded-lg">
+                                                    <div className="flex items-center justify-between mb-3">
+                                                        <div className="flex-1">
+                                                            <h5 className="font-semibold text-gray-900">{category.label}</h5>
+                                                            <p className="text-sm text-gray-600">Multiple images allowed</p>
+                                                        </div>
+                                                        <div className="flex gap-3 items-center">
+                                                            <input
+                                                                type="file"
+                                                                accept="image/*"
+                                                                multiple
+                                                                onChange={(e) => e.target.files.length > 0 && handlePropertyImageUpload(category.id, e.target.files)}
+                                                                className="hidden"
+                                                                id={`property-${category.id}`}
+                                                            />
+                                                            <label
+                                                                htmlFor={`property-${category.id}`}
+                                                                className="px-6 py-2 text-white rounded-lg font-semibold cursor-pointer transition-colors hover:opacity-90"
+                                                                style={{ backgroundColor: category.color }}
+                                                            >
+                                                                Upload Images
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    {propertyImages[category.id] && propertyImages[category.id].length > 0 && (
+                                                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                                            {propertyImages[category.id].map((imageData, index) => (
+                                                                <div key={index} className="relative">
+                                                                    <img src={imageData.url} alt={`${category.label} ${index + 1}`} className="w-full h-32 object-cover rounded-lg border-2 border-gray-300" />
+                                                                    {imageData.loading && (
+                                                                        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
+                                                                            <div className="text-white text-xs">Uploading...</div>
+                                                                        </div>
+                                                                    )}
+                                                                    {!imageData.loading && (
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => handleRemovePropertyImage(category.id, imageData)}
+                                                                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
+                                                                        >
+                                                                            ×
+                                                                        </button>
+                                                                    )}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     )}
@@ -1591,7 +2279,7 @@ const PropertyRegistration = () => {
                     {currentStep === 13 && (
                         <div className="mb-8">
                             <div className="bg-white rounded-lg p-6">
-                                <h2 className="text-2xl font-bold text-gray-900 mb-8">Personal Information</h2>
+                                <h2 className="text-2xl font-bold text-gray-900 mb-8 underline">Personal Information</h2>
 
                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                                     {/* Left Column - Owner Information */}
@@ -1604,36 +2292,25 @@ const PropertyRegistration = () => {
                                                     <label className="block text-sm font-semibold text-gray-700 mb-2">Owner Name</label>
                                                     <input type="text" {...register('ownerName')}
                                                         className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                                                        placeholder="Type Here" style={{ backgroundColor: '#14b8a6', color: 'white' }} />
+                                                        placeholder="Type Here" />
                                                 </div>
                                                 <div>
                                                     <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
                                                     <input type="email" {...register('ownerEmail')}
                                                         className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                                                        placeholder="Type Here" style={{ backgroundColor: '#14b8a6', color: 'white' }} />
+                                                        placeholder="Type Here" />
                                                 </div>
                                                 <div>
                                                     <label className="block text-sm font-semibold text-gray-700 mb-2">Contact Number</label>
                                                     <input type="tel" {...register('ownerContact')}
                                                         className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                                                        placeholder="Type Here" style={{ backgroundColor: '#14b8a6', color: 'white' }} />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Pan Number</label>
-                                                    <div className="flex gap-2">
-                                                        <input type="text" {...register('panNumber')}
-                                                            className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                                                            placeholder="Type Here" style={{ backgroundColor: '#14b8a6', color: 'white' }} />
-                                                        <button type="button" className="px-6 py-3 bg-white border-2 border-teal-500 text-teal-600 rounded-lg font-semibold hover:bg-teal-50">
-                                                            Upload Document
-                                                        </button>
-                                                    </div>
+                                                        placeholder="Type Here" />
                                                 </div>
                                                 <div>
                                                     <label className="block text-sm font-semibold text-gray-700 mb-2">Aadhar Number</label>
                                                     <input type="text" {...register('aadhaarNumber')}
                                                         className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                                                        placeholder="Type Here" style={{ backgroundColor: '#14b8a6', color: 'white' }} />
+                                                        placeholder="Type Here" />
                                                 </div>
                                             </div>
                                         </div>
@@ -1646,26 +2323,26 @@ const PropertyRegistration = () => {
                                                     <label className="block text-sm font-semibold text-gray-700 mb-2">Property Name</label>
                                                     <input type="text" {...register('officialPropertyName')}
                                                         className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                                        placeholder="Type Here" style={{ backgroundColor: '#4f46e5', color: 'white' }} />
+                                                        placeholder="Type Here" />
                                                 </div>
                                                 <div>
                                                     <label className="block text-sm font-semibold text-gray-700 mb-2">Official Email</label>
                                                     <input type="email" {...register('officialEmail')}
                                                         className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                                        placeholder="Type Here" style={{ backgroundColor: '#4f46e5', color: 'white' }} />
+                                                        placeholder="Type Here" />
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-4">
                                                     <div>
                                                         <label className="block text-sm font-semibold text-gray-700 mb-2">Contact Number</label>
                                                         <input type="tel" {...register('officialContact')}
                                                             className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                                            placeholder="Type Here" style={{ backgroundColor: '#4f46e5', color: 'white' }} />
+                                                            placeholder="Type Here" />
                                                     </div>
                                                     <div>
                                                         <label className="block text-sm font-semibold text-gray-700 mb-2">Alternative Contact</label>
                                                         <input type="tel" {...register('alternativeContact')}
                                                             className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                                            placeholder="Type Here" style={{ backgroundColor: '#4f46e5', color: 'white' }} />
+                                                            placeholder="Type Here" />
                                                     </div>
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-4">
@@ -1673,27 +2350,102 @@ const PropertyRegistration = () => {
                                                         <label className="block text-sm font-semibold text-gray-700 mb-2">Pan Number</label>
                                                         <input type="text" {...register('propertyPanNumber')}
                                                             className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                                            placeholder="Type Here" style={{ backgroundColor: '#4f46e5', color: 'white' }} />
+                                                            placeholder="Type Here" />
                                                     </div>
                                                     <div>
-                                                        <button type="button" className="w-full mt-7 px-6 py-3 bg-white border-2 border-indigo-500 text-indigo-600 rounded-lg font-semibold hover:bg-indigo-50">
-                                                            Upload Document
-                                                        </button>
+                                                        <input
+                                                            type="file"
+                                                            accept="image/*,application/pdf"
+                                                            onChange={(e) => e.target.files[0] && handleDocumentUpload('propertyPanDoc', e.target.files[0])}
+                                                            className="hidden"
+                                                            id="property-pan-doc"
+                                                            disabled={documents.propertyPanDoc?.loading}
+                                                        />
+                                                        <label
+                                                            htmlFor="property-pan-doc"
+                                                            className={`w-full mt-7 px-6 py-3 bg-white border-2 border-indigo-500 text-indigo-600 rounded-lg font-semibold hover:bg-indigo-50 cursor-pointer inline-block text-center ${documents.propertyPanDoc?.loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                        >
+                                                            {documents.propertyPanDoc?.loading ? 'Uploading...' : 'Upload Document'}
+                                                        </label>
                                                     </div>
+                                                    {documents.propertyPanDoc && (
+                                                        <div className="mt-2 p-3 rounded-lg">
+                                                            <div className="flex flex-col items-start gap-3">
+                                                                <p className="text-md font-semibold text-black">Property PAN Document</p>
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="relative">
+                                                                        <img src={documents.propertyPanDoc.url} alt="Property PAN" className="w-60 h-24 object-cover rounded border-2 border-indigo-200 hover:border-indigo-400 transition-colors" />
+                                                                        {documents.propertyPanDoc?.loading && (
+                                                                            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded">
+                                                                                <div className="text-white text-sm font-semibold">Uploading...</div>
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                    {!documents.propertyPanDoc.loading && (
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => handleRemoveDocument('propertyPanDoc')}
+                                                                            className="px-3 py-1.5 text-sm text-white bg-red-400 hover:bg-red-500 rounded font-semibold transition-colors"
+                                                                        >
+                                                                            Remove
+                                                                        </button>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-4">
                                                     <div>
                                                         <label className="block text-sm font-semibold text-gray-700 mb-2">GST Number</label>
                                                         <input type="text" {...register('gstNumber')}
                                                             className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                                            placeholder="Type Here" style={{ backgroundColor: '#4f46e5', color: 'white' }} />
+                                                            placeholder="Type Here" />
                                                     </div>
                                                     <div>
-                                                        <button type="button" className="w-full mt-7 px-6 py-3 bg-white border-2 border-indigo-500 text-indigo-600 rounded-lg font-semibold hover:bg-indigo-50">
-                                                            Upload Document
-                                                        </button>
+                                                        <input
+                                                            type="file"
+                                                            accept="image/*,application/pdf"
+                                                            onChange={(e) => e.target.files[0] && handleDocumentUpload('gstDoc', e.target.files[0])}
+                                                            className="hidden"
+                                                            id="gst-doc"
+                                                            disabled={documents.gstDoc?.loading}
+                                                        />
+                                                        <label
+                                                            htmlFor="gst-doc"
+                                                            className={`w-full mt-7 px-6 py-3 bg-white border-2 border-indigo-500 text-indigo-600 rounded-lg font-semibold hover:bg-indigo-50 cursor-pointer inline-block text-center ${documents.gstDoc?.loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                        >
+                                                            {documents.gstDoc?.loading ? 'Uploading...' : 'Upload Document'}
+                                                        </label>
                                                     </div>
                                                 </div>
+                                                {documents.gstDoc && (
+                                                    <div className="mt-2 p-3 rounded-lg">
+                                                        <div className="flex flex-col items-start gap-3">
+                                                            <p className="text-md font-semibold text-black">GST Document</p>
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="relative">
+                                                                    <img src={documents.gstDoc.url} alt="GST Document" className="w-60 h-24 object-cover rounded border-2 border-indigo-200 hover:border-indigo-400 transition-colors" />
+                                                                    {documents.gstDoc?.loading && (
+                                                                        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded">
+                                                                            <div className="text-white text-sm font-semibold">Uploading...</div>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                                {!documents.gstDoc.loading && (
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => handleRemoveDocument('gstDoc')}
+                                                                        className="px-3 py-1.5 text-sm text-white bg-red-400 hover:bg-red-500 rounded font-semibold transition-colors"
+                                                                    >
+                                                                        Remove
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+
                                             </div>
                                         </div>
 
@@ -1705,32 +2457,69 @@ const PropertyRegistration = () => {
                                                     <label className="block text-sm font-semibold text-gray-700 mb-2">Account Number</label>
                                                     <input type="text" {...register('accountNumber')}
                                                         className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                                        placeholder="Type Here" style={{ backgroundColor: '#a855f7', color: 'white' }} />
+                                                        placeholder="Type Here" />
                                                 </div>
                                                 <div>
                                                     <label className="block text-sm font-semibold text-gray-700 mb-2">A/C Holder Name</label>
                                                     <input type="text" {...register('accountHolderName')}
                                                         className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                                        placeholder="Type Here" style={{ backgroundColor: '#a855f7', color: 'white' }} />
+                                                        placeholder="Type Here" />
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-4">
                                                     <div>
                                                         <label className="block text-sm font-semibold text-gray-700 mb-2">IFSC Code</label>
                                                         <input type="text" {...register('ifscCode')}
                                                             className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                                            placeholder="Type Here" style={{ backgroundColor: '#a855f7', color: 'white' }} />
+                                                            placeholder="Type Here" />
                                                     </div>
                                                     <div>
-                                                        <button type="button" className="w-full mt-7 px-6 py-3 bg-white border-2 border-purple-500 text-purple-600 rounded-lg font-semibold hover:bg-purple-50">
-                                                            Cheque Upload Document
-                                                        </button>
+                                                        <input
+                                                            type="file"
+                                                            accept="image/*,application/pdf"
+                                                            onChange={(e) => e.target.files[0] && handleDocumentUpload('bankChequeDoc', e.target.files[0])}
+                                                            className="hidden"
+                                                            id="bank-cheque-doc"
+                                                            disabled={documents.bankChequeDoc?.loading}
+                                                        />
+                                                        <label
+                                                            htmlFor="bank-cheque-doc"
+                                                            className={`w-full mt-7 px-6 py-3 bg-white border-2 border-purple-500 text-purple-600 rounded-lg font-semibold hover:bg-purple-50 cursor-pointer inline-block text-center ${documents.bankChequeDoc?.loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                        >
+                                                            {documents.bankChequeDoc?.loading ? 'Uploading...' : 'Upload Cheque Document'}
+                                                        </label>
                                                     </div>
                                                 </div>
+                                                {documents.bankChequeDoc && (
+                                                    <div className="mt-2 p-3 rounded-lg">
+                                                        <div className="flex flex-col items-start gap-3">
+                                                            <p className="text-md font-semibold text-gray-700">Bank Cheque</p>
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="relative">
+                                                                    <img src={documents.bankChequeDoc.url} alt="Bank Cheque" className="w-60 h-28 object-cover rounded-md border-2 border-gray-500 hover:border-gray-900 transition-colors" />
+                                                                    {documents.bankChequeDoc?.loading && (
+                                                                        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-md">
+                                                                            <div className="text-white text-sm font-semibold">Uploading...</div>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                                {!documents.bankChequeDoc.loading && (
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => handleRemoveDocument('bankChequeDoc')}
+                                                                        className="px-3 py-1.5 text-sm text-white bg-red-400 hover:bg-red-500 rounded font-semibold transition-colors"
+                                                                    >
+                                                                        Remove
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
                                                 <div>
                                                     <label className="block text-sm font-semibold text-gray-700 mb-2">Bank Address</label>
                                                     <input type="text" {...register('bankAddress')}
                                                         className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                                        placeholder="Type Here" style={{ backgroundColor: '#a855f7', color: 'white' }} />
+                                                        placeholder="Type Here" />
                                                 </div>
                                             </div>
                                         </div>
@@ -1740,12 +2529,43 @@ const PropertyRegistration = () => {
                                     <div className="lg:col-span-1">
                                         <div className="sticky top-6">
                                             <label className="block text-sm font-semibold text-gray-700 mb-2 text-center">Profile Photo</label>
-                                            <div className="w-full aspect-square bg-gray-200 rounded-lg flex items-center justify-center border-2 border-gray-300">
-                                                <span className="text-gray-400 text-sm">Upload Photo</span>
+                                            <div className="w-full aspect-square bg-gray-200 rounded-lg flex items-center justify-center border-2 border-gray-300 relative overflow-hidden">
+                                                {profilePhoto ? (
+                                                    <>
+                                                        <img src={profilePhoto.url} alt="Profile" className="w-full h-full object-cover" />
+                                                        {profilePhoto.loading && (
+                                                            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                                                                <span className="text-white text-sm font-semibold">Uploading...</span>
+                                                            </div>
+                                                        )}
+                                                        {!profilePhoto.loading && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={handleRemoveProfilePhoto}
+                                                                className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600 font-bold text-lg"
+                                                            >
+                                                                ×
+                                                            </button>
+                                                        )}
+                                                    </>
+                                                ) : (
+                                                    <span className="text-gray-400 text-sm">Upload Photo</span>
+                                                )}
                                             </div>
-                                            <button type="button" className="w-full mt-4 px-6 py-3 bg-teal-500 text-white rounded-lg font-semibold hover:bg-teal-600">
-                                                Choose File
-                                            </button>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={(e) => e.target.files[0] && handleProfilePhotoUpload(e.target.files[0])}
+                                                className="hidden"
+                                                id="profile-photo"
+                                                disabled={profilePhoto?.loading}
+                                            />
+                                            <label
+                                                htmlFor="profile-photo"
+                                                className={`w-full mt-4 px-6 py-3 bg-teal-500 text-white rounded-lg font-semibold hover:bg-teal-600 cursor-pointer inline-block text-center ${profilePhoto?.loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                            >
+                                                {profilePhoto?.loading ? 'Uploading...' : 'Choose File'}
+                                            </label>
                                         </div>
                                     </div>
                                 </div>
@@ -1782,7 +2602,7 @@ const PropertyRegistration = () => {
                                     Submitting...
                                 </span>
                             ) : (
-                                currentStep === 13 ? 'Submit' : 'Continue'
+                                currentStep === 10 ? 'Submit' : 'Continue'
                             )}
                         </button>
                     </div>
@@ -2245,7 +3065,6 @@ const PropertyRegistration = () => {
                 </div>
             )}
 
-            {/* Custom Room Amenity Modals */}
             {/* Bathroom Items Modal */}
             {isBathroomModalOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
