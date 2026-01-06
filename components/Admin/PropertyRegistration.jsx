@@ -101,6 +101,12 @@ const PropertyRegistration = () => {
     const breakfastIncluded = watch('breakfastIncluded')
     const parkingAvailable = watch('parkingAvailable')
     const allowPets = watch('allowPets')
+    const [furnishingStatus, setFurnishingStatus] = useState(null)
+
+    // Apartment-specific fields
+    const [listedWebsites, setListedWebsites] = useState([])
+    const [customWebsite, setCustomWebsite] = useState('')
+    const [airbnbImportLink, setAirbnbImportLink] = useState('')
 
     // Fetch custom facilities and breakfast types on component mount
     useEffect(() => {
@@ -196,10 +202,12 @@ const PropertyRegistration = () => {
     // Property types organized by category
     const propertyTypesByCategory = {
         apartment: [
-            { id: 'apartment', label: 'Apartment', description: 'Furnished and self-catering accommodation where guests rent the entire place' },
-            { id: 'studio', label: 'Studio', description: 'Single-room apartment with combined living and sleeping area' },
-            { id: 'penthouse', label: 'Penthouse', description: 'Luxury apartment on the top floor with premium amenities' },
-            { id: 'loft', label: 'Loft', description: 'Open-plan apartment with high ceilings, often in converted buildings' }
+            { id: '1bhk', label: '1 BHK (1 Bedroom, Hall, Kitchen)', description: 'A "ready-to-live" space including a bed, sofa, fridge, and TV; ideal for moving in with just a suitcase.', hasFurnishing: true },
+            { id: '2bhk', label: '2 BHK (2 Bedrooms, Hall, Kitchen)', description: 'A complete home setup for two people or a small family, removing the need to buy furniture for multiple rooms.', hasFurnishing: true },
+            { id: '3bhk', label: '3 BHK (3 Bedrooms, Hall, Kitchen)', description: 'High-end convenience in a large space; every bedroom and the living area is fully equipped with designer furniture.', hasFurnishing: true },
+            { id: '4bhk', label: '4 BHK (4 Bedrooms, Hall, Kitchen)', description: 'The height of luxury and ease; a sprawling, professionally decorated home where every detail is pre-arranged.', hasFurnishing: true },
+            { id: 'studio', label: 'Studio Apartment', description: 'A single open-plan room combining sleep, work, and cooking; the ultimate choice for minimalist, solo city living.', hasFurnishing: false },
+            { id: 'penthouse', label: 'Penthouse', description: 'A premium top-floor residence offering the best views, extra privacy, and often a private terrace or higher ceilings.', hasFurnishing: false }
         ],
         homes: [
             { id: 'villa', label: 'Villa', description: 'Luxurious standalone house with premium amenities and often a private pool' },
@@ -249,6 +257,15 @@ const PropertyRegistration = () => {
         const types = propertyTypesByCategory[selectedCategory] || []
         const selectedType = types.find(type => type.id === selectedPropertyType)
         return selectedType ? selectedType.label.toLowerCase() : 'property'
+    }
+
+    // Helper function to get actual step number based on category
+    // Apartments have 2 extra steps (4A and 4B) after step 4
+    const getActualStep = (logicalStep) => {
+        if (selectedCategory === 'apartment' && logicalStep >= 5) {
+            return logicalStep + 2 // Add 2 for the apartment-specific steps
+        }
+        return logicalStep
     }
 
 
@@ -311,6 +328,10 @@ const PropertyRegistration = () => {
                 category: selectedCategory,
                 propertyType: selectedPropertyType,
                 customPropertyType: customPropertyType,
+                furnishingStatus: furnishingStatus,
+                listedWebsites: listedWebsites,
+                customWebsite: customWebsite,
+                airbnbImportLink: airbnbImportLink,
                 numberOfRooms: numberOfRooms,
                 numberOfFloors: numberOfFloors,
                 propertyConfirmation: propertyConfirmation,
@@ -490,40 +511,65 @@ const PropertyRegistration = () => {
                 return
             }
             if (propertyConfirmation === 'no') setCurrentStep(2)
-            else if (propertyConfirmation === 'yes') setCurrentStep(5)
+            else if (propertyConfirmation === 'yes') {
+                // For apartments, go to step 5 (listing websites)
+                // For others, skip to step 7 (location)
+                setCurrentStep(selectedCategory === 'apartment' ? 5 : 7)
+            }
         }
-        // Step 5: Location - Validate required fields
+        // Step 5: Listing websites (apartments only)
         else if (currentStep === 5) {
             setCurrentStep(6)
         }
-        // Step 6: Property details - Validate property name
+        // Step 6: Property name (apartments only)
         else if (currentStep === 6) {
             setCurrentStep(7)
         }
-        // Step 7: Services
+        // Step 7: Location - Validate required fields
         else if (currentStep === 7) {
             setCurrentStep(8)
         }
-        // Step 8: Languages
+        // Step 8: Property details - Validate property name
         else if (currentStep === 8) {
             setCurrentStep(9)
         }
-        // Step 9: House rules - Validate check-in/out times
+        // Step 9: Services
         else if (currentStep === 9) {
             setCurrentStep(10)
         }
-        // Step 10: Submit form - Validate rooms exist
+        // Step 10: Languages
         else if (currentStep === 10) {
+            setCurrentStep(11)
+        }
+        // Step 11: House rules - Validate check-in/out times
+        else if (currentStep === 11) {
+            setCurrentStep(12)
+        }
+        // Step 12: Rooms - Validate rooms exist
+        else if (currentStep === 12) {
+            setCurrentStep(13)
+        }
+        // Step 13: Photo uploads
+        else if (currentStep === 13) {
+            setCurrentStep(14)
+        }
+        // Step 14: Owner/Property/Bank info
+        else if (currentStep === 14) {
             handleSubmit(onSubmit)()
         }
         // Navigation from sub-steps back to overview
-        else if (currentStep === 11) setCurrentStep(10)
-        else if (currentStep === 12) setCurrentStep(10)
-        else if (currentStep === 13) setCurrentStep(10)
+        else if (currentStep === 15) setCurrentStep(14)
     }
 
     const handleBack = () => {
-        if (currentStep > 1) setCurrentStep(currentStep - 1)
+        if (currentStep > 1) {
+            // If going back from step 7 and not an apartment, skip to step 4
+            if (currentStep === 7 && selectedCategory !== 'apartment') {
+                setCurrentStep(4)
+            } else {
+                setCurrentStep(currentStep - 1)
+            }
+        }
     }
 
     const incrementValue = (fieldName, currentValue) => setValue(fieldName, currentValue + 1)
@@ -1323,6 +1369,72 @@ const PropertyRegistration = () => {
                                     );
                                 })}
                             </div>
+
+                            {/* Furnishing Status - Only for Apartments with furnishing options */}
+                            {selectedCategory === 'apartment' && selectedPropertyType && (() => {
+                                const selectedType = getPropertyTypes().find(type => type.id === selectedPropertyType);
+                                return selectedType?.hasFurnishing;
+                            })() && (
+                                    <div className="mt-8">
+                                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Select Furnishing Status</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {/* Semi-Furnished Option */}
+                                            <div
+                                                onClick={() => setFurnishingStatus('semi-furnished')}
+                                                className={`p-6 border-2 rounded-lg cursor-pointer transition-all duration-200 ${furnishingStatus === 'semi-furnished'
+                                                    ? 'border-blue-600 bg-blue-50 shadow-md'
+                                                    : 'border-gray-200 bg-white hover:border-blue-500 hover:bg-blue-50'
+                                                    }`}
+                                            >
+                                                <div className="flex items-start gap-3">
+                                                    <div className="flex-shrink-0 mt-0.5">
+                                                        <div className={`w-5 h-5 rounded-full border-2 transition-all duration-200 flex items-center justify-center ${furnishingStatus === 'semi-furnished'
+                                                            ? 'border-blue-600 bg-blue-600'
+                                                            : 'border-gray-300'
+                                                            }`}>
+                                                            <div className={`w-2 h-2 rounded-full bg-white transition-opacity duration-200 ${furnishingStatus === 'semi-furnished' ? 'opacity-100' : 'opacity-0'
+                                                                }`}></div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex-grow">
+                                                        <h4 className="font-semibold text-gray-900 mb-1">Semi-Furnished</h4>
+                                                        <p className="text-sm text-gray-600 leading-snug">
+                                                            Basic furniture provided including bed, sofa, fridge, and TV. Ideal for moving in with just a suitcase.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Fully Furnished Option */}
+                                            <div
+                                                onClick={() => setFurnishingStatus('fully-furnished')}
+                                                className={`p-6 border-2 rounded-lg cursor-pointer transition-all duration-200 ${furnishingStatus === 'fully-furnished'
+                                                    ? 'border-blue-600 bg-blue-50 shadow-md'
+                                                    : 'border-gray-200 bg-white hover:border-blue-500 hover:bg-blue-50'
+                                                    }`}
+                                            >
+                                                <div className="flex items-start gap-3">
+                                                    <div className="flex-shrink-0 mt-0.5">
+                                                        <div className={`w-5 h-5 rounded-full border-2 transition-all duration-200 flex items-center justify-center ${furnishingStatus === 'fully-furnished'
+                                                            ? 'border-blue-600 bg-blue-600'
+                                                            : 'border-gray-300'
+                                                            }`}>
+                                                            <div className={`w-2 h-2 rounded-full bg-white transition-opacity duration-200 ${furnishingStatus === 'fully-furnished' ? 'opacity-100' : 'opacity-0'
+                                                                }`}></div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex-grow">
+                                                        <h4 className="font-semibold text-gray-900 mb-1">Fully Furnished</h4>
+                                                        <p className="text-sm text-gray-600 leading-snug">
+                                                            Complete home setup with designer furniture in every room. No need to buy furniture for multiple rooms.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
                             {/* <div className="mt-6 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
                                 <label className="flex items-start gap-3 cursor-pointer group">
                                     <input type="checkbox" {...register('customPropertyType')}
@@ -1444,8 +1556,191 @@ const PropertyRegistration = () => {
                         </div>
                     )}
 
+                    {/* Step 4A: Where else is your property listed? - Only for Apartments */}
+                    {currentStep === 5 && selectedCategory === 'apartment' && (
+                        <div className="mb-8">
+                            <h2 className="text-2xl font-bold text-gray-900 mb-4">Where else is your property listed?</h2>
+                            <p className="text-gray-600 mb-6">If your property is listed on Airbnb, you can speed up registration by importing it directly from Booking.com.</p>
+
+                            <div className="space-y-4 max-w-2xl">
+                                {/* Airbnb */}
+                                <label className="flex items-center gap-3 p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-500 transition-colors">
+                                    <input
+                                        type="checkbox"
+                                        checked={listedWebsites.includes('airbnb')}
+                                        onChange={(e) => {
+                                            if (e.target.checked) {
+                                                setListedWebsites([...listedWebsites, 'airbnb'])
+                                            } else {
+                                                setListedWebsites(listedWebsites.filter(w => w !== 'airbnb'))
+                                            }
+                                        }}
+                                        className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                    />
+                                    <span className="font-semibold text-gray-900">Airbnb</span>
+                                </label>
+
+                                {/* TripAdvisor */}
+                                <label className="flex items-center gap-3 p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-500 transition-colors">
+                                    <input
+                                        type="checkbox"
+                                        checked={listedWebsites.includes('tripadvisor')}
+                                        onChange={(e) => {
+                                            if (e.target.checked) {
+                                                setListedWebsites([...listedWebsites, 'tripadvisor'])
+                                            } else {
+                                                setListedWebsites(listedWebsites.filter(w => w !== 'tripadvisor'))
+                                            }
+                                        }}
+                                        className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                    />
+                                    <span className="font-semibold text-gray-900">TripAdvisor</span>
+                                </label>
+
+                                {/* Vrbo */}
+                                <label className="flex items-center gap-3 p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-500 transition-colors">
+                                    <input
+                                        type="checkbox"
+                                        checked={listedWebsites.includes('vrbo')}
+                                        onChange={(e) => {
+                                            if (e.target.checked) {
+                                                setListedWebsites([...listedWebsites, 'vrbo'])
+                                            } else {
+                                                setListedWebsites(listedWebsites.filter(w => w !== 'vrbo'))
+                                            }
+                                        }}
+                                        className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                    />
+                                    <span className="font-semibold text-gray-900">Vrbo</span>
+                                </label>
+
+                                {/* Another website */}
+                                <label className="flex items-start gap-3 p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-500 transition-colors">
+                                    <input
+                                        type="checkbox"
+                                        checked={listedWebsites.includes('other')}
+                                        onChange={(e) => {
+                                            if (e.target.checked) {
+                                                setListedWebsites([...listedWebsites, 'other'])
+                                            } else {
+                                                setListedWebsites(listedWebsites.filter(w => w !== 'other'))
+                                                setCustomWebsite('')
+                                            }
+                                        }}
+                                        className="w-5 h-5 mt-0.5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                    />
+                                    <div className="flex-1">
+                                        <span className="font-semibold text-gray-900 block mb-2">Another website</span>
+                                        {listedWebsites.includes('other') && (
+                                            <div>
+                                                <input
+                                                    type="text"
+                                                    value={customWebsite}
+                                                    onChange={(e) => setCustomWebsite(e.target.value)}
+                                                    placeholder="Type the website name"
+                                                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                />
+                                                <p className="text-sm text-gray-500 mt-1">This helps us identify potential import options.</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </label>
+
+                                {/* Not listed */}
+                                <label className="flex items-center gap-3 p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-500 transition-colors">
+                                    <input
+                                        type="checkbox"
+                                        checked={listedWebsites.includes('none')}
+                                        onChange={(e) => {
+                                            if (e.target.checked) {
+                                                setListedWebsites(['none'])
+                                            } else {
+                                                setListedWebsites([])
+                                            }
+                                        }}
+                                        className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                    />
+                                    <span className="font-semibold text-gray-900">My property isn't listed on any other websites</span>
+                                </label>
+
+                                {/* Airbnb Import Section */}
+                                {listedWebsites.includes('airbnb') && (
+                                    <div className="mt-6 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
+                                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                                            Import property details from Airbnb <span className="text-blue-600 text-sm">(Optional)</span>
+                                        </h3>
+                                        <p className="text-sm text-gray-600 mb-4">Paste the link to your Airbnb listing</p>
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                value={airbnbImportLink}
+                                                onChange={(e) => setAirbnbImportLink(e.target.value)}
+                                                placeholder="https://www.airbnb.com/rooms/xxxxxxx"
+                                                className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            />
+                                            {/* <button
+                                                type="button"
+                                                className="px-6 py-2 bg-gray-300 text-gray-600 rounded-lg font-semibold hover:bg-gray-400 transition-colors"
+                                            >
+                                                Import
+                                            </button> */}
+                                        </div>
+                                        <p className="text-sm text-gray-500 mt-2">Example link: https://www.airbnb.com/rooms/xxxxxxx</p>
+                                        {/* <a href="#" className="text-sm text-blue-600 hover:underline mt-1 inline-block">Where can I find this link?</a> */}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Step 4B: What's the name of your place? - Only for Apartments */}
+                    {currentStep === 6 && selectedCategory === 'apartment' && (
+                        <div className="mb-8">
+                            <h2 className="text-2xl font-bold text-gray-900 mb-6">What's the name of your place?</h2>
+
+                            <div className="max-w-2xl">
+                                <label className="block text-sm font-semibold text-gray-900 mb-2">Property Name</label>
+                                <input
+                                    type="text"
+                                    {...register('propertyName')}
+                                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Enter property name"
+                                />
+
+                                {/* Help boxes */}
+                                <div className="mt-6 space-y-4">
+                                    <div className="p-4 bg-gray-50 border-2 border-gray-200 rounded-lg">
+                                        <div className="flex items-start gap-3">
+                                            <span className="text-2xl">💡</span>
+                                            <div>
+                                                <h4 className="font-semibold text-gray-900 mb-1">What should I consider when choosing a name?</h4>
+                                                <ul className="text-sm text-gray-600 space-y-1 list-disc list-inside">
+                                                    <li>Keep it short and catchy</li>
+                                                    <li>Avoid abbreviations</li>
+                                                    <li>Stick to the facts</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="p-4 bg-gray-50 border-2 border-gray-200 rounded-lg">
+                                        <div className="flex items-start gap-3">
+                                            <span className="text-2xl">❓</span>
+                                            <div>
+                                                <h4 className="font-semibold text-gray-900 mb-1">Why do I need to name my property?</h4>
+                                                <p className="text-sm text-gray-600">
+                                                    This is the name that will appear as the title of your listing on our site. It should tell guests something specific about your property and what you offer. This will be visible to anyone visiting our site, so don't include your address in the name.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Step 5: Property Location */}
-                    {currentStep === 5 && (
+                    {currentStep === (selectedCategory === 'apartment' ? 7 : 5) && (
                         <div className="mb-8">
                             <div className="flex items-center gap-3 mb-8">
                                 <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-yellow-500 rounded-full flex items-center justify-center text-white text-2xl">G</div>
@@ -1519,8 +1814,8 @@ const PropertyRegistration = () => {
                         </div>
                     )}
 
-                    {/* Step 6: Property Details & Facilities */}
-                    {currentStep === 6 && (
+                    {/* Step 6/8: Property Details & Facilities */}
+                    {currentStep === (selectedCategory === 'apartment' ? 8 : 6) && (
                         <div className="mb-8 flex md:flex-row flex-col items-start gap-3">
                             <div className="flex items-center gap-3 mb-8">
                                 <div className="w-12 h-12 border-2 border-gray-800 rounded-full flex items-center justify-center text-2xl">📍</div>
@@ -1647,8 +1942,8 @@ const PropertyRegistration = () => {
                         </div>
                     )}
 
-                    {/* Step 7: Services (Breakfast & Parking) */}
-                    {currentStep === 7 && (
+                    {/* Step 7/9: Services (Breakfast & Parking) */}
+                    {currentStep === (selectedCategory === 'apartment' ? 9 : 7) && (
                         <div className="mb-8">
                             <div className="space-y-8 max-w-2xl">
                                 {/* Breakfast Section */}
@@ -1809,8 +2104,8 @@ const PropertyRegistration = () => {
                         </div>
                     )}
 
-                    {/* Step 8: Languages Spoken */}
-                    {currentStep === 8 && (
+                    {/* Step 8/10: Languages Spoken */}
+                    {currentStep === (selectedCategory === 'apartment' ? 10 : 8) && (
                         <div className="mb-8">
                             <div className="space-y-6 max-w-2xl">
                                 <div>
@@ -1841,8 +2136,8 @@ const PropertyRegistration = () => {
                         </div>
                     )}
 
-                    {/* Step 9: House Rules */}
-                    {currentStep === 9 && (
+                    {/* Step 9/11: House Rules */}
+                    {currentStep === (selectedCategory === 'apartment' ? 11 : 9) && (
                         <div className="mb-8">
                             <div className="space-y-8 max-w-2xl">
                                 <div>
@@ -2013,8 +2308,8 @@ const PropertyRegistration = () => {
                         </div>
                     )}
 
-                    {/* Step 11: Room Management */}
-                    {currentStep === 11 && (
+                    {/* Step 10/12: Rooms */}
+                    {currentStep === (selectedCategory === 'apartment' ? 12 : 10) && (
                         <div className="mb-8">
                             <div className="bg-white rounded-lg p-6">
                                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Manage Your Rooms</h2>
@@ -2070,8 +2365,8 @@ const PropertyRegistration = () => {
                         </div>
                     )}
 
-                    {/* Step 12: Photo Uploads */}
-                    {currentStep === 12 && (
+                    {/* Step 12/14: Photo Uploads */}
+                    {currentStep === (selectedCategory === 'apartment' ? 14 : 12) && (
                         <div className="mb-8">
                             <div className="bg-white rounded-lg p-6">
                                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Upload Photos</h2>
@@ -2468,8 +2763,8 @@ const PropertyRegistration = () => {
                         </div>
                     )}
 
-                    {/* Step 13: Owner, Property & Bank Information */}
-                    {currentStep === 13 && (
+                    {/* Step 13/15: Owner, Property & Bank Information */}
+                    {currentStep === (selectedCategory === 'apartment' ? 15 : 13) && (
                         <div className="mb-8">
                             <div className="bg-white rounded-lg p-6">
                                 <h2 className="text-2xl font-bold text-gray-900 mb-8 underline">Personal Information</h2>
@@ -2837,8 +3132,8 @@ const PropertyRegistration = () => {
                                     (currentStep === 2 && !selectedPropertyType && !customPropertyType) ||
                                     (currentStep === 4 && !propertyConfirmation) ||
                                     (currentStep === 10 && roomFields.length === 0) ||
-                                    // Disable on Step 12 if any images are uploading
-                                    (currentStep === 12 && (() => {
+                                    // Disable on Step 12/14 if any images are uploading
+                                    ((selectedCategory === 'apartment' ? currentStep === 14 : currentStep === 12) && (() => {
                                         // Check if any room images are uploading
                                         const roomImagesUploading = Object.values(roomImages).some(room =>
                                             room?.primary?.loading ||
@@ -2858,8 +3153,8 @@ const PropertyRegistration = () => {
 
                                         return roomImagesUploading || propertyImagesUploading;
                                     })()) ||
-                                    // Disable on Step 13 if any documents or profile photo are uploading
-                                    (currentStep === 13 && (
+                                    // Disable on Step 13/15 if any documents or profile photo are uploading
+                                    ((selectedCategory === 'apartment' ? currentStep === 15 : currentStep === 13) && (
                                         documents?.propertyPanDoc?.loading ||
                                         documents?.gstDoc?.loading ||
                                         documents?.bankChequeDoc?.loading ||
@@ -2875,7 +3170,7 @@ const PropertyRegistration = () => {
                                         Submitting...
                                     </span>
                                 ) : (
-                                    currentStep === 10 ? 'Submit' : 'Continue'
+                                    (selectedCategory === 'apartment' ? currentStep === 14 : currentStep === 12) ? 'Submit' : 'Continue'
                                 )}
                             </button>
                         )}

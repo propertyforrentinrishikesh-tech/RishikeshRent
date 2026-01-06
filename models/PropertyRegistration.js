@@ -15,6 +15,21 @@ const PropertyRegistrationSchema = new mongoose.Schema({
     },
     customPropertyType: String,
 
+    // Furnishing Status (for apartments)
+    furnishingStatus: {
+        type: String,
+        enum: ['semi-furnished', 'fully-furnished', null],
+        default: null
+    },
+
+    // Apartment-specific: Where else is the property listed
+    listedWebsites: {
+        type: [String],
+        default: []
+    },
+    customWebsite: String,
+    airbnbImportLink: String,
+
     // Step 3: Property Size
     numberOfRooms: {
         type: Number,

@@ -40,6 +40,12 @@ export async function POST(request) {
             // Step 2: Property Type
             propertyType: data.propertyType,
             customPropertyType: data.customPropertyType,
+            furnishingStatus: data.furnishingStatus,
+
+            // Apartment-specific: Where else is the property listed
+            listedWebsites: data.listedWebsites || [],
+            customWebsite: data.customWebsite,
+            airbnbImportLink: data.airbnbImportLink,
 
             // Step 3: Property Size
             numberOfRooms: data.numberOfRooms || 1,
