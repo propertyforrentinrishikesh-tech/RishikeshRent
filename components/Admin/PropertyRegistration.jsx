@@ -108,6 +108,13 @@ const PropertyRegistration = () => {
     const [customWebsite, setCustomWebsite] = useState('')
     const [airbnbImportLink, setAirbnbImportLink] = useState('')
 
+    // Home-specific: How many apartments are you listing?
+    const [homeListingType, setHomeListingType] = useState('') // 'one' or 'multiple'
+
+    // Alternative-specific fields
+    const [alternativeSubtype, setAlternativeSubtype] = useState('') // Selected subtype
+    const [alternativeBookingType, setAlternativeBookingType] = useState('') // 'entire-place' or 'private-room'
+
     // Fetch custom facilities and breakfast types on component mount
     useEffect(() => {
         const fetchCustomData = async () => {
@@ -210,12 +217,15 @@ const PropertyRegistration = () => {
             { id: 'penthouse', label: 'Penthouse', description: 'A premium top-floor residence offering the best views, extra privacy, and often a private terrace or higher ceilings.', hasFurnishing: false }
         ],
         homes: [
-            { id: 'villa', label: 'Villa', description: 'Luxurious standalone house with premium amenities and often a private pool' },
-            { id: 'cottage', label: 'Cottage', description: 'Small, cozy house typically in rural or scenic locations' },
-            { id: 'bungalow', label: 'Bungalow', description: 'Single-story house with a simple layout' },
-            { id: 'townhouse', label: 'Townhouse', description: 'Multi-story house sharing walls with neighboring properties' },
-            { id: 'vacation-home', label: 'Vacation Home', description: 'Fully furnished house designed for holiday rentals' },
-            { id: 'farmhouse', label: 'Farmhouse', description: 'Rural house on a farm property with rustic charm' }
+            { id: 'single-family-detached', label: 'Single-Family Detached', description: 'A standalone house that shares no walls with neighbors. It offers the most privacy and usually includes a private yard.' },
+            { id: 'semi-detached-duplex', label: 'Semi-Detached (Duplex)', description: 'Two houses joined together by a single common wall. This is often more affordable than a fully detached home while still offering a yard.' },
+            { id: 'townhouse-row-house', label: 'Townhouse (Row House)', description: 'Multiple houses lined up in a row, sharing side walls with neighbors on both sides (unless it\'s an end unit). These are usually multi-story.' },
+            { id: 'multi-family-home', label: 'Multi-Family Home', description: 'A building designed to house multiple separate families in distinct units (like a triplex or fourplex). Often used as investment properties.' },
+            { id: 'tiny-home', label: 'Tiny Home', description: 'Typically under 400 square feet. These focus on minimalism and efficiency, and can be on wheels or a permanent foundation.' },
+            { id: 'paying-guest-home', label: 'Paying Guest Home (Row House)', description: 'Single Room in an Owner-Occupied home. You have your own private bedroom, but you share the "heart of the home" (kitchen/laundry) with the owner.' },
+            { id: 'owner-occupied-multi-shared', label: 'Owner-Occupied Multi-Shared Rooms', description: 'This is when a homeowner lives in their primary residence while renting out multiple rooms to separate individuals, and each tenant has an individual agreement for their specific room.' },
+            { id: 'home-family-free', label: 'Home With Family-Free Options', description: 'Moving away from the traditional nuclear family model and toward Solo Living. Managed by a Landlord you get a private room/bath but share high-end kitchens and lounges.' },
+            { id: 'corporate-housing', label: 'Corporate Housing', description: 'Fully furnished apartments designed for 30-day stays. Great if you are in a transition period and don\'t want to buy furniture. Maximum privacy and storage.' }
         ],
         hotel: [
             { id: 'hotel', label: 'Hotel', description: 'Accommodations for travelers often with restaurants, meeting rooms and other guest services' },
@@ -236,12 +246,42 @@ const PropertyRegistration = () => {
             { id: 'ryokan', label: 'Ryokan', description: 'Traditional Japanese-style accommodations with meal options' }
         ],
         alternative: [
-            { id: 'boat', label: 'Boat', description: 'Accommodation on a boat or houseboat' },
-            { id: 'campground', label: 'Campground', description: 'Outdoor camping area with facilities for tents or RVs' },
-            { id: 'luxury-tent', label: 'Luxury Tent', description: 'High-end glamping tent with premium amenities' },
-            { id: 'caravan', label: 'Caravan/RV', description: 'Mobile home or recreational vehicle for accommodation' },
-            { id: 'treehouse', label: 'Treehouse', description: 'Unique accommodation built in or around trees' },
-            { id: 'yurt', label: 'Yurt', description: 'Traditional circular tent with modern comforts' }
+            {
+                id: 'floating-stays',
+                label: 'Floating Stays (Boats & Houseboats)',
+                description: 'These properties offer a literal "on-the-water" experience, ranging from rustic sailboats to stationary luxury houseboats.',
+                subtypes: [
+                    { id: 'semi-furnished', label: 'Semi-Furnished' },
+                    { id: 'fully-furnished', label: 'Fully Furnished' }
+                ]
+            },
+            {
+                id: 'traditional-campgrounds',
+                label: 'Traditional Campgrounds',
+                description: 'These properties emphasize communal living, campfires, and immediate access to hiking trails and national parks.',
+                subtypes: [
+                    { id: 'sharing-single', label: 'Sharing Basis Single Accommodation' },
+                    { id: 'sharing-multiple', label: 'Sharing Basis Multiple Accommodation' }
+                ]
+            },
+            {
+                id: 'glamping-luxury-tents',
+                label: 'Glamping & Luxury Tents',
+                description: 'These properties feature semi-permanent structures—such as safari tents, yurts, or tipis—outfitted with real beds, fine linens, and often private bathrooms.',
+                subtypes: [
+                    { id: 'sharing-single', label: 'Sharing Basis Single Accommodation' },
+                    { id: 'sharing-multiple', label: 'Sharing Basis Multiple Accommodation' }
+                ]
+            },
+            {
+                id: 'unique-architectural',
+                label: 'Unique Architectural Structures',
+                description: 'They appeal to whimsical travelers and design enthusiasts who want their accommodation to be the highlight of their trip.',
+                subtypes: [
+                    { id: 'sharing-basis', label: 'Sharing Basis Accommodation' },
+                    { id: 'private', label: 'Private Accommodation' }
+                ]
+            }
         ]
     }
 
@@ -332,6 +372,9 @@ const PropertyRegistration = () => {
                 listedWebsites: listedWebsites,
                 customWebsite: customWebsite,
                 airbnbImportLink: airbnbImportLink,
+                homeListingType: homeListingType,
+                alternativeSubtype: alternativeSubtype,
+                alternativeBookingType: alternativeBookingType,
                 numberOfRooms: numberOfRooms,
                 numberOfFloors: numberOfFloors,
                 propertyConfirmation: propertyConfirmation,
@@ -512,24 +555,24 @@ const PropertyRegistration = () => {
             }
             if (propertyConfirmation === 'no') setCurrentStep(2)
             else if (propertyConfirmation === 'yes') {
-                // For apartments, go to step 5 (listing websites)
-                // For others, skip to step 7 (location)
-                setCurrentStep(selectedCategory === 'apartment' ? 5 : 7)
+                // For non-hotels (apartments, homes, alternative): go to step 5
+                // For hotels: skip to step 7
+                setCurrentStep(selectedCategory === 'hotel' ? 7 : 5)
             }
         }
-        // Step 5: Listing websites (apartments only)
+        // Step 5: Listing websites (all except hotels)
         else if (currentStep === 5) {
             setCurrentStep(6)
         }
-        // Step 6: Property name (apartments only)
+        // Step 6: Property name (all except hotels)
         else if (currentStep === 6) {
             setCurrentStep(7)
         }
-        // Step 7: Location - Validate required fields
+        // Step 7: Location
         else if (currentStep === 7) {
             setCurrentStep(8)
         }
-        // Step 8: Property details - Validate property name
+        // Step 8: Property details
         else if (currentStep === 8) {
             setCurrentStep(9)
         }
@@ -541,32 +584,40 @@ const PropertyRegistration = () => {
         else if (currentStep === 10) {
             setCurrentStep(11)
         }
-        // Step 11: House rules - Validate check-in/out times
+        // Step 11: House Rules
         else if (currentStep === 11) {
             setCurrentStep(12)
         }
-        // Step 12: Rooms - Validate rooms exist
+        // Step 12: Overview page - Submit form
         else if (currentStep === 12) {
-            setCurrentStep(13)
-        }
-        // Step 13: Photo uploads
-        else if (currentStep === 13) {
-            setCurrentStep(14)
-        }
-        // Step 14: Owner/Property/Bank info
-        else if (currentStep === 14) {
             handleSubmit(onSubmit)()
         }
-        // Navigation from sub-steps back to overview
-        else if (currentStep === 15) setCurrentStep(14)
+        // Step 13: Rooms - Return to overview
+        else if (currentStep === 13) {
+            setCurrentStep(12)
+        }
+        // Step 14: Photos - Return to overview
+        else if (currentStep === 14) {
+            setCurrentStep(12)
+        }
+        // Step 15: Personal Info - Return to overview
+        else if (currentStep === 15) {
+            setCurrentStep(12)
+        }
     }
 
     const handleBack = () => {
         if (currentStep > 1) {
-            // If going back from step 7 and not an apartment, skip to step 4
-            if (currentStep === 7 && selectedCategory !== 'apartment') {
+            // From step 7, skip steps 5-6 for hotels
+            if (currentStep === 7 && selectedCategory === 'hotel') {
                 setCurrentStep(4)
-            } else {
+            }
+            // From steps 13, 14, 15 (sub-steps), go back to step 12 (overview)
+            else if (currentStep === 13 || currentStep === 14 || currentStep === 15) {
+                setCurrentStep(12)
+            }
+            // Normal back navigation
+            else {
                 setCurrentStep(currentStep - 1)
             }
         }
@@ -1196,16 +1247,18 @@ const PropertyRegistration = () => {
 
     const getStepTitle = () => {
         const titles = {
-            1: "To get started, select the type of property you want to list on Booking.com",
+            1: "To get started, select the type of property you want to list on www.rishikeshrent.com",
             2: "From the list below, which property category is the best fit for your place?",
             3: `How many ${getSelectedPropertyTypeLabel()} are you listing?`,
             4: `One ${getSelectedPropertyTypeLabel()} where guests can book a room`,
-            5: "Where is your property?",
-            6: `Tell us about your ${getSelectedPropertyTypeLabel()}`,
-            7: "Services at your property?",
-            8: "What languages do you or your staff speak?",
-            9: "House Rules",
-            10: "Add rooms"
+            5: "Where else is your property listed?",
+            6: "What's the name of your place?",
+            7: "Where is your property?",
+            8: `Tell us about your ${getSelectedPropertyTypeLabel()}`,
+            9: "Services at your property?",
+            10: "What languages do you or your staff speak?",
+            11: "House Rules",
+            12: "Add rooms"
         }
         return titles[currentStep] || ""
     }
@@ -1219,13 +1272,13 @@ const PropertyRegistration = () => {
                         {/* Step Counter Text */}
                         <div className="text-center mb-4">
                             <p className="text-lg font-semibold text-gray-700">
-                                Step {currentStep} of 13
+                                Step {currentStep} of 15
                             </p>
                         </div>
 
                         {/* Progress Bar */}
                         <div className="flex gap-1">
-                            {Array.from({ length: 13 }, (_, i) => i + 1).map((step) => {
+                            {Array.from({ length: 15 }, (_, i) => i + 1).map((step) => {
                                 const stepColors = [
                                     'bg-teal-500',      // Step 1
                                     'bg-orange-500',    // Step 2
@@ -1239,7 +1292,9 @@ const PropertyRegistration = () => {
                                     'bg-yellow-500',    // Step 10
                                     'bg-lime-500',      // Step 11
                                     'bg-green-500',     // Step 12
-                                    'bg-emerald-500'    // Step 13
+                                    'bg-cyan-500' ,   // Step 13
+                                    'bg-sky-500',   // Step 14
+                                    'bg-fuchsia-500',   // Step 15
                                 ];
 
                                 return (
@@ -1435,6 +1490,43 @@ const PropertyRegistration = () => {
                                     </div>
                                 )}
 
+                            {/* Subtype Selection - Only for Alternative Properties with subtypes */}
+                            {selectedCategory === 'alternative' && selectedPropertyType && (() => {
+                                const selectedType = getPropertyTypes().find(type => type.id === selectedPropertyType);
+                                return selectedType?.subtypes && selectedType.subtypes.length > 0;
+                            })() && (
+                                    <div className="mt-8">
+                                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Select Subtype</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {getPropertyTypes().find(type => type.id === selectedPropertyType)?.subtypes.map((subtype) => (
+                                                <div
+                                                    key={subtype.id}
+                                                    onClick={() => setAlternativeSubtype(subtype.id)}
+                                                    className={`p-6 border-2 rounded-lg cursor-pointer transition-all duration-200 ${alternativeSubtype === subtype.id
+                                                        ? 'border-blue-600 bg-blue-50 shadow-md'
+                                                        : 'border-gray-200 bg-white hover:border-blue-500 hover:bg-blue-50'
+                                                        }`}
+                                                >
+                                                    <div className="flex items-start gap-3">
+                                                        <div className="flex-shrink-0 mt-0.5">
+                                                            <div className={`w-5 h-5 rounded-full border-2 transition-all duration-200 flex items-center justify-center ${alternativeSubtype === subtype.id
+                                                                ? 'border-blue-600 bg-blue-600'
+                                                                : 'border-gray-300'
+                                                                }`}>
+                                                                <div className={`w-2 h-2 rounded-full bg-white transition-opacity duration-200 ${alternativeSubtype === subtype.id ? 'opacity-100' : 'opacity-0'
+                                                                    }`}></div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex-grow">
+                                                            <h4 className="font-semibold text-gray-900">{subtype.label}</h4>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
                             {/* <div className="mt-6 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
                                 <label className="flex items-start gap-3 cursor-pointer group">
                                     <input type="checkbox" {...register('customPropertyType')}
@@ -1454,49 +1546,177 @@ const PropertyRegistration = () => {
                     {/* Step 3: Property Size */}
                     {currentStep === 3 && (
                         <div className="mb-8">
-                            <div className="mb-8 p-5 bg-blue-50 border-2 border-blue-300 rounded-lg flex items-start gap-4">
-                                <div className="flex-shrink-0">
-                                    <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center text-2xl">🏨</div>
-                                </div>
-                                <div className="flex-grow">
-                                    <p className="text-gray-800 leading-relaxed"><span className="font-semibold">One {getSelectedPropertyTypeLabel()} with one or multiple rooms that guests can book</span></p>
-                                </div>
-                                <div className="flex-shrink-0">
-                                    <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-bold">✓</div>
-                                </div>
-                            </div>
-                            <div className="mb-8">
-                                <div className="flex items-center justify-between max-w-md">
-                                    <label className="text-lg font-semibold text-gray-900">No Of Rooms</label>
-                                    <div className="flex items-center gap-3">
-                                        <button type="button" onClick={() => decrementValue('numberOfRooms', numberOfRooms)}
-                                            className="w-12 h-12 bg-green-100 hover:bg-green-200 text-gray-800 font-bold text-xl rounded-full transition-all duration-200 flex items-center justify-center border-2 border-green-300 active:scale-95">&lt;</button>
-                                        <Controller name="numberOfRooms" control={control} rules={{ required: true, min: 1 }}
-                                            render={({ field }) => (
-                                                <input {...field} type="number" min="1" readOnly
-                                                    className="w-20 h-12 text-center text-xl font-bold bg-green-100 border-2 border-green-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500" />
-                                            )} />
-                                        <button type="button" onClick={() => incrementValue('numberOfRooms', numberOfRooms)}
-                                            className="w-12 h-12 bg-green-100 hover:bg-green-200 text-gray-800 font-bold text-xl rounded-full transition-all duration-200 flex items-center justify-center border-2 border-green-300 active:scale-95">&gt;</button>
+                            {/* For Homes: How many apartments are you listing? */}
+                            {selectedCategory === 'apartment' ? (
+                                <div className="mb-8">
+                                    {/* <h2 className="text-2xl font-bold text-gray-900 mb-6">How many apartments are you listing?</h2> */}
+                                    <div className="space-y-4 max-w-2xl">
+                                        {/* One apartment */}
+                                        <div
+                                            onClick={() => setHomeListingType('one')}
+                                            className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${homeListingType === 'one'
+                                                ? 'border-blue-600 bg-blue-50 shadow-md'
+                                                : 'border-gray-200 bg-white hover:border-blue-500 hover:bg-blue-50'
+                                                }`}
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className="flex-shrink-0">
+                                                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-2xl">
+                                                        🏠
+                                                    </div>
+                                                </div>
+                                                <div className="flex-grow">
+                                                    <h3 className="font-semibold text-gray-900">One apartment</h3>
+                                                </div>
+                                                {homeListingType === 'one' && (
+                                                    <div className="flex-shrink-0">
+                                                        <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm">✓</div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Multiple apartments */}
+                                        <div
+                                            onClick={() => setHomeListingType('multiple')}
+                                            className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${homeListingType === 'multiple'
+                                                ? 'border-blue-600 bg-blue-50 shadow-md'
+                                                : 'border-gray-200 bg-white hover:border-blue-500 hover:bg-blue-50'
+                                                }`}
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className="flex-shrink-0">
+                                                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-2xl">
+                                                        🏘️
+                                                    </div>
+                                                </div>
+                                                <div className="flex-grow">
+                                                    <h3 className="font-semibold text-gray-900">Multiple apartments</h3>
+                                                </div>
+                                                {homeListingType === 'multiple' && (
+                                                    <div className="flex-shrink-0">
+                                                        <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm">✓</div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div className="mb-8">
-                                <div className="flex items-center justify-between max-w-md">
-                                    <label className="text-lg font-semibold text-gray-900">No Of Floors</label>
-                                    <div className="flex items-center gap-3">
-                                        <button type="button" onClick={() => decrementValue('numberOfFloors', numberOfFloors)}
-                                            className="w-12 h-12 bg-yellow-100 hover:bg-yellow-200 text-gray-800 font-bold text-xl rounded-full transition-all duration-200 flex items-center justify-center border-2 border-yellow-300 active:scale-95">&lt;</button>
-                                        <Controller name="numberOfFloors" control={control} rules={{ required: true, min: 1 }}
-                                            render={({ field }) => (
-                                                <input {...field} type="number" min="1" readOnly
-                                                    className="w-20 h-12 text-center text-xl font-bold bg-yellow-100 border-2 border-yellow-300 rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-500" />
-                                            )} />
-                                        <button type="button" onClick={() => incrementValue('numberOfFloors', numberOfFloors)}
-                                            className="w-12 h-12 bg-yellow-100 hover:bg-yellow-200 text-gray-800 font-bold text-xl rounded-full transition-all duration-200 flex items-center justify-center border-2 border-yellow-300 active:scale-95">&gt;</button>
+                            ) : (
+                                /* For Non-Homes (Apartments, Hotels, Alternative): Show room and floor counters */
+                                <>
+                                    {/* What can guests book? - Only for Alternative */}
+                                    {selectedCategory === 'homes' && (
+                                        <div className="mb-8">
+                                            <h2 className="text-2xl font-bold text-gray-900 mb-6">What can guests book?</h2>
+                                            <div className="space-y-4 max-w-2xl">
+                                                {/* Entire place */}
+                                                <div
+                                                    onClick={() => setAlternativeBookingType('entire-place')}
+                                                    className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${alternativeBookingType === 'entire-place'
+                                                        ? 'border-blue-600 bg-blue-50 shadow-md'
+                                                        : 'border-gray-200 bg-white hover:border-blue-500 hover:bg-blue-50'
+                                                        }`}
+                                                >
+                                                    <div className="flex items-start gap-4">
+                                                        <div className="flex-shrink-0 mt-1">
+                                                            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-2xl">
+                                                                🏠
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex-grow">
+                                                            <h3 className="font-bold text-gray-900 mb-1">Entire place</h3>
+                                                            <p className="text-sm text-gray-600">
+                                                                Guests have access to the entire place and don't have to share it with the host or other guests.
+                                                            </p>
+                                                        </div>
+                                                        {alternativeBookingType === 'entire-place' && (
+                                                            <div className="flex-shrink-0">
+                                                                <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm">✓</div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                {/* A private room */}
+                                                <div
+                                                    onClick={() => setAlternativeBookingType('private-room')}
+                                                    className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${alternativeBookingType === 'private-room'
+                                                        ? 'border-blue-600 bg-blue-50 shadow-md'
+                                                        : 'border-gray-200 bg-white hover:border-blue-500 hover:bg-blue-50'
+                                                        }`}
+                                                >
+                                                    <div className="flex items-start gap-4">
+                                                        <div className="flex-shrink-0 mt-1">
+                                                            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-2xl">
+                                                                🚪
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex-grow">
+                                                            <h3 className="font-bold text-gray-900 mb-1">A private room</h3>
+                                                            <p className="text-sm text-gray-600">
+                                                                Guests rent a room within the property. There are common areas that are shared with either the host or other guests.
+                                                            </p>
+                                                        </div>
+                                                        {alternativeBookingType === 'private-room' && (
+                                                            <div className="flex-shrink-0">
+                                                                <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm">✓</div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="mb-8">
+                                        {/* Info box - Only for Hotels */}
+                                        {selectedCategory === 'hotel' && (
+                                            <div className="mb-8 p-5 bg-blue-50 border-2 border-blue-300 rounded-lg flex items-start gap-4">
+                                                <div className="flex-shrink-0">
+                                                    <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center text-2xl">🏨</div>
+                                                </div>
+                                                <div className="flex-grow">
+                                                    <p className="text-gray-800 leading-relaxed"><span className="font-semibold">One {getSelectedPropertyTypeLabel()} with one or multiple rooms that guests can book</span></p>
+                                                </div>
+                                                <div className="flex-shrink-0">
+                                                    <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-bold">✓</div>
+                                                </div>
+                                            </div>
+                                        )}
+                                        <div className="flex items-center justify-between max-w-md">
+                                            <label className="text-lg font-semibold text-gray-900">No Of Rooms</label>
+                                            <div className="flex items-center gap-3">
+                                                <button type="button" onClick={() => decrementValue('numberOfRooms', numberOfRooms)}
+                                                    className="w-12 h-12 bg-green-100 hover:bg-green-200 text-gray-800 font-bold text-xl rounded-full transition-all duration-200 flex items-center justify-center border-2 border-green-300 active:scale-95">&lt;</button>
+                                                <Controller name="numberOfRooms" control={control} rules={{ required: true, min: 1 }}
+                                                    render={({ field }) => (
+                                                        <input {...field} type="number" min="1" readOnly
+                                                            className="w-20 h-12 text-center text-xl font-bold bg-green-100 border-2 border-green-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500" />
+                                                    )} />
+                                                <button type="button" onClick={() => incrementValue('numberOfRooms', numberOfRooms)}
+                                                    className="w-12 h-12 bg-green-100 hover:bg-green-200 text-gray-800 font-bold text-xl rounded-full transition-all duration-200 flex items-center justify-center border-2 border-green-300 active:scale-95">&gt;</button>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
+                                    <div className="mb-8">
+                                        <div className="flex items-center justify-between max-w-md">
+                                            <label className="text-lg font-semibold text-gray-900">No Of Floors</label>
+                                            <div className="flex items-center gap-3">
+                                                <button type="button" onClick={() => decrementValue('numberOfFloors', numberOfFloors)}
+                                                    className="w-12 h-12 bg-yellow-100 hover:bg-yellow-200 text-gray-800 font-bold text-xl rounded-full transition-all duration-200 flex items-center justify-center border-2 border-yellow-300 active:scale-95">&lt;</button>
+                                                <Controller name="numberOfFloors" control={control} rules={{ required: true, min: 1 }}
+                                                    render={({ field }) => (
+                                                        <input {...field} type="number" min="1" readOnly
+                                                            className="w-20 h-12 text-center text-xl font-bold bg-yellow-100 border-2 border-yellow-300 rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-500" />
+                                                    )} />
+                                                <button type="button" onClick={() => incrementValue('numberOfFloors', numberOfFloors)}
+                                                    className="w-12 h-12 bg-yellow-100 hover:bg-yellow-200 text-gray-800 font-bold text-xl rounded-full transition-all duration-200 flex items-center justify-center border-2 border-yellow-300 active:scale-95">&gt;</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     )}
 
@@ -1556,11 +1776,11 @@ const PropertyRegistration = () => {
                         </div>
                     )}
 
-                    {/* Step 4A: Where else is your property listed? - Only for Apartments */}
-                    {currentStep === 5 && selectedCategory === 'apartment' && (
+                    {/* Step 4A: Where else is your property listed? - For all except Hotels */}
+                    {currentStep === 5 && selectedCategory !== 'hotel' && (
                         <div className="mb-8">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-4">Where else is your property listed?</h2>
-                            <p className="text-gray-600 mb-6">If your property is listed on Airbnb, you can speed up registration by importing it directly from Booking.com.</p>
+                            {/* <h2 className="text-2xl font-bold text-gray-900 mb-4">Where else is your property listed?</h2> */}
+                            <p className="text-gray-600 mb-6">If your property is listed on Airbnb, you can speed up registration by importing it directly from www.rishikeshrent.com</p>
 
                             <div className="space-y-4 max-w-2xl">
                                 {/* Airbnb */}
@@ -1693,10 +1913,10 @@ const PropertyRegistration = () => {
                         </div>
                     )}
 
-                    {/* Step 4B: What's the name of your place? - Only for Apartments */}
-                    {currentStep === 6 && selectedCategory === 'apartment' && (
+                    {/* Step 4B: What's the name of your place? - For all except Hotels */}
+                    {currentStep === 6 && selectedCategory !== 'hotel' && (
                         <div className="mb-8">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-6">What's the name of your place?</h2>
+                            {/* <h2 className="text-2xl font-bold text-gray-900 mb-6">What's the name of your place?</h2> */}
 
                             <div className="max-w-2xl">
                                 <label className="block text-sm font-semibold text-gray-900 mb-2">Property Name</label>
@@ -1740,7 +1960,7 @@ const PropertyRegistration = () => {
                     )}
 
                     {/* Step 5: Property Location */}
-                    {currentStep === (selectedCategory === 'apartment' ? 7 : 5) && (
+                    {currentStep === 7 && (
                         <div className="mb-8">
                             <div className="flex items-center gap-3 mb-8">
                                 <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-yellow-500 rounded-full flex items-center justify-center text-white text-2xl">G</div>
@@ -1815,7 +2035,7 @@ const PropertyRegistration = () => {
                     )}
 
                     {/* Step 6/8: Property Details & Facilities */}
-                    {currentStep === (selectedCategory === 'apartment' ? 8 : 6) && (
+                    {currentStep === 8 && (
                         <div className="mb-8 flex md:flex-row flex-col items-start gap-3">
                             <div className="flex items-center gap-3 mb-8">
                                 <div className="w-12 h-12 border-2 border-gray-800 rounded-full flex items-center justify-center text-2xl">📍</div>
@@ -1943,7 +2163,7 @@ const PropertyRegistration = () => {
                     )}
 
                     {/* Step 7/9: Services (Breakfast & Parking) */}
-                    {currentStep === (selectedCategory === 'apartment' ? 9 : 7) && (
+                    {currentStep === 9 && (
                         <div className="mb-8">
                             <div className="space-y-8 max-w-2xl">
                                 {/* Breakfast Section */}
@@ -2105,7 +2325,7 @@ const PropertyRegistration = () => {
                     )}
 
                     {/* Step 8/10: Languages Spoken */}
-                    {currentStep === (selectedCategory === 'apartment' ? 10 : 8) && (
+                    {currentStep === 10 && (
                         <div className="mb-8">
                             <div className="space-y-6 max-w-2xl">
                                 <div>
@@ -2137,7 +2357,7 @@ const PropertyRegistration = () => {
                     )}
 
                     {/* Step 9/11: House Rules */}
-                    {currentStep === (selectedCategory === 'apartment' ? 11 : 9) && (
+                    {currentStep === 11 && (
                         <div className="mb-8">
                             <div className="space-y-8 max-w-2xl">
                                 <div>
@@ -2257,7 +2477,7 @@ const PropertyRegistration = () => {
                         </div>
                     )}
 
-                    {currentStep === 10 && (
+                    {currentStep === 12 && (
                         <div className="mb-8">
                             <div className="space-y-6">
                                 {/* Progress Steps */}
@@ -2276,7 +2496,7 @@ const PropertyRegistration = () => {
                                             <h3 className="font-semibold text-gray-900">Step 2 - Rooms</h3>
                                             <p className="text-sm text-gray-600">Tell us about your first room. Once you set one up you can add more</p>
                                         </div>
-                                        <button type="button" onClick={() => setCurrentStep(11)}
+                                        <button type="button" onClick={() => setCurrentStep(13)}
                                             className="px-6 py-2 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition-colors">
                                             Add room
                                         </button>
@@ -2287,7 +2507,7 @@ const PropertyRegistration = () => {
                                             <h3 className="font-semibold text-gray-900">Step 3 - Photos</h3>
                                             <p className="text-sm text-gray-600">Show some photos of your property so guests know what to expect</p>
                                         </div>
-                                        <button type="button" onClick={() => setCurrentStep(12)}
+                                        <button type="button" onClick={() => setCurrentStep(14)}
                                             className="px-6 py-2 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition-colors">
                                             Add photos
                                         </button>
@@ -2298,7 +2518,7 @@ const PropertyRegistration = () => {
                                             <h3 className="font-semibold text-gray-900">Step 4 - Final steps</h3>
                                             <p className="text-sm text-gray-600">Set up payments and invoices before you open for bookings</p>
                                         </div>
-                                        <button type="button" onClick={() => setCurrentStep(13)}
+                                        <button type="button" onClick={() => setCurrentStep(15)}
                                             className="px-6 py-2 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition-colors">
                                             Add final details
                                         </button>
@@ -2309,7 +2529,7 @@ const PropertyRegistration = () => {
                     )}
 
                     {/* Step 10/12: Rooms */}
-                    {currentStep === (selectedCategory === 'apartment' ? 12 : 10) && (
+                    {currentStep === 13 && (
                         <div className="mb-8">
                             <div className="bg-white rounded-lg p-6">
                                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Manage Your Rooms</h2>
@@ -2366,7 +2586,7 @@ const PropertyRegistration = () => {
                     )}
 
                     {/* Step 12/14: Photo Uploads */}
-                    {currentStep === (selectedCategory === 'apartment' ? 14 : 12) && (
+                    {currentStep === 14 && (
                         <div className="mb-8">
                             <div className="bg-white rounded-lg p-6">
                                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Upload Photos</h2>
@@ -2764,7 +2984,7 @@ const PropertyRegistration = () => {
                     )}
 
                     {/* Step 13/15: Owner, Property & Bank Information */}
-                    {currentStep === (selectedCategory === 'apartment' ? 15 : 13) && (
+                    {currentStep === 15 && (
                         <div className="mb-8">
                             <div className="bg-white rounded-lg p-6">
                                 <h2 className="text-2xl font-bold text-gray-900 mb-8 underline">Personal Information</h2>
@@ -3131,7 +3351,7 @@ const PropertyRegistration = () => {
                                     isSubmitting ||
                                     (currentStep === 2 && !selectedPropertyType && !customPropertyType) ||
                                     (currentStep === 4 && !propertyConfirmation) ||
-                                    (currentStep === 10 && roomFields.length === 0) ||
+                                    (currentStep === 12 && roomFields.length === 0) ||
                                     // Disable on Step 12/14 if any images are uploading
                                     ((selectedCategory === 'apartment' ? currentStep === 14 : currentStep === 12) && (() => {
                                         // Check if any room images are uploading
@@ -3170,7 +3390,7 @@ const PropertyRegistration = () => {
                                         Submitting...
                                     </span>
                                 ) : (
-                                    (selectedCategory === 'apartment' ? currentStep === 14 : currentStep === 12) ? 'Submit' : 'Continue'
+                                    (selectedCategory === 'hotel' ? currentStep === 12 : currentStep === 15) ? 'Submit Data...' : 'Continue'
                                 )}
                             </button>
                         )}

@@ -145,8 +145,8 @@ const Page = () => {
       </header>
 
       {/* Navigation Cards */}
-      <div className="px-4 py-8">
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6 px-5">
+      <div className="px-4 py-7">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 w-[80%] mx-auto">
           {menuItems.map((item, index) => (
             <Card
               key={index}

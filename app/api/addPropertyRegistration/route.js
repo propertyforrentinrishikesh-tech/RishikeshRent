@@ -47,6 +47,13 @@ export async function POST(request) {
             customWebsite: data.customWebsite,
             airbnbImportLink: data.airbnbImportLink,
 
+            // Home-specific: How many apartments are you listing?
+            homeListingType: data.homeListingType,
+
+            // Alternative-specific fields
+            alternativeSubtype: data.alternativeSubtype,
+            alternativeBookingType: data.alternativeBookingType,
+
             // Step 3: Property Size
             numberOfRooms: data.numberOfRooms || 1,
             numberOfFloors: data.numberOfFloors || 1,

@@ -30,6 +30,21 @@ const PropertyRegistrationSchema = new mongoose.Schema({
     customWebsite: String,
     airbnbImportLink: String,
 
+    // Home-specific: How many apartments are you listing?
+    homeListingType: {
+        type: String,
+        enum: ['one', 'multiple', null],
+        default: null
+    },
+
+    // Alternative-specific fields
+    alternativeSubtype: String,
+    alternativeBookingType: {
+        type: String,
+        enum: ['entire-place', 'private-room', null],
+        default: null
+    },
+
     // Step 3: Property Size
     numberOfRooms: {
         type: Number,
