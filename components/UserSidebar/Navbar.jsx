@@ -54,26 +54,26 @@ const Navbar = ({ className }) => {
   return (
     <header className={`${className} font-barlow print:hidden`}>
       <div className="flex items-center gap-10">
-      <SidebarTrigger className="scale-110" />
+        <SidebarTrigger className="scale-110" />
 
-          <div className="hidden md:flex items-center gap-4">
-            <div className="flex items-center gap-4">
-              <Mail size={20} className="text-black" />
-              <Link href={"mailto:info@info@adventureaxis.in"}>
-                <p className="text-sm font-semibold hover:underline">info@info@adventureaxis.in</p>
-              </Link>
-            </div>
-
-            <div className="h-4 w-0.5 bg-black rounded-full"></div>
-
-            <div className="flex items-center gap-4">
-              <Phone size={20} className="text-black" />
-              <Link href={"tel:+918006000325"}>
-                <p className="text-sm font-semibold tracking-widest hover:underline">+91 8006000325</p>
-              </Link>
-            </div>
+        <div className="hidden md:flex items-center gap-4">
+          <div className="flex items-center gap-4">
+            <Mail size={20} className="text-black" />
+            <Link href={"mailto:info@info@rishikeshrent.com"}>
+              <p className="text-sm font-semibold hover:underline">info@info@rishikeshrent.com</p>
+            </Link>
           </div>
- 
+
+          <div className="h-4 w-0.5 bg-black rounded-full"></div>
+
+          <div className="flex items-center gap-4">
+            <Phone size={20} className="text-black" />
+            <Link href={"tel:+918006000325"}>
+              <p className="text-sm font-semibold tracking-widest hover:underline">+91 8006000325</p>
+            </Link>
+          </div>
+        </div>
+
       </div>
 
       <div className="flex items-center gap-8">

@@ -107,7 +107,7 @@ export async function POST(req) {
                     <tr>
                         <td style="padding: 20px 30px; text-align: center; background-color: #f8f9fa; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
                             <div class="footer">
-            <p>If you have any questions, feel free to contact: <a href="mailto:info@adventureaxis.in">info@adventureaxis.in</a>.</p>
+            <p>If you have any questions, feel free to contact: <a href="mailto:info@rishikeshrent.com">info@rishikeshrent.com</a>.</p>
             <p>&copy; ${new Date().getFullYear()} Rishikesh HandMade. All rights reser  ved.</p>
         </div>
                         </td>   
@@ -125,7 +125,7 @@ export async function POST(req) {
         // Send the OTP via Brevo
         const otpSent = await sendOTP(email, otp, message, subject);
         if (!otpSent) {
-          return NextResponse.json({ message: 'Failed to send OTP email. Please try again later.' }, { status: 500 });
+            return NextResponse.json({ message: 'Failed to send OTP email. Please try again later.' }, { status: 500 });
         }
 
         return NextResponse.json({ message: 'OTP sent to your email' }, { status: 201 });

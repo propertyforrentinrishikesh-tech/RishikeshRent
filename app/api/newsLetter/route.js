@@ -37,7 +37,7 @@ export async function POST(req) {
             'content-type': 'application/json'
           },
           body: JSON.stringify({
-            sender: { name: 'Rishikesh Rent', email: 'info@adventureaxis.in' },
+            sender: { name: 'Rishikesh Rent', email: 'info@rishikeshrent.com' },
             to: [{ email }],
             subject: 'Thank You for Subscribing – Get Ready for Exclusive Deals!',
             htmlContent: `
@@ -66,9 +66,9 @@ export async function POST(req) {
                   <strong>Team Rishikesh Rent</strong>
                 </p>
                 <div style="margin:28px 0 18px 0;">
-                  <img src="https://www.info@adventureaxis.in/_next/image?url=%2Flogo.png&w=256&q=75" alt="Rishikesh Rent Logo" style="height:64px;margin-bottom:8px;" />
+                  <img src="https://www.info@rishikeshrent.com/_next/image?url=%2Flogo.png&w=256&q=75" alt="Rishikesh Rent Logo" style="height:64px;margin-bottom:8px;" />
                   <div style="font-size:1.1rem;font-weight:bold;margin-bottom:2px;">
-                    Web: <a href="https://www.info@adventureaxis.in" style="color:#0056b3;text-decoration:underline;">www.info@adventureaxis.in</a>
+                    Web: <a href="https://www.info@rishikeshrent.com" style="color:#0056b3;text-decoration:underline;">www.info@rishikeshrent.com</a>
                   </div>
                   <div style="font-size:0.98rem;color:#444;">Your Gateway to Artisan Excellence</div>
                 </div>
@@ -78,7 +78,7 @@ export async function POST(req) {
                 <div style="max-width:700px;margin:0 auto;padding:0 16px;">
                   Please do not reply to this mail as this is an automated mail service. The information provided on this website is for general informational purposes only. While we strive to keep the information up to date and accurate, we make no representations or warranties of any kind, express or implied, about the completeness, accuracy, reliability, suitability, or availability with respect to the website or the information, products, services, or related graphics contained on the website for any purpose.
                   <br><br>
-                  If you would prefer not receiving our emails, please click here to <a href="https://www.info@adventureaxis.in/unsubscribe" style="color:#0056b3;">unsubscribe</a>.<br>
+                  If you would prefer not receiving our emails, please click here to <a href="https://www.info@rishikeshrent.com/unsubscribe" style="color:#0056b3;">unsubscribe</a>.<br>
                   <span style="color:#888;">© {`(new Date().getFullYear())`} Rishikesh Rent. All rights reserved</span>
                 </div>
               </div>

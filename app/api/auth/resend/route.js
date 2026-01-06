@@ -4,24 +4,24 @@ import { sendOTP } from '@/lib/brevo';
 import { NextResponse } from 'next/server';
 
 export async function POST(req) {
-  try {
-    const { email } = await req.json();
+    try {
+        const { email } = await req.json();
 
-    await connectDB();
+        await connectDB();
 
-    const tempUser = await TempUser.findOne({ email });
-    if (!tempUser) {
-      return NextResponse.json({ message: 'Email not found or expired' }, { status: 400 });
-    }
+        const tempUser = await TempUser.findOne({ email });
+        if (!tempUser) {
+            return NextResponse.json({ message: 'Email not found or expired' }, { status: 400 });
+        }
 
-    // Generate a new OTP
-    const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
+        // Generate a new OTP
+        const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Update the OTP in the TempUser
-    tempUser.otp = newOtp;
-    await tempUser.save();
+        // Update the OTP in the TempUser
+        tempUser.otp = newOtp;
+        await tempUser.save();
 
-    const message = `<!DOCTYPE html>
+        const message = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -66,8 +66,8 @@ export async function POST(req) {
                     <!-- Header -->
                     <tr>
                         <td style="padding: 30px 0; text-align: center; background-color: #4F46E5; border-top-left-radius: 8px; border-top-right-radius: 8px;">
-                            <a href="https://info@adventureaxis.in" class="header">
-            <img src="https://info@adventureaxis.in/logo.png" alt="Rishikesh HandMade Logo">
+                            <a href="https://info@rishikeshrent.com" class="header">
+            <img src="https://info@rishikeshrent.com/logo.png" alt="Rishikesh HandMade Logo">
         </a>
                             <h1 style="color: #ffffff; margin: 0; margin-top:12px; font-size: 24px;">Verification Code</h1>
                         </td>
@@ -100,17 +100,17 @@ export async function POST(req) {
 </body>
 </html>`
 
-    const subject = 'Verify Your Email';
+        const subject = 'Verify Your Email';
 
-    // Resend the OTP
-    const otpSent = await sendOTP(email, newOtp, message, subject);
-    if (!otpSent) {
-      return NextResponse.json({ message: 'Failed to resend OTP' }, { status: 201 });
+        // Resend the OTP
+        const otpSent = await sendOTP(email, newOtp, message, subject);
+        if (!otpSent) {
+            return NextResponse.json({ message: 'Failed to resend OTP' }, { status: 201 });
+        }
+
+        return NextResponse.json({ message: 'New OTP sent' }, { status: 200 });
+    } catch (error) {
+        console.error('Error resending OTP:', error);
+        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
-
-    return NextResponse.json({ message: 'New OTP sent' }, { status: 200 });
-  } catch (error) {
-    console.error('Error resending OTP:', error);
-    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
-  }
 }

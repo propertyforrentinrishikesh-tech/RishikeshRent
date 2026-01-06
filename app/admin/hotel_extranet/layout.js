@@ -1,5 +1,5 @@
 import '@/app/globals.css'
-import { AppSidebar } from '@/components/app-sidebar'
+import { AppSidebar } from '@/components/sidebar/hotel-sidebar'
 import { SidebarProvider } from '@/components/ui/sidebar'
 
 export const metadata = {
@@ -12,7 +12,7 @@ export default function RootLayout({
     return (
         <>
             <SidebarProvider className="!font-barlow">
-                {/* <AppSidebar className="py-10 bg-blue-100" /> */}
+                <AppSidebar className="py-10 bg-blue-100" />
                 {children}
             </SidebarProvider>
         </>

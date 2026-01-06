@@ -5,7 +5,7 @@ const ReturnPolicy = () => {
     <section className="bg-[#fffaf3] py-10 px-4 md:px-12 w-full mx-auto rounded-lg shadow-sm">
       <div className="border border-black p-4 md:p-8 rounded-xl shadow-sm">
         <h2 className="text-xl md:text-2xl font-bold mb-6 text-center">Return Policy & Procedure</h2>
-        
+
         <div className="space-y-6">
           <div>
             <h3 className="text-xl font-semibold mb-3">How We Accept Return Requests:</h3>
@@ -26,7 +26,7 @@ const ReturnPolicy = () => {
               <div>
                 <h4 className="font-semibold">Initiate Return Request:</h4>
                 <p className="mt-2">
-                  The guest must contact our customer service desk or email us at <a href="mailto:info@adventureaxis.in" className="text-blue-600 hover:underline">info@adventureaxis.in</a> or call <a href="tel:+911352442822" className="text-blue-600 hover:underline">+91-135-2442822</a> / <a href="tel:917669280002" className="text-blue-600 hover:underline">7669280002</a>, <a href="tel:919897468886" className="text-blue-600 hover:underline">9897468886</a> with the following details:
+                  The guest must contact our customer service desk or email us at <a href="mailto:info@rishikeshrent.com" className="text-blue-600 hover:underline">info@rishikeshrent.com</a> or call <a href="tel:+911352442822" className="text-blue-600 hover:underline">+91-135-2442822</a> / <a href="tel:917669280002" className="text-blue-600 hover:underline">7669280002</a>, <a href="tel:919897468886" className="text-blue-600 hover:underline">9897468886</a> with the following details:
                 </p>
                 <ul className="list-disc ml-6 mt-2 space-y-1">
                   <li>Order number</li>
@@ -61,7 +61,7 @@ const ReturnPolicy = () => {
             <p className="mb-4">
               Once your return request is received, the following steps will be taken:
             </p>
-            
+
             <div className="ml-4 space-y-4">
               <div>
                 <h4 className="font-semibold">Verification:</h4>
@@ -92,7 +92,7 @@ const ReturnPolicy = () => {
 
           <div className="border-t border-gray-300 pt-6">
             <h3 className="text-xl font-semibold mb-3">Refund & Exchange Terms</h3>
-            
+
             <div className="ml-4 space-y-4">
               <div>
                 <h4 className="font-semibold">Refund Mode:</h4>
@@ -136,7 +136,7 @@ const ReturnPolicy = () => {
             <p>Address: 162, Badrinath Road (Opp. Divine Lakshmi Ganga Hotel)</p>
             <p>Tapovan Luxman Jhoola, RISHIKESH-249 192 (UK)</p>
             <p>Ph.: +91-135-2442822 | Mo.: 7669280002, 9897468886</p>
-            <p>E-mail: <a href="mailto:info@adventureaxis.in" className="text-blue-600 hover:underline">info@adventureaxis.in</a> / <a href="mailto:nitin.rksh@gmail.com" className="text-blue-600 hover:underline">nitin.rksh@gmail.com</a></p>
+            <p>E-mail: <a href="mailto:info@rishikeshrent.com" className="text-blue-600 hover:underline">info@rishikeshrent.com</a> / <a href="mailto:nitin.rksh@gmail.com" className="text-blue-600 hover:underline">nitin.rksh@gmail.com</a></p>
             <p>Visit us at: <a href="https://www.adventureaxis.in" className="text-blue-600 hover:underline">www.adventureaxis.in</a></p>
           </div>
         </div>

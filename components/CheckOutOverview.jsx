@@ -111,7 +111,7 @@ const downloadInvoiceAsPdf = async (orderData) => {
 
         <div style="margin-top: 32px; padding: 16px; background: #f9f9f9; border-radius: 6px; text-align: center;">
           <p style="margin: 0; color: #666;">Thank you for your order!</p>
-          <p style="margin: 8px 0 0; color: #666;">For any queries, please contact support@info@adventureaxis.in</p>
+          <p style="margin: 8px 0 0; color: #666;">For any queries, please contact support@info@rishikeshrent.com</p>
         </div>
       </div>
     `;
@@ -163,7 +163,7 @@ const CheckOutOverview = ({ checkoutData, paymentMethod, onEdit, onConfirm, load
   // In your component, use it like this:
   const handleDownloadInvoice = () => {
     if (!checkoutData) return;
-  
+
     const orderData = {
       orderId: orderId || `ORD-${Math.random().toString(36).substr(2, 8).toUpperCase()}`,
       orderDate: new Date().toISOString(),
@@ -185,7 +185,7 @@ const CheckOutOverview = ({ checkoutData, paymentMethod, onEdit, onConfirm, load
       shippingCost: checkoutData?.shippingCost || checkoutData?.shipping || 0,
       cartTotal: checkoutData.cartTotal || 0
     };
-  
+
     downloadInvoiceAsPdf(orderData);
   };
   if (!checkoutData) {
@@ -250,7 +250,7 @@ const CheckOutOverview = ({ checkoutData, paymentMethod, onEdit, onConfirm, load
                 Download Invoice
               </button>
               <button
-              className="w-fit bg-black hover:bg-gray-800 text-white font-medium py-2 px-4 rounded-md transition duration-200 mb-4 flex items-center justify-center"
+                className="w-fit bg-black hover:bg-gray-800 text-white font-medium py-2 px-4 rounded-md transition duration-200 mb-4 flex items-center justify-center"
 
                 onClick={onGoToDashboard}
               >

@@ -290,7 +290,7 @@ const CheckOut = () => {
                 Thank you for shopping with us! You can check your order status anytime in your dashboard.
               </p>
           
-              <a href="https://info@adventureaxis.in/dashboard?section=orders" class="dashboard-btn">View Order in Dashboard</a>
+              <a href="https://info@rishikeshrent.com/dashboard?section=orders" class="dashboard-btn">View Order in Dashboard</a>
             </div>
           </body>
           </html>`
@@ -615,7 +615,7 @@ const CheckOut = () => {
                 const res = await fetch('/api/checkShipping', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ 
+                  body: JSON.stringify({
                     weight: totalWeight, // Now in kg
                     weightInGrams: (Number(buyNowProduct.weight) * qty) // Also send in grams for reference
                   }),
@@ -922,7 +922,7 @@ const CheckOut = () => {
   // const [error, setError] = useState(null);
 
 
- 
+
   const [payment, setPayment] = useState('booking_enquiry');
   const [paymentMethod, setPaymentMethod] = useState('booking_enquiry');
   const [agree, setAgree] = useState(false);
@@ -1615,7 +1615,7 @@ const CheckOut = () => {
           setLoading(false);
           return;
         }
-        
+
         // Show enquiry submitted toast first
         toast.success('Enquiry Submitted Successfully!');
         // Add this email sending logic right here:

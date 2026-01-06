@@ -15,7 +15,7 @@ const ReturnRequest = ({ order: propOrder, orderId, onClose }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   // Get order from props or fetch using orderId
   const currentOrderId = orderId || searchParams?.get('orderId');
-  
+
   // Redirect to dashboard if no order is found
   React.useEffect(() => {
     if (!currentOrderId && !order && typeof window !== 'undefined') {
@@ -44,29 +44,29 @@ const ReturnRequest = ({ order: propOrder, orderId, onClose }) => {
     try {
       setLoading(true);
       const response = await fetch(`/api/orders/${currentOrderId}`);
-      
+
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const orderData = await response.json();
-      
+
       if (!orderData) {
         throw new Error('No order data received from server');
       }
 
       // Check if we have items in the order
       const orderItems = orderData.products || orderData.items || [];
-      
+
       // Set the order data
       setOrder(orderData);
-      
+
       // Initialize with all item IDs that have _id
       const itemIds = orderItems
         .filter(item => item && (item._id || item.id))
         .map(item => item._id || item.id);
-        
+
       setSelectedItems(itemIds);
     } catch (error) {
       // console.error('Error in fetchOrderDetails:', {
@@ -81,7 +81,7 @@ const ReturnRequest = ({ order: propOrder, orderId, onClose }) => {
   };
 
   const handleItemToggle = (itemId) => {
-    
+
     setSelectedItems(prev => {
       const newItems = prev.includes(itemId)
         ? prev.filter(id => id !== itemId)
@@ -92,12 +92,12 @@ const ReturnRequest = ({ order: propOrder, orderId, onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!reason) {
       toast.error('Please select a reason for return');
       return;
     }
-    
+
     if (selectedItems.length === 0) {
       toast.error('Please select at least one item to return');
       return;
@@ -119,7 +119,7 @@ const ReturnRequest = ({ order: propOrder, orderId, onClose }) => {
       });
 
       const data = await response.json();
-      
+
       if (data.success) {
         toast.success('Return request submitted successfully');
         if (onClose) {
@@ -170,7 +170,7 @@ const ReturnRequest = ({ order: propOrder, orderId, onClose }) => {
     <div className="bg-white rounded-lg shadow-sm p-6 max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">Return Policy & Procedure</h2>
-        <button 
+        <button
           onClick={onClose || (() => router.back())}
           className="text-gray-500 hover:text-gray-700"
         >
@@ -186,12 +186,12 @@ const ReturnRequest = ({ order: propOrder, orderId, onClose }) => {
           <h3 className="text-lg font-semibold text-gray-900 mb-3">How to Initiate a Return</h3>
           <div className="space-y-4">
             <p className="text-gray-700">If you wish to return a product, please follow these steps:</p>
-            
+
             <div className="bg-white p-4 rounded-lg shadow">
               <h4 className="font-medium text-gray-800 mb-2">1. Contact Our Customer Service</h4>
               <p className="text-gray-600 mb-3">Reach out to us through any of these methods:</p>
               <ul className="list-disc pl-5 space-y-1 text-gray-700">
-                <li>Email: <a href="mailto:info@info@adventureaxis.in" className="text-blue-600 hover:underline">info@info@adventureaxis.in</a></li>
+                <li>Email: <a href="mailto:info@info@rishikeshrent.com" className="text-blue-600 hover:underline">info@info@rishikeshrent.com</a></li>
                 <li>Phone: <a href="tel:917351009107" className="text-blue-600 hover:underline">917351009107</a></li>
               </ul>
             </div>

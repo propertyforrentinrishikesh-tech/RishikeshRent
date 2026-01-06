@@ -26,7 +26,7 @@ export async function POST(req) {
 
     // First check in User collection
     const users = await User.find({ email: { $in: recipients } }, "email");
-    
+
     // Then check in Newsletter collection for any remaining emails
     const newsletterEmails = await Newsletter.find({ email: { $in: recipients } }, "email");
 
@@ -45,7 +45,7 @@ export async function POST(req) {
     const emailRecipients = uniqueEmails.map(email => ({ email }));
 
     const emailData = {
-      sender: { name: "Rishikesh Rent", email: "info@adventureaxis.in" },
+      sender: { name: "Rishikesh Rent", email: "info@rishikeshrent.com" },
       to: emailRecipients,
       subject,
       htmlContent: `
@@ -114,7 +114,7 @@ export async function POST(req) {
                             <p>Working hours:</p>
                             <p>MON to SAT : 9:30AM - 08:00 PM</p>
                             <p>Sunday Closed</p>
-            <p>If you have any questions, feel free to contact: <a href="mailto:info@adventureaxis.in">info@adventureaxis.in</a>.</p>
+            <p>If you have any questions, feel free to contact: <a href="mailto:info@rishikeshrent.com">info@rishikeshrent.com</a>.</p>
             <p>&copy; ${new Date().getFullYear()} Rishikesh Rent. All rights reserved.</p>
         </div>
                         </td>
@@ -152,7 +152,7 @@ export async function POST(req) {
       status: error.response?.status,
       stack: error.stack
     });
-    
+
     let errorMessage = 'Failed to send email. Please try again later.';
     if (error.response) {
       // Handle Brevo API specific errors
@@ -162,7 +162,7 @@ export async function POST(req) {
         errorMessage = `Email service error: ${error.response.data.message}`;
       }
     }
-    
+
     return NextResponse.json(
       { success: false, message: errorMessage },
       { status: error.response?.status || 500 }

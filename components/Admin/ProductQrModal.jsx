@@ -15,7 +15,7 @@ export default function ProductQrModal({
   const handleDownload = async () => {
     const downloadBtn = document.querySelector('.download-btn');
     const originalText = downloadBtn?.textContent;
-    
+
     try {
       if (downloadBtn) {
         downloadBtn.textContent = 'Preparing...';
@@ -31,14 +31,14 @@ export default function ProductQrModal({
       container.style.backgroundColor = 'white';
       container.style.borderRadius = '8px';
       container.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
-      
+
       // Clone the content we want to capture
       const contentToCapture = contentRef.current.cloneNode(true);
-      
+
       // Remove the download and close buttons from the clone
       const buttons = contentToCapture.querySelectorAll('button');
       buttons.forEach(btn => btn.remove());
-      
+
       // Ensure proper spacing for the description
       const description = contentToCapture.querySelector('.description-container');
       if (description) {
@@ -130,18 +130,18 @@ export default function ProductQrModal({
 
             {/* Description with HTML content */}
             <div className="text-xs text-gray-700 pb-5">
-              <div 
+              <div
                 className="h-10 overflow-x-hidden"
-                dangerouslySetInnerHTML={{ 
+                dangerouslySetInnerHTML={{
                   __html: productDescription || ''
-                }} 
+                }}
               />
             </div>
 
             {/* Details Table */}
             <table className="w-full mb-2">
               <tbody>
-              <tr>
+                <tr>
                   <td className="font-bold p-2 w-1/3">Product Code:</td>
                   <td>{productCode}</td>
                 </tr>
@@ -174,21 +174,21 @@ export default function ProductQrModal({
                   </td>
                   <td className="text-right" rowSpan={6}>
                     {logoUrl && (
-                    <img 
-                      src={logoUrl} 
-                      alt="Logo" 
-                      width={150} 
-                      height={50} 
-                      className="inline-block object-contain"
-                      crossOrigin="anonymous"
-                    />
-                  )}  
+                      <img
+                        src={logoUrl}
+                        alt="Logo"
+                        width={150}
+                        height={50}
+                        className="inline-block object-contain"
+                        crossOrigin="anonymous"
+                      />
+                    )}
                   </td>
                 </tr>
               </tbody>
             </table>
             <hr className="w-full my-2 border-gray-300" />
-            <div className="text-md text-center w-full">www.info@adventureaxis.in</div>
+            <div className="text-md text-center w-full">www.info@rishikeshrent.com</div>
           </div>
 
         </div>

@@ -34,7 +34,7 @@ const productQnA = [
   },
   {
     q: "🧑‍💬 Chat With Admin",
-    a: `Yes, our customer support is available [Days & Hours]. You can also email us at support@info@adventureaxis.in or call +91 7351009107, 9411571947.`
+    a: `Yes, our customer support is available [Days & Hours]. You can also email us at support@info@rishikeshrent.com or call +91 7351009107, 9411571947.`
   }
 ];
 
@@ -356,7 +356,7 @@ export default function ChatBot() {
     setMessages((msgs) => [
       ...msgs,
       { from: "You", sender: session?.user?.id || "user", text: qna.q, createdAt: new Date().toISOString() },
-      { from: "Bot", sender: "bot", text: qna.a + "\n\nFor more help, contact us at support@info@adventureaxis.in or call +91 7351009107, 9411571947.", createdAt: new Date().toISOString() },
+      { from: "Bot", sender: "bot", text: qna.a + "\n\nFor more help, contact us at support@info@rishikeshrent.com or call +91 7351009107, 9411571947.", createdAt: new Date().toISOString() },
     ]);
   };
 
@@ -561,7 +561,7 @@ export default function ChatBot() {
                   <MessageCircle className="w-5 h-5" />
                   Chat with Admin
                 </button> */}
-                
+
                 {/* Other menu items */}
                 {productQnA.map((qna) => (
                   <button
