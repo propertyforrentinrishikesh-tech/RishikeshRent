@@ -4,7 +4,7 @@ import { useForm, Controller, useFieldArray } from 'react-hook-form'
 import toast from 'react-hot-toast'
 
 const PropertyRegistration = () => {
-    const [currentStep, setCurrentStep] = useState(12)
+    const [currentStep, setCurrentStep] = useState(1)
     const [isRoomModalOpen, setIsRoomModalOpen] = useState(false)
     const [editingRoomIndex, setEditingRoomIndex] = useState(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -106,43 +106,54 @@ const PropertyRegistration = () => {
     useEffect(() => {
         const fetchCustomData = async () => {
             try {
-                // Fetch custom facilities
-                const facilitiesResponse = await fetch('/api/customFacilities')
+                // Fetch all APIs in parallel using Promise.all
+                const [
+                    facilitiesResponse,
+                    breakfastResponse,
+                    bathroomResponse,
+                    generalResponse,
+                    outdoorResponse,
+                    foodDrinkResponse
+                ] = await Promise.all([
+                    fetch('/api/customFacilities'),
+                    fetch('/api/customBreakfastTypes'),
+                    fetch('/api/customRoomAmenities/bathroom'),
+                    fetch('/api/customRoomAmenities/general'),
+                    fetch('/api/customRoomAmenities/outdoor'),
+                    fetch('/api/customRoomAmenities/fooddrink')
+                ])
+
+                // Process facilities
                 if (facilitiesResponse.ok) {
                     const facilitiesData = await facilitiesResponse.json()
                     setCustomFacilities(facilitiesData.facilities || [])
                 }
 
-                // Fetch custom breakfast types
-                const breakfastResponse = await fetch('/api/customBreakfastTypes')
+                // Process breakfast types
                 if (breakfastResponse.ok) {
                     const breakfastData = await breakfastResponse.json()
                     setCustomBreakfastTypes(breakfastData.breakfastTypes || [])
                 }
 
-                // Fetch custom bathroom items
-                const bathroomResponse = await fetch('/api/customRoomAmenities/bathroom')
+                // Process bathroom items
                 if (bathroomResponse.ok) {
                     const bathroomData = await bathroomResponse.json()
                     setCustomBathroomItems(bathroomData.items || [])
                 }
 
-                // Fetch custom general amenities
-                const generalResponse = await fetch('/api/customRoomAmenities/general')
+                // Process general amenities
                 if (generalResponse.ok) {
                     const generalData = await generalResponse.json()
                     setCustomGeneralAmenities(generalData.items || [])
                 }
 
-                // Fetch custom outdoor items
-                const outdoorResponse = await fetch('/api/customRoomAmenities/outdoor')
+                // Process outdoor items
                 if (outdoorResponse.ok) {
                     const outdoorData = await outdoorResponse.json()
                     setCustomOutdoorItems(outdoorData.items || [])
                 }
 
-                // Fetch custom food/drink items
-                const foodDrinkResponse = await fetch('/api/customRoomAmenities/fooddrink')
+                // Process food/drink items
                 if (foodDrinkResponse.ok) {
                     const foodDrinkData = await foodDrinkResponse.json()
                     setCustomFoodDrinkItems(foodDrinkData.items || [])
@@ -2109,7 +2120,7 @@ const PropertyRegistration = () => {
                                                     setPhotoSectionView('selection')
                                                     setShowRoomPhotoDetail(false)
                                                 }}
-                                                className="px-4 py-2 text-blue-600 font-semibold hover:underline"
+                                                className="px-4 py-2 rounded-md border-2 border-blue-600 text-blue-600 font-semibold hover:underline"
                                             >
                                                 ← Back to Selection
                                             </button>
@@ -2158,7 +2169,7 @@ const PropertyRegistration = () => {
                                                     <button
                                                         type="button"
                                                         onClick={closeRoomPhotoDetail}
-                                                        className="px-4 py-2 text-blue-600 font-semibold hover:underline"
+                                                        className="px-4 py-2 rounded-md border-2 border-blue-600 text-blue-600 font-semibold hover:underline"
                                                     >
                                                         ← Back to Rooms
                                                     </button>
@@ -2328,7 +2339,7 @@ const PropertyRegistration = () => {
                                             <button
                                                 type="button"
                                                 onClick={() => setPhotoSectionView('selection')}
-                                                className="px-4 py-2 text-blue-600 font-semibold hover:underline"
+                                                className="px-4 py-2 rounded-md border-2 border-blue-600 text-blue-600 font-semibold hover:underline"
                                             >
                                                 ← Back to Selection
                                             </button>
@@ -2440,6 +2451,16 @@ const PropertyRegistration = () => {
                                                     )}
                                                 </div>
                                             ))}
+                                        </div>
+                                        {/* Save Button */}
+                                        <div className="mt-6">
+                                            <button
+                                                type="button"
+                                                onClick={() => setPhotoSectionView('selection')}
+                                                className="w-full px-8 py-3 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition-colors"
+                                            >
+                                                Data Save
+                                            </button>
                                         </div>
                                     </div>
                                 )}
