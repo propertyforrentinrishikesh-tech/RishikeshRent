@@ -1606,68 +1606,8 @@ const PropertyRegistration = () => {
                                 /* For Non-Homes (Apartments, Hotels, Alternative): Show room and floor counters */
                                 <>
                                     {/* What can guests book? - Only for Alternative */}
-                                    {selectedCategory === 'homes' && (
-                                        <div className="mb-8">
-                                            <h2 className="text-2xl font-bold text-gray-900 mb-6">What can guests book?</h2>
-                                            <div className="space-y-4 max-w-2xl">
-                                                {/* Entire place */}
-                                                <div
-                                                    onClick={() => setAlternativeBookingType('entire-place')}
-                                                    className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${alternativeBookingType === 'entire-place'
-                                                        ? 'border-blue-600 bg-blue-50 shadow-md'
-                                                        : 'border-gray-200 bg-white hover:border-blue-500 hover:bg-blue-50'
-                                                        }`}
-                                                >
-                                                    <div className="flex items-start gap-4">
-                                                        <div className="flex-shrink-0 mt-1">
-                                                            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-2xl">
-                                                                🏠
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex-grow">
-                                                            <h3 className="font-bold text-gray-900 mb-1">Entire place</h3>
-                                                            <p className="text-sm text-gray-600">
-                                                                Guests have access to the entire place and don't have to share it with the host or other guests.
-                                                            </p>
-                                                        </div>
-                                                        {alternativeBookingType === 'entire-place' && (
-                                                            <div className="flex-shrink-0">
-                                                                <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm">✓</div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-
-                                                {/* A private room */}
-                                                <div
-                                                    onClick={() => setAlternativeBookingType('private-room')}
-                                                    className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${alternativeBookingType === 'private-room'
-                                                        ? 'border-blue-600 bg-blue-50 shadow-md'
-                                                        : 'border-gray-200 bg-white hover:border-blue-500 hover:bg-blue-50'
-                                                        }`}
-                                                >
-                                                    <div className="flex items-start gap-4">
-                                                        <div className="flex-shrink-0 mt-1">
-                                                            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-2xl">
-                                                                🚪
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex-grow">
-                                                            <h3 className="font-bold text-gray-900 mb-1">A private room</h3>
-                                                            <p className="text-sm text-gray-600">
-                                                                Guests rent a room within the property. There are common areas that are shared with either the host or other guests.
-                                                            </p>
-                                                        </div>
-                                                        {alternativeBookingType === 'private-room' && (
-                                                            <div className="flex-shrink-0">
-                                                                <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm">✓</div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
+                                 
+                                 
 
                                     <div className="mb-8">
                                         {/* Info box - Only for Hotels */}

@@ -32,27 +32,33 @@ export async function POST(request) {
             );
         }
 
+        // Sanitize data - convert empty strings to null for enum fields
+        const sanitizedData = {
+            ...data,
+            alternativeBookingType: data.alternativeBookingType === '' ? null : data.alternativeBookingType,
+        };
+
         // Create new property registration
         const propertyRegistration = new PropertyRegistration({
             // Step 1: Property Category
-            category: data.category,
+            category: sanitizedData.category,
 
             // Step 2: Property Type
-            propertyType: data.propertyType,
-            customPropertyType: data.customPropertyType,
-            furnishingStatus: data.furnishingStatus,
+            propertyType: sanitizedData.propertyType,
+            customPropertyType: sanitizedData.customPropertyType,
+            furnishingStatus: sanitizedData.furnishingStatus,
 
             // Apartment-specific: Where else is the property listed
-            listedWebsites: data.listedWebsites || [],
-            customWebsite: data.customWebsite,
-            airbnbImportLink: data.airbnbImportLink,
+            listedWebsites: sanitizedData.listedWebsites || [],
+            customWebsite: sanitizedData.customWebsite,
+            airbnbImportLink: sanitizedData.airbnbImportLink,
 
             // Home-specific: How many apartments are you listing?
-            homeListingType: data.homeListingType,
+            homeListingType: sanitizedData.homeListingType,
 
             // Alternative-specific fields
-            alternativeSubtype: data.alternativeSubtype,
-            alternativeBookingType: data.alternativeBookingType,
+            alternativeSubtype: sanitizedData.alternativeSubtype,
+            alternativeBookingType: sanitizedData.alternativeBookingType,
 
             // Step 3: Property Size
             numberOfRooms: data.numberOfRooms || 1,
@@ -186,7 +192,7 @@ export async function POST(request) {
     }
 }
 
-// GET endpoint to retrieve property registrations (optional)
+// GET endpoint to retrieve property registrations
 export async function GET(request) {
     try {
         await connectDB();
@@ -212,8 +218,7 @@ export async function GET(request) {
         } else {
             // Get all properties
             const properties = await PropertyRegistration.find()
-                .sort({ createdAt: -1 })
-                .limit(50);
+                .sort({ createdAt: -1 });
 
             return NextResponse.json({
                 success: true,
@@ -227,6 +232,81 @@ export async function GET(request) {
         return NextResponse.json({
             success: false,
             error: 'Failed to retrieve properties',
+            message: error.message
+        }, { status: 500 });
+    }
+}
+
+// PATCH endpoint to update property status and credentials
+export async function PATCH(request) {
+    try {
+        await connectDB();
+
+        const data = await request.json();
+        const { id, status, partnerUsername, partnerPassword, partnerPasswordPlain, hotelCode, isActive } = data;
+
+        if (!id) {
+            return NextResponse.json({
+                success: false,
+                error: 'Property ID is required'
+            }, { status: 400 });
+        }
+
+        // Find the property
+        const property = await PropertyRegistration.findById(id);
+
+        if (!property) {
+            return NextResponse.json({
+                success: false,
+                error: 'Property not found'
+            }, { status: 404 });
+        }
+
+        // Update fields
+        const updateData = {};
+
+        if (status !== undefined) {
+            updateData.status = status;
+        }
+
+        if (partnerUsername !== undefined) {
+            updateData.partnerUsername = partnerUsername;
+        }
+
+        if (partnerPassword !== undefined) {
+            updateData.partnerPassword = partnerPassword;
+        }
+
+        if (partnerPasswordPlain !== undefined) {
+            updateData.partnerPasswordPlain = partnerPasswordPlain;
+        }
+
+        if (hotelCode !== undefined) {
+            updateData.hotelCode = hotelCode;
+        }
+
+        if (isActive !== undefined) {
+            updateData.isActive = isActive;
+        }
+
+        // Update the property
+        const updatedProperty = await PropertyRegistration.findByIdAndUpdate(
+            id,
+            { $set: updateData },
+            { new: true, runValidators: true }
+        );
+
+        return NextResponse.json({
+            success: true,
+            message: 'Property updated successfully',
+            data: updatedProperty
+        });
+
+    } catch (error) {
+        console.error('Update Property Error:', error);
+        return NextResponse.json({
+            success: false,
+            error: 'Failed to update property',
             message: error.message
         }, { status: 500 });
     }

@@ -180,6 +180,15 @@ const PropertyRegistrationSchema = new mongoose.Schema({
     bankAddress: String,
     cancelledCheque: { url: String, key: String },
 
+    partnerUsername: { type: String },
+    partnerPassword: { type: String },
+    partnerPasswordPlain: { type: String },
+    hotelCode:{type:String},
+    isActive: {
+        type: Boolean,
+        default: true
+    },
+
     // Metadata
     status: {
         type: String,

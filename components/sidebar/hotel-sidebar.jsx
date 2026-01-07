@@ -51,17 +51,12 @@ const data = {
         { divider: true },
         {
             name: "Create Hotel Partner's",
-            url: "/admin/create_hotel_partner",
+            url: "/admin/hotel_extranet",
             icon: Plus,
         },
         {
-            name: "Hotel Partner's Log Details",
-            url: "/admin/hotel_partner_log_details",
-            icon: Plus,
-        },
-        {
-            name: "Partner's Details",
-            url: "/admin/hotel_partner_details",
+            name: "Hotel Partner's Log && Login Details",
+            url: "/admin/hotel_partner_log_and_login_details",
             icon: Plus,
         },
         { divider: true },
