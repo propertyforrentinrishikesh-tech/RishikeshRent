@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import toast from "react-hot-toast"
+import { signIn } from "next-auth/react"
 
 export default function HotelPartnerLogin() {
     const router = useRouter()
@@ -69,6 +70,18 @@ export default function HotelPartnerLogin() {
         } finally {
             setIsLoading(false)
         }
+    }
+
+    const handleGoogleSignIn = async () => {
+        setIsLoading(true)
+        setError("")
+
+        toast.error("Google Sign-In is currently unavailable for hotel partners. Please use Hotel Code, Username, and Password to login.")
+        setIsLoading(false)
+
+        // Note: To enable Google login without affecting admin session,
+        // you would need to implement a separate OAuth flow using Google's
+        // JavaScript SDK or a different authentication provider
     }
 
     return (
@@ -162,18 +175,24 @@ export default function HotelPartnerLogin() {
                         </div>
 
                         {/* Divider */}
-                        <div className="relative py-2">
+                        {/* <div className="relative py-2">
                             <div className="absolute inset-0 flex items-center">
                                 <div className="w-full border-t border-gray-300"></div>
                             </div>
                             <div className="relative flex justify-center text-sm">
                                 <span className="bg-white px-4 text-gray-500 font-medium">Or</span>
                             </div>
-                        </div>
+                        </div> */}
 
-                        {/* Google Sign In (Optional - can be removed) */}
-                        <div className="flex justify-center">
-                            <div className="w-12 h-12 rounded-full bg-white shadow-md flex items-center justify-center cursor-not-allowed opacity-50">
+                        {/* Google Sign In */}
+                        {/* <div className="flex justify-center">
+                            <button
+                                type="button"
+                                onClick={handleGoogleSignIn}
+                                disabled={true}
+                                className="w-12 h-12 rounded-full bg-white shadow-md flex items-center justify-center opacity-50 cursor-not-allowed"
+                                title="Google Sign-In is currently unavailable"
+                            >
                                 <svg viewBox="0 0 24 24" className="h-6 w-6">
                                     <path
                                         d="M12.0003 4.75C13.7703 4.75 15.3553 5.36002 16.6053 6.54998L20.0303 3.125C17.9502 1.19 15.2353 0 12.0003 0C7.31028 0 3.25527 2.69 1.28027 6.60998L5.27028 9.70498C6.21525 6.86002 8.87028 4.75 12.0003 4.75Z"
@@ -192,8 +211,8 @@ export default function HotelPartnerLogin() {
                                         fill="#34A853"
                                     />
                                 </svg>
-                            </div>
-                        </div>
+                            </button>
+                        </div> */}
 
                         {/* Login Button */}
                         <Button

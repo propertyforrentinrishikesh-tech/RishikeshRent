@@ -71,6 +71,7 @@ const PropertyRegistration = () => {
             parkingAvailable: false,
             allowChildren: false,
             allowPets: 'no',
+            alternativeBookingType: null,
             rooms: []
         }
     })
@@ -84,6 +85,7 @@ const PropertyRegistration = () => {
         bedTypes: [],
         roomSize: '',
         smokingAllowed: false,
+        privateBathroom: null, // null by default, so bathroom items are hidden
         roomFacilities: [],
         pricePerNight: '',
         numberOfRooms: 1
@@ -297,6 +299,13 @@ const PropertyRegistration = () => {
         const types = propertyTypesByCategory[selectedCategory] || []
         const selectedType = types.find(type => type.id === selectedPropertyType)
         return selectedType ? selectedType.label.toLowerCase() : 'property'
+    }
+
+    // Get the label of the selected category
+    const getSelectedCategoryLabel = () => {
+        if (!selectedCategory) return 'property'
+        const category = propertyCategories.find(cat => cat.id === selectedCategory)
+        return category ? category.label.toLowerCase() : 'property'
     }
 
     // Helper function to get actual step number based on category
@@ -1249,7 +1258,7 @@ const PropertyRegistration = () => {
         const titles = {
             1: "To get started, select the type of property you want to list on www.rishikeshrent.com",
             2: "From the list below, which property category is the best fit for your place?",
-            3: `How many ${getSelectedPropertyTypeLabel()} are you listing?`,
+            3: `How many ${getSelectedCategoryLabel()} are you listing?`,
             4: `One ${getSelectedPropertyTypeLabel()} where guests can book a room`,
             5: "Where else is your property listed?",
             6: "What's the name of your place?",
@@ -1292,7 +1301,7 @@ const PropertyRegistration = () => {
                                     'bg-yellow-500',    // Step 10
                                     'bg-lime-500',      // Step 11
                                     'bg-green-500',     // Step 12
-                                    'bg-cyan-500' ,   // Step 13
+                                    'bg-cyan-500',   // Step 13
                                     'bg-sky-500',   // Step 14
                                     'bg-fuchsia-500',   // Step 15
                                 ];
@@ -1605,10 +1614,6 @@ const PropertyRegistration = () => {
                             ) : (
                                 /* For Non-Homes (Apartments, Hotels, Alternative): Show room and floor counters */
                                 <>
-                                    {/* What can guests book? - Only for Alternative */}
-                                 
-                                 
-
                                     <div className="mb-8">
                                         {/* Info box - Only for Hotels */}
                                         {selectedCategory === 'hotel' && (
@@ -1624,6 +1629,67 @@ const PropertyRegistration = () => {
                                                 </div>
                                             </div>
                                         )}
+
+                                        {/* What can guests book? - For Alternative and Homes */}
+                                        {(selectedCategory === 'alternative' || selectedCategory === 'homes') && (
+                                            <div className="mb-8">
+                                                <h3 className="text-xl font-bold text-gray-900 mb-4">What can guests book?</h3>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    {/* Entire Place Option */}
+                                                    <div
+                                                        onClick={() => setValue('alternativeBookingType', 'entire-place')}
+                                                        className={`p-5 border-2 rounded-lg cursor-pointer transition-all duration-200 ${watch('alternativeBookingType') === 'entire-place'
+                                                            ? 'border-blue-600 bg-blue-50'
+                                                            : 'border-gray-300 hover:border-blue-400 bg-white'
+                                                            }`}
+                                                    >
+                                                        <div className="flex items-start gap-4">
+                                                            <div className="flex-shrink-0">
+                                                                <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center text-2xl">🏠</div>
+                                                            </div>
+                                                            <div className="flex-grow">
+                                                                <h4 className="font-semibold text-lg text-gray-900 mb-1">Entire place</h4>
+                                                                <p className="text-sm text-gray-600">
+                                                                    Guests have access to the entire place and don't have to share it with the host or other guests.
+                                                                </p>
+                                                            </div>
+                                                            {watch('alternativeBookingType') === 'entire-place' && (
+                                                                <div className="flex-shrink-0">
+                                                                    <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-bold">✓</div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Private Room Option */}
+                                                    <div
+                                                        onClick={() => setValue('alternativeBookingType', 'private-room')}
+                                                        className={`p-5 border-2 rounded-lg cursor-pointer transition-all duration-200 ${watch('alternativeBookingType') === 'private-room'
+                                                            ? 'border-blue-600 bg-blue-50'
+                                                            : 'border-gray-300 hover:border-blue-400 bg-white'
+                                                            }`}
+                                                    >
+                                                        <div className="flex items-start gap-4">
+                                                            <div className="flex-shrink-0">
+                                                                <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center text-2xl">🚪</div>
+                                                            </div>
+                                                            <div className="flex-grow">
+                                                                <h4 className="font-semibold text-lg text-gray-900 mb-1">A private room</h4>
+                                                                <p className="text-sm text-gray-600">
+                                                                    Guests rent a room within the property. There are common areas that are shared with either the host or other guests.
+                                                                </p>
+                                                            </div>
+                                                            {watch('alternativeBookingType') === 'private-room' && (
+                                                                <div className="flex-shrink-0">
+                                                                    <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-bold">✓</div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
                                         <div className="flex items-center justify-between max-w-md">
                                             <label className="text-lg font-semibold text-gray-900">No Of Rooms</label>
                                             <div className="flex items-center gap-3">
@@ -2447,7 +2513,10 @@ const PropertyRegistration = () => {
                                             <h3 className="font-semibold text-gray-900">Step 3 - Photos</h3>
                                             <p className="text-sm text-gray-600">Show some photos of your property so guests know what to expect</p>
                                         </div>
-                                        <button type="button" onClick={() => setCurrentStep(14)}
+                                        <button type="button" onClick={() => {
+                                            setPhotoSectionView('selection') // Reset to selection screen
+                                            setCurrentStep(14)
+                                        }}
                                             className="px-6 py-2 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition-colors">
                                             Add photos
                                         </button>
@@ -3428,7 +3497,7 @@ const PropertyRegistration = () => {
                                     </div>
 
                                     {/* Bathroom Items */}
-                                    {currentRoomData.privateBathroom !== false && (
+                                    {currentRoomData.privateBathroom === true && (
                                         <div>
                                             <label className="block text-base font-semibold text-gray-900 mb-3">What bathroom items are available in this room?</label>
                                             <div className="grid grid-cols-2 gap-3">

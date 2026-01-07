@@ -33,7 +33,7 @@ const PropertyRegistrationSchema = new mongoose.Schema({
     // Home-specific: How many apartments are you listing?
     homeListingType: {
         type: String,
-        enum: ['one', 'multiple', null],
+        enum: ['one', 'multiple', '', null],
         default: null
     },
 
@@ -41,18 +41,16 @@ const PropertyRegistrationSchema = new mongoose.Schema({
     alternativeSubtype: String,
     alternativeBookingType: {
         type: String,
-        enum: ['entire-place', 'private-room', null],
+        enum: ['entire-place', 'private-room', '', null],
         default: null
     },
 
     // Step 3: Property Size
     numberOfRooms: {
         type: Number,
-        min: 1
     },
     numberOfFloors: {
         type: Number,
-        min: 1
     },
 
     // Step 4: Property Confirmation
@@ -183,7 +181,7 @@ const PropertyRegistrationSchema = new mongoose.Schema({
     partnerUsername: { type: String },
     partnerPassword: { type: String },
     partnerPasswordPlain: { type: String },
-    hotelCode:{type:String},
+    hotelCode: { type: String },
     isActive: {
         type: Boolean,
         default: true

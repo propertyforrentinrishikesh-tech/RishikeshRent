@@ -120,6 +120,7 @@ const handleStatusChange = async (id, isActive) => {
             <TableRow>
               <TableHead>#</TableHead>
               <TableHead>Property Name</TableHead>
+              <TableHead>Hotel Code</TableHead>
               <TableHead>Username</TableHead>
               <TableHead>Password</TableHead>
               <TableHead>Status</TableHead>
@@ -130,8 +131,8 @@ const handleStatusChange = async (id, isActive) => {
               filteredPartners.map((partner, index) => (
                 <TableRow key={partner._id}>
                   <TableCell>{index + 1}</TableCell>
-                  <TableCell className="font-medium">{partner.propertyName}</TableCell>
-
+                  <TableCell className="font-medium text">{partner.propertyName}</TableCell>
+                  <TableCell className="font-medium text">{partner.hotelCode}</TableCell>
                   {/* Username */}
                   <TableCell>
                     {editingId === partner._id ? (

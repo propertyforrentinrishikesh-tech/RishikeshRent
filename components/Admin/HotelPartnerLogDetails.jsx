@@ -299,7 +299,7 @@ const HotelPartnerLogDetails = ({ partnerDetails }) => {
           </head>
           <body>
               <div class="header">
-                  <h2>Welcome to Rishikesh HandMade Vendor Portal</h2>
+                  <h2>Welcome to RishikeshRent Vendor Portal</h2>
               </div>
               
               <div class="content">
@@ -308,18 +308,18 @@ const HotelPartnerLogDetails = ({ partnerDetails }) => {
                   <p>We are pleased to inform you that your vendor application has been approved. You can now access your vendor dashboard using the credentials below:</p>
                   
                   <div class="credentials">
-                      <p><strong>Website URL:</strong> <a href="https://rishikeshhandmade.com/vendor/login">https://rishikeshhandmade.com/vendor/login</a></p>
+                      <p><strong>Website URL:</strong> <a href="https://rishikeshrent.com/vendor/login">https://rishikeshrent.com/vendor/login</a></p>
                       <p><strong>Hotel Code:</strong> ${generatedCredentials.hotelCode}</p>
                       <p><strong>Username:</strong> ${generatedCredentials.username}</p>
                       <p><strong>Password:</strong> ${plainPassword}</p>
                   </div>                  
                   <div style="text-align: center;">
-                      <a href="https://rishikeshhandmade.com/vendor/login" class="button">Access Vendor Dashboard</a>
+                      <a href="https://rishikeshrent.com/vendor/login" class="button">Access Vendor Dashboard</a>
                   </div>
                   
                   <p>If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
                   
-                  <p>Best regards,<br>Rishikesh HandMade Team</p>
+                  <p>Best regards,<br>Rishikesh Rent Team</p>
               </div>
               
               <div class="footer">
@@ -522,9 +522,28 @@ const HotelPartnerLogDetails = ({ partnerDetails }) => {
                                         {selectedPartner.isChainProperty === "true" && (
                                             <InfoRow label="Chain Name" value={selectedPartner.chainName || "N/A"} />
                                         )}
-                                        <InfoRow label="Furnishing" value={selectedPartner.furnishingStatus || "N/A"} />
+                                        {selectedPartner.furnishingStatus && (
+                                            <InfoRow label="Furnishing" value={selectedPartner.furnishingStatus} />
+                                        )}
                                         <InfoRow label="Rooms" value={selectedPartner.numberOfRooms || "N/A"} />
                                         <InfoRow label="Floors" value={selectedPartner.numberOfFloors || "N/A"} />
+
+                                        {/* Home-specific fields */}
+                                        {selectedPartner.category === 'homes' && selectedPartner.homeListingType && (
+                                            <InfoRow label="Home Listing Type" value={selectedPartner.homeListingType === 'one' ? 'One Property' : 'Multiple Properties'} />
+                                        )}
+
+                                        {/* Alternative-specific fields */}
+                                        {selectedPartner.category === 'alternative' && (
+                                            <>
+                                                {selectedPartner.alternativeSubtype && (
+                                                    <InfoRow label="Alternative Subtype" value={selectedPartner.alternativeSubtype.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())} />
+                                                )}
+                                                {selectedPartner.alternativeBookingType && (
+                                                    <InfoRow label="Booking Type" value={selectedPartner.alternativeBookingType === 'entire-place' ? 'Entire Place' : 'Private Room'} />
+                                                )}
+                                            </>
+                                        )}
                                     </div>
                                 </div>
 
