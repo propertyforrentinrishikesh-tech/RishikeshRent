@@ -12,7 +12,7 @@ export default function RootLayout({
     return (
         <>
             <SidebarProvider className="!font-barlow">
-                <AppSidebar className="py-10 bg-blue-100" />
+                <AppSidebar className="py-10 bg-white" />
                 {children}
             </SidebarProvider>
         </>

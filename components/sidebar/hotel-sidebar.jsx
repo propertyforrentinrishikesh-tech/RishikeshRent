@@ -306,7 +306,7 @@ const data = {
 const dataManager = {
     user: {
         name: "Welcome, Manager",
-        email: "info@adventureaxis1.in",
+        email: "info@rishikeshrent.com",
     },
     projects: [
         {

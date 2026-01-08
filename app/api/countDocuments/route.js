@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/connectDB';
 import PropertyDetails from '@/models/PropertyDetails';
+import PropertyRegistration from '@/models/PropertyRegistration';
 // Import other models you want to count
 // import PropertyType from '@/models/PropertyType'; // Adjust the import path as needed
 // import Location from '@/models/Location'; // Adjust the import path as needed
@@ -12,9 +13,9 @@ export async function GET() {
         await connectDB();
         
         // Fetch all counts in parallel
-        const [properties, propertyTypes, locations, users] = await Promise.all([
+        const [properties, propertyRegistrations, locations, users] = await Promise.all([
             PropertyDetails.countDocuments({}),
-            // PropertyType.countDocuments({}),     // Adjust model name as needed
+            PropertyRegistration.countDocuments({}),
             // Location.countDocuments({}),         // Adjust model name as needed
             // User.countDocuments({})              // Example of another model count
         ]);
@@ -23,7 +24,7 @@ export async function GET() {
             success: true,
             data: {
                 properties,
-                // propertyTypes,
+                propertyRegistrations,
                 // locations,
                 // users
                 // Add more counts as needed

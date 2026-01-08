@@ -12,7 +12,7 @@ const Page = () => {
   const router = useRouter();
   const [counts, setCounts] = useState({
     properties: 0,
-    propertyTypes: 0,
+    propertyRegistrations: 0,
     locations: 0,
     users: 0,
     // Add more counts as needed
@@ -36,7 +36,7 @@ const Page = () => {
         // Set default counts on error
         setCounts({
           properties: 0,
-          propertyTypes: 0,
+          propertyRegistrations: 0,
           locations: 0,
           users: 0
         });
@@ -80,7 +80,7 @@ const Page = () => {
       ),
       description: "Manage hotel listings",
       link: "/admin/hotel_extranet",
-      count: 18,
+      count: counts.propertyRegistrations,
       bgColor: "bg-blue-500",
       hoverBgColor: "hover:bg-blue-600"
     },
@@ -99,7 +99,7 @@ const Page = () => {
       description: "Manage pilgrimage services",
       link: "#",
       // link: "/admin/pilgrimage_dashboard",
-      count: 27,
+      count: 0,
       bgColor: "bg-sky-500",
       hoverBgColor: "hover:bg-sky-600"
     },
@@ -118,7 +118,7 @@ const Page = () => {
       description: "Manage food services",
       link: "#",
       // link: "/admin/food_chain_dashboard",
-      count: 15,
+      count: 0,
       bgColor: "bg-purple-500",
       hoverBgColor: "hover:bg-purple-600"
     }
@@ -126,7 +126,7 @@ const Page = () => {
 
   return (
     <SidebarProvider className="!font-barlow">
-      <AppSidebar className="py-10 bg-blue-100" />
+      <AppSidebar className="py-10 bg-white" />
       <SidebarInset className="flex-1 overflow-auto">
         <header className="flex h-16 shrink-0 items-center gap-2 border-b bg-black sticky top-0 z-10">
           <div className="flex items-center gap-2 px-4">
