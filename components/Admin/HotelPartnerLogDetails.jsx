@@ -591,6 +591,7 @@ const HotelPartnerLogDetails = ({ partnerDetails }) => {
                                         <InfoRow label="Account Number" value={selectedPartner.accountNumber || "N/A"} />
                                         <InfoRow label="IFSC Code" value={selectedPartner.ifscCode || "N/A"} />
                                         <InfoRow label="Bank Address" value={selectedPartner.bankAddress || "N/A"} />
+                                        <InfoRow label="Bank Name" value={selectedPartner.bankName || "N/A"} />
                                         <InfoRow label="PAN Number" value={selectedPartner.propertyPanNumber || "N/A"} />
                                         <InfoRow label="GST Number" value={selectedPartner.gstNumber || "N/A"} />
                                     </div>

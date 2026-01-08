@@ -561,7 +561,7 @@ const QuantityManagement = ({ productData, productId }) => {
     e.preventDefault();
     setSaving(true);
     try {
-      console.log('Submitting form with rows:', JSON.stringify(rows, null, 2));
+      // console.log('Submitting form with rows:', JSON.stringify(rows, null, 2));
       
       const variants = rows.map(row => {
         // Ensure size is a string (not an object) before sending to the server
@@ -595,7 +595,7 @@ const QuantityManagement = ({ productData, productId }) => {
           subImages: Array.isArray(row.subImages) ? row.subImages : []
         };
 
-        console.log('Processed variant data:', JSON.stringify(variantData, null, 2));
+        // console.log('Processed variant data:', JSON.stringify(variantData, null, 2));
         return variantData;
       });
       const payload = {

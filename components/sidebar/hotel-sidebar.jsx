@@ -67,72 +67,72 @@ const data = {
         },
         {
             name: "Promotional Discount",
-            url: "/admin/promotional_discount",
+            url: "#",
             icon: Plus,
         },
         {
             name: "Hotel Operational or Admisitrative",
-            url: "/admin/hotel_operational_admisitrative",
+            url: "#",
             icon: Plus,
         },
         {
             name: "Hotel Finanace Payout Overview",
-            url: "/admin/hotel_finanace_payout_overview",
+            url: "#",
             icon: Plus,
         },
         {
             name: "Hotel Status (Block, Suspend, Availble)",
-            url: "/admin/hotel_status",
+            url: "#",
             icon: Plus,
         },
         {
             name: "Suspended & Terminate Contract",
-            url: "/admin/suspended_terminate_contract",
+            url: "#",
             icon: Plus,
         },
         {
             name: "Hotel Payout Overview",
-            url: "/admin/hotel_payout_overview",
+            url: "#",
             icon: Plus,
         },
         {
             name: "Review And Chat Management",
-            url: "/admin/review_and_chat_management",
+            url: "#",
             icon: Plus,
         },
         {
             name: "Booking Enquiry",
-            url: "/admin/booking_enquiry",
+            url: "#",
             icon: Plus,
         },
         {
             name: "Cancelled Enquiry",
-            url: "/admin/cancelled_enquiry",
+            url: "#",
             icon: Plus,
         },
         {
             name: "No Show Enquiry",
-            url: "/admin/no_show_enquiry",
+            url: "#",
             icon: Plus,
         },
         {
             name: "BDM Contact",
-            url: "/admin/bdm_contact",
+            url: "#",
             icon: Plus,
         },
         {
             name: "Use Full Link",
-            url: "/admin/use_full_link",
+            url: "#",
             icon: Plus,
         },
         {
             name: "Send Promotional Emails",
-            url: "/admin/send_promotional_emails",
+            url: "#",
             icon: Send,
         },
         {
             name: "Hotel Advertisment",
-            url: "/admin/hotel_advertisment",
+            url: "#",
             icon: Send,
         },
         { divider: true },
@@ -164,7 +164,7 @@ const data = {
         },
         {
             name: "Add Direct Package",
-            url: "/admin/add_direct_package",
+            url: "#",
             icon: Image
         },
         {

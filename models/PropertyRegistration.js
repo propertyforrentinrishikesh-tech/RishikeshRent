@@ -11,7 +11,6 @@ const PropertyRegistrationSchema = new mongoose.Schema({
     // Step 2: Property Type
     propertyType: {
         type: String,
-        required: true
     },
     customPropertyType: String,
 
@@ -173,6 +172,7 @@ const PropertyRegistrationSchema = new mongoose.Schema({
     gstDocument: { url: String, key: String },
 
     accountNumber: String,
+    bankName: String,
     accountHolderName: String,
     ifscCode: String,
     bankAddress: String,

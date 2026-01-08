@@ -8,7 +8,7 @@ const PropertyRegistration = () => {
     const [isRoomModalOpen, setIsRoomModalOpen] = useState(false)
     const [editingRoomIndex, setEditingRoomIndex] = useState(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [allowReload, setAllowReload] = useState(false) // Flag to allow reload after successful submission
+    const [allowReload, setAllowReload] = useState(false) 
     const [submitStatus, setSubmitStatus] = useState(null)
     const [isFacilityModalOpen, setIsFacilityModalOpen] = useState(false)
     const [customFacilities, setCustomFacilities] = useState([])
@@ -59,7 +59,8 @@ const PropertyRegistration = () => {
     })
     const [profilePhoto, setProfilePhoto] = useState(null) // { url, key, loading }
 
-    const { register, handleSubmit, watch, control, setValue, formState: { errors } } = useForm({
+    const { register, handleSubmit, watch, control, setValue, formState: { errors }, trigger } = useForm({
+        mode: 'onChange', // Enable real-time validation
         defaultValues: {
             numberOfRooms: 1,
             numberOfFloors: 1,
@@ -196,7 +197,7 @@ const PropertyRegistration = () => {
         },
         {
             id: 'hotel',
-            label: 'Hotel, B&Bs & More',
+            label: 'Hotel',
             description: 'Properties like hotels, B&Bs, guest houses, hostels, condo hotels, etc.',
             icon: '🏨'
         },
@@ -482,6 +483,7 @@ const PropertyRegistration = () => {
                 gstDocument: documents.gstDoc ? { url: documents.gstDoc.url, key: documents.gstDoc.key } : null,
 
                 accountNumber: data.accountNumber,
+                bankName: data.bankName,
                 accountHolderName: data.accountHolderName,
                 ifscCode: data.ifscCode,
                 bankAddress: data.bankAddress,
@@ -539,9 +541,14 @@ const PropertyRegistration = () => {
         }
     }
 
-    const handleContinue = () => {
+    const handleContinue = async () => {
         // Step 1: Category selection
         if (currentStep === 1) {
+            const isValid = await trigger('category')
+            if (!isValid) {
+                toast.error('Please select a property category')
+                return
+            }
             setCurrentStep(2)
         }
         // Step 2: Property type selection
@@ -558,7 +565,8 @@ const PropertyRegistration = () => {
         }
         // Step 4: Property confirmation
         else if (currentStep === 4) {
-            if (!propertyConfirmation) {
+            const isValid = await trigger('propertyConfirmation')
+            if (!isValid || !propertyConfirmation) {
                 toast.error('Please confirm if this is your property type')
                 return
             }
@@ -579,10 +587,20 @@ const PropertyRegistration = () => {
         }
         // Step 7: Location
         else if (currentStep === 7) {
+            const isValid = await trigger(['addressLine1', 'city', 'pinCode'])
+            if (!isValid) {
+                toast.error('Please fill in all required location fields')
+                return
+            }
             setCurrentStep(8)
         }
         // Step 8: Property details
         else if (currentStep === 8) {
+            const isValid = await trigger(['propertyName', 'starRating'])
+            if (!isValid) {
+                toast.error('Please fill in all required property details')
+                return
+            }
             setCurrentStep(9)
         }
         // Step 9: Services
@@ -595,6 +613,11 @@ const PropertyRegistration = () => {
         }
         // Step 11: House Rules
         else if (currentStep === 11) {
+            const isValid = await trigger(['checkInFrom', 'checkInUntil', 'checkOutFrom', 'checkOutUntil'])
+            if (!isValid) {
+                toast.error('Please fill in all check-in and check-out times')
+                return
+            }
             setCurrentStep(12)
         }
         // Step 12: Overview page - Submit form
@@ -1263,7 +1286,7 @@ const PropertyRegistration = () => {
             5: "Where else is your property listed?",
             6: "What's the name of your place?",
             7: "Where is your property?",
-            8: `Tell us about your ${getSelectedPropertyTypeLabel()}`,
+            8: `Tell us about your ${getSelectedCategoryLabel()}`,
             9: "Services at your property?",
             10: "What languages do you or your staff speak?",
             11: "House Rules",
@@ -2050,7 +2073,7 @@ const PropertyRegistration = () => {
                                 <div className="flex items-center gap-3">
                                     <label className="block text-xl font-semibold text-gray-900 mb-2">What's the name of your {getSelectedPropertyTypeLabel()}?</label>
                                     <div>
-                                        <input type="text" {...register('propertyName', { required: 'Property name is required' })}
+                                        <input type="text" {...register('propertyName', { required: "Property Name is required" })}
                                             className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                             placeholder={getSelectedPropertyTypeLabel() + " Name"} />
                                         <p className="text-xs text-gray-500 mt-1">Guests will see this name when searching for a place to stay.</p>
@@ -2088,6 +2111,7 @@ const PropertyRegistration = () => {
                                                 </div>
                                             );
                                         })}
+                                        {errors.starRating && <p className="text-red-600 text-sm mt-2">{errors.starRating.message}</p>}
                                     </div>
                                 </div>
                                 <div>
@@ -2118,6 +2142,7 @@ const PropertyRegistration = () => {
                                         <option value="">Select Here</option>
                                         {ownershipTypes.map((type) => <option key={type} value={type}>{type}</option>)}
                                     </select>
+                                    {errors.ownershipType && <p className="text-red-600 text-sm mt-2">{errors.ownershipType.message}</p>}
                                 </div>
                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                                     {/* Left side - Facilities */}
@@ -2494,7 +2519,7 @@ const PropertyRegistration = () => {
                                             <h3 className="font-semibold text-gray-900">Step 1 - Property details</h3>
                                             <p className="text-sm text-gray-600">The basics: Add your property name, address, facilities, and more</p>
                                         </div>
-                                        <button type="button" onClick={() => setCurrentStep(1)} className="px-6 py-2 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition-colors">Edit</button>
+                                        <button type="button" onClick={() => setCurrentStep(1)} className="px-2 w-40 py-2 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition-colors">Edit</button>
                                     </div>
                                     <div className="flex items-center gap-4 p-4 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-400 transition-colors">
                                         <div className="flex-shrink-0 w-10 h-10 bg-white border-2 border-gray-300 rounded-full flex items-center justify-center text-gray-600 font-bold">🛏️</div>
@@ -2503,7 +2528,7 @@ const PropertyRegistration = () => {
                                             <p className="text-sm text-gray-600">Tell us about your first room. Once you set one up you can add more</p>
                                         </div>
                                         <button type="button" onClick={() => setCurrentStep(13)}
-                                            className="px-6 py-2 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition-colors">
+                                            className="px-6 w-40 py-2 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition-colors">
                                             Add room
                                         </button>
                                     </div>
@@ -2517,7 +2542,7 @@ const PropertyRegistration = () => {
                                             setPhotoSectionView('selection') // Reset to selection screen
                                             setCurrentStep(14)
                                         }}
-                                            className="px-6 py-2 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition-colors">
+                                            className="px-2 w-40 py-2 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition-colors">
                                             Add photos
                                         </button>
                                     </div>
@@ -2528,7 +2553,7 @@ const PropertyRegistration = () => {
                                             <p className="text-sm text-gray-600">Set up payments and invoices before you open for bookings</p>
                                         </div>
                                         <button type="button" onClick={() => setCurrentStep(15)}
-                                            className="px-6 py-2 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition-colors">
+                                            className="px-2 w-40 py-2 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition-colors">
                                             Add final details
                                         </button>
                                     </div>
@@ -3222,6 +3247,12 @@ const PropertyRegistration = () => {
                                             <h3 className="text-xl font-semibold text-gray-900 mb-4">Bank Information</h3>
                                             <div className="space-y-4">
                                                 <div>
+                                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Bank Name</label>
+                                                    <input type="text" {...register('bankName')}
+                                                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                                        placeholder="Type Here" />
+                                                </div>
+                                                <div>
                                                     <label className="block text-sm font-semibold text-gray-700 mb-2">Account Number</label>
                                                     <input type="text" {...register('accountNumber')}
                                                         className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
@@ -3399,7 +3430,7 @@ const PropertyRegistration = () => {
                                         Submitting...
                                     </span>
                                 ) : (
-                                    (selectedCategory === 'hotel' ? currentStep === 12 : currentStep === 15) ? 'Submit Data...' : 'Continue'
+                                    currentStep === 12 ? 'Submit Data...' : 'Continue'
                                 )}
                             </button>
                         )}

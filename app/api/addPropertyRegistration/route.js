@@ -144,6 +144,7 @@ export async function POST(request) {
             gstDocument: data.gstDocument,
 
             accountNumber: data.accountNumber,
+            bankName: data.bankName,
             accountHolderName: data.accountHolderName,
             ifscCode: data.ifscCode,
             bankAddress: data.bankAddress,
