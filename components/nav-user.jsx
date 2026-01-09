@@ -87,16 +87,16 @@ export function NavUser({
   };
 
   return (
-    (<SidebarMenu className="bg-blue-100">
+    (<SidebarMenu className="bg-white">
       <SidebarMenuItem>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="hover:bg-blue-500 data-[state=open]:bg-blue-200 data-[state=open]:text-sidebar-accent-foreground">
+              className="hover:bg-white data-[state=open]:bg-white data-[state=open]:text-sidebar-accent-foreground">
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={'/placeholder.jpeg'} />
-                <AvatarFallback className="rounded-lg bg-blue-600 text-white font-bold">AD</AvatarFallback>
+                <AvatarFallback className="rounded-lg bg-white text-black font-bold">AD</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">Welcome, {user?.user.name}</span>

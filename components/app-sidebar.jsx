@@ -57,13 +57,13 @@ const data = {
     { divider: true },
     {
       name: "Pilgrimage Extranet",
-      url: "/admin/pilgrimage_extranet",
+      url: "#",
       icon: Plus,
     },
     { divider: true },
     {
       name: "Restaurant Extranet",
-      url: "/admin/restaurant_extranet",
+      url: "#",
       icon: Plus,
     },
     { divider: true },

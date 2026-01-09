@@ -1342,7 +1342,7 @@ const PropertyRegistration = () => {
                 </div>
 
                 <div className="text-center mb-12">
-                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-gray-900 leading-tight px-4">
+                    <h1 className="text-2xl sm:text-xl lg:text-2xl font-semibold text-gray-900 leading-tight px-4">
                         {getStepTitle()}
                     </h1>
                 </div>
