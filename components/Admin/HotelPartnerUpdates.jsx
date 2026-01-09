@@ -4,7 +4,7 @@ import { ChevronDown, ChevronRight, LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import toast from 'react-hot-toast';
-import Calendar from './HotelPartnerSidebar/Calender';
+import B2CPrice from './HotelPartnerSidebar/B2CPrice';
 
 const HotelPartnerUpdates = () => {
     const router = useRouter();
@@ -13,7 +13,7 @@ const HotelPartnerUpdates = () => {
     const [allProperties, setAllProperties] = useState([]);
     const [approvedProperties, setApprovedProperties] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [activeSection, setActiveSection] = useState('calendar');
+    const [activeSection, setActiveSection] = useState('');
     const [expandedSections, setExpandedSections] = useState({
         'rates': false,
         'content': false,
@@ -103,7 +103,18 @@ const HotelPartnerUpdates = () => {
             bgColor: 'bg-blue-500',
             textColor: 'text-white',
             children: [
-                { id: 'calendar', label: 'Calendar', description: 'Manage rates, availability, and restrictions for dates.' },
+                {
+                    id: 'calendar',
+                    label: 'Calendar',
+                    description: 'Manage rates, availability, and restrictions for dates.',
+                    children: [
+                        // { id: 'year-calendar', label: 'Year Calendar', description: 'View and manage yearly calendar.' },
+                        { id: 'b2c-price', label: 'B2C Price', description: 'Ideal for standard bookings on normal periods.' },
+                        { id: 'bulk-price-update', label: 'Bulk Price Update', description: 'Setting your base rates for the entire upcoming year.' },
+                        { id: 'weekend-price', label: 'Weekend Price', description: 'Weekend Escape Rates, perfect for leisure nights!' },
+                        { id: 'special-offer-price', label: 'Special Offer Price', description: 'The "Best Value" Approach.' }
+                    ]
+                },
                 { id: 'rate-plans', label: 'Rate Plans', description: 'Create and manage rate plans.' },
                 { id: 'restrictions', label: 'Restrictions', description: 'Set minimum stay, closed to arrival, etc.' }
             ]
@@ -192,10 +203,10 @@ const HotelPartnerUpdates = () => {
 
         // Render specific components based on active section
         switch (activeSection) {
-            case 'calendar':
+            case 'b2c-price':
                 return (
                     <div className="p-6">
-                        <Calendar />
+                        <B2CPrice />
                     </div>
                 );
 
@@ -279,14 +290,48 @@ const HotelPartnerUpdates = () => {
                                     {!section.isSingle && !section.isHeader && expandedSections[section.id] && (
                                         <div className="bg-gray-200">
                                             {section.children?.map((child) => (
-                                                <div
-                                                    key={child.id}
-                                                    className={`px-6 py-3 cursor-pointer border-b border-gray-300 hover:bg-gray-300 transition-colors ${activeSection === child.id ? 'bg-blue-100 border-l-4 border-l-blue-600' : ''
-                                                        }`}
-                                                    onClick={() => setActiveSection(child.id)}
-                                                >
-                                                    <div className="font-medium text-sm text-gray-900">{child.label}</div>
-                                                    <div className="text-xs text-gray-600 mt-1">{child.description}</div>
+                                                <div key={child.id}>
+                                                    {/* Child Item */}
+                                                    <div
+                                                        className={`px-6 py-3 cursor-pointer border-b border-gray-300 hover:bg-gray-300 transition-colors ${activeSection === child.id ? 'bg-blue-100 border-l-4 border-l-blue-600' : ''
+                                                            }`}
+                                                        onClick={() => {
+                                                            if (child.children) {
+                                                                toggleSection(child.id);
+                                                            } else {
+                                                                setActiveSection(child.id);
+                                                            }
+                                                        }}
+                                                    >
+                                                        <div className="flex items-center justify-between">
+                                                            <div className="flex-1">
+                                                                <div className="font-medium text-sm text-gray-900">{child.label}</div>
+                                                                <div className="text-xs text-gray-600 mt-1">{child.description}</div>
+                                                            </div>
+                                                            {child.children && (
+                                                                expandedSections[child.id] ?
+                                                                    <ChevronDown className="h-3 w-3 ml-2" /> :
+                                                                    <ChevronRight className="h-3 w-3 ml-2" />
+                                                            )}
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Nested Children (Third Level) */}
+                                                    {child.children && expandedSections[child.id] && (
+                                                        <div className="bg-gray-300">
+                                                            {child.children.map((subChild) => (
+                                                                <div
+                                                                    key={subChild.id}
+                                                                    className={`px-8 py-2.5 cursor-pointer border-b border-gray-400 hover:bg-gray-400 transition-colors ${activeSection === subChild.id ? 'bg-blue-100 border-l-4 border-l-blue-600' : ''
+                                                                        }`}
+                                                                    onClick={() => setActiveSection(subChild.id)}
+                                                                >
+                                                                    <div className="font-medium text-xs text-gray-900">{subChild.label}</div>
+                                                                    <div className="text-xs text-gray-600 mt-0.5">{subChild.description}</div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             ))}
                                         </div>
