@@ -1230,9 +1230,12 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                             <TableRow key={property._id}>
                                 <TableCell className="border border-black flex items-center justify-center">
                                     {property.mainImage?.url ? (
-                                        <img
+                                        <Image
+                                            height={100}
+                                            width={100}
                                             src={property.mainImage.url}
                                             alt={property.propertyName}
+                                            loading='lazy'
                                             className="h-16 w-16 object-cover rounded"
                                         />
                                     ) : (

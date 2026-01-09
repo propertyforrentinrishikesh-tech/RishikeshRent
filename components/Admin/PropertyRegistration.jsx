@@ -319,7 +319,7 @@ const PropertyRegistration = () => {
     }
 
 
-    const roomTypesList = ['Studio', 'Suite', 'Twin/Double', 'Triple/Quad', 'Family', 'Dorm', 'Shared Room', 'Bunk Room']
+    const roomTypesList = ['Studio', 'Suite', 'Twin/Double', 'Triple/Quad', 'Family', 'Dorm', 'Shared Room', 'Bunk Room','Deluxe Room','Deluxe Room  With Balcony','King / Queen Room','Standard Room','Deluxe Room','Junior Suite','Executive/Presidential Suite','Connecting Rooms','Adjoining Rooms','Premium Room','Classic Room','Premier Room']
     const ownershipTypes = ['Primary Property Ownership', 'Freehold', 'Leasehold', 'Strata Title', 'Partnership', 'Fractional Ownership', 'Joint Ownership (Co-ownership)']
     const languages = [
         'English', 'Hindi', 'Arabic', 'Bengali', 'Bulgarian', 'Catalan', 'Chinese', 'Croatian',

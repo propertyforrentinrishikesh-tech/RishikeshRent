@@ -44,28 +44,28 @@ export async function POST(request) {
         });
 
         // Handle validation errors
-        if (error.name === 'ValidationError') {
-            const validationErrors = Object.keys(error.errors).map(key => ({
-                field: key,
-                message: error.errors[key].message
-            }));
-            return NextResponse.json(
-                {
-                    success: false,
-                    error: 'Validation failed',
-                    validationErrors
-                },
-                { status: 400 }
-            );
-        }
+        // if (error.name === 'ValidationError') {
+        //     const validationErrors = Object.keys(error.errors).map(key => ({
+        //         field: key,
+        //         message: error.errors[key].message
+        //     }));
+        //     return NextResponse.json(
+        //         {
+        //             success: false,
+        //             error: 'Validation failed',
+        //             validationErrors
+        //         },
+        //         { status: 400 }
+        //     );
+        // }
 
         // Handle duplicate key errors
-        if (error.code === 11000) {
-            return NextResponse.json(
-                { success: false, error: 'A property with these details already exists' },
-                { status: 400 }
-            );
-        }
+        // if (error.code === 11000) {
+        //     return NextResponse.json(
+        //         { success: false, error: 'A property with these details already exists' },
+        //         { status: 400 }
+        //     );
+        // }
 
         return NextResponse.json(
             {

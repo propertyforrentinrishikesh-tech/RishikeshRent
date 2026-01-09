@@ -23,6 +23,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
   const [filters, setFilters] = useState({
     propertyType: '',
     locationType: '',
+    propertyFor: '',
   });
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -40,13 +41,13 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
     galleryImages: [],
     video: { type: "upload", file: null, youtubeLink: "" },
     locationType: "",
+    propertyFor: "",
     contactAddress: "",
     brokerName: "",
     contactNumbers: [""],
     rentPrice: "",
     propertyName: "",
     highlights: [],
-    propertyFor: "",
     isAvailable: true,
     isTrending: false,
     isActive: true,
@@ -320,7 +321,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
     }));
   };
   const handleSearch = async () => {
-    if (!filters.propertyType && !filters.locationType) {
+    if (!filters.propertyType && !filters.locationType && !filters.propertyFor) {
       toast.error('Please select at least one filter');
       return;
     }
@@ -330,7 +331,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
       const queryParams = new URLSearchParams();
       if (filters.propertyType) queryParams.append('propertyType', filters.propertyType);
       if (filters.locationType) queryParams.append('locationType', filters.locationType);
-
+      if (filters.propertyFor) queryParams.append('propertyFor', filters.propertyFor);
       const response = await fetch(`/api/searchPropertyDetails?${queryParams}`);
       if (!response.ok) {
         throw new Error('Failed to fetch properties');
@@ -543,11 +544,11 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
   const toggleAvailable = async (property) => {
     const newStatus = !property.isActive;
     // Optimistically update the UI
-    const updatedProperties = searchResults.map(p => 
+    const updatedProperties = searchResults.map(p =>
       p._id === property._id ? { ...p, isActive: newStatus } : p
     );
     setSearchResults(updatedProperties);
-    
+
     try {
       await updatePropertyStatus(property._id, {
         isActive: newStatus
@@ -555,7 +556,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
       toast.success(`Property marked as ${newStatus ? 'active' : 'inactive'}`);
     } catch (error) {
       // Revert on error
-      const revertedProperties = searchResults.map(p => 
+      const revertedProperties = searchResults.map(p =>
         p._id === property._id ? { ...p, isActive: property.isActive } : p
       );
       setSearchResults(revertedProperties);
@@ -567,11 +568,11 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
   const toggleTrending = async (property) => {
     const newStatus = !property.isTrending;
     // Optimistically update the UI
-    const updatedProperties = searchResults.map(p => 
+    const updatedProperties = searchResults.map(p =>
       p._id === property._id ? { ...p, isTrending: newStatus } : p
     );
     setSearchResults(updatedProperties);
-    
+
     try {
       await updatePropertyStatus(property._id, {
         isTrending: newStatus
@@ -579,7 +580,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
       toast.success(`Property ${newStatus ? 'added to' : 'removed from'} trending`);
     } catch (error) {
       // Revert on error
-      const revertedProperties = searchResults.map(p => 
+      const revertedProperties = searchResults.map(p =>
         p._id === property._id ? { ...p, isTrending: property.isTrending } : p
       );
       setSearchResults(revertedProperties);
@@ -592,7 +593,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
       <div className="bg-white rounded-lg shadow p-6 mb-6 border border-black">
         <h1 className="text-2xl font-bold mb-6">Search Properties</h1>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div>
             <label className="block text-sm font-medium mb-1">Property Type</label>
             <Select
@@ -615,8 +616,8 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
           <div>
             <label className="block text-sm font-medium mb-1">Location</label>
             <Select
-              value={filters.location}
-              onValueChange={(value) => setFilters(prev => ({ ...prev, location: value }))}
+              value={filters.locationType}
+              onValueChange={(value) => setFilters(prev => ({ ...prev, locationType: value }))}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select location" />
@@ -627,6 +628,21 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                     {location.locationType}
                   </SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Property Be Like</label>
+            <Select
+              value={filters.propertyFor}
+              onValueChange={(value) => setFilters(prev => ({ ...prev, propertyFor: value }))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select property type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="residential">Residential</SelectItem>
+                <SelectItem value="commercial">Commercial</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -761,9 +777,12 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                   <div className="bg-white p-4 rounded-lg border shadow-sm">
                     <h3 className="text-lg font-semibold mb-3 pb-2 border-b">Main Image</h3>
                     <div className="flex justify-center items-center">
-                      <img
+                      <Image
+                        height={200}
+                        width={200}
                         src={selectedProperty.mainImage.url}
                         alt="Main property"
+                        loading='lazy'
                         className="max-w-full h-auto max-h-44 rounded-lg object-contain border"
                       />
                     </div>
@@ -776,9 +795,12 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                     <div className=" flex flex-wrap items-center gap-5 max-h-64 overflow-y-auto">
                       {selectedProperty.galleryImages.map((img, idx) => (
                         <div key={idx} className="w-44 h-32 overflow-hidden">
-                          <img
+                          <Image
+                            height={200}
+                            width={200}
                             src={img.url}
                             alt={`Gallery ${idx + 1}`}
+                            loading='lazy'
                             className="w-full h-full object-cover rounded-lg border"
                           />
                         </div>
@@ -987,6 +1009,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                       src={img.url}
                       alt={`Gallery ${index + 1}`}
                       fill
+                      loading='lazy'
                       className="object-cover"
                     />
                     {img.loading && (

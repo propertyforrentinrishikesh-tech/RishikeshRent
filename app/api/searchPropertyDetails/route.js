@@ -10,11 +10,15 @@ export async function GET(request) {
         const { searchParams } = new URL(request.url);
         const propertyType = searchParams.get('propertyType');
         const locationType = searchParams.get('locationType');
+        const propertyFor = searchParams.get('propertyFor');
+
+
 
         // Build the query
         const query = {};
         if (propertyType) query.propertyType = propertyType;
         if (locationType) query.locationType = locationType;
+        if (propertyFor) query.propertyFor = propertyFor;
 
         // Search for properties
         const properties = await PropertyDetails.find(query)
@@ -31,10 +35,10 @@ export async function GET(request) {
     } catch (error) {
         console.error('Search error:', error);
         return NextResponse.json(
-            { 
-                success: false, 
+            {
+                success: false,
                 error: 'Failed to search properties',
-                details: error.message 
+                details: error.message
             },
             { status: 500 }
         );
