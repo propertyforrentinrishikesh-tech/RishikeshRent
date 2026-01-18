@@ -5,6 +5,15 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import toast from 'react-hot-toast';
 import B2CPrice from './HotelPartnerSidebar/B2CPrice';
+import BulkPriceUpdate from './HotelPartnerSidebar/BulkPriceUpdate';
+import WeekendPrice from './HotelPartnerSidebar/WeekendPrice';
+import SpecialOfferPrice from './HotelPartnerSidebar/SpecialOfferPrice';
+import PlanPriceUpdate from './HotelPartnerSidebar/PlanPriceUpdate';
+import Restrictions from './HotelPartnerSidebar/Restrictions';
+import Photos from './HotelPartnerSidebar/Photos';
+import Descriptions from './HotelPartnerSidebar/Descriptions';
+import FacilitiesAmenities from './HotelPartnerSidebar/FacilitiesAmenities';
+import RatePlans from './HotelPartnerSidebar/RatePlans';
 
 const HotelPartnerUpdates = () => {
     const router = useRouter();
@@ -115,8 +124,19 @@ const HotelPartnerUpdates = () => {
                         { id: 'special-offer-price', label: 'Special Offer Price', description: 'The "Best Value" Approach.' }
                     ]
                 },
-                { id: 'rate-plans', label: 'Rate Plans', description: 'Create and manage rate plans.' },
-                { id: 'restrictions', label: 'Restrictions', description: 'Set minimum stay, closed to arrival, etc.' }
+                {
+                    id: 'rate-plans', label: 'Rate Plans', description: 'Create and manage rate plans.',
+                    children: [
+                        { id: 'create-plan', label: 'Create Plan / Package', description: 'Meal for Standard bookings or seasonal promotions' },
+                        { id: 'plan-price-update', label: 'Plan Price Update', description: 'Setting your base rates for the entire upcoming year.' },
+                    ]
+                },
+                {
+                    id: 'restrictions', label: 'Restrictions', description: 'Set minimum stay, closed to arrival, etc.',
+                    children: [
+                        { id: 'krc-update', label: 'KRC Update', description: 'View and update room availability for specific dates.' },
+                    ]
+                }
             ]
         },
         {
@@ -125,9 +145,9 @@ const HotelPartnerUpdates = () => {
             bgColor: 'bg-blue-500',
             textColor: 'text-white',
             children: [
-                { id: 'photos', label: 'Photos', description: 'Upload and manage property photos.' },
-                { id: 'facilities', label: 'Facilities & Amenities', description: 'Update facilities and amenities.' },
-                { id: 'descriptions', label: 'Descriptions', description: 'Edit property descriptions.' }
+                { id: 'photos', label: 'Photos', description: 'Images of rooms, bathrooms and common areas.' },
+                { id: 'facilities', label: 'Facilities & Amenities', description: 'Cehckboxes for WiFi, pool, parking, air conditioning, etc.' },
+                { id: 'descriptions', label: 'Descriptions', description: 'Write or edit the "About Us" text and room specific details.' }
             ]
         },
         {
@@ -209,13 +229,28 @@ const HotelPartnerUpdates = () => {
                         <B2CPrice />
                     </div>
                 );
-
-            // Add more cases for other sections here
-            // case 'rate-plans':
-            //     return <RatePlans />
-            // case 'photos':
-            //     return <Photos />
-
+            case 'bulk-price-update':
+                return (
+                    <div className="p-6">
+                        <BulkPriceUpdate />
+                    </div>
+                );
+            case 'weekend-price':
+                return <WeekendPrice />
+            case 'special-offer-price':
+                return <SpecialOfferPrice />
+            case 'create-plan':
+                return <RatePlans />
+            case 'plan-price-update':
+                return <PlanPriceUpdate />
+            case 'krc-update':
+                return <Restrictions />
+            case 'photos':
+                return <Photos />
+            case 'facilities':
+                return <FacilitiesAmenities />
+            case 'descriptions':
+                return <Descriptions />
             default:
                 return (
                     <div className="p-6">
@@ -236,7 +271,7 @@ const HotelPartnerUpdates = () => {
     };
 
     return (
-        <div style={{ minHeight: '85vh', background: '#fff' }}>
+        <div style={{ minHeight: '50vh', background: '#fff' }}>
             {loading || !isAuthenticated ? (
                 <div className="text-center text-lg font-semibold p-8">Loading partner details...</div>
             ) : (

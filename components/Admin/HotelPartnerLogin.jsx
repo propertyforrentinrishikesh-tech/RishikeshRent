@@ -85,7 +85,7 @@ export default function HotelPartnerLogin() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center font-barlow px-4 py-12 bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="min-h-screen flex items-center justify-center font-barlow px-4 py-10 bg-gradient-to-br from-blue-50 to-indigo-100">
             <Card className="w-full max-w-md shadow-2xl border-2 border-gray-200">
                 <CardHeader className="space-y-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-lg">
                     <CardTitle className="text-3xl font-bold text-center">

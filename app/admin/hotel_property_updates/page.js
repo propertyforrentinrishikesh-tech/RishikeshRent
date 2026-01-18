@@ -9,7 +9,7 @@ const HotelPartnerUpdatesPage = () => {
                     <SidebarTrigger className="-ml-1" />
                 </div>
             </header>
-            <div className="flex flex-1 flex-col gap-4 p-4 md:p-6 lg:p-8">
+            <div className="flex flex-1 flex-col gap-4 p-4 md:p-6">
                 <HotelPartnerUpdates />
             </div>
         </SidebarInset>
