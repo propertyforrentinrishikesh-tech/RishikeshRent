@@ -22,7 +22,7 @@ export async function GET(request) {
 
         // Search for properties
         const properties = await PropertyDetails.find(query)
-            .select('propertyName propertyType locationType mainImage galleryImages video contactAddress brokerName contactNumbers rentPrice highlights isActive isTrending propertyFor propertyNameSlug')
+            .select('propertyName propertyType locationType mainImage galleryImages video contactAddress brokerName ownerName contactNumbers rentPrice maxRentPrice highlights isActive isTrending propertyFor propertyNameSlug')
             .sort({ createdAt: -1 })
             .lean();
 

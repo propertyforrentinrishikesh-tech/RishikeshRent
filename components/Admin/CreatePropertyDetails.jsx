@@ -28,6 +28,7 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
     const galleryImagesRef = useRef(null);
     const [activeTab, setActiveTab] = useState('youtube');
     const [editingProperty, setEditingProperty] = useState(null);
+    const [brokerOrOwner, setBrokerOrOwner] = useState('broker'); // Track broker or owner selection
     const [formData, setFormData] = useState({
         propertyType: "",
         mainImage: { url: "", key: "", loading: false },
@@ -36,8 +37,10 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
         locationType: "",
         contactAddress: "",
         brokerName: "",
+        ownerName: "",
         contactNumbers: [""],
         rentPrice: "",
+        maxRentPrice: "",
         propertyName: "",
         highlights: [],
         propertyFor: "",
@@ -629,8 +632,10 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
             locationType: "",
             contactAddress: "",
             brokerName: "",
+            ownerName: "",
             contactNumbers: [""],
             rentPrice: "",
+            maxRentPrice: "",
             propertyName: "",
             propertyFor: "",
             isTrending: false,
@@ -644,6 +649,7 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
         setUploadError(null);
         setActiveTab('upload'); // Reset to upload tab
         setEditingProperty(null);
+        setBrokerOrOwner('broker'); // Reset to broker
 
         // Clear file inputs
         if (mainImageRef.current) {
@@ -693,12 +699,21 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
             locationType: property.locationType || "",
             contactAddress: property.contactAddress || "",
             brokerName: property.brokerName || "",
+            ownerName: property.ownerName || "",
             contactNumbers: property.contactNumbers?.length ? [...property.contactNumbers] : [""],
             rentPrice: property.rentPrice || "",
+            maxRentPrice: property.maxRentPrice || "",
             propertyName: property.propertyName || "",
             highlights: property.highlights?.length ? [...property.highlights] : [""],
             propertyFor: property.propertyFor || "",
         });
+
+        // Set broker or owner based on which field has data
+        if (property.ownerName) {
+            setBrokerOrOwner('owner');
+        } else {
+            setBrokerOrOwner('broker');
+        }
 
         // Set the correct active tab based on video type
         if (videoData.type === 'youtube' && videoData.youtubeLink) {
@@ -788,6 +803,16 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                         </SelectContent>
                     </Select>
                 </div>
+                <div className="w-full">
+                    <Label>Property Name</Label>
+                    <Input
+                        className="bg-white border border-black rounded-md p-2"
+                        name="propertyName"
+                        value={formData.propertyName}
+                        onChange={handleChange}
+                        placeholder="Enter Property Name"
+                    />
+                </div>
 
                 <div className="space-y-2">
                     <Label>Main Property Image</Label>
@@ -804,7 +829,7 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                         <Button
                             type="button"
                             variant="outline"
-                            className="flex items-center gap-2 bg-blue-500 text-white hover:bg-blue-600"
+                            className="flex items-center gap-2 bg-blue-500 text-white hover:bg-blue-600 hover:text-white w-48"
                             onClick={() => mainImageRef.current?.click()}
                             disabled={formData.mainImage.loading}
                         >
@@ -851,7 +876,7 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                     <Button
                         type="button"
                         variant="outline"
-                        className="flex items-center gap-2 bg-blue-500 text-white hover:bg-blue-600"
+                        className="flex items-center gap-2 bg-blue-500 text-white hover:bg-blue-600 hover:text-white w-48"
                         onClick={() => galleryImagesRef.current?.click()}
                         disabled={loading}
                     >
@@ -1058,19 +1083,59 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
 
                 {/* Broker Info */}
                 <div className="space-y-4">
-                    <h3 className="text-xl font-medium underline">Broker Information</h3>
+                    <h3 className="text-xl font-medium underline"> Broker / Owner Information</h3>
+                    <div className="flex items-center gap-2 w-full">
+                        <div className="space-y-2 w-48">
+                            <Label>Select Type</Label>
+                            <Select
+                                value={brokerOrOwner}
+                                onValueChange={(value) => {
+                                    setBrokerOrOwner(value);
+                                    // Clear the opposite field when switching
+                                    if (value === 'broker') {
+                                        setFormData(prev => ({ ...prev, ownerName: "" }));
+                                    } else {
+                                        setFormData(prev => ({ ...prev, brokerName: "" }));
+                                    }
+                                }}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select Broker / Owner" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="broker">Broker</SelectItem>
+                                    <SelectItem value="owner">Owner</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2 w-full">
 
-                    <div className="space-y-2">
-                        <Label>Broker Name</Label>
-                        <Input
-                            className="bg-white border border-black rounded-md p-2"
-                            name="brokerName"
-                            value={formData.brokerName}
-                            onChange={handleChange}
-                            placeholder="Enter broker name"
-                        />
+                            {/* Conditionally show Broker Name or Owner Name input */}
+                            {brokerOrOwner === 'broker' ? (
+                                <div className="space-y-2">
+                                    <Label>Broker Name</Label>
+                                    <Input
+                                        className="bg-white border border-black rounded-md p-2"
+                                        name="brokerName"
+                                        value={formData.brokerName}
+                                        onChange={handleChange}
+                                        placeholder="Enter broker name"
+                                    />
+                                </div>
+                            ) : (
+                                <div className="space-y-2">
+                                    <Label>Owner Name</Label>
+                                    <Input
+                                        className="bg-white border border-black rounded-md p-2"
+                                        name="ownerName"
+                                        value={formData.ownerName}
+                                        onChange={handleChange}
+                                        placeholder="Enter owner name"
+                                    />
+                                </div>
+                            )}
+                        </div>
                     </div>
-
                     <div className="space-y-2">
                         <Label>Contact Numbers</Label>
                         {formData.contactNumbers.map((number, index) => (
@@ -1098,7 +1163,7 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                         ))}
                         <Button
                             type="button"
-                            variant="outline"
+                            variant="destructive"
                             onClick={() => {
                                 setFormData(prev => ({
                                     ...prev,
@@ -1113,7 +1178,7 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                 </div>
                 <div className="flex items-center gap-5 w-full">
                     <div className="w-full">
-                        <Label>Accept Rent Amount</Label>
+                        <Label>Minimum Rent Amount</Label>
                         <Input
                             className="bg-white border border-black rounded-md p-2"
                             name="rentPrice"
@@ -1124,13 +1189,14 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                         />
                     </div>
                     <div className="w-full">
-                        <Label>Property Name</Label>
+                        <Label>Maximum Rent Amount</Label>
                         <Input
                             className="bg-white border border-black rounded-md p-2"
-                            name="propertyName"
-                            value={formData.propertyName}
+                            name="maxRentPrice"
+                            type="number"
+                            value={formData.maxRentPrice}
                             onChange={handleChange}
-                            placeholder="Enter Property Name"
+                            placeholder="Enter Maximum Rent Price"
                         />
                     </div>
                 </div>
@@ -1209,7 +1275,7 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                 <TableHeader>
                     <TableRow className="bg-gray-200 border border-black">
                         <TableHead className="border border-black text-center">Image</TableHead>
-                        <TableHead className="border border-black text-center">Broker Name</TableHead>
+                        <TableHead className="border border-black text-center">Broker / Owner Name</TableHead>
                         <TableHead className="border border-black text-center">Property Type</TableHead>
                         <TableHead className="border border-black text-center">Location Type</TableHead>
                         <TableHead className="border border-black text-center">Price</TableHead>
@@ -1242,7 +1308,7 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                                         <div className="h-16 w-16 bg-gray-200 rounded" />
                                     )}
                                 </TableCell>
-                                <TableCell className="font-medium border border-black text-center">{property.brokerName}</TableCell>
+                                <TableCell className="font-medium border border-black text-center">{property.brokerName || property.ownerName}</TableCell>
                                 <TableCell className="border border-black text-center">{property.propertyType}</TableCell>
                                 <TableCell className="border border-black text-center">{property.locationType}</TableCell>
                                 <TableCell className="border border-black text-center">₹{property.rentPrice?.toLocaleString()}</TableCell>

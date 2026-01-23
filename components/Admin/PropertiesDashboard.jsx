@@ -16,44 +16,56 @@ const PropertiesDashboard = ({ productId }) => {
   const [galiType, setGaliType] = useState([]);
 
   // Fetch property types and locations
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        // Fetch property types
-        const propResponse = await fetch("/api/createProperty");
-        const propData = await propResponse.json();
-        setPropertyTypes(propData);
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      setLoading(true);
 
-        // Fetch locations
-        const locResponse = await fetch("/api/createLocation");
-        const locData = await locResponse.json();
-        setLocationType(locData);
+      const [
+        propResponse,
+        locResponse,
+        subLocResponse,
+        wardResponse,
+        galiResponse,
+      ] = await Promise.all([
+        fetch("/api/createProperty"),
+        fetch("/api/createLocation"),
+        fetch("/api/createSubLocation"),
+        fetch("/api/createWard"),
+        fetch("/api/createGali"),
+      ]);
 
-        // Fetch sub locations
-        const subLocResponse = await fetch("/api/createSubLocation");
-        const subLocData = await subLocResponse.json();
-        setSubLocationType(subLocData);
+      const [
+        propData,
+        locData,
+        subLocData,
+        wardData,
+        galiData,
+      ] = await Promise.all([
+        propResponse.json(),
+        locResponse.json(),
+        subLocResponse.json(),
+        wardResponse.json(),
+        galiResponse.json(),
+      ]);
 
-        // Fetch wards
-        const wardResponse = await fetch("/api/createWard");
-        const wardData = await wardResponse.json();
-        setWardType(wardData);
+      setPropertyTypes(propData);
+      setLocationType(locData);
+      setSubLocationType(subLocData);
+      setWardType(wardData);
+      setGaliType(galiData);
 
-        // Fetch galis
-        const galiResponse = await fetch("/api/createGali");
-        const galiData = await galiResponse.json();
-        setGaliType(galiData);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        toast.error("Failed to fetch data");
-      } finally {
-        setLoading(false);
-      }
-    };
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      toast.error("Failed to fetch data");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchData();
-  }, []);
+  fetchData();
+}, []);
+
 
   const sectionConfig = [
     { 

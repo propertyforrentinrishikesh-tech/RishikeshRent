@@ -35,6 +35,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
   const [uploadError, setUploadError] = useState(null);
   const [retryAttempt, setRetryAttempt] = useState(0);
   const [activeTab, setActiveTab] = useState('upload');
+  const [brokerOrOwner, setBrokerOrOwner] = useState('broker');
   const [formData, setFormData] = useState({
     propertyType: "",
     mainImage: { url: "", key: "", loading: false },
@@ -44,8 +45,10 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
     propertyFor: "",
     contactAddress: "",
     brokerName: "",
+    ownerName: "",
     contactNumbers: [""],
     rentPrice: "",
+    maxRentPrice: "",
     propertyName: "",
     highlights: [],
     isAvailable: true,
@@ -371,11 +374,77 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
   const handleEdit = (propertyId) => {
     const property = searchResults.find(p => p._id === propertyId);
     setEditingProperty(property);
+
+    // Set broker or owner based on which field has data (do this FIRST)
+    // Check for non-empty strings, not just truthy values
+    if (property.ownerName && property.ownerName.trim() !== '') {
+      setBrokerOrOwner('owner');
+    } else {
+      setBrokerOrOwner('broker');
+    }
+
+    // Transform video data from database format to form format
+    let videoData = { type: "upload", file: null, youtubeLink: "" };
+
+    if (property.video) {
+      if (property.video.type === 'upload' && property.video.url) {
+        videoData = {
+          type: 'upload',
+          file: {
+            url: property.video.url,
+            key: property.video.key || '',
+            name: 'Existing Video',
+            type: 'video/*',
+            size: 0
+          },
+          youtubeLink: ''
+        };
+      } else if (property.video.type === 'youtube' && property.video.youtubeLink) {
+        videoData = {
+          type: 'youtube',
+          file: null,
+          youtubeLink: property.video.youtubeLink
+        };
+      }
+    }
+
     setFormData({
-      ...property,
-      mainImage: property.mainImage || { url: property.mainImageUrl, loading: false },
-      galleryImages: property.galleryImages || []
+      propertyType: property.propertyType || "",
+      mainImage: property.mainImage || { url: "", key: "", loading: false },
+      galleryImages: property.galleryImages || [],
+      video: videoData,
+      locationType: property.locationType || "",
+      propertyFor: property.propertyFor || "",
+      contactAddress: property.contactAddress || "",
+      brokerName: property.brokerName || "",
+      ownerName: property.ownerName || "",
+      contactNumbers: property.contactNumbers?.length ? [...property.contactNumbers] : [""],
+      rentPrice: property.rentPrice || "",
+      maxRentPrice: property.maxRentPrice || "",
+      propertyName: property.propertyName || "",
+      highlights: property.highlights?.length ? [...property.highlights] : [""],
+      isAvailable: property.isAvailable !== undefined ? property.isAvailable : true,
+      isTrending: property.isTrending !== undefined ? property.isTrending : false,
+      isActive: property.isActive !== undefined ? property.isActive : true,
+      propertyNameSlug: property.propertyNameSlug || ""
     });
+
+    // Set the correct active tab based on video type
+    if (videoData.type === 'youtube' && videoData.youtubeLink) {
+      setActiveTab('youtube');
+    } else if (videoData.type === 'upload' && videoData.file) {
+      setActiveTab('upload');
+    } else {
+      setActiveTab('upload'); // Default to upload tab
+    }
+
+    // Scroll to form (if element exists)
+    setTimeout(() => {
+      const formElement = document.querySelector('form');
+      if (formElement) {
+        formElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
   };
 
   const handleDelete = (propertyId) => {
@@ -447,22 +516,29 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
 
       // Reset form and editing state
       setFormData({
-        propertyFor: '',
-        propertyType: '',
-        mainImage: { url: '', loading: false },
+        propertyType: "",
+        mainImage: { url: "", key: "", loading: false },
         galleryImages: [],
-        video: { type: 'upload', file: null, youtubeLink: '' },
-        // Add other initial form fields here
-        locationType: '',
-        contactAddress: '',
-        brokerName: '',
-        contactNumbers: [''],
-        rentPrice: '',
-        propertyName: '',
-        highlights: ['']
+        video: { type: "upload", file: null, youtubeLink: "" },
+        locationType: "",
+        propertyFor: "",
+        contactAddress: "",
+        brokerName: "",
+        ownerName: "",
+        contactNumbers: [""],
+        rentPrice: "",
+        maxRentPrice: "",
+        propertyName: "",
+        highlights: [""],
+        isAvailable: true,
+        isTrending: false,
+        isActive: true,
+        propertyNameSlug: ""
       });
 
       setEditingProperty(null);
+      setBrokerOrOwner('broker'); // Reset to broker
+      setActiveTab('upload'); // Reset to upload tab
 
     } catch (error) {
       console.error('Error updating property:', error);
@@ -759,8 +835,9 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                       <p><span className="font-medium">Property Type:</span> {selectedProperty.propertyType}</p>
                       <p><span className="font-medium">Property Be Like:</span> {selectedProperty.propertyFor}</p>
                       <p><span className="font-medium">Location:</span> {selectedProperty.locationType}</p>
-                      <p><span className="font-medium">Rent Price:</span> ₹{selectedProperty.rentPrice?.toLocaleString()}</p>
-                      <p><span className="font-medium">Broker Name:</span> {selectedProperty.brokerName || 'N/A'}</p>
+                      <p><span className="font-medium">Minimum Rent Price:</span> ₹{selectedProperty.rentPrice?.toLocaleString()}</p>
+                      <p><span className="font-medium">Maximum Rent Price:</span> ₹{selectedProperty.maxRentPrice?.toLocaleString()}</p>
+                      <p><span className="font-medium">{selectedProperty.brokerName ? "Broker" : "Owner"} Name:</span> {selectedProperty.brokerName || selectedProperty.ownerName}</p>
                     </div>
                     <div className="space-y-2">
                       <h4 className="font-medium underline">Contact Information</h4>
@@ -936,6 +1013,16 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                 </SelectContent>
               </Select>
             </div>
+            <div className="w-full">
+              <Label>Property Name</Label>
+              <Input
+                className="bg-white border border-black rounded-md p-2"
+                name="propertyName"
+                value={formData.propertyName}
+                onChange={handleChange}
+                placeholder="Enter Property Name"
+              />
+            </div>
 
             {/* Main Image Upload */}
             <div className="space-y-2">
@@ -953,7 +1040,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                 <Button
                   type="button"
                   variant="outline"
-                  className="flex items-center gap-2 bg-blue-500 text-white hover:bg-blue-600"
+                  className="flex items-center gap-2 bg-blue-500 text-white hover:bg-blue-600 hover:text-white w-48"
                   onClick={() => mainImageRef.current?.click()}
                   disabled={formData.mainImage.loading}
                 >
@@ -996,7 +1083,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
               <Button
                 type="button"
                 variant="outline"
-                className="flex items-center gap-2 bg-blue-500 text-white hover:bg-blue-600"
+                className="flex items-center gap-2 bg-blue-500 text-white hover:bg-blue-600 hover:text-white w-48"
                 onClick={() => galleryImagesRef.current?.click()}
               >
                 <Upload className="w-4 h-4" />
@@ -1182,17 +1269,59 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
 
             {/* Broker Info */}
             <div className="space-y-4">
-              <h3 className="text-xl font-medium underline">Broker Information</h3>
+              <h3 className="text-xl font-medium underline">Broker / Owner Information</h3>
 
-              <div className="space-y-2">
-                <Label>Broker Name</Label>
-                <Input
-                  className="bg-white border border-black rounded-md p-2"
-                  name="brokerName"
-                  value={formData.brokerName}
-                  onChange={handleChange}
-                  placeholder="Enter broker name"
-                />
+              <div className="flex items-center gap-2 w-full">
+                <div className="space-y-2 w-48">
+                  <Label>Select Type</Label>
+                  <Select
+                    value={brokerOrOwner}
+                    onValueChange={(value) => {
+                      setBrokerOrOwner(value);
+                      // Clear the opposite field when switching
+                      if (value === 'broker') {
+                        setFormData(prev => ({ ...prev, ownerName: "" }));
+                      } else {
+                        setFormData(prev => ({ ...prev, brokerName: "" }));
+                      }
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Broker / Owner" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="broker">Broker</SelectItem>
+                      <SelectItem value="owner">Owner</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2 w-full">
+
+                  {/* Conditionally show Broker Name or Owner Name input */}
+                  {brokerOrOwner === 'broker' ? (
+                    <div className="space-y-2">
+                      <Label>Broker Name</Label>
+                      <Input
+                        className="bg-white border border-black rounded-md p-2"
+                        name="brokerName"
+                        value={formData.brokerName || ''}
+                        onChange={handleChange}
+                        placeholder="Enter broker name"
+                      />
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Label>Owner Name</Label>
+                      <Input
+                        className="bg-white border border-black rounded-md p-2"
+                        name="ownerName"
+                        value={formData.ownerName || ''}
+                        onChange={handleChange}
+                        placeholder="Enter owner name"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -1222,7 +1351,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                 ))}
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="destructive"
                   onClick={() => {
                     setFormData(prev => ({
                       ...prev,
@@ -1237,24 +1366,25 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
             </div>
             <div className="flex items-center gap-5 w-full">
               <div className="w-full">
-                <Label>Accept Rent Amount</Label>
+                <Label>Minimum Rent Amount</Label>
                 <Input
                   className="bg-white border border-black rounded-md p-2"
                   name="rentPrice"
                   type="number"
                   value={formData.rentPrice}
                   onChange={handleChange}
-                  placeholder="Enter Rent Price"
+                  placeholder="Enter Minimum Rent Price"
                 />
               </div>
               <div className="w-full">
-                <Label>Property Name</Label>
+                <Label>Maximum Rent Amount</Label>
                 <Input
                   className="bg-white border border-black rounded-md p-2"
-                  name="propertyName"
-                  value={formData.propertyName}
+                  name="maxRentPrice"
+                  type="number"
+                  value={formData.maxRentPrice}
                   onChange={handleChange}
-                  placeholder="Enter Property Name"
+                  placeholder="Enter Maximum Rent Price"
                 />
               </div>
             </div>

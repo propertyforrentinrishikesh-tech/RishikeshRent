@@ -55,7 +55,7 @@ const CreatePropertyType = ({
   const [showDeleteModalLocation, setShowDeleteModalLocation] = useState(false);
   const [showDeleteModalSubLocation, setShowDeleteModalSubLocation] = useState(false);
   const [showDeleteModalWardLocation, setShowDeleteModalWardLocation] = useState(false);
-  const [showDeleteModalForGali , setShowDeleteModalForGali] = useState(false);
+  const [showDeleteModalForGali, setShowDeleteModalForGali] = useState(false);
   const [propertyToDelete, setPropertyToDelete] = useState(null);
   const [locationToDelete, setLocationToDelete] = useState(null);
   const [subLocationToDelete, setSubLocationToDelete] = useState(null);
@@ -760,10 +760,10 @@ const CreatePropertyType = ({
         </TableHeader>
         <TableBody>
           {properties.length > 0 ? (
-            properties.map((property,index) => (
+            properties.map((property, index) => (
               <TableRow key={property._id} className="border border-black">
                 <TableCell className="border border-black text-center">
-                  {index+1}
+                  {index + 1}
                 </TableCell>
                 <TableCell className="border border-black text-center">
                   {property.propertyType}
@@ -885,10 +885,10 @@ const CreatePropertyType = ({
         </TableHeader>
         <TableBody>
           {locations.length > 0 ? (
-            locations.map((location,index) => (
+            locations.map((location, index) => (
               <TableRow key={location._id} className="border border-black">
                 <TableCell className="border border-black text-center">
-                  {index+1}
+                  {index + 1}
                 </TableCell>
                 <TableCell className="border border-black text-center">
                   {location.locationType}
@@ -944,6 +944,8 @@ const CreatePropertyType = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <hr className="my-6 border border-gray-400" />
 
       {/* sub location Type */}
       <h2 className="text-2xl font-bold my-6">
@@ -1038,10 +1040,10 @@ const CreatePropertyType = ({
         </TableHeader>
         <TableBody>
           {subLocations.length > 0 ? (
-            subLocations.map((subLocation,index) => (
+            subLocations.map((subLocation, index) => (
               <TableRow key={subLocation._id} className="border border-black">
                 <TableCell className="border border-black text-center">
-                  {index+1}
+                  {index + 1}
                 </TableCell>
                 <TableCell className="border border-black text-center">
                   {subLocation.locationType}
@@ -1100,7 +1102,7 @@ const CreatePropertyType = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
+      <hr className="my-6 border border-gray-400" />
       {/* new Sub 3rd ward number type */}
       <h2 className="text-2xl font-bold my-6">
         {editLocation
@@ -1223,10 +1225,10 @@ const CreatePropertyType = ({
         </TableHeader>
         <TableBody>
           {wards.length > 0 ? (
-            wards.map((ward,index) => (
+            wards.map((ward, index) => (
               <TableRow key={ward._id} className="border border-black">
                 <TableCell className="border border-black text-center">
-                  {index+1}
+                  {index + 1}
                 </TableCell>
                 <TableCell className="border border-black text-center">
                   {ward.locationType}
@@ -1288,7 +1290,7 @@ const CreatePropertyType = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
+      <hr className="my-6 border border-gray-400" />
       {/* add new gali/ mohalla location type */}
       <h2 className="text-2xl font-bold my-6">
         {editGali
@@ -1438,10 +1440,10 @@ const CreatePropertyType = ({
         </TableHeader>
         <TableBody>
           {galis.length > 0 ? (
-            galis.map((gali,index) => (
+            galis.map((gali, index) => (
               <TableRow key={gali._id} className="border border-black">
                 <TableCell className="border border-black text-center">
-                  {index+1}
+                  {index + 1}
                 </TableCell>
                 <TableCell className="border border-black text-center">
                   {gali.locationType}
