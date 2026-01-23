@@ -17,12 +17,15 @@ import { Upload, Trash2, Edit, X, Plus, Search, Eye } from 'lucide-react';
 import Image from 'next/image';
 import { Switch } from "@/components/ui/switch";
 
-const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
+const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationType = [], wardType = [], galiType = [] }) => {
   const [loading, setLoading] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [filters, setFilters] = useState({
     propertyType: '',
     locationType: '',
+    subLocationType: '',
+    wardType: '',
+    galiType: '',
     propertyFor: '',
   });
   const [selectedProperty, setSelectedProperty] = useState(null);
@@ -42,6 +45,9 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
     galleryImages: [],
     video: { type: "upload", file: null, youtubeLink: "" },
     locationType: "",
+    subLocationType: "",
+    wardType: "",
+    galiType: "",
     propertyFor: "",
     contactAddress: "",
     brokerName: "",
@@ -414,6 +420,9 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
       galleryImages: property.galleryImages || [],
       video: videoData,
       locationType: property.locationType || "",
+      subLocationType: property.subLocationType || "",
+      wardType: property.wardType || "",
+      galiType: property.galiType || "",
       propertyFor: property.propertyFor || "",
       contactAddress: property.contactAddress || "",
       brokerName: property.brokerName || "",
@@ -521,6 +530,9 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
         galleryImages: [],
         video: { type: "upload", file: null, youtubeLink: "" },
         locationType: "",
+        subLocationType: "",
+        wardType: "",
+        galiType: "",
         propertyFor: "",
         contactAddress: "",
         brokerName: "",
@@ -835,6 +847,9 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                       <p><span className="font-medium">Property Type:</span> {selectedProperty.propertyType}</p>
                       <p><span className="font-medium">Property Be Like:</span> {selectedProperty.propertyFor}</p>
                       <p><span className="font-medium">Location:</span> {selectedProperty.locationType}</p>
+                      <p><span className="font-medium">Sub Location:</span> {selectedProperty.subLocationType}</p>
+                      <p><span className="font-medium">Ward:</span> {selectedProperty.wardType}</p>
+                      <p><span className="font-medium">Gali:</span> {selectedProperty.galiType}</p>
                       <p><span className="font-medium">Minimum Rent Price:</span> ₹{selectedProperty.rentPrice?.toLocaleString()}</p>
                       <p><span className="font-medium">Maximum Rent Price:</span> ₹{selectedProperty.maxRentPrice?.toLocaleString()}</p>
                       <p><span className="font-medium">{selectedProperty.brokerName ? "Broker" : "Owner"} Name:</span> {selectedProperty.brokerName || selectedProperty.ownerName}</p>
@@ -1246,6 +1261,62 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                   {locationType.map((location) => (
                     <SelectItem key={location._id} value={location.locationType}>
                       {location.locationType}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Sub Location Select */}
+            <div className="space-y-2">
+              <Label>Sub Location</Label>
+              <Select
+                value={formData.subLocationType}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, subLocationType: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select sub location" />
+                </SelectTrigger>
+                <SelectContent>
+                  {subLocationType.map((location) => (
+                    <SelectItem key={location._id} value={location.subLocationType}>
+                      {location.subLocationType}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Ward Location</Label>
+              <Select
+                value={formData.wardType}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, wardType: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select ward location" />
+                </SelectTrigger>
+                <SelectContent>
+                  {wardType.map((location) => (
+                    <SelectItem key={location._id} value={location.wardName}>
+                      {location.wardName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Gali Location</Label>
+              <Select
+                value={formData.galiType}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, galiType: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select gali location" />
+                </SelectTrigger>
+                <SelectContent>
+                  {galiType.map((location) => (
+                    <SelectItem key={location._id} value={location.galiName}>
+                      {location.galiName}
                     </SelectItem>
                   ))}
                 </SelectContent>

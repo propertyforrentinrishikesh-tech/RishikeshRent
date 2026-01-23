@@ -14,7 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { useRef } from 'react';
 import toast from 'react-hot-toast';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
+const CreatePropertyDetails = ({ propertyTypes = [], locationType = [], subLocationType = [], wardType = [], galiType = [] }) => {
     const [loading, setLoading] = useState(false);
     const [propertyDetails, setPropertyDetails] = useState([]);
     const [videoUploading, setVideoUploading] = useState(false);
@@ -28,13 +28,16 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
     const galleryImagesRef = useRef(null);
     const [activeTab, setActiveTab] = useState('youtube');
     const [editingProperty, setEditingProperty] = useState(null);
-    const [brokerOrOwner, setBrokerOrOwner] = useState('broker'); // Track broker or owner selection
+    const [brokerOrOwner, setBrokerOrOwner] = useState('broker');
     const [formData, setFormData] = useState({
         propertyType: "",
         mainImage: { url: "", key: "", loading: false },
         galleryImages: [],
         video: { type: "upload", file: null, youtubeLink: "" },
         locationType: "",
+        subLocationType: "",
+        wardType: "",
+        galiType: "",
         contactAddress: "",
         brokerName: "",
         ownerName: "",
@@ -73,13 +76,16 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                     return {
                         ...prev,
                         propertyType: propertyTypes[0].propertyType,
-                        locationType: locationType[0]?.locationType || ""
+                        locationType: locationType[0]?.locationType || "",
+                        subLocationType: subLocationType[0]?.subLocationType || "",
+                        wardType: wardType[0]?.wardType || "",
+                        galiType: galiType[0]?.galiType || ""
                     };
                 }
                 return prev;
             });
         }
-    }, [propertyTypes, locationType]);
+    }, [propertyTypes, locationType, subLocationType, wardType, galiType]);
 
     // Handle input changes
     const handleChange = (e) => {
@@ -539,6 +545,9 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
             // Get the selected property type object
             const selectedPropertyType = propertyTypes.find(type => type.propertyType === formData.propertyType);
             const selectedLocationType = locationType.find(loc => loc.locationType === formData.locationType);
+            const selectedSubLocationType = subLocationType.find(subLoc => subLoc.subLocationType === formData.subLocationType);
+            const selectedWardType = wardType.find(ward => ward.wardType === formData.wardType);
+            const selectedGaliType = galiType.find(gali => gali.galiType === formData.galiType);
 
             if (!selectedPropertyType) {
                 throw new Error('Please select a valid property type');
@@ -566,6 +575,9 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                 // Ensure we're using the exact property type from the selected type
                 propertyType: selectedPropertyType.propertyType,
                 locationType: selectedLocationType?.locationType || formData.locationType,
+                subLocationType: selectedSubLocationType?.subLocationType || formData.subLocationType,
+                wardType: selectedWardType?.wardType || formData.wardType,
+                galiType: selectedGaliType?.galiType || formData.galiType,
                 contactNumbers: formData.contactNumbers
                     .map(num => num ? num.trim() : '')
                     .filter(num => num !== ''),
@@ -630,6 +642,9 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
             galleryImages: [],
             video: { type: "upload", file: null, youtubeLink: "" },
             locationType: "",
+            subLocationType: "",
+            wardType: "",
+            galiType: "",
             contactAddress: "",
             brokerName: "",
             ownerName: "",
@@ -697,6 +712,9 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
             galleryImages: property.galleryImages || [],
             video: videoData,
             locationType: property.locationType || "",
+            subLocationType: property.subLocationType || "",
+            wardType: property.wardType || "",
+            galiType: property.galiType || "",
             contactAddress: property.contactAddress || "",
             brokerName: property.brokerName || "",
             ownerName: property.ownerName || "",
@@ -1065,7 +1083,61 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                         </SelectContent>
                     </Select>
                 </div>
-
+                   {/* Sub Location Select */}
+                <div className="space-y-2">
+                    <Label>Sub Location</Label>
+                    <Select
+                        value={formData.subLocationType}
+                        onValueChange={(value) => setFormData(prev => ({ ...prev, subLocationType: value }))}
+                    >
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select sub location" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {subLocationType.map((location) => (
+                                <SelectItem key={location._id} value={location.subLocationType}>
+                                    {location.subLocationType}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+                   <div className="space-y-2">
+                    <Label>Ward Location</Label>
+                    <Select
+                        value={formData.wardType}
+                        onValueChange={(value) => setFormData(prev => ({ ...prev, wardType: value }))}
+                    >
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select ward location" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {wardType.map((location) => (
+                                <SelectItem key={location._id} value={location.wardName}>
+                                    {location.wardName}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+                   <div className="space-y-2">
+                    <Label>Gali Location</Label>
+                    <Select
+                        value={formData.galiType}
+                        onValueChange={(value) => setFormData(prev => ({ ...prev, galiType: value }))}
+                    >
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select gali location" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {galiType.map((location) => (
+                                <SelectItem key={location._id} value={location.galiName}>
+                                    {location.galiName}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
                 {/* Address */}
                 <div className="space-y-2">
                     <Label>Address</Label>
@@ -1185,7 +1257,7 @@ const CreatePropertyDetails = ({ propertyTypes = [], locationType = [] }) => {
                             type="number"
                             value={formData.rentPrice}
                             onChange={handleChange}
-                            placeholder="Enter Rent Price"
+                            placeholder="Enter Minimum Rent Price"
                         />
                     </div>
                     <div className="w-full">

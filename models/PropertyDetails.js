@@ -20,6 +20,9 @@ const propertyDetailsSchema = new mongoose.Schema({
         youtubeLink: { type: String }
     },
     locationType: { type: String, required: true },
+    subLocationType: { type: String, required: true },
+    wardType: { type: String, required: true },
+    galiType: { type: String, required: true },
     contactAddress: { type: String },    
     brokerName: { type: String },
     ownerName: { type: String },

@@ -20,7 +20,7 @@ const Photos = () => {
     })
 
     const onSubmit = (data) => {
-        console.log('Form Data:', data)
+        // console.log('Form Data:', data)
         // Add your save logic here
     }
 

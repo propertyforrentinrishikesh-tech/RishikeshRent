@@ -16,64 +16,64 @@ const PropertiesDashboard = ({ productId }) => {
   const [galiType, setGaliType] = useState([]);
 
   // Fetch property types and locations
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      setLoading(true);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
 
-      const [
-        propResponse,
-        locResponse,
-        subLocResponse,
-        wardResponse,
-        galiResponse,
-      ] = await Promise.all([
-        fetch("/api/createProperty"),
-        fetch("/api/createLocation"),
-        fetch("/api/createSubLocation"),
-        fetch("/api/createWard"),
-        fetch("/api/createGali"),
-      ]);
+        const [
+          propResponse,
+          locResponse,
+          subLocResponse,
+          wardResponse,
+          galiResponse,
+        ] = await Promise.all([
+          fetch("/api/createProperty"),
+          fetch("/api/createLocation"),
+          fetch("/api/createSubLocation"),
+          fetch("/api/createWard"),
+          fetch("/api/createGali"),
+        ]);
 
-      const [
-        propData,
-        locData,
-        subLocData,
-        wardData,
-        galiData,
-      ] = await Promise.all([
-        propResponse.json(),
-        locResponse.json(),
-        subLocResponse.json(),
-        wardResponse.json(),
-        galiResponse.json(),
-      ]);
+        const [
+          propData,
+          locData,
+          subLocData,
+          wardData,
+          galiData,
+        ] = await Promise.all([
+          propResponse.json(),
+          locResponse.json(),
+          subLocResponse.json(),
+          wardResponse.json(),
+          galiResponse.json(),
+        ]);
 
-      setPropertyTypes(propData);
-      setLocationType(locData);
-      setSubLocationType(subLocData);
-      setWardType(wardData);
-      setGaliType(galiData);
+        setPropertyTypes(propData);
+        setLocationType(locData);
+        setSubLocationType(subLocData);
+        setWardType(wardData);
+        setGaliType(galiData);
 
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      toast.error("Failed to fetch data");
-    } finally {
-      setLoading(false);
-    }
-  };
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        toast.error("Failed to fetch data");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  fetchData();
-}, []);
+    fetchData();
+  }, []);
 
 
   const sectionConfig = [
-    { 
-      key: 'create_property_type', 
-      label: 'Create Property Type', 
-      component: (props) => <CreatePropertyType 
-        propertyTypes={propertyTypes} 
-        locationType={locationType} 
+    {
+      key: 'create_property_type',
+      label: 'Create Property Type',
+      component: (props) => <CreatePropertyType
+        propertyTypes={propertyTypes}
+        locationType={locationType}
         subLocationType={subLocationType}
         wardType={wardType}
         galiType={galiType}
@@ -82,33 +82,45 @@ useEffect(() => {
         setSubLocationType={setSubLocationType}
         setWardType={setWardType}
         setGaliType={setGaliType}
-        {...props} 
-      /> 
+        {...props}
+      />
     },
-    { 
-      key: 'create_property_details', 
-      label: 'Create Property Details', 
-      component: (props) => <CreatePropertyDetails 
-        propertyTypes={propertyTypes} 
-        locationType={locationType} 
+    {
+      key: 'create_property_details',
+      label: 'Create Property Details',
+      component: (props) => <CreatePropertyDetails
+        propertyTypes={propertyTypes}
+        locationType={locationType}
+        subLocationType={subLocationType}
+        wardType={wardType}
+        galiType={galiType}
         setPropertyTypes={setPropertyTypes}
         setLocationType={setLocationType}
-        {...props} 
-      /> 
+        setSubLocationType={setSubLocationType}
+        setWardType={setWardType}
+        setGaliType={setGaliType}
+        {...props}
+      />
     },
-    { 
-      key: 'property_details', 
-      label: 'Property Details', 
-      component: (props) => <PropertyDetails 
-        propertyTypes={propertyTypes} 
-        locationType={locationType} 
+    {
+      key: 'property_details',
+      label: 'Property Details',
+      component: (props) => <PropertyDetails
+        propertyTypes={propertyTypes}
+        locationType={locationType}
+        subLocationType={subLocationType}
+        wardType={wardType}
+        galiType={galiType}
         setPropertyTypes={setPropertyTypes}
         setLocationType={setLocationType}
-        {...props} 
-      /> 
+        setSubLocationType={setSubLocationType}
+        setWardType={setWardType}
+        setGaliType={setGaliType}
+        {...props}
+      />
     },
   ];
-  
+
   const [activeSection, setActiveSection] = useState(sectionConfig[0].key);
 
   return (
