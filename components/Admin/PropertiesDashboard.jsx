@@ -11,6 +11,9 @@ const PropertiesDashboard = ({ productId }) => {
   const [loading, setLoading] = useState(true);
   const [propertyTypes, setPropertyTypes] = useState([]);
   const [locationType, setLocationType] = useState([]);
+  const [subLocationType, setSubLocationType] = useState([]);
+  const [wardType, setWardType] = useState([]);
+  const [galiType, setGaliType] = useState([]);
 
   // Fetch property types and locations
   useEffect(() => {
@@ -26,6 +29,21 @@ const PropertiesDashboard = ({ productId }) => {
         const locResponse = await fetch("/api/createLocation");
         const locData = await locResponse.json();
         setLocationType(locData);
+
+        // Fetch sub locations
+        const subLocResponse = await fetch("/api/createSubLocation");
+        const subLocData = await subLocResponse.json();
+        setSubLocationType(subLocData);
+
+        // Fetch wards
+        const wardResponse = await fetch("/api/createWard");
+        const wardData = await wardResponse.json();
+        setWardType(wardData);
+
+        // Fetch galis
+        const galiResponse = await fetch("/api/createGali");
+        const galiData = await galiResponse.json();
+        setGaliType(galiData);
       } catch (error) {
         console.error("Error fetching data:", error);
         toast.error("Failed to fetch data");
@@ -44,8 +62,14 @@ const PropertiesDashboard = ({ productId }) => {
       component: (props) => <CreatePropertyType 
         propertyTypes={propertyTypes} 
         locationType={locationType} 
+        subLocationType={subLocationType}
+        wardType={wardType}
+        galiType={galiType}
         setPropertyTypes={setPropertyTypes}
         setLocationType={setLocationType}
+        setSubLocationType={setSubLocationType}
+        setWardType={setWardType}
+        setGaliType={setGaliType}
         {...props} 
       /> 
     },

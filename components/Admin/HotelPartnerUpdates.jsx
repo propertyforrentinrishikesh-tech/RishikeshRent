@@ -224,17 +224,9 @@ const HotelPartnerUpdates = () => {
         // Render specific components based on active section
         switch (activeSection) {
             case 'b2c-price':
-                return (
-                    <div className="p-6">
-                        <B2CPrice />
-                    </div>
-                );
+                return <B2CPrice />
             case 'bulk-price-update':
-                return (
-                    <div className="p-6">
-                        <BulkPriceUpdate />
-                    </div>
-                );
+                return <BulkPriceUpdate />
             case 'weekend-price':
                 return <WeekendPrice />
             case 'special-offer-price':
@@ -258,7 +250,7 @@ const HotelPartnerUpdates = () => {
                             {activeItem?.label || 'Select a section'}
                         </h2>
                         <div className="bg-gray-50 p-6 rounded-lg">
-                            <p className="text-gray-600">
+                            <p className="text-gray-~600">
                                 Content for <strong>{activeSection}</strong> will be displayed here.
                             </p>
                             <p className="text-sm text-gray-500 mt-2">

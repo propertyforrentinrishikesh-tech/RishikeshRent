@@ -1,9 +1,11 @@
 import { Schema, models, model } from "mongoose";
 
-const LocationTypeSchema = new Schema({
+const GaliSchema = new Schema({
     locationType: { type: String},
     subLocationType: { type: String},
+    wardName:{type:String},
+    galiName: { type: String},
     order: { type: Number, required: true },
 }, { timestamps: true });
 
-export default models.LocationType || model("LocationType", LocationTypeSchema);
+export default models.Gali || model("Gali", GaliSchema);

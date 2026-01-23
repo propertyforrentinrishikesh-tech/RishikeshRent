@@ -16,13 +16,13 @@ export async function GET() {
 export async function POST(req) {
     await connectDB();
     try {
-        const { locationType, order } = await req.json();
+        const { locationType,subLocationType, order } = await req.json();
 
         // Find the highest order number
         const lastBanner = await LocationType.findOne().sort({ order: -1 });
         const nextOrder = lastBanner ? lastBanner.order + 1 : 1; // Auto-increment order
 
-        const newBanner = new LocationType({ locationType, order: nextOrder });
+        const newBanner = new LocationType({ locationType,subLocationType, order: nextOrder });
         await newBanner.save();
         return NextResponse.json(newBanner, { status: 201 });
     } catch (error) {
@@ -33,8 +33,8 @@ export async function POST(req) {
 export async function PATCH(req) {
     await connectDB();
     try {
-        const { id,locationType } = await req.json();
-        const updatedBanner = await LocationType.findByIdAndUpdate(id, { locationType }, { new: true });
+        const { id,locationType,subLocationType } = await req.json();
+        const updatedBanner = await LocationType.findByIdAndUpdate(id, { locationType,subLocationType }, { new: true });
         return NextResponse.json(updatedBanner, { status: 200 });
     } catch (error) {
         return NextResponse.json({ error: "Failed to update Location Name" }, { status: 500 });
