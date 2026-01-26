@@ -14,6 +14,30 @@ import Photos from './HotelPartnerSidebar/Photos';
 import Descriptions from './HotelPartnerSidebar/Descriptions';
 import FacilitiesAmenities from './HotelPartnerSidebar/FacilitiesAmenities';
 import RatePlans from './HotelPartnerSidebar/RatePlans';
+import BookingsList from './HotelPartnerSidebar/BookingsList';
+import ConfirmNoShow from './HotelPartnerSidebar/ConfirmNoShow';
+import InvoicesPayouts from './HotelPartnerSidebar/InvoicesPayouts';
+import FinancialOverview from './HotelPartnerSidebar/FinancialOverview';
+import PayoutSettings from './HotelPartnerSidebar/PayoutSettings';
+import Deals from './HotelPartnerSidebar/Deals';
+import CreateDiscount from './HotelPartnerSidebar/CreateDiscount';
+import ReviewsGuestExperience from './HotelPartnerSidebar/ReviewsGuestExperience';
+import ReviewManagement from './HotelPartnerSidebar/ReviewManagement';
+import PropertyLocation from './HotelPartnerSidebar/PropertyLocation';
+import BankInformation from './HotelPartnerSidebar/BankInformation';
+import PropertyInformation from './HotelPartnerSidebar/PropertyInformation';
+import NonPerformingAccount from './HotelPartnerSidebar/NonPerformingAccount';
+import OverdueCommission from './HotelPartnerSidebar/OverdueCommission';
+import SuspendedAccount from './HotelPartnerSidebar/SuspendedAccount';
+import HowToFix from './HotelPartnerSidebar/HowToFix';
+import ReinstatementProcess from './HotelPartnerSidebar/ReinstatementProcess';
+import OTATerminationLetter from './HotelPartnerSidebar/OTATerminationLetter';
+import AdministrativeNotifications from './HotelPartnerSidebar/AdministrativeNotifications';
+import PaymentDetailsPayouts from './HotelPartnerSidebar/PaymentDetailsPayouts';
+import SuspendedTerminatedPolicy from './HotelPartnerSidebar/SuspendedTerminatedPolicy';
+import OfficialAdminCorrespondence from './HotelPartnerSidebar/OfficialAdminCorrespondence';
+import ReinstatementTimelines from './HotelPartnerSidebar/ReinstatementTimelines';
+import PermanentContractTermination from './HotelPartnerSidebar/PermanentContractTermination';
 
 const HotelPartnerUpdates = () => {
     const router = useRouter();
@@ -117,7 +141,6 @@ const HotelPartnerUpdates = () => {
                     label: 'Calendar',
                     description: 'Manage rates, availability, and restrictions for dates.',
                     children: [
-                        // { id: 'year-calendar', label: 'Year Calendar', description: 'View and manage yearly calendar.' },
                         { id: 'b2c-price', label: 'B2C Price', description: 'Ideal for standard bookings on normal periods.' },
                         { id: 'bulk-price-update', label: 'Bulk Price Update', description: 'Setting your base rates for the entire upcoming year.' },
                         { id: 'weekend-price', label: 'Weekend Price', description: 'Weekend Escape Rates, perfect for leisure nights!' },
@@ -171,7 +194,6 @@ const HotelPartnerUpdates = () => {
             children: [
                 { id: 'deals', label: 'Deals', description: 'Create special offers and deals.' },
                 { id: 'genius-program', label: 'Genius / Preferred Programs', description: 'Manage loyalty programs.' },
-                { id: 'reviews-marketing', label: 'Reviews', description: 'Respond to guest reviews.' }
             ]
         },
         {
@@ -179,7 +201,10 @@ const HotelPartnerUpdates = () => {
             label: 'Review Management',
             bgColor: 'bg-blue-500',
             textColor: 'text-white',
-            isSingle: true
+            children: [
+                { id: 'create-review', label: 'Create Review', description: 'Create a review for the property.' },
+                { id: 'review-management', label: 'Review Management', description: 'Soliciting reiviews from guest to improve your ranking.' },
+            ]
         },
         {
             id: 'official',
@@ -201,9 +226,23 @@ const HotelPartnerUpdates = () => {
                 { id: 'auto-closed', label: 'Auto-Closed (Availability)', description: 'Manage auto-closure settings.' },
                 { id: 'closed-payment', label: 'Closed (Payment Pending)', description: 'Properties with pending payments.' },
                 { id: 'suspended', label: 'Suspended / Terminated', description: 'View suspended properties.' },
-                { id: 'maintenance', label: 'Maintenance Review', description: 'Properties under maintenance.' },
+                { id: 'howtofix', label: 'How to Fix', description: 'How to fix suspended properties.' },
                 { id: 'reinstatement', label: 'Reinstatement Review', description: 'Request reinstatement.' },
                 { id: 'close-property', label: 'Close Property', description: 'Permanently close property.' }
+            ]
+        },
+        {
+            id: 'admin-main-inbox',
+            label: 'Admin Main Inbox',
+            bgColor: 'bg-blue-500',
+            textColor: 'text-white',
+            children: [
+                { id: 'availability-status', label: 'Availability Status', description: 'Availability Status / Notice' },
+                { id: 'payout-transfer', label: 'Payout Transfer Detail', description: 'Payout Transfer Detail' },
+                { id: 'suspended', label: 'Suspended ("Terminated")', description: 'Suspended ("Terminated")' },
+                { id: 'official-admin-correspondence', label: 'Official / Admin Correspondence', description: 'Official / Admin Correspondence' },
+                { id: 'reinstatement-status', label: 'Reinstatement Status', description: 'Reinstatement Status' },
+                { id: 'close-property-admin', label: 'Close Property', description: 'Permanently close property.' }
             ]
         }
     ];
@@ -243,6 +282,58 @@ const HotelPartnerUpdates = () => {
                 return <FacilitiesAmenities />
             case 'descriptions':
                 return <Descriptions />
+            case 'bookings-list':
+                return <BookingsList />
+            case 'confirm-no-show':
+                return <ConfirmNoShow />
+            case 'invoices':
+                return <InvoicesPayouts />
+            case 'financial-overview':
+                return <FinancialOverview />
+            case 'payout-settings':
+                return <PayoutSettings />
+            case 'reviews-marketing':
+                return <ReviewsMarketing />
+            case 'deals':
+                return <CreateDiscount />
+            case 'genius-program':
+                return <Deals />
+            case 'create-review':
+                return <ReviewsGuestExperience />
+            case 'review-management':
+                return <ReviewManagement />
+            case 'contact-management':
+                return <PropertyLocation />
+            case 'legal-document':
+                return <BankInformation />
+            case 'financial-info':
+                return <PropertyInformation />
+            case 'auto-closed':
+                return <NonPerformingAccount />
+            case 'closed-payment':
+                return <OverdueCommission />
+            case 'suspended':
+                return <SuspendedAccount />
+            case 'howtofix':
+                return <HowToFix />
+            case 'reinstatement':
+                return <ReinstatementProcess />
+            case 'maintenance':
+                return <Maintenance />
+            case 'close-property':
+                return <OTATerminationLetter />
+            case 'availability-status':
+                return <AdministrativeNotifications />
+            case 'payout-transfer':
+                return <PaymentDetailsPayouts />
+            case 'suspended':
+                return <SuspendedTerminatedPolicy />
+            case 'official-admin-correspondence':
+                return <OfficialAdminCorrespondence />
+            case 'reinstatement-status':
+                return <ReinstatementTimelines />
+            case 'close-property-admin':
+                return <PermanentContractTermination />
             default:
                 return (
                     <div className="p-6">
