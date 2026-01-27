@@ -175,17 +175,6 @@ const CreatePropertyType = ({
       return;
     }
     e.preventDefault();
-    // Check for duplicate property type (case-insensitive)
-    const isDuplicate = properties.some(
-      (property) =>
-        property.propertyType.toLowerCase() ===
-        formData.propertyType.trim().toLowerCase() &&
-        (!editProperty || property._id !== editProperty), // Skip current item when editing
-    );
-    if (isDuplicate) {
-      toast.error("This property type already exists");
-      return;
-    }
     try {
       const method = editProperty ? "PATCH" : "POST";
       // Compose payload with coupon details
@@ -230,18 +219,6 @@ const CreatePropertyType = ({
       return;
     }
     e.preventDefault();
-    // Check for duplicate location (case-insensitive)
-    const isDuplicate = locations.some(
-      (location) =>
-        location.locationType.toLowerCase() ===
-        formDataLocation.locationType.trim().toLowerCase() &&
-        (!editLocation || location._id !== editLocation), // Skip current item when editing
-    );
-
-    if (isDuplicate) {
-      toast.error("This location already exists");
-      return;
-    }
     try {
       const method = editLocation ? "PATCH" : "POST";
       // Compose payload with coupon details
@@ -288,18 +265,6 @@ const CreatePropertyType = ({
       return;
     }
     e.preventDefault();
-    // Check for duplicate location (case-insensitive)
-    const isDuplicate = subLocations.some(
-      (subLocation) =>
-        subLocation.subLocationType.toLowerCase() ===
-        formDataSubLocation.subLocationType.trim().toLowerCase() &&
-        (!editSubLocation || subLocation._id !== editSubLocation), // Skip current item when editing
-    );
-
-    if (isDuplicate) {
-      toast.error("This sub location already exists");
-      return;
-    }
     try {
       const method = editSubLocation ? "PATCH" : "POST";
       // Compose payload with coupon details
@@ -346,18 +311,6 @@ const CreatePropertyType = ({
       return;
     }
     e.preventDefault();
-    // Check for duplicate location (case-insensitive)
-    const isDuplicate = wards.some(
-      (ward) =>
-        ward.wardName.toLowerCase() ===
-        formDataWard.wardName.trim().toLowerCase() &&
-        (!editWard || ward._id !== editWard), // Skip current item when editing
-    );
-
-    if (isDuplicate) {
-      toast.error("This ward already exists");
-      return;
-    }
     try {
       const method = editWard ? "PATCH" : "POST";
       // Compose payload with coupon details
@@ -403,18 +356,6 @@ const CreatePropertyType = ({
       return;
     }
     e.preventDefault();
-    // Check for duplicate location (case-insensitive)
-    const isDuplicate = galis.some(
-      (gali) =>
-        gali.galiName.toLowerCase() ===
-        formDataGali.galiName.trim().toLowerCase() &&
-        (!editGali || gali._id !== editGali), // Skip current item when editing
-    );
-
-    if (isDuplicate) {
-      toast.error("This gali already exists");
-      return;
-    }
     try {
       const method = editGali ? "PATCH" : "POST";
       // Compose payload with coupon details
