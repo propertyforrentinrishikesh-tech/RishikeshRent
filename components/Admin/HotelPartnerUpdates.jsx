@@ -43,6 +43,7 @@ const HotelPartnerUpdates = () => {
     const router = useRouter();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [partnerSession, setPartnerSession] = useState(null);
+    const [propertyData, setPropertyData] = useState(null); // Store complete property data
     const [allProperties, setAllProperties] = useState([]);
     const [approvedProperties, setApprovedProperties] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -56,6 +57,7 @@ const HotelPartnerUpdates = () => {
         'official': false,
         'property': false
     });
+    console.log(partnerSession);
 
     // Check authentication on mount
     useEffect(() => {
@@ -73,6 +75,7 @@ const HotelPartnerUpdates = () => {
                 return;
             }
             setPartnerSession(parsedSession);
+            setPropertyData(parsedSession); // Store complete property data from session
             setIsAuthenticated(true);
         } catch (error) {
             console.error('Invalid session:', error);
@@ -261,79 +264,80 @@ const HotelPartnerUpdates = () => {
         );
 
         // Render specific components based on active section
+        // Pass propertyData as props to all components
         switch (activeSection) {
             case 'b2c-price':
-                return <B2CPrice />
+                return <B2CPrice propertyData={propertyData} />
             case 'bulk-price-update':
-                return <BulkPriceUpdate />
+                return <BulkPriceUpdate propertyData={propertyData} />
             case 'weekend-price':
-                return <WeekendPrice />
+                return <WeekendPrice propertyData={propertyData} />
             case 'special-offer-price':
-                return <SpecialOfferPrice />
+                return <SpecialOfferPrice propertyData={propertyData} />
             case 'create-plan':
-                return <RatePlans />
+                return <RatePlans propertyData={propertyData} />
             case 'plan-price-update':
-                return <PlanPriceUpdate />
+                return <PlanPriceUpdate propertyData={propertyData} />
             case 'krc-update':
-                return <Restrictions />
+                return <Restrictions propertyData={propertyData} />
             case 'photos':
-                return <Photos />
+                return <Photos propertyData={propertyData} />
             case 'facilities':
-                return <FacilitiesAmenities />
+                return <FacilitiesAmenities propertyData={propertyData} />
             case 'descriptions':
-                return <Descriptions />
+                return <Descriptions propertyData={propertyData} />
             case 'bookings-list':
-                return <BookingsList />
+                return <BookingsList propertyData={propertyData} />
             case 'confirm-no-show':
-                return <ConfirmNoShow />
+                return <ConfirmNoShow propertyData={propertyData} />
             case 'invoices':
-                return <InvoicesPayouts />
+                return <InvoicesPayouts propertyData={propertyData} />
             case 'financial-overview':
-                return <FinancialOverview />
+                return <FinancialOverview propertyData={propertyData} />
             case 'payout-settings':
-                return <PayoutSettings />
+                return <PayoutSettings propertyData={propertyData} />
             case 'reviews-marketing':
-                return <ReviewsMarketing />
+                return <ReviewsMarketing propertyData={propertyData} />
             case 'deals':
-                return <CreateDiscount />
+                return <CreateDiscount propertyData={propertyData} />
             case 'genius-program':
-                return <Deals />
+                return <Deals propertyData={propertyData} />
             case 'create-review':
-                return <ReviewsGuestExperience />
+                return <ReviewsGuestExperience propertyData={propertyData} />
             case 'review-management':
-                return <ReviewManagement />
+                return <ReviewManagement propertyData={propertyData} />
             case 'contact-management':
-                return <PropertyLocation />
+                return <PropertyLocation propertyData={propertyData} />
             case 'legal-document':
-                return <BankInformation />
+                return <BankInformation propertyData={propertyData} />
             case 'financial-info':
-                return <PropertyInformation />
+                return <PropertyInformation propertyData={propertyData} />
             case 'auto-closed':
-                return <NonPerformingAccount />
+                return <NonPerformingAccount propertyData={propertyData} />
             case 'closed-payment':
-                return <OverdueCommission />
+                return <OverdueCommission propertyData={propertyData} />
             case 'suspended':
-                return <SuspendedAccount />
+                return <SuspendedAccount propertyData={propertyData} />
             case 'howtofix':
-                return <HowToFix />
+                return <HowToFix propertyData={propertyData} />
             case 'reinstatement':
-                return <ReinstatementProcess />
+                return <ReinstatementProcess propertyData={propertyData} />
             case 'maintenance':
-                return <Maintenance />
+                return <Maintenance propertyData={propertyData} />
             case 'close-property':
-                return <OTATerminationLetter />
+                return <OTATerminationLetter propertyData={propertyData} />
             case 'availability-status':
-                return <AdministrativeNotifications />
+                return <AdministrativeNotifications propertyData={propertyData} />
             case 'payout-transfer':
-                return <PaymentDetailsPayouts />
+                return <PaymentDetailsPayouts propertyData={propertyData} />
             case 'suspended':
-                return <SuspendedTerminatedPolicy />
+                return <SuspendedTerminatedPolicy propertyData={propertyData} />
             case 'official-admin-correspondence':
-                return <OfficialAdminCorrespondence />
+                return <OfficialAdminCorrespondence propertyData={propertyData} />
             case 'reinstatement-status':
-                return <ReinstatementTimelines />
+                return <ReinstatementTimelines propertyData={propertyData} />
             case 'close-property-admin':
-                return <PermanentContractTermination />
+                return <PermanentContractTermination propertyData={propertyData} />
             default:
                 return (
                     <div className="p-6">
@@ -364,8 +368,8 @@ const HotelPartnerUpdates = () => {
                         <div>
                             <h1 className="text-2xl font-bold">{partnerSession?.propertyName}</h1>
                             <p className="text-sm text-blue-100">
-                                Hotel Code: <span className="font-semibold">{partnerSession?.hotelCode}</span> |
-                                Username: <span className="font-semibold ml-2">{partnerSession?.username}</span>
+                                Hotel Code: <span className="font-semibold pr-2">{partnerSession?.hotelCode}</span> |
+                                Username: <span className="font-semibold pl-2">{partnerSession?.username}</span>
                             </p>
                         </div>
                         <Button
@@ -378,9 +382,9 @@ const HotelPartnerUpdates = () => {
                         </Button>
                     </div>
 
-                    <div className="flex h-full">
+                    <div className="flex min-h-[50vh]">
                         {/* Sidebar */}
-                        <div className="w-60 bg-gray-100 border-r border-gray-300 overflow-y-auto">
+                        <div className="w-60 border-r border-gray-300 overflow-y-auto max-h-screen">
                             {menuStructure.map((section) => (
                                 <div key={section.id} className="mb-1">
                                     {/* Main Section Header */}

@@ -53,14 +53,8 @@ export default function HotelPartnerLogin() {
             }
 
             if (data.success) {
-                // Store hotel partner session in localStorage
-                localStorage.setItem('hotelPartnerSession', JSON.stringify({
-                    propertyId: data.property._id,
-                    propertyName: data.property.propertyName,
-                    hotelCode: data.property.hotelCode,
-                    username: data.property.partnerUsername,
-                    isActive: data.property.isActive
-                }))
+                // Store complete hotel partner property data in localStorage
+                localStorage.setItem('hotelPartnerSession', JSON.stringify(data.property))
 
                 toast.success("Login successful!")
                 router.push('/admin/hotel_property_updates')

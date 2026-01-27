@@ -49,21 +49,14 @@ export async function POST(request) {
             }, { status: 401 });
         }
 
-        // Successful login - return property details (excluding sensitive data)
+        // Successful login - return complete property details (excluding sensitive data)
+        const propertyData = property.toObject();
+        delete propertyData.partnerPassword; // Remove password from response
+
         return NextResponse.json({
             success: true,
             message: 'Login successful',
-            property: {
-                _id: property._id,
-                propertyName: property.propertyName,
-                hotelCode: property.hotelCode,
-                partnerUsername: property.partnerUsername,
-                ownerName: property.ownerName,
-                ownerEmail: property.ownerEmail,
-                category: property.category,
-                propertyType: property.propertyType,
-                isActive: property.isActive
-            }
+            property: propertyData
         });
 
     } catch (error) {
