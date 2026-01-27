@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, ChevronRight, LogOut } from 'lucide-react';
+import { ChevronDown, ChevronRight, Loader2, LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import toast from 'react-hot-toast';
@@ -57,8 +57,6 @@ const HotelPartnerUpdates = () => {
         'official': false,
         'property': false
     });
-    console.log(partnerSession);
-
     // Check authentication on mount
     useEffect(() => {
         const session = localStorage.getItem('hotelPartnerSession');
@@ -340,27 +338,29 @@ const HotelPartnerUpdates = () => {
                 return <PermanentContractTermination propertyData={propertyData} />
             default:
                 return (
-                    <div className="p-6">
-                        <h2 className="text-2xl font-bold mb-4">
-                            {activeItem?.label || 'Select a section'}
+                    <div className="p-6 flex items-center w-full justify-center">
+                        <h2 className="text-2xl font-bold">
+                            {activeItem?.label || '⬅️⬅️ Select Any Section'}
                         </h2>
-                        <div className="bg-gray-50 p-6 rounded-lg">
-                            <p className="text-gray-~600">
+                        {/* <div className="bg-gray-50 p-6 rounded-lg">
+                            <p className="text-gray-600">
                                 Content for <strong>{activeSection}</strong> will be displayed here.
                             </p>
                             <p className="text-sm text-gray-500 mt-2">
                                 This section is under development.
                             </p>
-                        </div>
+                        </div> */}
                     </div>
                 );
         }
     };
 
     return (
-        <div style={{ minHeight: '50vh', background: '#fff' }}>
+        <div style={{ minHeight: '50vh' }}>
             {loading || !isAuthenticated ? (
-                <div className="text-center text-lg font-semibold p-8">Loading partner details...</div>
+                <div className="flex items-center w-full justify-center text-center text-lg font-semibold p-8">
+                    <p className="flex items-center gap-2">
+                        <Loader2 className="animate-spin duration-700 repeat-infinite"/> Loading partner details...</p></div>
             ) : (
                 <>
                     {/* Header with Property Info and Logout */}

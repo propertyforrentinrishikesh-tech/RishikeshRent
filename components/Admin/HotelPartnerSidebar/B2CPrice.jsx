@@ -40,8 +40,7 @@ const B2CPrice = ({ propertyData }) => {
     const [showModal, setShowModal] = useState(false)
     const [selectedCategoryData, setSelectedCategoryData] = useState(null)
 
-    // Log property data
-    console.log('Property Data in B2CPrice:', propertyData)
+    
 
     // Get selected room data
     const selectedRoomData = propertyData?.rooms?.find(r => r.roomType === selectedRoom)
