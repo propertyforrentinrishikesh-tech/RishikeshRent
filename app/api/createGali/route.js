@@ -16,13 +16,13 @@ export async function GET() {
 export async function POST(req) {
     await connectDB();
     try {
-        const { locationType,subLocationType,wardName,galiName, order } = await req.json();
+        const { locationType,subLocationType,galiName, order } = await req.json();
 
         // Find the highest order number
         const lastBanner = await Gali.findOne().sort({ order: -1 });
         const nextOrder = lastBanner ? lastBanner.order + 1 : 1; // Auto-increment order
 
-        const newBanner = new Gali({ locationType,subLocationType,wardName,galiName, order: nextOrder });
+        const newBanner = new Gali({ locationType,subLocationType,galiName, order: nextOrder });
         await newBanner.save();
         return NextResponse.json(newBanner, { status: 201 });
     } catch (error) {
@@ -33,8 +33,8 @@ export async function POST(req) {
 export async function PATCH(req) {
     await connectDB();
     try {
-        const { id,locationType,subLocationType,wardName,galiName } = await req.json();
-        const updatedBanner = await Gali.findByIdAndUpdate(id, { locationType,subLocationType,wardName,galiName }, { new: true });
+        const { id,locationType,subLocationType,galiName } = await req.json();
+        const updatedBanner = await Gali.findByIdAndUpdate(id, { locationType,subLocationType,galiName }, { new: true });
         return NextResponse.json(updatedBanner, { status: 200 });
     } catch (error) {
         return NextResponse.json({ error: "Failed to update Gali" }, { status: 500 });

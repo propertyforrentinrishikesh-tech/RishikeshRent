@@ -17,14 +17,13 @@ import { Upload, Trash2, Edit, X, Plus, Search, Eye } from 'lucide-react';
 import Image from 'next/image';
 import { Switch } from "@/components/ui/switch";
 
-const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationType = [], wardType = [], galiType = [] }) => {
+const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationType = [], galiType = [] }) => {
   const [loading, setLoading] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [filters, setFilters] = useState({
     propertyType: '',
     locationType: '',
     subLocationType: '',
-    wardType: '',
     galiType: '',
     propertyFor: '',
   });
@@ -46,7 +45,6 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
     video: { type: "upload", file: null, youtubeLink: "" },
     locationType: "",
     subLocationType: "",
-    wardType: "",
     galiType: "",
     propertyFor: "",
     contactAddress: "",
@@ -421,7 +419,6 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
       video: videoData,
       locationType: property.locationType || "",
       subLocationType: property.subLocationType || "",
-      wardType: property.wardType || "",
       galiType: property.galiType || "",
       propertyFor: property.propertyFor || "",
       contactAddress: property.contactAddress || "",
@@ -531,7 +528,6 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
         video: { type: "upload", file: null, youtubeLink: "" },
         locationType: "",
         subLocationType: "",
-        wardType: "",
         galiType: "",
         propertyFor: "",
         contactAddress: "",
@@ -848,7 +844,6 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                       <p><span className="font-medium">Property Be Like:</span> {selectedProperty.propertyFor}</p>
                       <p><span className="font-medium">Location:</span> {selectedProperty.locationType}</p>
                       <p><span className="font-medium">Sub Location:</span> {selectedProperty.subLocationType}</p>
-                      <p><span className="font-medium">Ward:</span> {selectedProperty.wardType}</p>
                       <p><span className="font-medium">Gali:</span> {selectedProperty.galiType}</p>
                       <p><span className="font-medium">Minimum Rent Price:</span> ₹{selectedProperty.rentPrice?.toLocaleString()}</p>
                       <p><span className="font-medium">Maximum Rent Price:</span> ₹{selectedProperty.maxRentPrice?.toLocaleString()}</p>
@@ -1281,24 +1276,6 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                   {subLocationType.map((location) => (
                     <SelectItem key={location._id} value={location.subLocationType}>
                       {location.subLocationType}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Ward Location</Label>
-              <Select
-                value={formData.wardType}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, wardType: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select ward location" />
-                </SelectTrigger>
-                <SelectContent>
-                  {wardType.map((location) => (
-                    <SelectItem key={location._id} value={location.wardName}>
-                      {location.wardName}
                     </SelectItem>
                   ))}
                 </SelectContent>

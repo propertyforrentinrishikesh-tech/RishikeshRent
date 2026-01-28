@@ -12,7 +12,6 @@ const PropertiesDashboard = ({ productId }) => {
   const [propertyTypes, setPropertyTypes] = useState([]);
   const [locationType, setLocationType] = useState([]);
   const [subLocationType, setSubLocationType] = useState([]);
-  const [wardType, setWardType] = useState([]);
   const [galiType, setGaliType] = useState([]);
 
   // Fetch property types and locations
@@ -25,13 +24,11 @@ const PropertiesDashboard = ({ productId }) => {
           propResponse,
           locResponse,
           subLocResponse,
-          wardResponse,
           galiResponse,
         ] = await Promise.all([
           fetch("/api/createProperty"),
           fetch("/api/createLocation"),
           fetch("/api/createSubLocation"),
-          fetch("/api/createWard"),
           fetch("/api/createGali"),
         ]);
 
@@ -39,20 +36,17 @@ const PropertiesDashboard = ({ productId }) => {
           propData,
           locData,
           subLocData,
-          wardData,
           galiData,
         ] = await Promise.all([
           propResponse.json(),
           locResponse.json(),
           subLocResponse.json(),
-          wardResponse.json(),
           galiResponse.json(),
         ]);
 
         setPropertyTypes(propData);
         setLocationType(locData);
         setSubLocationType(subLocData);
-        setWardType(wardData);
         setGaliType(galiData);
 
       } catch (error) {
@@ -75,12 +69,10 @@ const PropertiesDashboard = ({ productId }) => {
         propertyTypes={propertyTypes}
         locationType={locationType}
         subLocationType={subLocationType}
-        wardType={wardType}
         galiType={galiType}
         setPropertyTypes={setPropertyTypes}
         setLocationType={setLocationType}
         setSubLocationType={setSubLocationType}
-        setWardType={setWardType}
         setGaliType={setGaliType}
         {...props}
       />
@@ -92,12 +84,10 @@ const PropertiesDashboard = ({ productId }) => {
         propertyTypes={propertyTypes}
         locationType={locationType}
         subLocationType={subLocationType}
-        wardType={wardType}
         galiType={galiType}
         setPropertyTypes={setPropertyTypes}
         setLocationType={setLocationType}
         setSubLocationType={setSubLocationType}
-        setWardType={setWardType}
         setGaliType={setGaliType}
         {...props}
       />
@@ -109,12 +99,10 @@ const PropertiesDashboard = ({ productId }) => {
         propertyTypes={propertyTypes}
         locationType={locationType}
         subLocationType={subLocationType}
-        wardType={wardType}
         galiType={galiType}
         setPropertyTypes={setPropertyTypes}
         setLocationType={setLocationType}
         setSubLocationType={setSubLocationType}
-        setWardType={setWardType}
         setGaliType={setGaliType}
         {...props}
       />

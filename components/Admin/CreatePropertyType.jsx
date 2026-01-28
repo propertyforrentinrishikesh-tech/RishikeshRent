@@ -43,34 +43,28 @@ const CreatePropertyType = ({
   propertyTypes = [],
   locationType = [],
   subLocationType = [],
-  wardType = [],
   galiType = [],
   setPropertyTypes,
   setLocationType,
   setSubLocationType,
-  setWardType,
   setGaliType,
 }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDeleteModalLocation, setShowDeleteModalLocation] = useState(false);
   const [showDeleteModalSubLocation, setShowDeleteModalSubLocation] = useState(false);
-  const [showDeleteModalWardLocation, setShowDeleteModalWardLocation] = useState(false);
   const [showDeleteModalForGali, setShowDeleteModalForGali] = useState(false);
   const [propertyToDelete, setPropertyToDelete] = useState(null);
   const [locationToDelete, setLocationToDelete] = useState(null);
   const [subLocationToDelete, setSubLocationToDelete] = useState(null);
-  const [wardLocationToDelete, setWardLocationToDelete] = useState(null);
   const [galiToDelete, setGaliToDelete] = useState(null);
   const [locations, setLocations] = useState([]);
   const [subLocations, setSubLocations] = useState([]);
-  const [wards, setWards] = useState([]);
   const [galis, setGalis] = useState([]);
   // Use props instead of local state
   const [properties, setProperties] = useState(propertyTypes);
   const [editProperty, setEditProperty] = useState(null);
   const [editLocation, setEditLocation] = useState(null);
   const [editSubLocation, setEditSubLocation] = useState(null);
-  const [editWard, setEditWard] = useState(null);
   const [editGali, setEditGali] = useState(null);
   const [formData, setFormData] = useState({
     propertyType: "",
@@ -86,16 +80,9 @@ const CreatePropertyType = ({
     subLocationType: "",
     order: 1,
   });
-  const [formDataWard, setFormDataWard] = useState({
-    locationType: "",
-    subLocationType: "",
-    wardName: "",
-    order: 1,
-  });
   const [formDataGali, setFormDataGali] = useState({
     locationType: "",
     subLocationType: "",
-    wardName: "",
     galiName: "",
     order: 1,
   });
@@ -117,17 +104,12 @@ const CreatePropertyType = ({
       setFormDataSubLocation((prev) => ({ ...prev, order: highestOrder + 1 }));
       setSubLocations(subLocationType);
     }
-    if (wardType?.length > 0) {
-      const highestOrder = Math.max(...wardType.map((b) => b.order || 0));
-      setFormDataWard((prev) => ({ ...prev, order: highestOrder + 1 }));
-      setWards(wardType);
-    }
     if (galiType?.length > 0) {
       const highestOrder = Math.max(...galiType.map((b) => b.order || 0));
       setFormDataGali((prev) => ({ ...prev, order: highestOrder + 1 }));
       setGalis(galiType);
     }
-  }, [propertyTypes, locationType, subLocationType, wardType, galiType]);
+  }, [propertyTypes, locationType, subLocationType]);
 
   const handleInputChangeForProperty = (e) => {
     const { name, value } = e.target;
@@ -152,15 +134,6 @@ const CreatePropertyType = ({
       [name]: value || "", // Ensure we never set undefined
     }));
   };
-
-  const handleInputChangeForWard = (e) => {
-    const { name, value } = e.target;
-    setFormDataWard((prev) => ({
-      ...prev,
-      [name]: value || "", // Ensure we never set undefined
-    }));
-  };
-
   const handleInputChangeForGali = (e) => {
     const { name, value } = e.target;
     setFormDataGali((prev) => ({
@@ -305,51 +278,6 @@ const CreatePropertyType = ({
       toast.error("Something went wrong");
     }
   };
-  const handleSubmitforWardName = async (e) => {
-    if (!formDataWard.wardName) {
-      toast.error("Ward Name is required");
-      return;
-    }
-    e.preventDefault();
-    try {
-      const method = editWard ? "PATCH" : "POST";
-      // Compose payload with coupon details
-      const payload = {
-        ...formDataWard,
-        id: editWard,
-      };
-      const response = await fetch("/api/createWard", {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        toast.success(
-          `Ward Name ${editWard ? "updated" : "added"} successfully`,
-        );
-        setEditWard(null);
-
-        // Refresh banner list
-        const updatedBanners = await fetch("/api/createWard").then((res) =>
-          res.json(),
-        );
-        setWards(updatedBanners);
-
-        // Reset form
-        setFormDataWard({
-          wardName: "",
-          order: updatedBanners.length + 1,
-        });
-      } else {
-        toast.error(data.error);
-      }
-    } catch (error) {
-      toast.error("Something went wrong");
-    }
-  };
   const handleSubmitforGali = async (e) => {
     if (!formDataGali.galiName) {
       toast.error("Gali Name is required");
@@ -388,7 +316,6 @@ const CreatePropertyType = ({
           galiName: "",
           locationType: "",
           subLocationType: "",
-          wardName: "",
           order: updatedBanners.length + 1,
         });
       } else {
@@ -424,16 +351,6 @@ const CreatePropertyType = ({
       order: banner.order,
     });
   };
-  const handleEditForWardLocation = (banner) => {
-    setEditWard(banner._id);
-    // console.log(banner)
-    setFormDataWard({
-      locationType: banner.locationType,
-      subLocationType: banner.subLocationType,
-      wardName: banner.wardName,
-      order: banner.order,
-    });
-  };
   const handleEditForGali = (banner) => {
     setEditGali(banner._id);
     // console.log(banner)
@@ -441,7 +358,6 @@ const CreatePropertyType = ({
       galiName: banner.galiName,
       locationType: banner.locationType,
       subLocationType: banner.subLocationType,
-      wardName: banner.wardName,
       order: banner.order,
     });
   };
@@ -527,33 +443,6 @@ const CreatePropertyType = ({
       toast.error("Something went wrong");
     }
   };
-  const handleDeleteForWardLocation = async (id) => {
-    try {
-      const response = await fetch("/api/createWard", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        toast.success("Ward Location deleted successfully");
-
-        setWards((prev) => prev.filter((banner) => banner._id !== id));
-
-        // Update order numbers
-        const updatedBanners = await fetch("/api/createWard").then((res) =>
-          res.json(),
-        );
-        setWards(updatedBanners);
-      } else {
-        toast.error(data.error);
-      }
-    } catch (error) {
-      toast.error("Something went wrong");
-    }
-  };
   const handleDeleteForGali = async (id) => {
     try {
       const response = await fetch("/api/createGali", {
@@ -602,13 +491,6 @@ const CreatePropertyType = ({
       setShowDeleteModalSubLocation(false);
     }
   };
-  const confirmDeleteForWardLocation = async () => {
-    if (wardLocationToDelete) {
-      await handleDeleteForWardLocation(wardLocationToDelete);
-      setWardLocationToDelete(null);
-      setShowDeleteModalWardLocation(false);
-    }
-  };
   const confirmDeleteForGali = async () => {
     if (galiToDelete) {
       await handleDeleteForGali(galiToDelete);
@@ -628,10 +510,6 @@ const CreatePropertyType = ({
   const cancelDeleteForSubLocation = () => {
     setShowDeleteModalSubLocation(false);
     setSubLocationToDelete(null);
-  };
-  const cancelDeleteForWardLocation = () => {
-    setShowDeleteModalWardLocation(false);
-    setWardLocationToDelete(null);
   };
   const cancelDeleteForGali = () => {
     setShowDeleteModalForGali(false);
@@ -1044,194 +922,6 @@ const CreatePropertyType = ({
         </DialogContent>
       </Dialog>
       <hr className="my-6 border border-gray-400" />
-      {/* new Sub 3rd ward number type */}
-      <h2 className="text-2xl font-bold my-6">
-        {editLocation
-          ? "Edit Sub 3rd (Ward Number) Location Type"
-          : "Add New Sub 3rd (Ward Number) Location Type"}
-      </h2>
-      <form
-        onSubmit={handleSubmitforWardName}
-        className="bg-white shadow-lg rounded-lg p-6 space-y-4 border border-black"
-      >
-        <div>
-          <Label>Select Main Destination </Label>
-          <Select
-            value={formDataWard.locationType || ""}
-            onValueChange={(value) =>
-              setFormDataWard((prev) => ({
-                ...prev,
-                locationType: value,
-              }))
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select location type" />
-            </SelectTrigger>
-            <SelectContent>
-              {locations.filter(location => location.locationType && location.locationType.trim() !== '').map((location) => (
-                <SelectItem key={location._id} value={location.locationType}>
-                  {location.locationType}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label>Select Sub Destination </Label>
-          <Select
-            value={formDataWard.subLocationType || ""}
-            onValueChange={(value) =>
-              setFormDataWard((prev) => ({
-                ...prev,
-                subLocationType: value,
-              }))
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select location type" />
-            </SelectTrigger>
-            <SelectContent>
-              {subLocations.filter(subLocation => subLocation.subLocationType && subLocation.subLocationType.trim() !== '').map((subLocation) => (
-                <SelectItem key={subLocation._id} value={subLocation.subLocationType}>
-                  {subLocation.subLocationType}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label>Type Sub 3rd (Ward Number) Destination</Label>
-          <Input
-            name="wardName"
-            className="border border-black"
-            placeholder="Enter ward name"
-            type="text"
-            value={formDataWard.wardName || ""}
-            onChange={handleInputChangeForWard}
-          />
-        </div>
-        <div className="flex gap-3">
-          <Button type="submit" className="bg-blue-600 hover:bg-blue-500">
-            {editWard
-              ? "Update Ward Name"
-              : "Add Ward Name"}
-          </Button>
-          {editWard && (
-            <Button
-              type="button"
-              variant="outline"
-              className="bg-gray-300 hover:bg-gray-200 text-black"
-              onClick={() => {
-                setEditWard(null);
-                setFormDataWard({
-                  locationType: "",
-                  subLocationType: "",
-                  wardName: "",
-                  order:
-                    wards.length > 0
-                      ? Math.max(...wards.map((b) => b.order)) + 1
-                      : 1,
-                });
-              }}
-            >
-              Cancel Edit
-            </Button>
-          )}
-        </div>
-      </form>
-
-      <h2 className="text-xl font-bold mt-10 mb-4">
-        Existing Ward Name
-      </h2>
-      <Table className="border border-black">
-        <TableHeader>
-          <TableRow className="border border-black">
-            <TableHead className="border border-black text-center">
-              Order
-            </TableHead>
-            <TableHead className="border border-black text-center">
-              Location Type
-            </TableHead>
-            <TableHead className="border border-black text-center">
-              Sub Location Type
-            </TableHead>
-            <TableHead className="border border-black text-center">
-              Ward Name
-            </TableHead>
-            <TableHead className="border border-black text-center">
-              Actions
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {wards.length > 0 ? (
-            wards.map((ward, index) => (
-              <TableRow key={ward._id} className="border border-black">
-                <TableCell className="border border-black text-center">
-                  {index + 1}
-                </TableCell>
-                <TableCell className="border border-black text-center">
-                  {ward.locationType}
-                </TableCell>
-                <TableCell className="border border-black text-center">
-                  {ward.subLocationType}
-                </TableCell>
-                <TableCell className="border border-black text-center">
-                  {ward.wardName}
-                </TableCell>
-                <TableCell className="border border-black text-center">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleEditForWardLocation(ward)}
-                    className="mr-2 "
-                  >
-                    <PencilIcon />
-                  </Button>
-                  <Button
-                    size="icon"
-                    onClick={() => {
-                      setShowDeleteModalWardLocation(true);
-                      setWardLocationToDelete(ward._id);
-                    }}
-                    variant="destructive"
-                  >
-                    <Trash2Icon />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))
-          ) : (
-            <TableRow className="border border-black">
-              <TableCell colSpan="6" className="text-center py-4">
-                No ward name found
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-      {/* Delete Confirmation Dialog */}
-      <Dialog
-        open={showDeleteModalWardLocation}
-        onOpenChange={setShowDeleteModalWardLocation}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Ward Name</DialogTitle>
-          </DialogHeader>
-          <p>Are you sure you want to delete this ward name?</p>
-          <DialogFooter>
-            <Button variant="secondary" onClick={cancelDeleteForWardLocation}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={confirmDeleteForWardLocation}>
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      <hr className="my-6 border border-gray-400" />
       {/* add new gali/ mohalla location type */}
       <h2 className="text-2xl font-bold my-6">
         {editGali
@@ -1289,30 +979,7 @@ const CreatePropertyType = ({
           </Select>
         </div>
         <div>
-          <Label>Select Sub 3rd (Ward Number) Destination </Label>
-          <Select
-            value={formDataGali.wardName || ""}
-            onValueChange={(value) =>
-              setFormDataGali((prev) => ({
-                ...prev,
-                wardName: value,
-              }))
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select Ward Name" />
-            </SelectTrigger>
-            <SelectContent>
-              {wardType.filter(ward => ward.wardName && ward.wardName.trim() !== '').map((ward) => (
-                <SelectItem key={ward._id} value={ward.wardName}>
-                  {ward.wardName}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label>Type 4th (Gali /Mohalla) Destination</Label>
+          <Label>Type 3rd (Gali /Mohalla) Destination</Label>
           <Input
             name="galiName"
             className="border border-black"
@@ -1338,7 +1005,6 @@ const CreatePropertyType = ({
                 setFormDataGali({
                   locationType: "",
                   subLocationType: "",
-                  wardName: "",
                   galiName: "",
                   order:
                     locations.length > 0
@@ -1369,9 +1035,6 @@ const CreatePropertyType = ({
               Sub Location Type
             </TableHead>
             <TableHead className="border border-black text-center">
-              Ward Name
-            </TableHead>
-            <TableHead className="border border-black text-center">
               Gali/ Mohalla
             </TableHead>
             <TableHead className="border border-black text-center">
@@ -1391,9 +1054,6 @@ const CreatePropertyType = ({
                 </TableCell>
                 <TableCell className="border border-black text-center">
                   {gali.subLocationType}
-                </TableCell>
-                <TableCell className="border border-black text-center">
-                  {gali.wardName}
                 </TableCell>
                 <TableCell className="border border-black text-center">
                   {gali.galiName}

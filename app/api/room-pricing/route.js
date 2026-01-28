@@ -74,6 +74,7 @@ export async function POST(request) {
             startDate,
             endDate,
             pricingType,
+            weekendDays,
             ratePlanName,
             epPlan,
             cpPlan,
@@ -182,8 +183,21 @@ export async function POST(request) {
                 currentDate.setDate(currentDate.getDate() + 1);
             }
 
+            // Filter for weekend days if weekendDays is provided
+            let filteredDates = dates;
+            if (weekendDays) {
+                filteredDates = dates.filter(date => {
+                    const dayOfWeek = date.getDay(); // 0=Sunday, 5=Friday, 6=Saturday
+                    return (
+                        (weekendDays.friday && dayOfWeek === 5) ||
+                        (weekendDays.saturday && dayOfWeek === 6) ||
+                        (weekendDays.sunday && dayOfWeek === 0)
+                    );
+                });
+            }
+
             // Bulk upsert
-            const bulkOps = dates.map(dateItem => ({
+            const bulkOps = filteredDates.map(dateItem => ({
                 updateOne: {
                     filter: { propertyId, roomType, date: dateItem },
                     update: { $set: { ...pricingData, date: dateItem } },
@@ -195,9 +209,9 @@ export async function POST(request) {
 
             return NextResponse.json({
                 success: true,
-                message: `Pricing updated for ${dates.length} dates`,
+                message: `Pricing updated for ${filteredDates.length} dates`,
                 data: {
-                    datesUpdated: dates.length,
+                    datesUpdated: filteredDates.length,
                     startDate: start,
                     endDate: end,
                     modifiedCount: result.modifiedCount,

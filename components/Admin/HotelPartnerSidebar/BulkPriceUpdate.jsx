@@ -61,44 +61,6 @@ const BulkPriceUpdate = ({ propertyData }) => {
         }
     }, [startDate, endDate, selectedRoom])
 
-    const fetchCurrentPricing = async () => {
-        if (!startDate || !selectedRoom || !propertyData?._id) return
-
-        setLoading(true)
-        try {
-            // Fetch pricing for the START date to populate form
-            const response = await fetch(
-                `/api/room-pricing?propertyId=${propertyData._id}&roomType=${selectedRoom}&date=${startDate}`
-            )
-            const data = await response.json()
-
-            if (data.success && data.data.length > 0) {
-                const pricing = data.data[0]
-                setCurrentPricing(pricing)
-
-                // Populate form with existing data
-                setEpPlan({ person1: pricing.epPlan.person1 || '', person2: pricing.epPlan.person2 || '' })
-                setCpPlan({ person1: pricing.cpPlan.person1 || '', person2: pricing.cpPlan.person2 || '' })
-                setMapPlan({ person1: pricing.mapPlan.person1 || '', person2: pricing.mapPlan.person2 || '' })
-                setApPlan({ person1: pricing.apPlan.person1 || '', person2: pricing.apPlan.person2 || '' })
-                setTotalRooms(pricing.totalRooms)
-                setAvailableRooms(pricing.availableRooms)
-                const minStayValue = pricing.restrictions?.minStay || 1
-                setMinStay(minStayValue)
-                setMinStayEnabled(minStayValue > 1)
-                setStatus(pricing.status)
-            } else {
-                // No existing pricing, reset to defaults
-                setCurrentPricing(null)
-                resetPricingForm()
-            }
-        } catch (error) {
-            console.error('Error fetching pricing:', error)
-        } finally {
-            setLoading(false)
-        }
-    }
-
     const fetchAllPricingForDateRange = async () => {
         if (!startDate || !endDate || !selectedRoom || !propertyData?._id) return
 
