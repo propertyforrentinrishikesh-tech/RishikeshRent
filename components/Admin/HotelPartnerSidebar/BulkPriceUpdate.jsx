@@ -757,7 +757,7 @@ const BulkPriceUpdate = ({ propertyData }) => {
                                 </h2>
                                 <button
                                     onClick={() => setShowModal(false)}
-                                    className="text-white hover:text-gray-200 text-2xl font-bold"
+                                    className="text-white px-4 py-1 rounded-md bg-red-500 text-2xl font-bold"
                                 >
                                     ×
                                 </button>

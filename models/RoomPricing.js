@@ -37,6 +37,17 @@ const RoomPricingSchema = new mongoose.Schema({
         default: null
     },
 
+    // Special Offer Information (for promotional pricing)
+    offerName: {
+        type: String,
+        default: null
+    },
+
+    offerDescription: {
+        type: String,
+        default: null
+    },
+
     // Meal Plans Pricing
     epPlan: {
         person1: { type: Number, default: 0 },

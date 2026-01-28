@@ -43,7 +43,7 @@ const HotelPartnerUpdates = () => {
     const router = useRouter();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [partnerSession, setPartnerSession] = useState(null);
-    const [propertyData, setPropertyData] = useState(null); // Store complete property data
+    const [propertyData, setPropertyData] = useState(null);
     const [allProperties, setAllProperties] = useState([]);
     const [approvedProperties, setApprovedProperties] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -57,6 +57,7 @@ const HotelPartnerUpdates = () => {
         'official': false,
         'property': false
     });
+
     // Check authentication on mount
     useEffect(() => {
         const session = localStorage.getItem('hotelPartnerSession');
@@ -73,7 +74,7 @@ const HotelPartnerUpdates = () => {
                 return;
             }
             setPartnerSession(parsedSession);
-            setPropertyData(parsedSession); // Store complete property data from session
+            setPropertyData(parsedSession);
             setIsAuthenticated(true);
         } catch (error) {
             console.error('Invalid session:', error);
@@ -360,7 +361,7 @@ const HotelPartnerUpdates = () => {
             {loading || !isAuthenticated ? (
                 <div className="flex items-center w-full justify-center text-center text-lg font-semibold p-8">
                     <p className="flex items-center gap-2">
-                        <Loader2 className="animate-spin duration-700 repeat-infinite"/> Loading partner details...</p></div>
+                        <Loader2 className="animate-spin duration-700 repeat-infinite" /> Loading partner details...</p></div>
             ) : (
                 <>
                     {/* Header with Property Info and Logout */}
@@ -369,7 +370,7 @@ const HotelPartnerUpdates = () => {
                             <h1 className="text-2xl font-bold">{partnerSession?.propertyName}</h1>
                             <p className="text-sm text-blue-100">
                                 Hotel Code: <span className="font-semibold pr-2">{partnerSession?.hotelCode}</span> |
-                                Username: <span className="font-semibold pl-2">{partnerSession?.username}</span>
+                                Username: <span className="font-semibold pl-2">{partnerSession?.partnerUsername}</span>
                             </p>
                         </div>
                         <Button
