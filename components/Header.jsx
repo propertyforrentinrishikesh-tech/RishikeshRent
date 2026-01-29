@@ -101,6 +101,7 @@ const Header = () => {
           pathName.includes("sign-up") ||
           pathName.includes("sign-in") ||
           pathName.includes("customEnquiry")
+          
           ? "hidden"
           : "block"
           } border-b font-barlow tracking-wider w-full bg-black text-white`}
@@ -264,7 +265,10 @@ const Header = () => {
       </header>
       {/* Show only on md and larger screens, and only if not in admin section */}
       <div className="hidden md:block sticky top-0 z-50">
-        {!pathName.includes("admin") && (
+        {!pathName.includes("admin")
+        || !pathName.includes("partner/login")
+        || !pathName.includes("partner/register")
+         && (
           <div className="w-full print:hidden">
             <div className={`bg-white py-2 border-b border-gray-200 transition-all duration-300 ${showHeader ? "translate-y-0" : "-translate-y-full"}`}>
               <div className="container mx-auto px-4">
