@@ -26,15 +26,9 @@ const RoomPricingSchema = new mongoose.Schema({
     // Pricing Type (to differentiate between different pricing strategies)
     pricingType: {
         type: String,
-        enum: ['b2c', 'weekend', 'special-offer', 'bulk', 'rate-plan'],
+        enum: ['b2c', 'weekend', 'special-offer', 'bulk'],
         default: 'b2c',
         index: true
-    },
-
-    // Rate Plan Information (if applicable)
-    ratePlanName: {
-        type: String,
-        default: null
     },
 
     // Special Offer Information (for promotional pricing)
