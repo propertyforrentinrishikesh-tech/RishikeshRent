@@ -97,19 +97,6 @@ const BulkPriceUpdate = ({ propertyData }) => {
         }
     }
 
-    const resetPricingForm = () => {
-        setEpPlan({ person1: '', person2: '' })
-        setCpPlan({ person1: '', person2: '' })
-        setMapPlan({ person1: '', person2: '' })
-        setApPlan({ person1: '', person2: '' })
-        if (selectedRoomData) {
-            setTotalRooms(selectedRoomData.numberOfRooms)
-            setAvailableRooms(selectedRoomData.numberOfRooms)
-        }
-        setMinStay(1)
-        setStatus('open')
-    }
-
     const handleUpdate = async () => {
         // Validation
         if (!startDate || !endDate || !selectedRoom) {
