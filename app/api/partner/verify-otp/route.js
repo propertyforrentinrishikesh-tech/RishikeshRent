@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-
-// This should match the otpStore from send-otp route
-// In production, use Redis or database
-const otpStore = new Map();
+import connectDB from '@/lib/connectDB';
+import TempPartner from '@/models/TempPartner';
 
 export async function POST(request) {
     try {
+        await connectDB();
+
         const { email, otp } = await request.json();
 
         // Validate input
@@ -16,51 +16,75 @@ export async function POST(request) {
             );
         }
 
-        // Get stored OTP data
-        const storedData = otpStore.get(email);
+        const emailKey = email.toLowerCase().trim();
 
-        if (!storedData) {
+        // Find the temporary partner
+        const tempPartner = await TempPartner.findOne({ email: emailKey });
+        if (!tempPartner) {
             return NextResponse.json(
-                { message: 'OTP not found or expired' },
+                { message: 'OTP not found or expired. Please request a new one.' },
                 { status: 400 }
             );
         }
 
-        // Check if OTP is expired
-        if (Date.now() > storedData.expiresAt) {
-            otpStore.delete(email);
+        // Verify the OTP
+        if (tempPartner.otp !== otp.trim()) {
             return NextResponse.json(
-                { message: 'OTP has expired. Please request a new one.' },
+                { message: 'Invalid OTP. Please check and try again.' },
                 { status: 400 }
             );
         }
 
-        // Verify OTP
-        if (storedData.otp !== otp) {
+        // OTP is valid - Call registration API to create partner account
+        try {
+            const registerResponse = await fetch(
+                `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/partner/register`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        propertyName: tempPartner.propertyName,
+                        contactNumber: tempPartner.contactNumber,
+                        email: emailKey,
+                    }),
+                }
+            );
+
+            const registerData = await registerResponse.json();
+
+            if (registerData.success) {
+                // Delete the temporary partner after successful registration
+                await TempPartner.deleteOne({ email: emailKey });
+
+                return NextResponse.json(
+                    {
+                        success: true,
+                        message: registerData.message,
+                        partner: registerData.partner,
+                    },
+                    { status: 200 }
+                );
+            } else {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: registerData.message || 'Failed to create account',
+                    },
+                    { status: 500 }
+                );
+            }
+        } catch (registerError) {
+            console.error('Registration error:', registerError);
             return NextResponse.json(
-                { message: 'Invalid OTP' },
-                { status: 400 }
+                {
+                    success: false,
+                    message: 'Failed to create partner account',
+                },
+                { status: 500 }
             );
         }
-
-        // OTP is valid - remove from store
-        otpStore.delete(email);
-
-        // Here you would typically:
-        // 1. Create the partner account in database
-        // 2. Send welcome email
-        // 3. Generate session token
-
-        return NextResponse.json(
-            {
-                message: 'Email verified successfully',
-                verified: true,
-                email: email,
-                propertyName: storedData.propertyName,
-                contactNumber: storedData.contactNumber
-            },
-            { status: 200 }
-        );
     } catch (error) {
         console.error('Verify OTP error:', error);
         return NextResponse.json(

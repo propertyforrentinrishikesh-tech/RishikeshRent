@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-
-// Store OTPs temporarily (in production, use Redis or database)
-const otpStore = new Map();
+import connectDB from '@/lib/connectDB';
+import PartnerUser from '@/models/PartnerUser';
+import TempPartner from '@/models/TempPartner';
 
 // Generate 6-digit OTP
 function generateOTP() {
@@ -10,6 +10,8 @@ function generateOTP() {
 
 export async function POST(request) {
     try {
+        await connectDB();
+
         const { propertyName, contactNumber, email } = await request.json();
 
         // Validate input
@@ -29,15 +31,54 @@ export async function POST(request) {
             );
         }
 
+        // Validate contact number (10 digits)
+        const contactRegex = /^[0-9]{10}$/;
+        if (!contactRegex.test(contactNumber)) {
+            return NextResponse.json(
+                { message: 'Contact number must be 10 digits' },
+                { status: 400 }
+            );
+        }
+
+        // Check if partner already exists with this email
+        const existingPartner = await PartnerUser.findOne({
+            email: email.toLowerCase().trim()
+        });
+
+        if (existingPartner) {
+            return NextResponse.json(
+                {
+                    message: 'A partner account with this email already exists. Please login instead.',
+                    alreadyExists: true
+                },
+                { status: 409 }
+            );
+        }
+
+        // Check if OTP already sent (in TempPartner)
+        const existingTempPartner = await TempPartner.findOne({
+            email: email.toLowerCase().trim()
+        });
+
+        if (existingTempPartner) {
+            return NextResponse.json(
+                {
+                    message: 'OTP already sent. Check your email or wait for it to expire.',
+                    alreadySent: true
+                },
+                { status: 400 }
+            );
+        }
+
         // Generate OTP
         const otp = generateOTP();
 
-        // Store OTP with expiration (5 minutes)
-        otpStore.set(email, {
+        // Save to TempPartner (will auto-delete after 10 minutes)
+        await TempPartner.create({
+            propertyName: propertyName.trim(),
+            email: email.toLowerCase().trim(),
+            contactNumber: contactNumber.trim(),
             otp,
-            propertyName,
-            contactNumber,
-            expiresAt: Date.now() + 5 * 60 * 1000, // 5 minutes
         });
 
         // Send OTP via Brevo email service
@@ -60,7 +101,7 @@ export async function POST(request) {
             
             <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 4px;">
               <p style="margin: 0; color: #92400e; font-size: 14px;">
-                <strong>⏰ Important:</strong> This OTP is valid for <strong>5 minutes only</strong>.
+                <strong>⏰ Important:</strong> This OTP is valid for <strong>10 minutes only</strong>.
               </p>
             </div>
             

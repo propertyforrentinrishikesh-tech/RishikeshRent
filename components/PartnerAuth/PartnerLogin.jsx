@@ -1,11 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { PartnerIllustration } from '@/components/ui/partner-illustration';
+import Image from 'next/image';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, CheckCircle2 } from 'lucide-react';
 
@@ -26,19 +25,31 @@ export default function PartnerLogin() {
         setError('');
 
         try {
-            const result = await signIn('hotel-partner-credentials', {
-                redirect: false,
-                hotelCode: formData.hotelCode,
-                userCode: formData.userCode,
-                password: formData.password,
+            const response = await fetch('/api/auth/hotel-partner-login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    hotelCode: formData.hotelCode,
+                    username: formData.userCode,
+                    password: formData.password,
+                }),
             });
 
-            if (result?.error) {
-                setError(result.error);
-            } else if (result?.ok) {
-                router.push('/partner/dashboard');
+            const data = await response.json();
+
+            if (data.success) {
+                // Store property data in session/localStorage
+                localStorage.setItem('partnerProperty', JSON.stringify(data.property));
+
+                // Redirect to partner dashboard
+                router.push('/partner/hotel_property_updates');
+            } else {
+                setError(data.message || 'Login failed');
             }
         } catch (err) {
+            console.error('Login error:', err);
             setError('An error occurred. Please try again.');
         } finally {
             setLoading(false);
@@ -54,10 +65,46 @@ export default function PartnerLogin() {
 
     return (
         <div className="min-h-screen flex w-[80%] mx-auto">
-            {/* Left Side - Illustration */}
-            <div className="hidden lg:flex lg:w-1/2">
-                <PartnerIllustration />
+            <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-12 ">
+                <div className="relative w-full max-w-2xl">
+                    {/* Header Text */}
+                    <div className="text-center">
+                        <h1 className="text-xl md:text-3xl font-bold text-gray-900 mb-4">Your Properties With Us</h1>
+                        <div className="inline-flex items-center rounded-full overflow-hidden border-2 border-gray-800 shadow-lg">
+                            <div className="px-8 py-2 bg-blue-500 text-black font-bold text-lg">
+                                Login
+                            </div>
+                            <p className="px-8 py-2 bg-orange-500 text-black font-bold text-lg transition-colors">
+                                Extranet
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Image */}
+                    <div className="relative w-full aspect-square max-w-md mx-auto">
+                        <Image
+                            src="/partnerregister.png"
+                            alt="List Your Holiday Rental"
+                            fill
+                            className="object-contain"
+                            priority
+                        />
+                    </div>
+
+                    {/* Bottom Text */}
+                    <div className="text-center">
+                        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                            List Your Holiday Rental
+                        </h2>
+                        <p className="text-base text-justify text-gray-700 max-w-xl mx-auto">
+                            Open your door to rental income. Benefit from 20 years of expertise.
+                            Sign up now. You&apos;re in control - open and close your property for
+                            bookings when you want.
+                        </p>
+                    </div>
+                </div>
             </div>
+            <div className="border-r-2 border-gray-800 h-[85vh] my-auto"></div>
 
             {/* Right Side - Login Form */}
             <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
@@ -71,9 +118,9 @@ export default function PartnerLogin() {
 
                     {/* Login Form */}
                     <div className="space-y-6">
-                        <div className="text-center lg:text-left">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-2">Extranet Login</h2>
-                            <p className="text-gray-600">Sign in to manage your property</p>
+                        <div className="">
+                            <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">Extranet Login</h2>
+                            <p className="text-gray-600 text-center">Sign in to manage your property</p>
                         </div>
 
                         {error && (

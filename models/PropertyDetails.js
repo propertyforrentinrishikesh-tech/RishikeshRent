@@ -21,7 +21,6 @@ const propertyDetailsSchema = new mongoose.Schema({
     },
     locationType: { type: String, required: true },
     subLocationType: { type: String, required: true },
-    wardType: { type: String, required: true },
     galiType: { type: String, required: true },
     contactAddress: { type: String },    
     brokerName: { type: String },

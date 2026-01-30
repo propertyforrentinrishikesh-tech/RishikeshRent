@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { PartnerIllustration } from '@/components/ui/partner-illustration';
+import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -19,6 +19,7 @@ export default function PartnerRegister() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [countdown, setCountdown] = useState(0);
 
     const handleChange = (e) => {
         setFormData({
@@ -26,6 +27,18 @@ export default function PartnerRegister() {
             [e.target.name]: e.target.value,
         });
     };
+
+    useEffect(() => {
+        let timer;
+        if (countdown > 0) {
+            timer = setInterval(() => {
+                setCountdown((prev) => prev - 1);
+            }, 1000);
+        } else if (countdown === 0 && success && success.includes('Registration successful')) {
+            router.push('/partner/property_registration');
+        }
+        return () => clearInterval(timer);
+    }, [countdown, success, router]);
 
     const handleGetOTP = async (e) => {
         e.preventDefault();
@@ -52,9 +65,22 @@ export default function PartnerRegister() {
                 setSuccess('OTP sent successfully to your email!');
                 setStep(2);
             } else {
-                setError(data.message || 'Failed to send OTP');
+                // Check if user already exists
+                if (data.alreadyExists) {
+                    setError(
+                        <span>
+                            {data.message}{' '}
+                            <Link href="/partner/login" className="text-blue-600 hover:text-blue-700 font-bold underline">
+                                Click here to login
+                            </Link>
+                        </span>
+                    );
+                } else {
+                    setError(data.message || 'Failed to send OTP');
+                }
             }
         } catch (err) {
+            console.error('Send OTP error:', err);
             setError('An error occurred. Please try again.');
         } finally {
             setLoading(false);
@@ -80,13 +106,27 @@ export default function PartnerRegister() {
 
             const data = await response.json();
 
-            if (response.ok) {
-                // Redirect to complete registration or dashboard
-                router.push('/partner/complete-registration');
+            if (data.success) {
+                // Show success message
+                setSuccess(
+                    'Registration successful!'
+                );
+
+                // Clear form
+                setFormData({
+                    propertyName: '',
+                    contactNumber: '',
+                    email: '',
+                    otp: '',
+                });
+
+                // Start countdown for redirect
+                setCountdown(5);
             } else {
-                setError(data.message || 'Invalid OTP');
+                setError(data.message || 'Verification failed');
             }
         } catch (err) {
+            console.error('Verification error:', err);
             setError('An error occurred. Please try again.');
         } finally {
             setLoading(false);
@@ -96,9 +136,46 @@ export default function PartnerRegister() {
     return (
         <div className="min-h-[80vh] flex w-[80%] mx-auto">
             {/* Left Side - Illustration */}
-            <div className="hidden lg:flex lg:w-1/2">
-                <PartnerIllustration />
+            <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-12 ">
+                <div className="relative w-full max-w-2xl">
+                    {/* Header Text */}
+                    <div className="text-center">
+                        <h1 className="text-xl md:text-3xl font-bold text-gray-900 mb-4">Your Properties With Us</h1>
+                        <div className="inline-flex items-center rounded-full overflow-hidden border-2 border-gray-800 shadow-lg">
+                            <div className="px-8 py-2 bg-blue-500 text-black font-bold text-lg">
+                                Register
+                            </div>
+                            <p className="px-8 py-2 bg-orange-500 text-black font-bold text-lg transition-colors">
+                                Extranet
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Image */}
+                    <div className="relative w-full aspect-square max-w-md mx-auto">
+                        <Image
+                            src="/partnerregister.png"
+                            alt="List Your Holiday Rental"
+                            fill
+                            className="object-contain"
+                            priority
+                        />
+                    </div>
+
+                    {/* Bottom Text */}
+                    <div className="text-center">
+                        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                            List Your Holiday Rental
+                        </h2>
+                        <p className="text-base text-justify text-gray-700 max-w-xl mx-auto">
+                            Open your door to rental income. Benefit from 20 years of expertise.
+                            Sign up now. You&apos;re in control - open and close your property for
+                            bookings when you want.
+                        </p>
+                    </div>
+                </div>
             </div>
+            <div className="border-r-2 border-gray-800 h-[85vh] my-auto"></div>
 
             {/* Right Side - Register Form */}
             <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
@@ -112,11 +189,11 @@ export default function PartnerRegister() {
 
                     {/* Register Form */}
                     <div className="space-y-6">
-                        <div className="text-center lg:text-left">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                        <div className="w-full lg:text-left">
+                            <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
                                 {step === 1 ? 'Email For Register' : 'Verify Your Email'}
                             </h2>
-                            <p className="text-gray-600">
+                            <p className="text-gray-600 text-center">
                                 {step === 1
                                     ? 'Enter your details to get started'
                                     : 'Enter the OTP sent to your email'}
@@ -132,6 +209,11 @@ export default function PartnerRegister() {
                         {success && (
                             <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
                                 {success}
+                                {countdown > 0 && (
+                                    <p className="mt-2 font-bold text-sm">
+                                        Redirecting to registration page in {countdown} seconds...
+                                    </p>
+                                )}
                             </div>
                         )}
 
@@ -159,8 +241,8 @@ export default function PartnerRegister() {
                                     <label htmlFor="contactNumber" className="block text-sm font-bold text-gray-900 mb-2">
                                         Contact Number
                                     </label>
-                                    <div className="flex gap-2">
-                                        <div className="flex items-center justify-center bg-blue-600 text-white font-bold px-4 rounded-full text-lg">
+                                    <div className="flex gap-1">
+                                        <div className="flex items-center justify-center bg-blue-600 text-white font-bold px-4 rounded-md text-lg">
                                             +91
                                         </div>
                                         <Input

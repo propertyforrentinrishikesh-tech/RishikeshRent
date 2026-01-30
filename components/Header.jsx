@@ -202,7 +202,7 @@ const Header = () => {
             </div>
             <div className="w-[2px] bg-white h-6"></div>
             <div className="flex items-center gap-3">
-              <Link href="#"
+              <Link href="/partner/login"
                 className="text-white text-sm hover:underline  hover:scale-105 transition-all duration-300"
               >
                 Property Extranet
@@ -226,7 +226,7 @@ const Header = () => {
 
                 <div className="w-[2px] bg-white h-18"></div>
               <div className="flex item-center gap-2 justify-center">
-                <Link href="/" 
+                <Link href="/partner/register" 
                 className="flex items-center gap-2"
                 >
                 <div>
