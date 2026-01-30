@@ -90,6 +90,29 @@ const HotelPartnerUpdates = () => {
         router.push('/admin/hotel_property_updates/login');
     };
 
+    // Function to refresh property data from database
+    const refreshPropertyData = async () => {
+        if (!propertyData?._id) return;
+
+        try {
+            const propertyId = propertyData._id.$oid || propertyData._id;
+            console.log('Refreshing property data for ID:', propertyId);
+
+            const response = await fetch(`/api/addPropertyRegistration?id=${propertyId}`);
+            const data = await response.json();
+
+            if (data.success && data.data) {
+                setPropertyData(data.data);
+                // Also update localStorage
+                const session = JSON.parse(localStorage.getItem('hotelPartnerSession'));
+                const updatedSession = { ...session, ...data.data };
+                localStorage.setItem('hotelPartnerSession', JSON.stringify(updatedSession));
+            }
+        } catch (error) {
+            console.error('Error refreshing property data:', error);
+        }
+    };
+
     // Fetch all properties
     useEffect(() => {
         setLoading(true);
@@ -277,14 +300,14 @@ const HotelPartnerUpdates = () => {
                 return <RatePlans propertyData={propertyData} />
             case 'plan-price-update':
                 return <PlanPriceUpdate propertyData={propertyData} />
-            case 'krc-update':
-                return <Restrictions propertyData={propertyData} />
             case 'photos':
-                return <Photos propertyData={propertyData} />
+                return <Photos propertyData={propertyData} onDataUpdate={refreshPropertyData} />
             case 'facilities':
                 return <FacilitiesAmenities propertyData={propertyData} />
             case 'descriptions':
                 return <Descriptions propertyData={propertyData} />
+            case 'krc-update':
+                return <Restrictions propertyData={propertyData} />
             case 'bookings-list':
                 return <BookingsList propertyData={propertyData} />
             case 'confirm-no-show':
