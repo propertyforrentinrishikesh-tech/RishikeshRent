@@ -1,24 +1,50 @@
-import { Schema, models, model } from "mongoose";
+import mongoose from 'mongoose';
 
-const ReviewSchema = new Schema({
-  deleted: { type: Boolean, default: false },
-  name: { type: String, required: true },
-  date: { type: Number, required: true },
-  thumb: {
-    url: { type: String },
-    key: { type: String }
+const ReviewSchema = new mongoose.Schema({
+  propertyId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'PropertyRegistration',
+    required: true
   },
-  rating: { type: Number, required: true },
-  title: { type: String, required: true },
-  description: { type: String, required: true },
-  approved: { type: Boolean, default: false },
+  guestName: {
+    type: String,
+    required: true
+  },
+  dateOfReview: {
+    type: Date,
+    required: true
+  },
+  travelType: {
+    type: String,
+    required: true,
+    enum: ['soloTraveler', 'couple', 'family', 'business', 'group', 'friends', 'other']
+  },
+  rating: {
+    type: Number,
+    required: true,
+    min: 1,
+    max: 5
+  },
+  reviewTitle: {
+    type: String,
+    required: true
+  },
+  description: {
+    type: String,
+    required: true
+  },
+  images: [{
+    url: String,
+    key: String
+  }],
+  isPublished: {
+    type: Boolean,
+    default: true
+  }
+}, {
+  timestamps: true
+});
 
-  // NEW FIELDS:
-  type: { type: String, enum: ["product", "management", "all"], required: true },
-  product: { type: Schema.Types.ObjectId, ref: "Product" }, // for product reviews
-  artisan: { type: Schema.Types.ObjectId, ref: "Artisan" }, // for artisan reviews
+const Review = mongoose.models.Review || mongoose.model('Review', ReviewSchema);
 
-  createdAt: { type: Date, default: Date.now }
-}, { timestamps: true });
-
-export default models.Review || model("Review", ReviewSchema);
+export default Review;
