@@ -96,7 +96,6 @@ const HotelPartnerUpdates = () => {
 
         try {
             const propertyId = propertyData._id.$oid || propertyData._id;
-            console.log('Refreshing property data for ID:', propertyId);
 
             const response = await fetch(`/api/addPropertyRegistration?id=${propertyId}`);
             const data = await response.json();
@@ -303,7 +302,7 @@ const HotelPartnerUpdates = () => {
             case 'photos':
                 return <Photos propertyData={propertyData} onDataUpdate={refreshPropertyData} />
             case 'facilities':
-                return <FacilitiesAmenities propertyData={propertyData} />
+                return <FacilitiesAmenities propertyData={propertyData} onDataUpdate={refreshPropertyData} />
             case 'descriptions':
                 return <Descriptions propertyData={propertyData} />
             case 'krc-update':
