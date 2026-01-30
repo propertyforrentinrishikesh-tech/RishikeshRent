@@ -277,8 +277,11 @@ const FacilitiesAmenities = ({ propertyData, onDataUpdate }) => {
 
     return (
         <div className="w-full mx-auto p-6 space-y-6 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
-            <div className="flex items-center justify-between mb-6">
-                <h1 className="text-3xl font-bold text-gray-800">Facilities & Amenities</h1>
+            <div className="bg-gradient-to-r from-cyan-500 to-cyan-600 p-6 rounded-lg shadow-lg">
+                <h1 className="text-3xl font-bold text-white">Facilities & Amenities</h1>
+                <p className="text-white mt-2">Write or edit descriptions and content for your property</p>
+            </div>
+            <div className="flex items-center justify-end mt-4">
                 <Button
                     onClick={handleSave}
                     disabled={saving}

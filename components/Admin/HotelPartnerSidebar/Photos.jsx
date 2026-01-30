@@ -294,8 +294,11 @@ const Photos = ({ propertyData, onDataUpdate }) => {
     return (
         <div className="p-6 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
             <div className="max-w-7xl mx-auto">
-                <div className="flex items-center justify-between mb-6">
-                    <h1 className="text-3xl font-bold text-gray-800">Photo Management</h1>
+                <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-6 rounded-lg shadow-lg">
+                    <h1 className="text-3xl font-bold text-white">Photo Management</h1>
+                    <p className="text-white mt-2">Upload and manage photos for your property</p>
+                </div>
+                <div className="flex items-center justify-end my-5">
                     <Button
                         onClick={handleSave}
                         disabled={saving}
