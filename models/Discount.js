@@ -1,17 +1,41 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const DiscountSchema = new mongoose.Schema({
-  couponCode: { type: String, required: true, unique: true },
-  amount: { type: Number }, // Fixed discount amount
-  percent: { type: Number }, // Percentage discount
-  startDate: { type: Date, required: true },
-  endDate: { type: Date, required: true },
-//   category: { type: String }, // Optional: could be used for filtering
-  status: {
-    type: String,
-    enum: ['active', 'paused', 'expired'],
-    default: 'active',
+  propertyId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'PropertyRegistration',
+    required: true
   },
-}, { timestamps: true });
+  couponCode: {
+    type: String,
+    required: true,
+    uppercase: true
+  },
+  amount: {
+    type: Number,
+    default: null
+  },
+  percentage: {
+    type: Number,
+    default: null
+  },
+  startDate: {
+    type: Date,
+    required: true
+  },
+  endDate: {
+    type: Date,
+    required: true
+  },
+  isActive: {
+    type: Boolean,
+    default: true
+  }
+}, {
+  timestamps: true
+});
 
-module.exports = mongoose.models.Discount || mongoose.model('Discount', DiscountSchema);
+// Create or use existing model
+const Discount = mongoose.models.Discount || mongoose.model('Discount', DiscountSchema);
+
+export default Discount;
