@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { CalendarClock, MapPin, Heart, Bookmark, ArrowRight, Globe, X } from "lucide-react";
+import { CalendarClock, MapPin, Heart, Bookmark, ArrowRight, Globe, X,Star } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Carousel,
@@ -345,6 +345,135 @@ const RandomTourPackageSection = () => {
             <CarouselNext className="absolute right-2 top-60 md:top-1/2 -translate-y-1/2 p-5" />
           </Carousel>
         </div>
+
+
+        {/* New Unrivaled Offer Section */}
+        <section className="w-full py-12 px-4 md:px-10 bg-white">
+          <div className="flex flex-col mb-8">
+            <div className="flex justify-between items-end border-b border-gray-200 pb-2">
+              <div className="flex flex-col">
+                <span className="text-xs uppercase tracking-widest text-gray-500 mb-1">Experience the Unrivaled: Our Deluxe Room Offer</span>
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900">A Quiet Escape For Modern Travelers Like You</h2>
+              </div>
+              <Link href="/properties" className="text-sm font-semibold text-gray-800 hover:underline mb-1 hidden md:block">
+                View More
+              </Link>
+            </div>
+            <div className="mt-2 text-xs text-gray-500 uppercase tracking-wide">
+              Hospitality Reimagined, Modern Amenities Refined. Hot & Trending Venues
+            </div>
+          </div>
+
+          <Carousel className="w-full select-none">
+            <CarouselContent className="-ml-4">
+              {[
+                {
+                  id: 1,
+                  title: "Long Beach",
+                  rating: 4.8,
+                  desc: "Cicero famously orated against his political opponent Lucius Sergius Catilina.",
+                  priceMin: 492,
+                  priceMax: 799,
+                  rooms: 120,
+                  image: "https://images.unsplash.com/photo-1540541338287-41700207dee6?q=80&w=1000&auto=format&fit=crop"
+                },
+                {
+                  id: 2,
+                  title: "Jacksonville",
+                  rating: 4.7,
+                  desc: "Cicero famously orated against his political opponent Lucius Sergius Catilina.",
+                  priceMin: 492,
+                  priceMax: 799,
+                  rooms: 78,
+                  image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
+                },
+                {
+                  id: 3,
+                  title: "Kansas City",
+                  rating: 4.9,
+                  desc: "Cicero famously orated against his political opponent Lucius Sergius Catilina.",
+                  priceMin: 492,
+                  priceMax: 799,
+                  rooms: 65,
+                  image: "https://images.unsplash.com/photo-1512918760383-edaebe36037c?q=80&w=1000&auto=format&fit=crop"
+                },
+                {
+                  id: 4,
+                  title: "Los Angeles",
+                  rating: 4.6,
+                  desc: "Cicero famously orated against his political opponent Lucius Sergius Catilina.",
+                  priceMin: 492,
+                  priceMax: 799,
+                  rooms: 23,
+                  image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop"
+                },
+                {
+                  id: 5,
+                  title: "Miami Beach",
+                  rating: 4.8,
+                  desc: "Cicero famously orated against his political opponent Lucius Sergius Catilina.",
+                  priceMin: 550,
+                  priceMax: 900,
+                  rooms: 45,
+                  image: "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?q=80&w=1000&auto=format&fit=crop"
+                }
+
+              ].map((item, idx) => (
+                <CarouselItem key={item.id} className="pl-4 md:basis-1/2 lg:basis-1/4">
+                  <div className="bg-white rounded-xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col h-full">
+                    {/* Image Area */}
+                    <div className="relative h-48 w-full overflow-hidden">
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                      />
+                      <div className="absolute top-3 left-3 bg-black/50 p-1.5 rounded-lg backdrop-blur-sm">
+                        <Globe className="w-4 h-4 text-white" />
+                      </div>
+                    </div>
+
+                    {/* Content Area */}
+                    <div className="p-5 flex flex-col flex-grow">
+                      <div className="flex justify-between items-center mb-2">
+                        <h3 className="text-lg font-bold text-gray-900">{item.title}</h3>
+                        <div className="flex items-center gap-1">
+                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                          <span className="text-sm font-bold text-gray-900">{item.rating}</span>
+                        </div>
+                      </div>
+
+                      <p className="text-gray-500 text-sm mb-6 line-clamp-2">
+                        {item.desc}
+                      </p>
+
+                      <div className="mt-auto">
+                        <div className="flex justify-between items-end mb-4 text-sm font-medium text-gray-600">
+                          <div>
+                            <span className="text-gray-400 mr-1">From</span>
+                            <span className="text-gray-900 font-bold text-base">${item.priceMin} - ${item.priceMax}</span>
+                          </div>
+                          <span className="text-xs text-gray-400">{item.rooms} Rooms</span>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <Button className="flex-1 bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 font-bold text-sm py-2 rounded-lg border-none shadow-none">
+                            Request Book <ArrowRight className="w-4 h-4 ml-1" />
+                          </Button>
+                          <Button variant="outline" size="icon" className="bg-emerald-50 border-none text-emerald-500 hover:bg-emerald-100 hover:text-emerald-600 rounded-lg w-10 h-10 shrink-0">
+                            <Heart className="w-5 h-5 fill-current" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="hidden md:flex -left-4 w-10 h-10 border-none bg-white shadow-md text-gray-800" />
+            <CarouselNext className="hidden md:flex -right-4 w-10 h-10 border-none bg-white shadow-md text-gray-800" />
+          </Carousel>
+        </section>
         {bannerSection3rd.length > 0 && (
           <section className="relative w-full">
             {loading1 ? (

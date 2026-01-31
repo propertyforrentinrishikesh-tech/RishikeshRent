@@ -65,23 +65,23 @@ export default function PartnerLogin() {
 
     return (
         <div className="min-h-screen flex w-[80%] mx-auto">
-            <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-12 ">
+            <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-5 ">
                 <div className="relative w-full max-w-2xl">
                     {/* Header Text */}
                     <div className="text-center">
-                        <h1 className="text-xl md:text-3xl font-bold text-gray-900 mb-4">Your Properties With Us</h1>
+                        <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-4">Your Properties With Us</h1>
                         <div className="inline-flex items-center rounded-full overflow-hidden border-2 border-gray-800 shadow-lg">
-                            <div className="px-8 py-2 bg-blue-500 text-black font-bold text-lg">
+                            <div className="px-5 py-1 bg-blue-500 text-black font-bold text-lg">
                                 Login
                             </div>
-                            <p className="px-8 py-2 bg-orange-500 text-black font-bold text-lg transition-colors">
+                            <p className="px-5 py-1 bg-orange-500 text-black font-bold text-lg transition-colors">
                                 Extranet
                             </p>
                         </div>
                     </div>
 
                     {/* Image */}
-                    <div className="relative w-full aspect-square max-w-md mx-auto">
+                    <div className="relative w-full aspect-square max-w-xs mx-auto">
                         <Image
                             src="/partnerregister.png"
                             alt="List Your Holiday Rental"
@@ -104,20 +104,20 @@ export default function PartnerLogin() {
                     </div>
                 </div>
             </div>
-            <div className="border-r-2 border-gray-800 h-[85vh] my-auto"></div>
+            <div className="hidden lg:block border-r-2 border-gray-800 h-[85vh] my-auto"></div>
 
             {/* Right Side - Login Form */}
-            <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
+            <div className="w-full lg:w-1/2 flex items-center justify-center p-5 bg-white">
                 <div className="w-full max-w-md">
                     {/* Mobile Illustration */}
                     <div className="lg:hidden mb-8">
-                        <div className="text-center mb-6">
+                        <div className="text-center mb-2">
                             <h1 className="text-3xl font-bold text-gray-900 mb-2">Your Properties With Us</h1>
                         </div>
                     </div>
 
                     {/* Login Form */}
-                    <div className="space-y-6">
+                    <div className="space-y-1">
                         <div className="">
                             <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">Extranet Login</h2>
                             <p className="text-gray-600 text-center">Sign in to manage your property</p>
@@ -216,20 +216,20 @@ export default function PartnerLogin() {
                                 Sign up and start welcoming guests today!
                             </p>
 
-                            <h3 className="text-xl font-bold text-gray-900">Register for free</h3>
+                            <h3 className="text-md font-bold text-gray-900">Register for free</h3>
 
-                            <div className="space-y-2">
+                            <div className="space-y-1">
                                 <div className="flex items-start gap-3">
                                     <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                                    <p className="text-gray-700">45% of hosts get their first booking within a week</p>
+                                    <p className="text-gray-700 text-sm">45% of hosts get their first booking within a week</p>
                                 </div>
                                 <div className="flex items-start gap-3">
                                     <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                                    <p className="text-gray-700">Choose instant bookings or Request to Book</p>
+                                    <p className="text-gray-700 text-sm">Choose instant bookings or Request to Book</p>
                                 </div>
                                 <div className="flex items-start gap-3">
                                     <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                                    <p className="text-gray-700">We&apos;ll facilitate payments for you</p>
+                                    <p className="text-gray-700 text-sm">We&apos;ll facilitate payments for you</p>
                                 </div>
                             </div>
 

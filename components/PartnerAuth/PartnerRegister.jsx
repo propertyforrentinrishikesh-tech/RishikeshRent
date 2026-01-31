@@ -136,23 +136,23 @@ export default function PartnerRegister() {
     return (
         <div className="min-h-[80vh] flex w-[80%] mx-auto">
             {/* Left Side - Illustration */}
-            <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-12 ">
+            <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-5 ">
                 <div className="relative w-full max-w-2xl">
                     {/* Header Text */}
                     <div className="text-center">
-                        <h1 className="text-xl md:text-3xl font-bold text-gray-900 mb-4">Your Properties With Us</h1>
+                        <h1 className="text-xl font-bold text-gray-900 mb-4">Your Properties With Us</h1>
                         <div className="inline-flex items-center rounded-full overflow-hidden border-2 border-gray-800 shadow-lg">
-                            <div className="px-8 py-2 bg-blue-500 text-black font-bold text-lg">
+                            <div className="px-5 py-1 bg-blue-500 text-black font-bold text-lg">
                                 Register
                             </div>
-                            <p className="px-8 py-2 bg-orange-500 text-black font-bold text-lg transition-colors">
+                            <p className="px-5 py-1 bg-orange-500 text-black font-bold text-lg transition-colors">
                                 Extranet
                             </p>
                         </div>
                     </div>
 
                     {/* Image */}
-                    <div className="relative w-full aspect-square max-w-md mx-auto">
+                    <div className="relative w-full aspect-square max-w-sm mx-auto">
                         <Image
                             src="/partnerregister.png"
                             alt="List Your Holiday Rental"
@@ -164,10 +164,10 @@ export default function PartnerRegister() {
 
                     {/* Bottom Text */}
                     <div className="text-center">
-                        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                        <h2 className="text-xl font-bold text-gray-900 mb-2">
                             List Your Holiday Rental
                         </h2>
-                        <p className="text-base text-justify text-gray-700 max-w-xl mx-auto">
+                        <p className="text-sm text-justify text-gray-700 max-w-xl mx-auto">
                             Open your door to rental income. Benefit from 20 years of expertise.
                             Sign up now. You&apos;re in control - open and close your property for
                             bookings when you want.
@@ -175,10 +175,10 @@ export default function PartnerRegister() {
                     </div>
                 </div>
             </div>
-            <div className="border-r-2 border-gray-800 h-[85vh] my-auto"></div>
+            <div className="hidden lg:block border-r-2 border-gray-800 h-[70vh] my-auto"></div>
 
             {/* Right Side - Register Form */}
-            <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
+            <div className="w-full lg:w-1/2 flex items-center justify-center p-5 bg-white">
                 <div className="w-full max-w-md">
                     {/* Mobile Header */}
                     <div className="lg:hidden mb-8">

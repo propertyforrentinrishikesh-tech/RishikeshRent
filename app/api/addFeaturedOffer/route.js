@@ -7,7 +7,7 @@ import { deleteFileFromCloudinary } from "@/utils/cloudinary";
 export async function GET() {
     await connectDB();
     try {
-        const banners = await FeaturedBanner.find().sort({ order: 1 });
+        const banners = await FeaturedBanner.find()
         return NextResponse.json(banners, { status: 200 });
     } catch (error) {
         return NextResponse.json({ error: "Failed to fetch banners" }, { status: 500 });
@@ -17,13 +17,11 @@ export async function GET() {
 export async function POST(req) {
     await connectDB();
     try {
-        const { title,  buttonLink, image, order } = await req.json();
+        const { propertyName, propertyType, propertySubDestination, price, buttonLink, image } = await req.json();
 
-        // Find the highest order number
-        const lastBanner = await FeaturedBanner.findOne().sort({ order: -1 });
-        const nextOrder = lastBanner ? lastBanner.order + 1 : 1; // Auto-increment order
+        const lastBanner = await FeaturedBanner.findOne().sort({});
 
-        const newBanner = new FeaturedBanner({ title, buttonLink, order: nextOrder, image });
+        const newBanner = new FeaturedBanner({ propertyName, propertyType, propertySubDestination, price, buttonLink, image });
         await newBanner.save();
         return NextResponse.json(newBanner, { status: 201 });
     } catch (error) {
@@ -34,8 +32,8 @@ export async function POST(req) {
 export async function PATCH(req) {
     await connectDB();
     try {
-        const { id, title,  buttonLink, image, order,} = await req.json();
-        const updatedBanner = await FeaturedBanner.findByIdAndUpdate(id, { title,  buttonLink, order, image }, { new: true });
+        const { id, propertyName, propertyType, propertySubDestination, price, buttonLink, image } = await req.json();
+        const updatedBanner = await FeaturedBanner.findByIdAndUpdate(id, { propertyName, propertyType, propertySubDestination, price, buttonLink, image }, { new: true });
         return NextResponse.json(updatedBanner, { status: 200 });
     } catch (error) {
         return NextResponse.json({ error: "Failed to update banner" }, { status: 500 });

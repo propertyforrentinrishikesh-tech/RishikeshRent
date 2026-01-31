@@ -21,9 +21,12 @@ const FeaturedOffer = () => {
     const [banners, setBanners] = useState([]);
     const [editBanner, setEditBanner] = useState(null);
     const [formData, setFormData] = useState({
+        propertyName: "",
+        propertyType: "",
+        propertySubDestination: "",
+        price: "",
         buttonLink: "",
         image: { url: "", key: "" },
-        order: 1,
     });
     // Fetch banners and determine the next order number
     useEffect(() => {
@@ -33,11 +36,6 @@ const FeaturedOffer = () => {
                 const data = await response.json();
                 setBanners(data);
 
-                // Auto-set next order number
-                if (data.length > 0) {
-                    const highestOrder = Math.max(...data.map((b) => b.order));
-                    setFormData((prev) => ({ ...prev, order: highestOrder + 1 }));
-                }
             } catch (error) {
                 toast.error("Failed to fetch banners");
             }
@@ -109,9 +107,11 @@ const FeaturedOffer = () => {
 
                 // Reset form
                 setFormData({
-                   
+                    propertyName: "",
+                    propertyType: "",
+                    propertySubDestination: "",
+                    price: "",
                     buttonLink: "",
-                    order: updatedBanners.length + 1,
                     image: { url: "", key: "" },
                 });
             } else {
@@ -125,9 +125,11 @@ const FeaturedOffer = () => {
     const handleEdit = (banner) => {
         setEditBanner(banner._id);
         setFormData({
-           
+            propertyName: banner.propertyName,
+            propertyType: banner.propertyType,
+            propertySubDestination: banner.propertySubDestination,
+            price: banner.price,
             buttonLink: banner.buttonLink,
-            order: banner.order,
             image: banner.image,
         });
     };
@@ -224,14 +226,30 @@ const FeaturedOffer = () => {
                         </div>
                     )}
                 </div>
-                 <div>
-                    <Label>Button Link</Label>
-                    <Input name="buttonLink" placeholder="Enter button link" type="url" value={formData.buttonLink} onChange={handleInputChange} />
+                <div>
+                    <Label>Property Name</Label>
+                    <Input name="propertyName" placeholder="Enter property name" type="text" value={formData.propertyName} onChange={handleInputChange} />
                 </div>
                 <div>
-                    <Label>Order</Label>                    <Input name="order" placeholder="Enter order" type="number" value={formData.order} readOnly className="bg-gray-100 cursor-not-allowed" />
+                    <Label>Property Type</Label>
+                    <Input name="propertyType" placeholder="Enter property type" type="text" value={formData.propertyType} onChange={handleInputChange} />
                 </div>
-
+                <div>
+                    <Label>Property Sub Destination</Label>
+                    <Input name="propertySubDestination" placeholder="Enter property sub destination" type="text" value={formData.propertySubDestination} onChange={handleInputChange} />
+                </div>
+                <div>
+                    <Label>Price</Label>
+                    <Input name="price" placeholder="Enter price" type="number" value={formData.price} onChange={handleInputChange} />
+                </div>
+                <div>
+                    <Label>Property Name</Label>
+                    <Input name="propertyName" placeholder="Enter property name" type="text" value={formData.propertyName} onChange={handleInputChange} />
+                </div>
+                <div>
+                    <Label>View Detail Link</Label>
+                    <Input name="buttonLink" placeholder="Enter button link" type="url" value={formData.buttonLink} onChange={handleInputChange} />
+                </div>
                 <div className="flex gap-2 mt-4">
                     <Button type="submit" className="bg-blue-600 hover:bg-blue-500">
                         {editBanner ? "Update Featured Offer" : "Add Featured Offer"}
@@ -244,9 +262,11 @@ const FeaturedOffer = () => {
                             onClick={() => {
                                 setEditBanner(null);
                                 setFormData({
-                                   
+                                    propertyName: "",
+                                    propertyType: "",
+                                    propertySubDestination: "",
+                                    price: "",
                                     buttonLink: "",
-                                    order: banners.length > 0 ? Math.max(...banners.map(b => b.order)) + 1 : 1,
                                     image: { url: "", key: "" },
                                 });
                             }}
@@ -261,9 +281,11 @@ const FeaturedOffer = () => {
             <Table>
                 <TableHeader>
                     <TableRow>
-                       
-                        <TableHead>Button Link</TableHead>
-                        <TableHead>Order</TableHead>
+                        <TableHead>Property Name</TableHead>
+                        <TableHead>Property Type</TableHead>
+                        <TableHead>Sub Destination</TableHead>
+                        <TableHead>Price</TableHead>
+                        <TableHead>View Detail Link</TableHead>
                         <TableHead>Image</TableHead>
                         <TableHead>Actions</TableHead>
                     </TableRow>
@@ -272,7 +294,10 @@ const FeaturedOffer = () => {
                     {banners.length > 0 ? (
                         banners.map((banner) => (
                             <TableRow key={banner._id}>
-                              
+                                <TableCell>{banner.propertyName}</TableCell>
+                                <TableCell>{banner.propertyType}</TableCell>
+                                <TableCell>{banner.propertySubDestination}</TableCell>
+                                <TableCell>{banner.price}</TableCell>
                                 <TableCell>
                                     <TooltipProvider>
                                         <Tooltip>
@@ -285,9 +310,8 @@ const FeaturedOffer = () => {
                                         </Tooltip>
                                     </TooltipProvider>
                                 </TableCell>
-                                <TableCell>{banner.order}</TableCell>
                                 <TableCell>
-                                    <Image src={banner.image.url} alt="Featured Offer Image" width={100} height={50} className="rounded-lg" />
+                                    <Image src={banner.image.url} alt="Featured Offer Image" width={100} height={100} className="rounded-md" />
                                 </TableCell>
                                 <TableCell>
                                     <Button variant="outline" size="icon" onClick={() => handleEdit(banner)} className="mr-2 "><PencilIcon /></Button>
@@ -297,7 +321,7 @@ const FeaturedOffer = () => {
                         ))
                     ) : (
                         <TableRow>
-                            <TableCell colSpan="5" className="text-center py-4">No banners found</TableCell>
+                            <TableCell colSpan="8" className="text-center py-4">No banners found</TableCell>
                         </TableRow>
                     )}
                 </TableBody>
