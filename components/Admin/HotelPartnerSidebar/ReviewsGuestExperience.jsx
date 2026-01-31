@@ -286,7 +286,7 @@ const ReviewsGuestExperience = ({ propertyData }) => {
             {/* Header */}
             <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-6 rounded-lg shadow-lg">
                 <h1 className="text-3xl font-bold text-white">Reviews & Guest Experience</h1>
-                <p className="text-purple-100 mt-2">Manage guest reviews and improve your property ranking.</p>
+                <p className="text-white font-semibold mt-2">Manage guest reviews and improve your property ranking.</p>
             </div>
 
             {/* Main Content - Form & List */}

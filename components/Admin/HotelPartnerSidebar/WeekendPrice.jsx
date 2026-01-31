@@ -229,7 +229,7 @@ const WeekendPrice = ({ propertyData }) => {
             {/* Header */}
             <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-6 rounded-lg shadow-lg">
                 <h1 className="text-3xl font-bold text-white">Weekend Price Update</h1>
-                <p className="text-purple-100 mt-2">Set special pricing for weekends (Friday, Saturday, Sunday)</p>
+                <p className="text-white font-semibold mt-2">Set special pricing for weekends (Friday, Saturday, Sunday)</p>
             </div>
 
             {/* Date and Room Selection */}

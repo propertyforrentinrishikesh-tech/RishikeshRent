@@ -296,7 +296,7 @@ const Photos = ({ propertyData, onDataUpdate }) => {
             <div className="max-w-7xl mx-auto">
                 <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-6 rounded-lg shadow-lg">
                     <h1 className="text-3xl font-bold text-white">Photo Management</h1>
-                    <p className="text-white mt-2">Upload and manage photos for your property</p>
+                    <p className="text-white font-semibold mt-2">Upload and manage photos for your property</p>
                 </div>
                 <div className="flex items-center justify-end my-5">
                     <Button

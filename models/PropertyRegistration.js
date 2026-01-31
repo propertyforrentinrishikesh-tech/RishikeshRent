@@ -178,6 +178,14 @@ const PropertyRegistrationSchema = new mongoose.Schema({
     bankAddress: String,
     cancelledCheque: { url: String, key: String },
 
+    // Secondary Bank Information
+    secondaryAccountNumber: String,
+    secondaryBankName: String,
+    secondaryAccountHolderName: String,
+    secondaryIfscCode: String,
+    secondaryBankAddress: String,
+    secondaryCancelledCheque: { url: String, key: String },
+
     partnerUsername: { type: String },
     partnerPassword: { type: String },
     partnerPasswordPlain: { type: String },

@@ -202,7 +202,7 @@ const RatePlans = ({ propertyData }) => {
             {/* Header */}
             <div className="bg-gradient-to-r from-teal-600 to-cyan-600 p-6 rounded-lg shadow-lg">
                 <h1 className="text-3xl font-bold text-white">Rate Plans Management</h1>
-                <p className="text-teal-100 mt-2">Create and manage promotional packages for your property</p>
+                <p className="text-white font-semibold mt-2">Create and manage promotional packages for your property</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -213,7 +213,7 @@ const RatePlans = ({ propertyData }) => {
                             <h2 className="text-xl font-bold text-white">
                                 {editingPlan ? 'Edit Plan / Package' : 'Create Plan / Package'}
                             </h2>
-                            <p className="text-sm text-teal-100">
+                            <p className="text-sm text-white font-semibold">
                                 Define promotional packages with specific meal plans and duration
                             </p>
                         </div>

@@ -212,7 +212,7 @@ const SpecialOfferPrice = ({ propertyData }) => {
             {/* Header */}
             <div className="bg-gradient-to-r from-orange-600 to-amber-600 p-6 rounded-lg shadow-lg">
                 <h1 className="text-3xl font-bold text-white">Special Offer Price Update</h1>
-                <p className="text-orange-100 mt-2">Create promotional pricing for special occasions and events</p>
+                <p className="text-white font-semibold mt-2">Create promotional pricing for special occasions and events</p>
             </div>
 
             {/* Date and Room Selection */}

@@ -204,7 +204,7 @@ const BulkPriceUpdate = ({ propertyData }) => {
             {/* Header */}
             <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 rounded-lg shadow-lg">
                 <h1 className="text-3xl font-bold text-white">Date Range Bulk Price Update</h1>
-                <p className="text-blue-100 mt-2">Setting your base rates for entire upcoming year</p>
+                <p className="text-white font-semibold mt-2">Setting your base rates for entire upcoming year</p>
             </div>
 
             {/* Date and Room Selection */}

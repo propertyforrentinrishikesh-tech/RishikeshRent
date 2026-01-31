@@ -328,9 +328,9 @@ const HotelPartnerUpdates = () => {
             case 'review-management':
                 return <ReviewManagement propertyData={propertyData} />
             case 'contact-management':
-                return <PropertyLocation propertyData={propertyData} />
+                return <PropertyLocation propertyData={propertyData} onDataUpdate={refreshPropertyData}/>
             case 'legal-document':
-                return <BankInformation propertyData={propertyData} />
+                return <BankInformation propertyData={propertyData} onDataUpdate={refreshPropertyData} />
             case 'financial-info':
                 return <PropertyInformation propertyData={propertyData} />
             case 'auto-closed':

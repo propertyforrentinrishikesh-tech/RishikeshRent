@@ -350,7 +350,7 @@ const PlanPriceUpdate = ({ propertyData }) => {
             {/* Header */}
             <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 rounded-lg shadow-lg">
                 <h1 className="text-3xl font-bold text-white">Plan Package Creator</h1>
-                <p className="text-indigo-100 mt-2">Create promotional packages with images and descriptions</p>
+                <p className="text-white font-semibold mt-2">Create promotional packages with images and descriptions</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
