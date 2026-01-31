@@ -332,7 +332,7 @@ const HotelPartnerUpdates = () => {
             case 'legal-document':
                 return <BankInformation propertyData={propertyData} onDataUpdate={refreshPropertyData} />
             case 'financial-info':
-                return <PropertyInformation propertyData={propertyData} />
+                return <PropertyInformation propertyData={propertyData} onDataUpdate={refreshPropertyData} />
             case 'auto-closed':
                 return <NonPerformingAccount propertyData={propertyData} />
             case 'closed-payment':

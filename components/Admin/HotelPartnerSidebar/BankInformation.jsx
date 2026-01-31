@@ -10,7 +10,7 @@ import { CreditCard, Building2, User, MapPin, Upload, FileText, Loader2, Save, S
 import toast from 'react-hot-toast'
 import Image from 'next/image'
 
-const BankInformation = ({ propertyData }) => {
+const BankInformation = ({ propertyData, onDataUpdate }) => {
     const { register, handleSubmit, setValue, formState: { errors } } = useForm({
         defaultValues: {
             accountNumber: '',
@@ -101,6 +101,12 @@ const BankInformation = ({ propertyData }) => {
             return
         }
 
+        // validation: create a check to prevent same account number
+        if (data.accountNumber && data.secondaryAccountNumber && data.accountNumber === data.secondaryAccountNumber) {
+            toast.error('Primary and Secondary Account Numbers cannot be the same.')
+            return
+        }
+
         setSubmitting(true)
         try {
             const payload = {
@@ -121,6 +127,7 @@ const BankInformation = ({ propertyData }) => {
 
             if (result.success) {
                 toast.success('Bank details updated successfully')
+                if(onDataUpdate) onDataUpdate()
             } else {
                 toast.error(result.message || 'Failed to update details')
             }

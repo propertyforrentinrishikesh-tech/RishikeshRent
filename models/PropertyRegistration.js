@@ -170,6 +170,9 @@ const PropertyRegistrationSchema = new mongoose.Schema({
     propertyPanDocument: { url: String, key: String },
     gstNumber: String,
     gstDocument: { url: String, key: String },
+    RegistrationDocument: { url: String, key: String },
+    hotelRegistrationDocument: { url: String, key: String },
+    otherDocument: { url: String, key: String },
 
     accountNumber: String,
     bankName: String,
