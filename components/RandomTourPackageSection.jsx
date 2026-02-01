@@ -179,6 +179,14 @@ const RandomTourPackageSection = () => {
     return new Intl.NumberFormat("en-IN").format(num);
   };
 
+    const slugify = (text) =>
+        text
+            ?.toString()
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, '-')   // spaces → -
+            .replace(/[^\w-]+/g, '') // remove special chars
+            .replace(/--+/g, '-');   // remove double -
 
   return (
     <section className="bg-[#fcf7f1] md:mt-19 w-full overflow-hidden max-w-screen overflow-x-hidden">
@@ -334,7 +342,7 @@ const RandomTourPackageSection = () => {
                         <div className="flex items-center gap-2 justify-between w-full">
 
                           <p className="text-black text-md font-semibold">{item?.locationType}</p>
-                          <Link href={`/property/${item.propertyNameSlug}`} className="text-md font-semibold px-4 py-1 hover:bg-gray-800 hover:text-white bg-black rounded-full text-white">View Details </Link>
+                          <Link href={`/properties/${slugify(item.propertyName)}/${slugify(item.propertyNameSlug)}`} className="text-md font-semibold px-4 py-1 hover:bg-gray-800 hover:text-white bg-black rounded-full text-white">View Details </Link>
                         </div>
                       </div>
                     </div>

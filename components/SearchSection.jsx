@@ -1,5 +1,6 @@
 "use client"
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ const SearchSection = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [checkInDate, setCheckInDate] = useState('');
   const [guestCount, setGuestCount] = useState(1);
+  const router = useRouter();
 
   // Reusable Number Input Component
   const NumberInput = ({ value, onChange, min = 1, max = 10, className = '' }) => {
@@ -155,6 +157,14 @@ const SearchSection = () => {
 
     fetchData();
   }, []);
+  const slugify = (text) =>
+    text
+      ?.toString()
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, '-')   // spaces → -
+      .replace(/[^\w-]+/g, '') // remove special chars
+      .replace(/--+/g, '-');   // remove double -
 
   // Handle search form submission
   const handleSearch = async (e) => {
@@ -162,21 +172,28 @@ const SearchSection = () => {
     setIsLoading(true);
 
     try {
-      // Build query parameters
       const params = new URLSearchParams();
-      
-      // Add only non-empty values to the query params
-      if (location) params.append('location', location);
+
+      // Filters (query params)
       if (propertyFor) params.append('propertyFor', propertyFor);
-      if (propertyType) params.append('propertyType', propertyType);
+      if (propertyType) params.append('propertyType', slugify(propertyType));
+
       if (checkInDate) {
-        const formattedDate = new Date(checkInDate).toISOString().split('T')[0];
+        const formattedDate = new Date(checkInDate)
+          .toISOString()
+          .split('T')[0];
         params.append('checkInDate', formattedDate);
       }
-      if (guestCount && guestCount > 1) params.append('guests', guestCount);
 
-      // Always use window.location for navigation to avoid hook issues
-      window.location.href = `/property?${params.toString()}`;
+      if (guestCount && guestCount > 1) {
+        params.append('guests', guestCount);
+      }
+
+      // Route param (city)
+      const citySlug = location ? slugify(location) : 'all';
+
+      // Client-side navigation (BEST)
+      router.push(`/properties/${citySlug}?${params.toString()}`);
 
     } catch (error) {
       console.error('Search error:', error);
@@ -185,6 +202,7 @@ const SearchSection = () => {
       setIsLoading(false);
     }
   };
+
 
   // Handle input changes to update state
   const handleInputChange = (e) => {
@@ -486,10 +504,10 @@ const SearchSection = () => {
 
                 {/* Check-in Date */}
                 <div className="w-full">
-                  <Input 
-                    type="date" 
+                  <Input
+                    type="date"
                     name="checkInDate"
-                    value={checkInDate} 
+                    value={checkInDate}
                     onChange={handleInputChange}
                     min={new Date().toISOString().split('T')[0]}
                   />
