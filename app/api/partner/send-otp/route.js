@@ -42,13 +42,14 @@ export async function POST(request) {
 
         // Check if partner already exists with this email
         const existingPartner = await PartnerUser.findOne({
-            email: email.toLowerCase().trim()
+            email: email.toLowerCase().trim(),
+            contactNumber: contactNumber.trim()
         });
 
         if (existingPartner) {
             return NextResponse.json(
                 {
-                    message: 'A partner account with this email already exists. Please login instead.',
+                    message: 'A partner account with this email and contact number already exists. Please login instead.',
                     alreadyExists: true
                 },
                 { status: 409 }
@@ -57,7 +58,8 @@ export async function POST(request) {
 
         // Check if OTP already sent (in TempPartner)
         const existingTempPartner = await TempPartner.findOne({
-            email: email.toLowerCase().trim()
+            email: email.toLowerCase().trim(),
+            contactNumber: contactNumber.trim()
         });
 
         if (existingTempPartner) {

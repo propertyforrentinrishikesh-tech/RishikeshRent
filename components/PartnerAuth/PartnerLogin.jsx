@@ -25,7 +25,7 @@ export default function PartnerLogin() {
         setError('');
 
         try {
-            const response = await fetch('/api/auth/hotel-partner-login', {
+            const response = await fetch('/api/partner/property_updates', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -41,7 +41,7 @@ export default function PartnerLogin() {
 
             if (data.success) {
                 // Store property data in session/localStorage
-                localStorage.setItem('partnerProperty', JSON.stringify(data.property));
+                localStorage.setItem('hotelPartnerSession', JSON.stringify(data.property));
 
                 // Redirect to partner dashboard
                 router.push('/partner/hotel_property_updates');
@@ -64,8 +64,8 @@ export default function PartnerLogin() {
     };
 
     return (
-        <div className="min-h-screen flex w-[80%] mx-auto">
-            <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-5 ">
+        <div className="min-h-[50vh] flex w-[80%] mx-auto">
+            <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-2 ">
                 <div className="relative w-full max-w-2xl">
                     {/* Header Text */}
                     <div className="text-center">

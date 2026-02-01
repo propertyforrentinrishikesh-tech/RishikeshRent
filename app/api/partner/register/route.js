@@ -18,7 +18,8 @@ export async function POST(request) {
 
         // Check if partner already exists
         const existingPartner = await PartnerUser.findOne({
-            email: email.toLowerCase().trim()
+            email: email.toLowerCase().trim(),
+            contactNumber: contactNumber.trim()
         });
 
         if (existingPartner) {

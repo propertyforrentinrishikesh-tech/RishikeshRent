@@ -407,7 +407,7 @@ const HotelPartnerUpdates = () => {
 
                     <div className="flex min-h-[50vh]">
                         {/* Sidebar */}
-                        <div className="w-60 border-r border-gray-300 overflow-y-auto max-h-screen">
+                        <div className="w-64 border-r border-gray-300 overflow-y-auto max-h-screen">
                             {menuStructure.map((section) => (
                                 <div key={section.id} className="mb-1">
                                     {/* Main Section Header */}

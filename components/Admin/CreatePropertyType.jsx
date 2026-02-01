@@ -86,6 +86,30 @@ const CreatePropertyType = ({
     galiName: "",
     order: 1,
   });
+  // New state for fetched sub-locations
+  const [filteredSubLocations, setFilteredSubLocations] = useState([]);
+
+  // Fetch sub-locations when main location changes in Gali form
+  useEffect(() => {
+    const fetchSubLocations = async () => {
+      if (!formDataGali.locationType) {
+        setFilteredSubLocations([]);
+        return;
+      }
+      try {
+        const res = await fetch("/api/createSubLocation");
+        if (res.ok) {
+          const data = await res.json();
+          const filtered = data.filter(item => item.locationType === formDataGali.locationType);
+          setFilteredSubLocations(filtered);
+        }
+      } catch (error) {
+        console.error("Failed to fetch sub locations", error);
+      }
+    };
+    fetchSubLocations();
+  }, [formDataGali.locationType]);
+
 
   // Set initial form data order based on props
   useEffect(() => {
@@ -148,6 +172,16 @@ const CreatePropertyType = ({
       return;
     }
     e.preventDefault();
+    const isDuplicate = properties.some(
+      (property) =>
+        property.propertyType.toLowerCase() ===
+        formData.propertyType.trim().toLowerCase() &&
+        (!editProperty || property._id !== editProperty), // Skip current item when editing
+    );
+    if (isDuplicate) {
+      toast.error("This property type already exists");
+      return;
+    }
     try {
       const method = editProperty ? "PATCH" : "POST";
       // Compose payload with coupon details
@@ -192,6 +226,17 @@ const CreatePropertyType = ({
       return;
     }
     e.preventDefault();
+    const isDuplicate = locations.some(
+      (location) =>
+        location.locationType.toLowerCase() ===
+        formDataLocation.locationType.trim().toLowerCase() &&
+        (!editLocation || location._id !== editLocation), // Skip current item when editing
+    );
+
+    if (isDuplicate) {
+      toast.error("This location already exists");
+      return;
+    }
     try {
       const method = editLocation ? "PATCH" : "POST";
       // Compose payload with coupon details
@@ -238,6 +283,19 @@ const CreatePropertyType = ({
       return;
     }
     e.preventDefault();
+    // Check for duplicates within the same Location
+    const isDuplicate = subLocations.some(
+      (subLocation) =>
+        subLocation.subLocationType.toLowerCase() ===
+        formDataSubLocation.subLocationType.trim().toLowerCase() &&
+        subLocation.locationType === formDataSubLocation.locationType &&
+        (!editSubLocation || subLocation._id !== editSubLocation)
+    );
+
+    if (isDuplicate) {
+      toast.error("This Sub Location already exists in the selected Main Location.");
+      return;
+    }
     try {
       const method = editSubLocation ? "PATCH" : "POST";
       // Compose payload with coupon details
@@ -284,6 +342,19 @@ const CreatePropertyType = ({
       return;
     }
     e.preventDefault();
+    // Check for duplicates within the same Location AND Sub Location
+    const isDuplicate = galis.some(
+      (gali) =>
+        gali.galiName.toLowerCase() === formDataGali.galiName.trim().toLowerCase() &&
+        gali.locationType === formDataGali.locationType &&
+        gali.subLocationType === formDataGali.subLocationType &&
+        (!editGali || gali._id !== editGali)
+    );
+
+    if (isDuplicate) {
+      toast.error("This Gali already exists in the selected Location and Sub Location.");
+      return;
+    }
     try {
       const method = editGali ? "PATCH" : "POST";
       // Compose payload with coupon details
@@ -859,39 +930,45 @@ const CreatePropertyType = ({
         </TableHeader>
         <TableBody>
           {subLocations.length > 0 ? (
-            subLocations.map((subLocation, index) => (
-              <TableRow key={subLocation._id} className="border border-black">
-                <TableCell className="border border-black text-center">
-                  {index + 1}
-                </TableCell>
-                <TableCell className="border border-black text-center">
-                  {subLocation.locationType}
-                </TableCell>
-                <TableCell className="border border-black text-center">
-                  {subLocation.subLocationType}
-                </TableCell>
-                <TableCell className="border border-black text-center">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleEditForSubLocation(subLocation)}
-                    className="mr-2 "
-                  >
-                    <PencilIcon />
-                  </Button>
-                  <Button
-                    size="icon"
-                    onClick={() => {
-                      setShowDeleteModalSubLocation(true);
-                      setSubLocationToDelete(subLocation._id);
-                    }}
-                    variant="destructive"
-                  >
-                    <Trash2Icon />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))
+            // Sort by Location Type, then Sub Location Type
+            [...subLocations]
+              .sort((a, b) =>
+                a.locationType.localeCompare(b.locationType) ||
+                a.subLocationType.localeCompare(b.subLocationType)
+              )
+              .map((subLocation, index) => (
+                <TableRow key={subLocation._id} className="border border-black">
+                  <TableCell className="border border-black text-center">
+                    {index + 1}
+                  </TableCell>
+                  <TableCell className="border border-black text-center">
+                    {subLocation.locationType}
+                  </TableCell>
+                  <TableCell className="border border-black text-center">
+                    {subLocation.subLocationType}
+                  </TableCell>
+                  <TableCell className="border border-black text-center">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => handleEditForSubLocation(subLocation)}
+                      className="mr-2 "
+                    >
+                      <PencilIcon />
+                    </Button>
+                    <Button
+                      size="icon"
+                      onClick={() => {
+                        setShowDeleteModalSubLocation(true);
+                        setSubLocationToDelete(subLocation._id);
+                      }}
+                      variant="destructive"
+                    >
+                      <Trash2Icon />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
           ) : (
             <TableRow className="border border-black">
               <TableCell colSpan="5" className="text-center py-4">
@@ -965,16 +1042,26 @@ const CreatePropertyType = ({
                 subLocationType: value,
               }))
             }
+            disabled={!formDataGali.locationType}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select Sub Location type" />
             </SelectTrigger>
             <SelectContent>
-              {subLocationType.filter(subLoc => subLoc.subLocationType && subLoc.subLocationType.trim() !== '').map((subLocationType) => (
-                <SelectItem key={subLocationType._id} value={subLocationType.subLocationType}>
-                  {subLocationType.subLocationType}
-                </SelectItem>
-              ))}
+              {filteredSubLocations
+                .filter(
+                  (subLoc) =>
+                    subLoc.subLocationType &&
+                    subLoc.subLocationType.trim() !== ""
+                )
+                .map((subLoc) => (
+                  <SelectItem
+                    key={subLoc._id}
+                    value={subLoc.subLocationType}
+                  >
+                    {subLoc.subLocationType}
+                  </SelectItem>
+                ))}
             </SelectContent>
           </Select>
         </div>
@@ -1044,42 +1131,49 @@ const CreatePropertyType = ({
         </TableHeader>
         <TableBody>
           {galis.length > 0 ? (
-            galis.map((gali, index) => (
-              <TableRow key={gali._id} className="border border-black">
-                <TableCell className="border border-black text-center">
-                  {index + 1}
-                </TableCell>
-                <TableCell className="border border-black text-center">
-                  {gali.locationType}
-                </TableCell>
-                <TableCell className="border border-black text-center">
-                  {gali.subLocationType}
-                </TableCell>
-                <TableCell className="border border-black text-center">
-                  {gali.galiName}
-                </TableCell>
-                <TableCell className="border border-black text-center">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleEditForGali(gali)}
-                    className="mr-2 "
-                  >
-                    <PencilIcon />
-                  </Button>
-                  <Button
-                    size="icon"
-                    onClick={() => {
-                      setShowDeleteModalForGali(true);
-                      setGaliToDelete(gali._id);
-                    }}
-                    variant="destructive"
-                  >
-                    <Trash2Icon />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))
+            // Sort by Location -> SubLocation -> GaliName
+            [...galis]
+              .sort((a, b) =>
+                a.locationType.localeCompare(b.locationType) ||
+                a.subLocationType.localeCompare(b.subLocationType) ||
+                a.galiName.localeCompare(b.galiName)
+              )
+              .map((gali, index) => (
+                <TableRow key={gali._id} className="border border-black">
+                  <TableCell className="border border-black text-center">
+                    {index + 1}
+                  </TableCell>
+                  <TableCell className="border border-black text-center">
+                    {gali.locationType}
+                  </TableCell>
+                  <TableCell className="border border-black text-center">
+                    {gali.subLocationType}
+                  </TableCell>
+                  <TableCell className="border border-black text-center">
+                    {gali.galiName}
+                  </TableCell>
+                  <TableCell className="border border-black text-center">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => handleEditForGali(gali)}
+                      className="mr-2 "
+                    >
+                      <PencilIcon />
+                    </Button>
+                    <Button
+                      size="icon"
+                      onClick={() => {
+                        setShowDeleteModalForGali(true);
+                        setGaliToDelete(gali._id);
+                      }}
+                      variant="destructive"
+                    >
+                      <Trash2Icon />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
           ) : (
             <TableRow className="border border-black">
               <TableCell colSpan="5" className="text-center py-4">

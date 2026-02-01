@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { getToken, decode } from "next-auth/jwt";
 
 export async function middleware(req) {
   const token = await getToken({
@@ -9,7 +9,49 @@ export async function middleware(req) {
   });
 
   const { pathname } = req.nextUrl;
-  
+
+  // Protect Partner Property Registration form
+  if (pathname.startsWith("/partner/property_registration")) {
+    const registrationToken = req.cookies.get('partner_registration_token')?.value;
+
+    if (!registrationToken) {
+      // No token found, redirect to register/login
+      return NextResponse.redirect(new URL("/partner/register", req.url));
+    }
+
+    try {
+      // Verify the token is valid
+      await decode({
+        token: registrationToken,
+        secret: process.env.NEXTAUTH_SECRET,
+      });
+      // If decode succeeds, allow access
+      return NextResponse.next();
+    } catch (error) {
+      // Token invalid/expired
+      return NextResponse.redirect(new URL("/partner/register", req.url));
+    }
+  }
+
+  // Protect Partner Hotel Property Updates page
+  if (pathname.startsWith("/partner/hotel_property_updates")) {
+    const partnerToken = req.cookies.get('partner_token')?.value;
+
+    if (!partnerToken) {
+      return NextResponse.redirect(new URL("/partner/login", req.url));
+    }
+
+    try {
+      await decode({
+        token: partnerToken,
+        secret: process.env.NEXTAUTH_SECRET,
+      });
+      return NextResponse.next();
+    } catch (error) {
+      return NextResponse.redirect(new URL("/partner/login", req.url));
+    }
+  }
+
   // Allow access to create-first-admin without authentication
   if (pathname === '/api/admin/create-first-admin') {
     return NextResponse.next();
@@ -61,6 +103,8 @@ export async function middleware(req) {
 // Apply middleware to protect admin and user routes
 export const config = {
   matcher: [
+    "/partner/property_registration",
+    "/partner/hotel_property_updates",
     "/admin/:path*",
     "/api/admin/:path*",
     "/dashboard",

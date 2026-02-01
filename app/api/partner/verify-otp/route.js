@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/connectDB';
 import TempPartner from '@/models/TempPartner';
+import { encode } from 'next-auth/jwt';
 
 export async function POST(request) {
     try {
@@ -58,7 +59,18 @@ export async function POST(request) {
                 // Delete the temporary partner after successful registration
                 await TempPartner.deleteOne({ email: emailKey });
 
-                return NextResponse.json(
+                // Create a JWT token for the registration session
+                const secret = process.env.NEXTAUTH_SECRET;
+                const token = await encode({
+                    token: {
+                        email: emailKey,
+                        propertyName: tempPartner.propertyName,
+                        isRegistrationTemp: true
+                    },
+                    secret,
+                });
+
+                const response = NextResponse.json(
                     {
                         success: true,
                         message: registerData.message,
@@ -66,6 +78,17 @@ export async function POST(request) {
                     },
                     { status: 200 }
                 );
+
+                // Set HttpOnly Cookie
+                response.cookies.set('partner_registration_token', token, {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production',
+                    sameSite: 'strict',
+                    maxAge: 60 * 60 * 24, // 24 hours
+                    path: '/',
+                });
+
+                return response;
             } else {
                 return NextResponse.json(
                     {

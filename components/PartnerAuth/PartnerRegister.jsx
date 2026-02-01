@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 
 export default function PartnerRegister() {
     const router = useRouter();
-    const [step, setStep] = useState(1); // 1: Initial form, 2: OTP verification
+    const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({
         propertyName: '',
         contactNumber: '',
@@ -134,9 +134,9 @@ export default function PartnerRegister() {
     };
 
     return (
-        <div className="min-h-[80vh] flex w-[80%] mx-auto">
+        <div className="min-h-[50vh] flex w-[80%] mx-auto">
             {/* Left Side - Illustration */}
-            <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-5 ">
+            <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-2 ">
                 <div className="relative w-full max-w-2xl">
                     {/* Header Text */}
                     <div className="text-center">
@@ -218,7 +218,7 @@ export default function PartnerRegister() {
                         )}
 
                         {step === 1 ? (
-                            <form onSubmit={handleGetOTP} className="space-y-5">
+                            <form onSubmit={handleGetOTP} className="space-y-2">
                                 {/* Property Name */}
                                 <div>
                                     <label htmlFor="propertyName" className="block text-sm font-bold text-gray-900 mb-2">
@@ -332,7 +332,7 @@ export default function PartnerRegister() {
                         )}
 
                         {/* Already have account */}
-                        <div className="text-center pt-4 border-t border-gray-200">
+                        <div className="text-center pt-2 border-t border-gray-200">
                             <p className="text-gray-600">
                                 Already have an account?{' '}
                                 <Link href="/partner/login" className="text-blue-600 hover:text-blue-700 font-bold">
