@@ -45,59 +45,59 @@ export default function Chat({
     // Optionally, add logic to mark messages as read for admin/user if needed for e-commerce chat
 
 
-    const fetchMessages = useCallback(async () => {
-        try {
-            // Fetch messages for user-admin/product chat
-            const res = await fetch(`/api/getMessages?userId=${userId}`)
-            const data = await res.json()
+    // const fetchMessages = useCallback(async () => {
+    //     try {
+    //         // Fetch messages for user-admin/product chat
+    //         const res = await fetch(`/api/getMessages?userId=${userId}`)
+    //         const data = await res.json()
 
-            if (data.messages && Array.isArray(data.messages)) {
-                setMessages((prev) => (JSON.stringify(prev) !== JSON.stringify(data.messages) ? data.messages : prev))
-                setAdminName(null);
-                // Find the most recent admin message
-                const adminMsg = [...data.messages].reverse().find(msg => msg.adminName);
-                if (adminMsg?.adminName) {
-                    setAdminName(adminMsg.adminName);
-                }
-            } else {
-                setMessages([])
-                setAdminName(null); // Reset when no messages
-            }
-        } catch (error) {
-            // console.error("Error fetching messages:", error)
-            setAdminName(null); // Reset on error
-        }
-    }, [userId])
+    //         if (data.messages && Array.isArray(data.messages)) {
+    //             setMessages((prev) => (JSON.stringify(prev) !== JSON.stringify(data.messages) ? data.messages : prev))
+    //             setAdminName(null);
+    //             // Find the most recent admin message
+    //             const adminMsg = [...data.messages].reverse().find(msg => msg.adminName);
+    //             if (adminMsg?.adminName) {
+    //                 setAdminName(adminMsg.adminName);
+    //             }
+    //         } else {
+    //             setMessages([])
+    //             setAdminName(null); // Reset when no messages
+    //         }
+    //     } catch (error) {
+    //         // console.error("Error fetching messages:", error)
+    //         setAdminName(null); // Reset on error
+    //     }
+    // }, [userId])
 
     // Removed enquiry and booking details logic for e-commerce chat
 
     // And update your useEffect to call it when type is "booking"
-    useEffect(() => {
+    // useEffect(() => {
         
-        // Only merge chatbot_history once per session
-        let mergedBotHistory = false;
-        const botHistory = localStorage.getItem("chatbot_history");
-        let parsedBotHistory = [];
-        if (botHistory) {
-            parsedBotHistory = JSON.parse(botHistory).map(msg => ({
-                ...msg,
-                from: msg.from === "bot" ? "Bot" : "You"
-            }));
-        }
-        fetchMessages();
-        setMessages(prev => {
-            const hasBotHistory = prev.some(msg => msg.from === "Bot");
-            if (!hasBotHistory && parsedBotHistory.length > 0 && !mergedBotHistory) {
-                mergedBotHistory = true;
-                // Clear chatbot_history so it doesn't keep merging
-                localStorage.removeItem("chatbot_history");
-                return [...parsedBotHistory, ...prev];
-            }
-            return prev;
-        });
-        const interval = setInterval(fetchMessages, 3000);
-        return () => { clearInterval(interval); setAdminName(null); }
-    }, [fetchMessages]);
+    //     // Only merge chatbot_history once per session
+    //     let mergedBotHistory = false;
+    //     const botHistory = localStorage.getItem("chatbot_history");
+    //     let parsedBotHistory = [];
+    //     if (botHistory) {
+    //         parsedBotHistory = JSON.parse(botHistory).map(msg => ({
+    //             ...msg,
+    //             from: msg.from === "bot" ? "Bot" : "You"
+    //         }));
+    //     }
+    //     fetchMessages();
+    //     setMessages(prev => {
+    //         const hasBotHistory = prev.some(msg => msg.from === "Bot");
+    //         if (!hasBotHistory && parsedBotHistory.length > 0 && !mergedBotHistory) {
+    //             mergedBotHistory = true;
+    //             // Clear chatbot_history so it doesn't keep merging
+    //             localStorage.removeItem("chatbot_history");
+    //             return [...parsedBotHistory, ...prev];
+    //         }
+    //         return prev;
+    //     });
+    //     const interval = setInterval(fetchMessages, 3000);
+    //     return () => { clearInterval(interval); setAdminName(null); }
+    // }, [fetchMessages]);
 
     const fileInputRef = useRef();
     const [attachmentUploading, setAttachmentUploading] = useState(false);
@@ -183,7 +183,7 @@ export default function Chat({
 
         if (res && res.ok) {
             // Immediately fetch messages after successful send to sync UI
-            await fetchMessages();
+            // await fetchMessages();
             const data = await res.json();
 
             // Update message status to delivered

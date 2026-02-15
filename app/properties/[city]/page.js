@@ -6,9 +6,13 @@ async function fetchProperties(searchParams = {}) {
         const params = new URLSearchParams();
 
         // Add search parameters to the query
-        const { location, propertyFor, propertyType, checkInDate, guests, q } = searchParams;
+        const { location, propertyFor, propertyType, checkInDate, guests, q, page = 1 } = searchParams;
 
         // Assuming the API handles these parameters correctly
+        params.append('fetchAll', 'true');
+        params.append('page', page);
+        params.append('limit', '15');
+
         if (q) params.append('q', q);
         if (location) params.append('location', location);
         if (propertyFor) params.append('propertyFor', propertyFor);
@@ -23,14 +27,18 @@ async function fetchProperties(searchParams = {}) {
 
         if (!response.ok) {
             console.warn("Failed to fetch properties in [city] page");
-            return [];
+            return { properties: [], hasMore: false, total: 0 };
         }
 
         const data = await response.json();
-        return data.data?.properties || [];
+        return {
+            properties: data.data?.properties || [],
+            hasMore: data.data?.hasMore || false,
+            total: data.data?.total || 0
+        };
     } catch (error) {
         console.error("Error fetching properties:", error);
-        return [];
+        return { properties: [], hasMore: false, total: 0 };
     }
 }
 
@@ -47,7 +55,7 @@ export default async function PropertyCityPage({ params, searchParams }) {
         location: locationFilter
     };
 
-    const properties = await fetchProperties(queryParams);
+    const { properties, hasMore, total } = await fetchProperties(queryParams);
 
-    return <PropertyFilter properties={properties} />;
+    return <PropertyFilter initialProperties={properties} initialHasMore={hasMore} totalCount={total} searchParams={queryParams} />;
 }

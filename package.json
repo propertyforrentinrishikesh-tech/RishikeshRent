@@ -60,11 +60,11 @@
     "framer-motion": "^12.4.7",
     "html2canvas": "^1.4.1",
     "input-otp": "^1.4.2",
-    "jspdf": "^3.0.1",
-    "jspdf-autotable": "^5.0.2",
+    "jspdf": "^4.1.0",
+    "jspdf-autotable": "^5.0.7",
     "lucide-react": "^0.475.0",
     "mongoose": "^8.10.1",
-    "next": "15.1.9",
+    "next": "^16.1.6",
     "next-auth": "^4.24.11",
     "nextjs-toploader": "^3.7.15",
     "node-fetch": "^3.3.2",
@@ -74,6 +74,7 @@
     "react-dom": "^18.0.0",
     "react-hook-form": "^7.54.2",
     "react-hot-toast": "^2.5.2",
+    "react-intersection-observer": "^10.0.2",
     "react-markdown": "^10.0.0",
     "react-number-format": "^5.4.3",
     "react-qr-code": "^2.0.15",
@@ -83,8 +84,7 @@
     "remark-gfm": "^4.0.1",
     "sib-api-v3-sdk": "^8.5.0",
     "tailwind-merge": "^3.0.1",
-    "tailwindcss-animate": "^1.0.7",
-    "uploadthing": "^7.5.2"
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

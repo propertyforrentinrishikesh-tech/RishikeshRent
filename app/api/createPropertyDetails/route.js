@@ -82,19 +82,31 @@ export async function GET(request) {
     try {
         await connectDB();
         const { searchParams } = new URL(request.url);
-        const limit = searchParams.get('limit');
+        const page = parseInt(searchParams.get('page')) || 1;
+        const limit = parseInt(searchParams.get('limit')) || 15; // Default to 15 items per page
+        const skip = (page - 1) * limit;
 
-        let query = PropertyDetails.find({}).sort({ createdAt: -1 });
+        let query = PropertyDetails.find({}).sort({ createdAt: -1 }).skip(skip).limit(limit);
 
-        if (limit && !isNaN(limit)) {
-            query = query.limit(parseInt(limit));
-        }
+        // if (limit && !isNaN(limit)) {
+        //     query = query.limit(parseInt(limit));
+        // }
 
+        const total = await PropertyDetails.countDocuments({});
         const properties = await query.exec();
-        return NextResponse.json({ success: true, data: properties });
+
+        return NextResponse.json({
+            success: true,
+            data: properties,
+            total,
+            page,
+            totalPages: Math.ceil(total / limit),
+            hasMore: page * limit < total
+        });
     } catch (error) {
+        console.error('Error fetching properties:', error);
         return NextResponse.json(
-            { success: false, error: 'Failed to fetch properties' },
+            { success: false, error: 'Failed to fetch properties', details: error.message },
             { status: 500 }
         );
     }

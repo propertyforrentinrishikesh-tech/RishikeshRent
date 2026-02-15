@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
-import { CalendarClock, MapPin, Heart, Bookmark, ArrowRight, Globe, X,Star } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+import { CalendarClock, MapPin, Heart, Bookmark, ArrowRight, Globe, X, Star } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Carousel,
@@ -11,13 +11,14 @@ import {
 } from "@/components/ui/carousel";
 import { Button } from "./ui/button";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Skeleton } from "./ui/skeleton";
 import Autoplay from "embla-carousel-autoplay";
 import QuickViewProductCard from "./QuickViewProductCard";
 import { useCart } from "../context/CartContext";
 import { toast } from "react-hot-toast"
-
+import { useInView } from 'react-intersection-observer';
 
 
 function slugify(text) {
@@ -31,6 +32,7 @@ function slugify(text) {
 }
 
 const RandomTourPackageSection = () => {
+  const router = useRouter();
   // ...existing state and hooks
   const handleAddToCart = (item) => {
     const price = item?.quantity?.variants[0].price;
@@ -81,7 +83,13 @@ const RandomTourPackageSection = () => {
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [loading1, setLoading1] = useState(true);
   const [bannerSection3rd, setBannerSection3rd] = useState([]);
-
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const { ref, inView } = useInView({
+    threshold: 0.1,
+    triggerOnce: false
+  });
 
   // Prevent background scroll when Quick View is open
   useEffect(() => {
@@ -117,25 +125,43 @@ const RandomTourPackageSection = () => {
     }
   };
   // Fetch Prouducts
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
+    if (loading || !hasMore) return;
+
+    setLoading(true);
     try {
-      const res = await fetch("/api/createPropertyDetails");
+      const res = await fetch(`/api/createPropertyDetails?page=${page}&limit=15`);
       const data = await res.json();
       // console.log("Product API response:", data);
+      const products = Array.isArray(data?.data)
+        ? data.data
+        : Array.isArray(data)
+          ? data
+          : [];
 
-      if (data.data && data.data.length > 0) {
-        setProducts(data.data);
-      } else {
-        setProducts([]);
+      if (products.length === 0) {
+        setHasMore(false);
+        return;
       }
-    } catch (error) {
-      // console.error("Error fetching products:", error);
-      setProducts([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
+      setProducts(prev => {
+        // Ensure we always have an array to spread
+        const currentProducts = Array.isArray(prev) ? prev : [];
+        return [...currentProducts, ...products];
+      });
+      setPage(prev => prev + 1);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      setHasMore(false);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, loading, hasMore]);
+  useEffect(() => {
+    if (inView && hasMore) {
+      fetchProducts();
+    }
+  }, [inView, hasMore, fetchProducts]);
   const fetchBannerSection3rd = async () => {
     try {
       const response = await fetch('/api/bannerSection3rd');
@@ -179,14 +205,14 @@ const RandomTourPackageSection = () => {
     return new Intl.NumberFormat("en-IN").format(num);
   };
 
-    const slugify = (text) =>
-        text
-            ?.toString()
-            .trim()
-            .toLowerCase()
-            .replace(/\s+/g, '-')   // spaces → -
-            .replace(/[^\w-]+/g, '') // remove special chars
-            .replace(/--+/g, '-');   // remove double -
+  const slugify = (text) =>
+    text
+      ?.toString()
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, '-')   // spaces → -
+      .replace(/[^\w-]+/g, '') // remove special chars
+      .replace(/--+/g, '-');   // remove double -
 
   return (
     <section className="bg-[#fcf7f1] md:mt-19 w-full overflow-hidden max-w-screen overflow-x-hidden">
@@ -211,6 +237,7 @@ const RandomTourPackageSection = () => {
                   <CarouselItem
                     key={index}
                     className="md:basis-1/2 lg:basis-1/3 xl:basis-1/4 min-w-0 snap-start"
+                    ref={index === products.length - 3 ? ref : null}
                   >
                     <div className="flex flex-col md:w-[290px]">
                       {/* Image Section */}
@@ -235,82 +262,6 @@ const RandomTourPackageSection = () => {
                             </div>
                           );
                         })()}
-
-                        {/* Heart/Wishlist & Cart Buttons - Top Right */}
-                        {/* <div className="absolute top-6 right-6 z-10 flex flex-col gap-4 items-end">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className={`rounded-full transition-colors duration-300 h-12 w-12 shadow-none ${wishlist.some(i => i.id === item._id) ? "bg-pink-600 hover:bg-pink-700" : "bg-white hover:bg-[#b3a7a3]"}`}
-                            onClick={() => {
-                              if (wishlist.some(i => i.id === item._id)) {
-                                removeFromWishlist(item._id);
-                                toast.success("Removed from wishlist!");
-                              } else {
-                                const price = item?.quantity?.variants[0].price;
-                                const coupon = item.coupon || item.coupons?.coupon;
-                                let discountedPrice = price;
-                                let couponApplied = false;
-                                let couponCode = "";
-
-                                if (coupon && typeof coupon.percent === 'number' && coupon.percent > 0) {
-                                  discountedPrice = price - (price * coupon.percent) / 100;
-                                  couponApplied = true;
-                                  couponCode = coupon.couponCode;
-                                } else if (coupon && typeof coupon.amount === 'number' && coupon.amount > 0) {
-                                  discountedPrice = price - coupon.amount;
-                                  couponApplied = true;
-                                  couponCode = coupon.couponCode;
-                                }
-                                addToWishlist({
-                                  id: item._id,
-                                  name: item.title,
-                                  image: item?.gallery?.mainImage || "/placeholder.jpeg",
-                                  price: Math.round(discountedPrice),
-                                  size: item?.quantity?.variants[0].size,
-                                  weight: item?.quantity?.variants[0].weight,
-                                  color:item?.quantity?.variants[0].color,
-                                  originalPrice: price,
-                                  qty: 1,
-                                  couponApplied,
-                                  couponCode: couponApplied ? couponCode : undefined,
-                                  productCode: item.code || item.productCode || '',
-                                  discountPercent: coupon && typeof coupon.percent === 'number' ? coupon.percent : undefined,
-                                  discountAmount: coupon && typeof coupon.amount === 'number' ? coupon.amount : undefined,
-                                  cgst: (item.taxes && item.taxes.cgst) || item.cgst || (item.tax && item.tax.cgst) || 0,
-                                  sgst: (item.taxes && item.taxes.sgst) || item.sgst || (item.tax && item.tax.sgst) || 0,
-                                  totalQuantity: item?.quantity?.variants[0]?.qty || 0,
-                                });
-                                toast.success("Added to wishlist!");
-                              }
-                            }}
-                          >
-                            <Heart size={28} className={wishlist.some(i => i.id === item._id) ? "text-white" : "text-pink-600"} />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="rounded-full bg-[#b3a7a3]/80 hover:bg-[#b3a7a3] transition-colors duration-300 h-12 w-12 shadow-none"
-                            onClick={() => handleAddToCart(item)}
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="28"
-                              height="28"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="white"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              className="text-white"
-                            >
-                              <circle cx="8" cy="21" r="1" />
-                              <circle cx="19" cy="21" r="1" />
-                              <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
-                            </svg>
-                          </Button>
-                        </div> */}
                         <Image
                           src={item?.mainImage?.url || "/placeholder.jpeg"}
                           alt={item?.title || "Tour package image"}
@@ -371,116 +322,118 @@ const RandomTourPackageSection = () => {
               Hospitality Reimagined, Modern Amenities Refined. Hot & Trending Venues
             </div>
           </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {[
+              {
+                id: 1,
+                title: "Long Beach",
+                rating: 4.8,
+                desc: "Cicero famously orated against his political opponent Lucius Sergius Catilina.",
+                priceMin: 492,
+                priceMax: 799,
+                rooms: 120,
+                image: "https://images.unsplash.com/photo-1540541338287-41700207dee6?q=80&w=1000&auto=format&fit=crop"
+              },
+              {
+                id: 2,
+                title: "Jacksonville",
+                rating: 4.7,
+                desc: "Cicero famously orated against his political opponent Lucius Sergius Catilina.",
+                priceMin: 492,
+                priceMax: 799,
+                rooms: 78,
+                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
+              },
+              {
+                id: 3,
+                title: "Kansas City",
+                rating: 4.9,
+                desc: "Cicero famously orated against his political opponent Lucius Sergius Catilina.",
+                priceMin: 492,
+                priceMax: 799,
+                rooms: 65,
+                image: "https://images.unsplash.com/photo-1512918760383-edaebe36037c?q=80&w=1000&auto=format&fit=crop"
+              },
+              {
+                id: 4,
+                title: "Los Angeles",
+                rating: 4.6,
+                desc: "Cicero famously orated against his political opponent Lucius Sergius Catilina.",
+                priceMin: 492,
+                priceMax: 799,
+                rooms: 23,
+                image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop"
+              },
+              {
+                id: 5,
+                title: "Miami Beach",
+                rating: 4.8,
+                desc: "Cicero famously orated against his political opponent Lucius Sergius Catilina.",
+                priceMin: 550,
+                priceMax: 900,
+                rooms: 45,
+                image: "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?q=80&w=1000&auto=format&fit=crop"
+              }
+            ].map((item) => (
+              <div
+                key={item.id}
+                className="bg-white rounded-xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col h-full"
+              >
+                {/* Image */}
+                <div className="relative h-48 w-full overflow-hidden">
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                  />
+                </div>
 
-          <Carousel className="w-full select-none">
-            <CarouselContent className="-ml-4">
-              {[
-                {
-                  id: 1,
-                  title: "Long Beach",
-                  rating: 4.8,
-                  desc: "Cicero famously orated against his political opponent Lucius Sergius Catilina.",
-                  priceMin: 492,
-                  priceMax: 799,
-                  rooms: 120,
-                  image: "https://images.unsplash.com/photo-1540541338287-41700207dee6?q=80&w=1000&auto=format&fit=crop"
-                },
-                {
-                  id: 2,
-                  title: "Jacksonville",
-                  rating: 4.7,
-                  desc: "Cicero famously orated against his political opponent Lucius Sergius Catilina.",
-                  priceMin: 492,
-                  priceMax: 799,
-                  rooms: 78,
-                  image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
-                },
-                {
-                  id: 3,
-                  title: "Kansas City",
-                  rating: 4.9,
-                  desc: "Cicero famously orated against his political opponent Lucius Sergius Catilina.",
-                  priceMin: 492,
-                  priceMax: 799,
-                  rooms: 65,
-                  image: "https://images.unsplash.com/photo-1512918760383-edaebe36037c?q=80&w=1000&auto=format&fit=crop"
-                },
-                {
-                  id: 4,
-                  title: "Los Angeles",
-                  rating: 4.6,
-                  desc: "Cicero famously orated against his political opponent Lucius Sergius Catilina.",
-                  priceMin: 492,
-                  priceMax: 799,
-                  rooms: 23,
-                  image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop"
-                },
-                {
-                  id: 5,
-                  title: "Miami Beach",
-                  rating: 4.8,
-                  desc: "Cicero famously orated against his political opponent Lucius Sergius Catilina.",
-                  priceMin: 550,
-                  priceMax: 900,
-                  rooms: 45,
-                  image: "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?q=80&w=1000&auto=format&fit=crop"
-                }
+                {/* Content */}
+                <div className="p-5 flex flex-col flex-grow">
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className="text-lg font-bold">{item.title}</h3>
+                    <span className="text-sm font-bold">{item.rating}</span>
+                  </div>
 
-              ].map((item, idx) => (
-                <CarouselItem key={item.id} className="pl-4 md:basis-1/2 lg:basis-1/4">
-                  <div className="bg-white rounded-xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col h-full">
-                    {/* Image Area */}
-                    <div className="relative h-48 w-full overflow-hidden">
-                      <img
-                        src={item.image}
-                        alt={item.title}
-                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                      />
-                      <div className="absolute top-3 left-3 bg-black/50 p-1.5 rounded-lg backdrop-blur-sm">
-                        <Globe className="w-4 h-4 text-white" />
-                      </div>
-                    </div>
+                  <p className="text-gray-500 text-sm mb-6 line-clamp-2">
+                    {item.desc}
+                  </p>
 
-                    {/* Content Area */}
-                    <div className="p-5 flex flex-col flex-grow">
-                      <div className="flex justify-between items-center mb-2">
-                        <h3 className="text-lg font-bold text-gray-900">{item.title}</h3>
-                        <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                          <span className="text-sm font-bold text-gray-900">{item.rating}</span>
-                        </div>
-                      </div>
-
-                      <p className="text-gray-500 text-sm mb-6 line-clamp-2">
-                        {item.desc}
-                      </p>
-
-                      <div className="mt-auto">
-                        <div className="flex justify-between items-end mb-4 text-sm font-medium text-gray-600">
-                          <div>
-                            <span className="text-gray-400 mr-1">From</span>
-                            <span className="text-gray-900 font-bold text-base">${item.priceMin} - ${item.priceMax}</span>
-                          </div>
-                          <span className="text-xs text-gray-400">{item.rooms} Rooms</span>
-                        </div>
-
-                        <div className="flex gap-2">
-                          <Button className="flex-1 bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 font-bold text-sm py-2 rounded-lg border-none shadow-none">
-                            Request Book <ArrowRight className="w-4 h-4 ml-1" />
-                          </Button>
-                          <Button variant="outline" size="icon" className="bg-emerald-50 border-none text-emerald-500 hover:bg-emerald-100 hover:text-emerald-600 rounded-lg w-10 h-10 shrink-0">
-                            <Heart className="w-5 h-5 fill-current" />
-                          </Button>
-                        </div>
-                      </div>
+                  <div className="mt-auto">
+                    <div className="flex justify-between mb-4 text-sm">
+                      <span className="font-bold">${item.priceMin} - ${item.priceMax}</span>
+                      <span>{item.rooms} Rooms</span>
                     </div>
                   </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="hidden md:flex -left-4 w-10 h-10 border-none bg-white shadow-md text-gray-800" />
-            <CarouselNext className="hidden md:flex -right-4 w-10 h-10 border-none bg-white shadow-md text-gray-800" />
-          </Carousel>
+                </div>
+                <div className="flex gap-2 p-4">
+                  {/* View Details */}
+                  <Button
+                    variant="outline"
+                    className="flex-1 border-gray-200 text-gray-700 hover:bg-gray-100 text-sm font-semibold rounded-lg"
+                    onClick={() => router.push(`/hotels/rishikesh/${slugify(item.title)}`)}
+                  >
+                    View Details
+                  </Button>
+
+                  {/* Request Book */}
+                  <Button className="flex-1 bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 font-bold text-sm rounded-lg">
+                    Request Book <ArrowRight className="w-4 h-4 ml-1" />
+                  </Button>
+
+                  {/* Wishlist */}
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="bg-emerald-50 border-none text-emerald-500 hover:bg-emerald-100 rounded-lg w-10 h-10"
+                  >
+                    <Heart className="w-5 h-5 fill-current" />
+                  </Button>
+                </div>
+
+              </div>
+            ))}
+          </div>
         </section>
         {bannerSection3rd.length > 0 && (
           <section className="relative w-full">
@@ -959,7 +912,6 @@ const RandomTourPackageSection = () => {
             </Carousel>
           </div>
         )}
-
 
         {/* Quick View Modal */}
         {quickViewProduct && (

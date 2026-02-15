@@ -7,6 +7,7 @@ import NextTopLoader from "nextjs-toploader";
 import { SearchProvider } from "@/context/SearchContext";
 import OverlayButton from "@/components/OverlayButton";
 import GoogleTranslate from "@/components/GoogleTranslate";
+import { MenuProvider } from "@/context/MenuProvider";
 
 
 export const metadata = {
@@ -41,13 +42,28 @@ export const metadata = {
     "viewport": "width=device-width, initial-scale=1",
   },
 };
+export const revalidate = 3600;
 
+async function getMenuItems() {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/getMenuCategories`,
+      { cache: "no-store" }
+    );
+
+    if (!res.ok) return [];
+    return res.json();
+  } catch (error) {
+    console.error("MenuItems Fetch Error:", error);
+    return [];
+  }
+}
 import { CartProvider } from "../context/CartContext";
 // import CartSyncOnLogin from "../context/CartSyncOnLogin";
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
   const isPaid = process.env.NEXT_PUBLIC_IS_PAID === "true";
-
+  const menuItems = await getMenuItems();
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`font-gilda`}>
@@ -58,13 +74,15 @@ export default function RootLayout({ children }) {
             <SessionWrapper>
               {/* <CartSyncOnLogin /> */}
               <SearchProvider>
-                <Header />
+                 <MenuProvider menuItems={menuItems}>
+                  <Header menuItems={menuItems} />
                 {/* <GoogleTranslate /> */}
                 <main>
                   <OverlayButton />
                   {children}
                 </main>
                 <Footer />
+                </MenuProvider>
               </SearchProvider>
             </SessionWrapper>
           </CartProvider>

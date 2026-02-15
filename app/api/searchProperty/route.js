@@ -10,9 +10,10 @@ export async function GET(request) {
         const location = searchParams.get('location');
         const propertyFor = searchParams.get('propertyFor');
         const propertyType = searchParams.get('propertyType');
+        const fetchAll = searchParams.get('fetchAll');
 
         // If no search parameters, return available filters
-        if (!location && !propertyFor && !propertyType) {
+        if (!location && !propertyFor && !propertyType && !fetchAll) {
             const [locations, propertyTypes] = await Promise.all([
                 PropertyDetails.distinct('locationType'),
                 PropertyDetails.distinct('propertyType')
@@ -43,22 +44,34 @@ export async function GET(request) {
         }
 
         if (propertyType) {
-            // Replace hyphens with wildcard/space to match db values like "Home & Villa" vs slug "home-villa"
             // or "home-with-owner" vs "Home With Owner"
             const flexibleType = propertyType.replace(/-/g, '[\\s&-]*');
             query.propertyType = { $regex: new RegExp(flexibleType, 'i') };
         }
 
+        // Pagination
+        const page = parseInt(searchParams.get('page')) || 1;
+        const limit = parseInt(searchParams.get('limit')) || 15;
+        const skip = (page - 1) * limit;
+
         // Search for properties with the given filters
-        const properties = await PropertyDetails.find(query)
-            .select('propertyName propertyType locationType subLocationType galiType contactAddress mainImage galleryImages maxRentPrice propertyFor rentPrice isActive isTrending propertyNameSlug')
-            .sort({ isTrending: -1, createdAt: -1 });
+        const [properties, total] = await Promise.all([
+            PropertyDetails.find(query)
+                .select('propertyName propertyType locationType subLocationType galiType contactAddress mainImage galleryImages maxRentPrice propertyFor rentPrice isActive isTrending propertyNameSlug')
+                .sort({ isTrending: -1, createdAt: -1 })
+                .skip(skip)
+                .limit(limit),
+            PropertyDetails.countDocuments(query)
+        ]);
 
         return NextResponse.json({
             success: true,
             data: {
                 properties,
-                count: properties.length
+                total,
+                page,
+                totalPages: Math.ceil(total / limit),
+                hasMore: page * limit < total
             }
         });
 
