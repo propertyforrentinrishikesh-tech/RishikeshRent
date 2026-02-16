@@ -61,7 +61,7 @@ const Page = () => {
         </div>
       ),
       description: "Manage all properties",
-      link: "/admin/properties_extranet",
+      link: "/admin/property_extranet",
       count: counts.properties,
       bgColor: "bg-orange-500",
       hoverBgColor: "hover:bg-orange-600"

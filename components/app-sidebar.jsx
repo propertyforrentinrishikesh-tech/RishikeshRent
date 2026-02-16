@@ -45,7 +45,7 @@ const data = {
     { divider: true },
     {
       name: "Properties Extranet",
-      url: "/admin/properties_extranet",
+      url: "/admin/properties_extrant",
       icon: Plus,
     },
     { divider: true },
