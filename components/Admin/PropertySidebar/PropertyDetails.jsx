@@ -13,7 +13,12 @@ import { Trash2, Edit } from 'lucide-react';
 import { Switch } from "@/components/ui/switch";
 import { useRef } from 'react';
 import toast from 'react-hot-toast';
+import { Checkbox } from "@/components/ui/checkbox"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import PhoneOTPVerification from '@/components/PhoneOTPVerification';
+import EmailOTPVerification from '@/components/EmailOTPVerification';
+import DeclarationForm from '@/components/DeclarationForm';
+// import MSG91OTPVerification from '@/components/MSG91OTPVerification'; // Commented out for testing
 const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationType = [], galiType = [] }) => {
     const [loading, setLoading] = useState(false);
     const [propertyDetails, setPropertyDetails] = useState([]);
@@ -23,6 +28,8 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
     const [uploadError, setUploadError] = useState(null);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [propertyToDelete, setPropertyToDelete] = useState(null);
+    const [type, setType] = useState("")
+    const [unit, setUnit] = useState(null)
     const videoRef = useRef(null);
     const mainImageRef = useRef(null);
     const galleryImagesRef = useRef(null);
@@ -33,6 +40,22 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
     const [activeTab, setActiveTab] = useState('youtube');
     const [editingProperty, setEditingProperty] = useState(null);
     const [brokerOrOwner, setBrokerOrOwner] = useState('broker');
+
+    // Modal states for custom amenities
+    const [isFurnishedAmenityModalOpen, setIsFurnishedAmenityModalOpen] = useState(false);
+    const [furnishedAmenityInput, setFurnishedAmenityInput] = useState('');
+    const [isBathroomAmenityModalOpen, setIsBathroomAmenityModalOpen] = useState(false);
+    const [bathroomAmenityInput, setBathroomAmenityInput] = useState('');
+    const [isTenantTypeModalOpen, setIsTenantTypeModalOpen] = useState(false);
+    const [tenantTypeInput, setTenantTypeInput] = useState('');
+    const [isParkingAmenityModalOpen, setIsParkingAmenityModalOpen] = useState(false);
+    const [parkingAmenityInput, setParkingAmenityInput] = useState('');
+    const [isParkingStyleModalOpen, setIsParkingStyleModalOpen] = useState(false);
+    const [parkingStyleInput, setParkingStyleInput] = useState('');
+    const [isOTPModalOpen, setIsOTPModalOpen] = useState(false);
+    const [isVerificationMethodModalOpen, setIsVerificationMethodModalOpen] = useState(false);
+    const [verificationMethod, setVerificationMethod] = useState(''); // 'mobile' or 'email'
+    const [showDeclarationForm, setShowDeclarationForm] = useState(false);
     const [formData, setFormData] = useState({
         propertyType: "",
         mainImage: { url: "", key: "", loading: false },
@@ -45,8 +68,11 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
         subLocationType: "",
         galiType: "",
         contactAddress: "",
+        landMarkDetails: "", // Added missing field
+        googleLocation: "", // Added missing field
         brokerName: "",
         ownerName: "",
+        sonDaughterWifeOf: "", // Added missing field
         contactNumbers: [""],
         emailAddresses: [""],
         aadharCardNumber: "",
@@ -54,6 +80,8 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
         rentPrice: "",
         maxRentPrice: "",
         propertyName: "",
+        propertyForRentLocatedOn: "", // Added missing field
+        propertyFacingDirection: "", // Added missing field
         highlights: [],
         propertyFor: "",
         isAvailable: true,
@@ -68,16 +96,24 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
         tenantType: "",
         sizeInFeet: "",
         sizeInMeter: "",
+        sizeUnit: "", // Added missing field for unit selection
+        sizeLength: "", // Added missing field
+        sizeWidth: "", // Added missing field
         numberOfBedrooms: "",
-        numberOfBathrooms: "",
+        numberOfBathrooms: 0, // Changed to number
+        numberOfRooms: 0, // Added missing field
         furnishingStatus: "",
         amenities: [],
         bathroomStyle: "",
+        bathroomType: "", // Added missing field
         parkingStyle: "",
+        parkingAvailable: "", // Added missing field
+        parkingType: "", // Added missing field
         roomStyle: "",
         petAllowed: false,
         smokingAllowed: false,
         familyAllowed: false,
+        familyMembers: "", // Added missing field
         vegetarianOnly: false,
         nonVegetarianAllowed: false,
         alcoholAllowed: false,
@@ -87,6 +123,9 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
         detailFor: "",
         powerBackup: "",
         powerBackupType: "",
+        powerBackupAvailable: null, // Added missing field
+        powerBackupSources: { inverter: false, generator: false }, // Added missing field
+        powerBackupCharge: null, // Added missing field
         floor: "",
         balcony: false,
         rooftop: false,
@@ -96,16 +135,97 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
         bathroomFeatures: [],
         cctv: "",
         cctvLocation: "",
-        parkingType: "",
         checkIn: "",
         checkOut: "",
+        customBathroomAmenities: [],
+        customFurnishedAmenitiesLabels: {},
+        furnishedAmenities: [],
+        // New comprehensive property detail fields
+        lift: "",
+        cctvFeatures: [],
+        parkingAmenities: [],
+        customParkingAmenities: [],
+        parkingStyleOptions: [],
+        customParkingStyles: [],
+        lateNightTimeIn: "",
+        lateNightTimeOut: "",
+        roomStyleOptions: [],
+        petShelter: "",
+        muslimFamilyAllowed: "",
+        nonVegAllowed: "",
+        inRoomPartyAllowed: "",
+        outsideVisitorAllowed: "",
+        prohibitedGoods: "",
+        visitorEntry: "",
+        photographsVideos: "",
+        priorNotice: "",
+        priorNoticeTime: "",
+        propertyAvailableFrom: "",
+        minimumStayAllow: "",
+        tenantTypeAllowed: [],
+        customTenantTypes: [],
+        stayAllowOnlyFor: "", // Added missing field
 
     });
+    const [available, setAvailable] = useState(null)
+    const [charge, setCharge] = useState(null)
+    const [sources, setSources] = useState({
+        inverter: false,
+        generator: false
+    })
+    const UnitSelector = () => (
+        <div className="border border-gray-400 rounded-md p-2 flex gap-4 pt-2 bg-white">
 
+            {/* Square Foot */}
+            <div className="flex items-center gap-2">
+                <Checkbox
+                    checked={unit === "sqft"}
+                    onCheckedChange={() => {
+                        const newUnit = unit === "sqft" ? null : "sqft";
+                        setUnit(newUnit);
+                        setFormData(prev => ({ ...prev, sizeUnit: newUnit || "" }));
+                    }}
+                />
+                <Label>Square Foot</Label>
+            </div>
+
+            {/* Meter */}
+            <div className="flex items-center gap-2 ">
+                <Checkbox
+                    checked={unit === "meter"}
+                    onCheckedChange={() => {
+                        const newUnit = unit === "meter" ? null : "meter";
+                        setUnit(newUnit);
+                        setFormData(prev => ({ ...prev, sizeUnit: newUnit || "" }));
+                    }}
+                />
+                <Label>In Meter</Label>
+            </div>
+        </div>
+    )
+
+    const SizeInputs = () => (
+        <div className="grid grid-cols-2 gap-3 bg-white border border-gray-400 p-4 rounded-md ">
+            <Input
+                placeholder="Length"
+                type="number"
+                disabled={!unit}
+                value={formData.sizeLength}
+                onChange={(e) => setFormData(prev => ({ ...prev, sizeLength: e.target.value }))}
+            />
+            <Input
+                placeholder="Width"
+                type="number"
+                disabled={!unit}
+                value={formData.sizeWidth}
+                onChange={(e) => setFormData(prev => ({ ...prev, sizeWidth: e.target.value }))}
+            />
+        </div>
+    )
     // console.log(propertyDetails)
     const fetchPropertyDetails = async () => {
         try {
-            const response = await fetch("/api/createPropertyDetails?limit=10");
+            const response = await fetch("/api/propertyDetails?limit=10");
             const data = await response.json();
             // console.log(data)
             setPropertyDetails(data.data);
@@ -740,20 +860,63 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
             .replace(/[^a-z0-9\-]/g, '')
             .replace(/\-+/g, '-');
     }
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e, signatureData = null) => {
         e.preventDefault();
         setLoading(true);
 
         try {
-            // Get the selected property type object
-            const selectedPropertyType = propertyTypes.find(type => type.propertyType === formData.propertyType);
-            const selectedLocationType = locationType.find(loc => loc.locationType === formData.locationType);
-            const selectedSubLocationType = subLocationType.find(subLoc => subLoc.subLocationType === formData.subLocationType);
-            const selectedGaliType = galiType.find(gali => gali.galiType === formData.galiType);
+            // ============= VALIDATION SECTION =============
 
+            // 1. Property Type Validation
+            if (!formData.propertyType) {
+                throw new Error('Please select a property type');
+            }
+
+            const selectedPropertyType = propertyTypes.find(type => type.propertyType === formData.propertyType);
             if (!selectedPropertyType) {
                 throw new Error('Please select a valid property type');
             }
+
+            // 2. Property Name Validation
+            if (!formData.propertyName || formData.propertyName.trim() === '') {
+                throw new Error('Property name is required');
+            }
+
+            // 3. Location Validation
+            if (!formData.locationType) {
+                throw new Error('Location type is required');
+            }
+
+            // 4. Main Image Validation
+            if (!formData.mainImage?.url) {
+                throw new Error('Main image is required');
+            }
+
+            // 5. Contact Number Validation
+            const validContactNumbers = formData.contactNumbers
+                .map(num => num ? num.trim() : '')
+                .filter(num => num !== '');
+
+            if (validContactNumbers.length === 0) {
+                throw new Error('At least one contact number is required');
+            }
+
+            // 6. Rent Price Validation
+            if (!formData.rentPrice || formData.rentPrice <= 0) {
+                throw new Error('Valid rent price is required');
+            }
+
+            // 7. Owner/Broker Name Validation
+            if (!formData.ownerName && !formData.brokerName) {
+                throw new Error('Either owner name or broker name is required');
+            }
+
+            // ============= DATA PREPARATION SECTION =============
+
+            // Get selected location types
+            const selectedLocationType = locationType.find(loc => loc.locationType === formData.locationType);
+            const selectedSubLocationType = subLocationType.find(subLoc => subLoc.subLocationType === formData.subLocationType);
+            const selectedGaliType = galiType.find(gali => gali.galiType === formData.galiType);
 
             // Transform video data to match database schema
             let videoData = {};
@@ -770,6 +933,11 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 };
             }
 
+            // Filter and clean email addresses
+            const validEmailAddresses = formData.emailAddresses
+                .map(email => email ? email.trim() : '')
+                .filter(email => email !== '');
+
             // Prepare the data to be submitted
             const formDataToSubmit = {
                 ...formData,
@@ -779,28 +947,30 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 locationType: selectedLocationType?.locationType || formData.locationType,
                 subLocationType: selectedSubLocationType?.subLocationType || formData.subLocationType,
                 galiType: selectedGaliType?.galiType || formData.galiType,
-                contactNumbers: formData.contactNumbers
-                    .map(num => num ? num.trim() : '')
-                    .filter(num => num !== ''),
-                emailAddresses: formData.emailAddresses
-                    .map(email => email ? email.trim() : '')
-                    .filter(email => email !== ''),
-                video: Object.keys(videoData).length > 0 ? videoData : undefined
+                contactNumbers: validContactNumbers,
+                emailAddresses: validEmailAddresses,
+                video: Object.keys(videoData).length > 0 ? videoData : undefined,
+                // Ensure numeric fields are numbers
+                rentPrice: Number(formData.rentPrice),
+                maxRentPrice: formData.maxRentPrice ? Number(formData.maxRentPrice) : undefined,
+                numberOfRooms: Number(formData.numberOfRooms) || 0,
+                numberOfBathrooms: Number(formData.numberOfBathrooms) || 0,
+                // Add signature data if provided from declaration form
+                ...(signatureData && {
+                    signatureUrl: signatureData.signatureUrl,
+                    verificationDate: signatureData.verificationDate,
+                    declarationAccepted: true
+                })
             };
-            // Validate at least one contact number
-            if (!formData.contactNumbers || formData.contactNumbers.length === 0) {
-                throw new Error('At least one contact number is required');
-            }
 
-            // Validate main image
-            if (!formData.mainImage?.url) {
-                throw new Error('Main image is required');
-            }
+            console.log('Submitting property data:', formDataToSubmit);
+
+            // ============= API SUBMISSION SECTION =============
 
             let response;
             if (editingProperty) {
                 // Update existing property
-                response = await fetch(`/api/createPropertyDetails?id=${editingProperty._id}`, {
+                response = await fetch(`/api/propertyDetails?id=${editingProperty._id}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -809,7 +979,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 });
             } else {
                 // Create new property
-                response = await fetch('/api/createPropertyDetails', {
+                response = await fetch('/api/propertyDetails', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -821,11 +991,20 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
             const data = await response.json();
 
             if (!response.ok) {
+                // Handle validation errors from API
+                if (data.validationErrors) {
+                    const errorMessages = data.validationErrors
+                        .map(err => `${err.field}: ${err.message}`)
+                        .join(', ');
+                    throw new Error(errorMessages);
+                }
                 throw new Error(data.error || 'Failed to save property details');
             }
 
             // Show success message
             toast.success(editingProperty ? 'Property updated successfully!' : 'Property created successfully!');
+
+            console.log('Property saved successfully:', data.data);
 
             // Reset form and refresh data
             resetForm();
@@ -1051,7 +1230,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
         if (!propertyToDelete) return;
 
         try {
-            const response = await fetch(`/api/createPropertyDetails?id=${propertyToDelete._id}`, {
+            const response = await fetch(`/api/propertyDetails?id=${propertyToDelete._id}`, {
                 method: 'DELETE',
             });
 
@@ -1108,8 +1287,8 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                             <SelectValue placeholder="Select property type" />
                         </SelectTrigger>
                         <SelectContent>
-                            {propertyTypes.map((type) => (
-                                <SelectItem key={type._id} value={type.propertyType}>
+                            {propertyTypes.map((type, index) => (
+                                <SelectItem key={index + 1} value={type.propertyType}>
                                     {type.propertyType}
                                 </SelectItem>
                             ))}
@@ -1127,8 +1306,8 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                             <SelectValue placeholder="Select location" />
                         </SelectTrigger>
                         <SelectContent>
-                            {locationType.map((location) => (
-                                <SelectItem key={location._id} value={location.locationType}>
+                            {locationType.map((location, index) => (
+                                <SelectItem key={index + 1} value={location.locationType}>
                                     {location.locationType}
                                 </SelectItem>
                             ))}
@@ -1146,8 +1325,8 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                             <SelectValue placeholder="Select sub location" />
                         </SelectTrigger>
                         <SelectContent>
-                            {subLocationType.map((location) => (
-                                <SelectItem key={location._id} value={location.subLocationType}>
+                            {subLocationType.map((location, index) => (
+                                <SelectItem key={index + 1} value={location.subLocationType}>
                                     {location.subLocationType}
                                 </SelectItem>
                             ))}
@@ -1165,8 +1344,8 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                             <SelectValue placeholder="Select gali location" />
                         </SelectTrigger>
                         <SelectContent>
-                            {galiType.map((location) => (
-                                <SelectItem key={location._id} value={location.galiName}>
+                            {galiType.map((location, index) => (
+                                <SelectItem key={index + 1} value={location.galiName}>
                                     {location.galiName}
                                 </SelectItem>
                             ))}
@@ -1350,7 +1529,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 <hr className="my-4 border border-gray-300" />
                 {/* Broker Info */}
                 <div className="space-y-4">
-                    <h3 className="text-xl font-medium underline"> Broker / Owner Information</h3>
+                    <h3 className="text-xl font-medium underline"> Broker / Owner / Property Information</h3>
                     <div className="flex gap-5 items-center">
 
                         {/* Property Name */}
@@ -1717,7 +1896,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                                 <div key={index} className="flex gap-2 pb-1">
                                     <Input
                                         className="bg-white border border-black rounded-md p-2"
-                                        type="number"
+                                        type="email"
                                         value={number || ''}  // Changed from formData.contactNumbers to just number
                                         onChange={(e) => handleEmailChange(index, e.target.value)}
                                         placeholder={`Email ${index + 1}`}
@@ -2205,16 +2384,89 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                         <div>
                             <h2 className="font-semibold text-lg">Tenant Type Allow</h2>
                             <div className="grid grid-cols-4 gap-2">
-                                {["Single", "Couple", "Married", "Bachelor", "Job Person", "Boys Only", "Girls Only", "Student", "All Religion", "Govt Retired"].map(i =>
-
-                                    <label className="flex gap-2">
-                                        <input type="checkbox" />
-                                        {i}
+                                {["Single", "Couple", "Married", "Bachelor", "Job Person", "Boys Only", "Girls Only", "Student", "All Religion", "Govt Retired"].map((type, index) => (
+                                    <label key={index} className="flex gap-2 items-center cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.tenantTypeAllowed?.includes(type) || false}
+                                            onChange={(e) => {
+                                                const current = formData.tenantTypeAllowed || [];
+                                                if (e.target.checked) {
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        tenantTypeAllowed: [...current, type]
+                                                    }));
+                                                } else {
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        tenantTypeAllowed: current.filter(t => t !== type)
+                                                    }));
+                                                }
+                                            }}
+                                            className="w-4 h-4"
+                                        />
+                                        <span className="text-sm">{type}</span>
                                     </label>
-
-                                )}
+                                ))}
                             </div>
-                            <Button>Add More</Button>
+
+                            {/* Custom Tenant Types */}
+                            {formData.customTenantTypes && formData.customTenantTypes.length > 0 && (
+                                <div className="space-y-2 mt-4">
+                                    <Label className="text-sm font-semibold text-blue-600">Custom Tenant Types:</Label>
+                                    <div className="grid grid-cols-4 gap-2">
+                                        {formData.customTenantTypes.map((type, index) => (
+                                            <div key={index} className="flex items-center gap-2">
+                                                <label className="flex items-center gap-2 cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={formData.tenantTypeAllowed?.includes(`custom_${type}`) || false}
+                                                        onChange={(e) => {
+                                                            const current = formData.tenantTypeAllowed || [];
+                                                            const customKey = `custom_${type}`;
+                                                            if (e.target.checked) {
+                                                                setFormData(prev => ({
+                                                                    ...prev,
+                                                                    tenantTypeAllowed: [...current, customKey]
+                                                                }));
+                                                            } else {
+                                                                setFormData(prev => ({
+                                                                    ...prev,
+                                                                    tenantTypeAllowed: current.filter(t => t !== customKey)
+                                                                }));
+                                                            }
+                                                        }}
+                                                        className="w-4 h-4"
+                                                    />
+                                                    <span className="text-sm bg-green-500 text-white px-2 py-1 rounded">{type}</span>
+                                                </label>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setFormData(prev => ({
+                                                            ...prev,
+                                                            customTenantTypes: prev.customTenantTypes.filter((_, i) => i !== index),
+                                                            tenantTypeAllowed: (prev.tenantTypeAllowed || []).filter(t => t !== `custom_${type}`)
+                                                        }));
+                                                        toast.success('Custom tenant type removed!');
+                                                    }}
+                                                    className="text-red-500 hover:text-red-700"
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            <Button
+                                type="button"
+                                className="bg-blue-600 hover:bg-blue-700 text-white mt-3"
+                                onClick={() => setIsTenantTypeModalOpen(true)}
+                            >
+                                Add More
+                            </Button>
 
                         </div>
                         <div className="flex-1">
@@ -2238,285 +2490,1892 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 </div>
                 <hr className="my-6 border border-gray-300" />
 
-                <div className="space-y-4">
-                    {/* Property Size */}
-                    <div className="flex items-center gap-4 w-full">
-                        <div className="space-y-2 w-full">
-                            <Label>Size in Feet</Label>
-                            <Input
-                                className="bg-white border border-black rounded-md p-2"
-                                name="sizeInFeet"
-                                type="number"
-                                value={formData.sizeInFeet}
-                                onChange={handleChange}
-                                placeholder="Enter size in feet"
-                            />
-                        </div>
-                        <div className="space-y-2 w-full">
-                            <Label>Size in Meter</Label>
-                            <Input
-                                className="bg-white border border-black rounded-md p-2"
-                                name="sizeInMeter"
-                                type="number"
-                                value={formData.sizeInMeter}
-                                onChange={handleChange}
-                                placeholder="Enter size in meter"
-                            />
-                        </div>
-                    </div>
-
-                    {/* Number of Bedrooms and Bathrooms */}
-                    <div className="flex items-center gap-4 w-full">
-                        <div className="space-y-2 w-full">
-                            <Label>Number of Bedrooms</Label>
-                            <Input
-                                className="bg-white border border-black rounded-md p-2"
-                                name="numberOfBedrooms"
-                                type="number"
-                                value={formData.numberOfBedrooms}
-                                onChange={handleChange}
-                                placeholder="Enter number of bedrooms"
-                            />
-                        </div>
-                        <div className="space-y-2 w-full">
-                            <Label>Number of Bathrooms</Label>
-                            <Input
-                                className="bg-white border border-black rounded-md p-2"
-                                name="numberOfBathrooms"
-                                type="number"
-                                value={formData.numberOfBathrooms}
-                                onChange={handleChange}
-                                placeholder="Enter number of bathrooms"
-                            />
-                        </div>
-                    </div>
-
-                    {/* Furnishing Status */}
-                    <div className="space-y-2">
-                        <Label>Furnishing Status</Label>
+                {/* property Details */}
+                <div className=" grid grid-cols-2 space-x-3 ">
+                    {/* SELECT TYPE */}
+                    <div>
+                        <Label>Detail For What</Label>
                         <Select
-                            value={formData.furnishingStatus}
-                            onValueChange={(value) => setFormData(prev => ({ ...prev, furnishingStatus: value }))}
+                            value={type}
+                            onValueChange={(val) => {
+                                setType(val);
+                                setUnit(null);
+                                setFormData(prev => ({ ...prev, detailFor: val, sizeUnit: "" }));
+                            }}
                         >
                             <SelectTrigger>
-                                <SelectValue placeholder="Select furnishing status" />
+                                <SelectValue placeholder="Select Type" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="furnished">Furnished</SelectItem>
-                                <SelectItem value="semi_furnished">Semi Furnished</SelectItem>
-                                <SelectItem value="non_furnished">Non Furnished</SelectItem>
+                                <SelectItem value="entire">Entire Property</SelectItem>
+                                <SelectItem value="room">Room Only</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
 
-                    {/* Amenities */}
-                    <div className="space-y-2">
-                        <Label>Amenities (Select all that apply)</Label>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 bg-white border border-black rounded-md p-4">
-                            {[
-                                { value: 'wifi', label: 'Wi-Fi' },
-                                { value: 'ac', label: 'Air Conditioner' },
-                                { value: 'parking', label: 'Parking' },
-                                { value: 'lift', label: 'Lift/Elevator' },
-                                { value: 'power_backup', label: 'Power Backup' },
-                                { value: 'security', label: '24/7 Security' },
-                                { value: 'gym', label: 'Gym' },
-                                { value: 'swimming_pool', label: 'Swimming Pool' },
-                                { value: 'garden', label: 'Garden' },
-                                { value: 'water_supply', label: '24/7 Water Supply' },
-                                { value: 'cctv', label: 'CCTV' },
-                                { value: 'fire_safety', label: 'Fire Safety' }
-                            ].map((amenity) => (
-                                <div key={amenity.value} className="flex items-center space-x-2">
+                    {/* ENTIRE PROPERTY */}
+                    {type === "entire" && (
+                        <div className="rounded-xl p-4 space-y-3">
+                            <Label className="font-semibold">Property Size</Label>
+                            <UnitSelector />
+                            <SizeInputs />
+                        </div>
+                    )}
+
+                    {/* ROOM */}
+                    {type === "room" && (
+                        <div className="rounded-xl p-4 space-y-3">
+                            <Label className="font-semibold">Room Size</Label>
+                            <UnitSelector />
+                            <SizeInputs />
+                        </div>
+                    )}
+                </div>
+
+                {/* PowerBackUp Facility */}
+                <div className="rounded-xl p-4 space-y-4">
+
+                    <Label className="font-semibold">Powerbackup Facility</Label>
+
+                    {/* AVAILABLE */}
+                    <div className="flex gap-6 items-center">
+
+                        <span className="text-sm font-medium">Available</span>
+
+                        <div className="flex items-center gap-2">
+                            <Checkbox
+                                checked={available === true}
+                                onCheckedChange={() => {
+                                    setAvailable(true);
+                                    setFormData(prev => ({ ...prev, powerBackupAvailable: true }));
+                                }}
+                            />
+                            <Label>Yes</Label>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <Checkbox
+                                checked={available === false}
+                                onCheckedChange={() => {
+                                    setAvailable(false);
+                                    setCharge(null);
+                                    setSources({ inverter: false, generator: false });
+                                    setFormData(prev => ({
+                                        ...prev,
+                                        powerBackupAvailable: false,
+                                        powerBackupSources: { inverter: false, generator: false },
+                                        powerBackupCharge: null
+                                    }));
+                                }}
+                            />
+                            <Label>No</Label>
+                        </div>
+                    </div>
+                    {/* IF YES SECTION */}
+                    {available === true && (
+                        <div className="flex items-center gap-2">
+                            {/* SOURCES */}
+                            <div className="flex gap-6 items-center">
+
+                                <span className="text-sm font-medium">If Yes</span>
+
+                                <div className="flex items-center gap-2">
+                                    <Checkbox
+                                        checked={sources.inverter}
+                                        onCheckedChange={(val) => {
+                                            const newSources = { ...sources, inverter: !!val };
+                                            setSources(newSources);
+                                            setFormData(prev => ({ ...prev, powerBackupSources: newSources }));
+                                        }}
+                                    />
+                                    <Label>Inverter</Label>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    <Checkbox
+                                        checked={sources.generator}
+                                        onCheckedChange={(val) => {
+                                            const newSources = { ...sources, generator: !!val };
+                                            setSources(newSources);
+                                            setFormData(prev => ({ ...prev, powerBackupSources: newSources }));
+                                        }}
+                                    />
+                                    <Label>Generator</Label>
+                                </div>
+                            </div>
+
+                            {/* CHARGE */}
+                            <div className="flex gap-6 items-center">
+
+                                <span className="text-sm font-bold px-2">Charge</span>
+
+                                <div className="flex items-center gap-2">
+                                    <Checkbox
+                                        checked={charge === true}
+                                        onCheckedChange={() => {
+                                            setCharge(true);
+                                            setFormData(prev => ({ ...prev, powerBackupCharge: true }));
+                                        }}
+                                    />
+                                    <Label>Yes</Label>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    <Checkbox
+                                        checked={charge === false}
+                                        onCheckedChange={() => {
+                                            setCharge(false);
+                                            setFormData(prev => ({ ...prev, powerBackupCharge: false }));
+                                        }}
+                                    />
+                                    <Label>No</Label>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+
+                </div>
+                <hr className="my-6 border border-gray-300" />
+
+                <div className="space-y-4">
+                    {/* ============= SECTION 1: NUMBER OF ROOMS ============= */}
+                    <div className="border border-gray-300 rounded-lg p-6 space-y-4">
+                        <h3 className="text-lg font-semibold mb-4">Number Of Room</h3>
+
+                        {/* Room Counter */}
+                        <div className="flex items-center gap-2">
+                            <Button
+                                type="button"
+                                onClick={() => setFormData(prev => ({
+                                    ...prev,
+                                    numberOfRooms: Math.max(0, (prev.numberOfRooms || 0) - 1)
+                                }))}
+                                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-l-full"
+                            >
+                                -
+                            </Button>
+                            <div className="bg-blue-600 text-white px-8 py-2 min-w-[80px] text-center font-semibold">
+                                {formData.numberOfRooms || 0}
+                            </div>
+                            <Button
+                                type="button"
+                                onClick={() => setFormData(prev => ({
+                                    ...prev,
+                                    numberOfRooms: (prev.numberOfRooms || 0) + 1
+                                }))}
+                                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-r-full"
+                            >
+                                +
+                            </Button>
+                        </div>
+
+                        {/* Room Amenities */}
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                                <Label className="font-semibold">Room Amenities</Label>
+                            </div>
+
+                            {/* Basic Room Amenities Array */}
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                {[
+                                    { value: 'balcony', label: 'Balcony Available' },
+                                    { value: 'window', label: 'Window Available' },
+                                    { value: 'rooftop', label: 'Rooftop Access' },
+                                    { value: 'wheelchair', label: 'Wheelchair Accessible' },
+                                    { value: 'housekeeping', label: 'Housekeeping' }
+                                ].map((amenity) => (
+                                    <label key={amenity.value} className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.roomAmenities?.includes(amenity.value) || false}
+                                            onChange={(e) => {
+                                                const current = formData.roomAmenities || [];
+                                                if (e.target.checked) {
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        roomAmenities: [...current, amenity.value]
+                                                    }));
+                                                } else {
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        roomAmenities: current.filter(a => a !== amenity.value)
+                                                    }));
+                                                }
+                                            }}
+                                            className="w-4 h-4"
+                                        />
+                                        <span className="text-sm">{amenity.label}</span>
+                                    </label>
+                                ))}
+                            </div>
+
+                            {/* Furnished/Non-Furnished Radio Buttons (Same Line) */}
+                            <div className="flex items-center gap-6 mt-3">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="furnishingStatus"
+                                        checked={formData.furnishingStatus === 'furnished'}
+                                        onChange={() => setFormData(prev => ({
+                                            ...prev,
+                                            furnishingStatus: 'furnished',
+                                            furnishedAmenities: []
+                                        }))}
+                                        className="w-4 h-4"
+                                    />
+                                    <span className="text-sm font-semibold">Furnished</span>
+                                </label>
+
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="furnishingStatus"
+                                        checked={formData.furnishingStatus === 'non_furnished'}
+                                        onChange={() => setFormData(prev => ({
+                                            ...prev,
+                                            furnishingStatus: 'non_furnished',
+                                            furnishedAmenities: []
+                                        }))}
+                                        className="w-4 h-4"
+                                    />
+                                    <span className="text-sm font-semibold">Non Furnished</span>
+                                </label>
+                            </div>
+
+                            {/* If Furnished Section with Parent-Child Amenities */}
+                            {formData.furnishingStatus === 'furnished' && (
+                                <div className="ml-6 space-y-4 mt-4">
+                                    <Label className="font-semibold">If Furnished Please Choose Room Amenities</Label>
+
+                                    {/* Parent Amenities with Sub-Amenities */}
+                                    <div className="space-y-4">
+                                        {/* Wi-Fi Parent with Sub-Amenities */}
+                                        <div className="space-y-2">
+                                            <label className="flex items-center gap-2 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.furnishedAmenities?.includes('wifi') || false}
+                                                    onChange={(e) => {
+                                                        const current = formData.furnishedAmenities || [];
+                                                        if (e.target.checked) {
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                furnishedAmenities: [...current, 'wifi']
+                                                            }));
+                                                        } else {
+                                                            // Remove wifi and its sub-amenities
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                furnishedAmenities: current.filter(a =>
+                                                                    !['wifi', 'wifi_basic', 'wifi_highspeed'].includes(a)
+                                                                )
+                                                            }));
+                                                        }
+                                                    }}
+                                                    className="w-4 h-4"
+                                                />
+                                                <span className="text-sm font-semibold">Wi-Fi</span>
+                                            </label>
+
+                                            {/* Wi-Fi Sub-Amenities */}
+                                            {formData.furnishedAmenities?.includes('wifi') && (
+                                                <div className="ml-6 flex flex-wrap gap-3">
+                                                    <label className="flex items-center gap-2 cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={formData.furnishedAmenities?.includes('wifi_basic') || false}
+                                                            onChange={(e) => {
+                                                                const current = formData.furnishedAmenities || [];
+                                                                if (e.target.checked) {
+                                                                    setFormData(prev => ({
+                                                                        ...prev,
+                                                                        furnishedAmenities: [...current, 'wifi_basic']
+                                                                    }));
+                                                                } else {
+                                                                    setFormData(prev => ({
+                                                                        ...prev,
+                                                                        furnishedAmenities: current.filter(a => a !== 'wifi_basic')
+                                                                    }));
+                                                                }
+                                                            }}
+                                                            className="w-4 h-4"
+                                                        />
+                                                        <span className="text-sm bg-pink-500 text-white px-2 py-1 rounded">Basic (may cost extra)</span>
+                                                    </label>
+
+                                                    <label className="flex items-center gap-2 cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={formData.furnishedAmenities?.includes('wifi_highspeed') || false}
+                                                            onChange={(e) => {
+                                                                const current = formData.furnishedAmenities || [];
+                                                                if (e.target.checked) {
+                                                                    setFormData(prev => ({
+                                                                        ...prev,
+                                                                        furnishedAmenities: [...current, 'wifi_highspeed']
+                                                                    }));
+                                                                } else {
+                                                                    setFormData(prev => ({
+                                                                        ...prev,
+                                                                        furnishedAmenities: current.filter(a => a !== 'wifi_highspeed')
+                                                                    }));
+                                                                }
+                                                            }}
+                                                            className="w-4 h-4"
+                                                        />
+                                                        <span className="text-sm bg-pink-500 text-white px-2 py-1 rounded">High-speed (Free)</span>
+                                                    </label>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Other Standalone Amenities */}
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                            {[
+                                                { value: 'bed_bedding', label: 'Bed & Bedding' },
+                                                { value: 'linens', label: 'Linens' },
+                                                { value: 'extra_pillow', label: 'Extra Pillow' },
+                                                { value: 'no_bed_bedding', label: 'No Bed & Bedding' }
+                                            ].map((amenity) => (
+                                                <label key={amenity.value} className="flex items-center gap-2 cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={formData.furnishedAmenities?.includes(amenity.value) || false}
+                                                        onChange={(e) => {
+                                                            const current = formData.furnishedAmenities || [];
+                                                            if (e.target.checked) {
+                                                                setFormData(prev => ({
+                                                                    ...prev,
+                                                                    furnishedAmenities: [...current, amenity.value]
+                                                                }));
+                                                            } else {
+                                                                setFormData(prev => ({
+                                                                    ...prev,
+                                                                    furnishedAmenities: current.filter(a => a !== amenity.value)
+                                                                }));
+                                                            }
+                                                        }}
+                                                        className="w-4 h-4"
+                                                    />
+                                                    <span className="text-sm">{amenity.label}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+
+                                        {/* Flat-screen TV Parent with Sub-Amenities */}
+                                        <div className="space-y-2">
+                                            <label className="flex items-center gap-2 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.furnishedAmenities?.includes('tv') || false}
+                                                    onChange={(e) => {
+                                                        const current = formData.furnishedAmenities || [];
+                                                        if (e.target.checked) {
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                furnishedAmenities: [...current, 'tv']
+                                                            }));
+                                                        } else {
+                                                            // Remove TV and its sub-amenities
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                furnishedAmenities: current.filter(a =>
+                                                                    !['tv', 'tv_cable', 'tv_free', 'tv_chargeable'].includes(a)
+                                                                )
+                                                            }));
+                                                        }
+                                                    }}
+                                                    className="w-4 h-4"
+                                                />
+                                                <span className="text-sm font-semibold">Flat-screen TV</span>
+                                            </label>
+
+                                            {/* TV Sub-Amenities */}
+                                            {formData.furnishedAmenities?.includes('tv') && (
+                                                <div className="ml-6 flex flex-wrap gap-3">
+                                                    <label className="flex items-center gap-2 cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={formData.furnishedAmenities?.includes('tv_cable') || false}
+                                                            onChange={(e) => {
+                                                                const current = formData.furnishedAmenities || [];
+                                                                if (e.target.checked) {
+                                                                    setFormData(prev => ({
+                                                                        ...prev,
+                                                                        furnishedAmenities: [...current, 'tv_cable']
+                                                                    }));
+                                                                } else {
+                                                                    setFormData(prev => ({
+                                                                        ...prev,
+                                                                        furnishedAmenities: current.filter(a => a !== 'tv_cable')
+                                                                    }));
+                                                                }
+                                                            }}
+                                                            className="w-4 h-4"
+                                                        />
+                                                        <span className="text-sm bg-pink-500 text-white px-2 py-1 rounded">With cable</span>
+                                                    </label>
+
+                                                    <label className="flex items-center gap-2 cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={formData.furnishedAmenities?.includes('tv_free') || false}
+                                                            onChange={(e) => {
+                                                                const current = formData.furnishedAmenities || [];
+                                                                if (e.target.checked) {
+                                                                    setFormData(prev => ({
+                                                                        ...prev,
+                                                                        furnishedAmenities: [...current, 'tv_free']
+                                                                    }));
+                                                                } else {
+                                                                    setFormData(prev => ({
+                                                                        ...prev,
+                                                                        furnishedAmenities: current.filter(a => a !== 'tv_free')
+                                                                    }));
+                                                                }
+                                                            }}
+                                                            className="w-4 h-4"
+                                                        />
+                                                        <span className="text-sm bg-pink-500 text-white px-2 py-1 rounded">Free</span>
+                                                    </label>
+
+                                                    <label className="flex items-center gap-2 cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={formData.furnishedAmenities?.includes('tv_chargeable') || false}
+                                                            onChange={(e) => {
+                                                                const current = formData.furnishedAmenities || [];
+                                                                if (e.target.checked) {
+                                                                    setFormData(prev => ({
+                                                                        ...prev,
+                                                                        furnishedAmenities: [...current, 'tv_chargeable']
+                                                                    }));
+                                                                } else {
+                                                                    setFormData(prev => ({
+                                                                        ...prev,
+                                                                        furnishedAmenities: current.filter(a => a !== 'tv_chargeable')
+                                                                    }));
+                                                                }
+                                                            }}
+                                                            className="w-4 h-4"
+                                                        />
+                                                        <span className="text-sm bg-pink-500 text-white px-2 py-1 rounded">Chargeable</span>
+                                                    </label>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* More Standalone Amenities */}
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                            {[
+                                                { value: 'ac', label: 'Air condition' },
+                                                { value: 'water_cooler', label: 'Water Cooler' },
+                                                { value: 'heating', label: 'Heating Facilities' },
+                                                { value: 'ceiling_fan', label: 'Ceiling Fan' },
+                                                { value: 'iron', label: 'Iron and ironing board' },
+                                                { value: 'hairdryer', label: 'Hairdryer' },
+                                                { value: 'desk', label: 'Desk/workspace' },
+                                                { value: 'chair', label: 'Chair' },
+                                                { value: 'water_bottles', label: 'Complimentary Water Bottles' }
+                                            ].map((amenity) => (
+                                                <label key={amenity.value} className="flex items-center gap-2 cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={formData.furnishedAmenities?.includes(amenity.value) || false}
+                                                        onChange={(e) => {
+                                                            const current = formData.furnishedAmenities || [];
+                                                            if (e.target.checked) {
+                                                                setFormData(prev => ({
+                                                                    ...prev,
+                                                                    furnishedAmenities: [...current, amenity.value]
+                                                                }));
+                                                            } else {
+                                                                setFormData(prev => ({
+                                                                    ...prev,
+                                                                    furnishedAmenities: current.filter(a => a !== amenity.value)
+                                                                }));
+                                                            }
+                                                        }}
+                                                        className="w-4 h-4"
+                                                    />
+                                                    <span className="text-sm">{amenity.label}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+
+                                        {/* Room Almirah Parent with Sub-Amenities */}
+                                        <div className="space-y-2">
+                                            <label className="flex items-center gap-2 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.furnishedAmenities?.includes('almirah') || false}
+                                                    onChange={(e) => {
+                                                        const current = formData.furnishedAmenities || [];
+                                                        if (e.target.checked) {
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                furnishedAmenities: [...current, 'almirah']
+                                                            }));
+                                                        } else {
+                                                            // Remove almirah and its sub-amenities
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                furnishedAmenities: current.filter(a =>
+                                                                    !['almirah', 'almirah_movable', 'almirah_fixed'].includes(a)
+                                                                )
+                                                            }));
+                                                        }
+                                                    }}
+                                                    className="w-4 h-4"
+                                                />
+                                                <span className="text-sm font-semibold">Room Almirah</span>
+                                            </label>
+
+                                            {/* Almirah Sub-Amenities */}
+                                            {formData.furnishedAmenities?.includes('almirah') && (
+                                                <div className="ml-6 flex flex-wrap gap-3">
+                                                    <label className="flex items-center gap-2 cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={formData.furnishedAmenities?.includes('almirah_movable') || false}
+                                                            onChange={(e) => {
+                                                                const current = formData.furnishedAmenities || [];
+                                                                if (e.target.checked) {
+                                                                    setFormData(prev => ({
+                                                                        ...prev,
+                                                                        furnishedAmenities: [...current, 'almirah_movable']
+                                                                    }));
+                                                                } else {
+                                                                    setFormData(prev => ({
+                                                                        ...prev,
+                                                                        furnishedAmenities: current.filter(a => a !== 'almirah_movable')
+                                                                    }));
+                                                                }
+                                                            }}
+                                                            className="w-4 h-4"
+                                                        />
+                                                        <span className="text-sm bg-pink-500 text-white px-2 py-1 rounded">Movable Almirah</span>
+                                                    </label>
+
+                                                    <label className="flex items-center gap-2 cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={formData.furnishedAmenities?.includes('almirah_fixed') || false}
+                                                            onChange={(e) => {
+                                                                const current = formData.furnishedAmenities || [];
+                                                                if (e.target.checked) {
+                                                                    setFormData(prev => ({
+                                                                        ...prev,
+                                                                        furnishedAmenities: [...current, 'almirah_fixed']
+                                                                    }));
+                                                                } else {
+                                                                    setFormData(prev => ({
+                                                                        ...prev,
+                                                                        furnishedAmenities: current.filter(a => a !== 'almirah_fixed')
+                                                                    }));
+                                                                }
+                                                            }}
+                                                            className="w-4 h-4"
+                                                        />
+                                                        <span className="text-sm bg-pink-500 text-white px-2 py-1 rounded">Fix On Wall</span>
+                                                    </label>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Custom Furnished Amenities as Checkboxes */}
+                                    {formData.customFurnishedAmenitiesLabels && Object.keys(formData.customFurnishedAmenitiesLabels).length > 0 && (
+                                        <div className="space-y-2 mt-4">
+                                            <Label className="text-sm font-semibold text-blue-600">Custom Amenities:</Label>
+                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                                {Object.entries(formData.customFurnishedAmenitiesLabels || {}).map(([key, label]) => (
+                                                    <div key={key} className="flex items-center gap-2">
+                                                        <label className="flex items-center gap-2 cursor-pointer">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={formData.furnishedAmenities?.includes(key) || false}
+                                                                onChange={(e) => {
+                                                                    const current = formData.furnishedAmenities || [];
+                                                                    if (e.target.checked) {
+                                                                        setFormData(prev => ({
+                                                                            ...prev,
+                                                                            furnishedAmenities: [...current, key]
+                                                                        }));
+                                                                    } else {
+                                                                        setFormData(prev => ({
+                                                                            ...prev,
+                                                                            furnishedAmenities: current.filter(a => a !== key)
+                                                                        }));
+                                                                    }
+                                                                }}
+                                                                className="w-4 h-4"
+                                                            />
+                                                            <span className="text-sm bg-green-500 text-white px-2 py-1 rounded">{label}</span>
+                                                        </label>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setFormData(prev => {
+                                                                    const newLabels = { ...prev.customFurnishedAmenitiesLabels };
+                                                                    delete newLabels[key];
+                                                                    return {
+                                                                        ...prev,
+                                                                        furnishedAmenities: (prev.furnishedAmenities || []).filter(a => a !== key),
+                                                                        customFurnishedAmenitiesLabels: newLabels
+                                                                    };
+                                                                });
+                                                                toast.success('Custom amenity removed!');
+                                                            }}
+                                                            className="text-red-500 hover:text-red-700"
+                                                            title="Remove this custom amenity"
+                                                        >
+                                                            <X className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <Button
+                                        type="button"
+                                        className="bg-blue-600 hover:bg-blue-700 text-white mt-3"
+                                        onClick={() => setIsFurnishedAmenityModalOpen(true)}
+                                    >
+                                        Add More
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* ============= SECTION 2: NUMBER OF BATHROOMS ============= */}
+                    <div className="border border-gray-300 rounded-lg p-6 space-y-4">
+                        <h3 className="text-lg font-semibold mb-4">Number Of Bathroom</h3>
+
+                        {/* Bathroom Counter */}
+                        <div className="flex items-center gap-2">
+                            <Button
+                                type="button"
+                                onClick={() => setFormData(prev => ({
+                                    ...prev,
+                                    numberOfBathrooms: Math.max(0, (prev.numberOfBathrooms || 0) - 1)
+                                }))}
+                                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-l-full"
+                            >
+                                -
+                            </Button>
+                            <div className="bg-blue-600 text-white px-8 py-2 min-w-[80px] text-center font-semibold">
+                                {formData.numberOfBathrooms || 0}
+                            </div>
+                            <Button
+                                type="button"
+                                onClick={() => setFormData(prev => ({
+                                    ...prev,
+                                    numberOfBathrooms: (prev.numberOfBathrooms || 0) + 1
+                                }))}
+                                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-r-full"
+                            >
+                                +
+                            </Button>
+
+                            <Button
+                                type="button"
+                                className="bg-blue-600 hover:bg-blue-700 text-white ml-auto"
+                                onClick={() => setIsBathroomAmenityModalOpen(true)}
+                            >
+                                Add More
+                            </Button>
+                        </div>
+
+                        {/* Custom Bathroom Amenities as Checkboxes */}
+                        {formData.customBathroomAmenities && formData.customBathroomAmenities.length > 0 && (
+                            <div className="space-y-2 mt-4">
+                                <Label className="text-sm font-semibold text-blue-600">Custom Bathroom Amenities:</Label>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                    {formData.customBathroomAmenities.map((amenity, index) => (
+                                        <div key={index} className="flex items-center gap-2">
+                                            <label className="flex items-center gap-2 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.bathroomFeatures?.includes(`custom_${amenity}`) || false}
+                                                    onChange={(e) => {
+                                                        const current = formData.bathroomFeatures || [];
+                                                        const customKey = `custom_${amenity}`;
+                                                        if (e.target.checked) {
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                bathroomFeatures: [...current, customKey]
+                                                            }));
+                                                        } else {
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                bathroomFeatures: current.filter(a => a !== customKey)
+                                                            }));
+                                                        }
+                                                    }}
+                                                    className="w-4 h-4"
+                                                />
+                                                <span className="text-sm bg-green-500 text-white px-2 py-1 rounded">{amenity}</span>
+                                            </label>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        customBathroomAmenities: prev.customBathroomAmenities.filter((_, i) => i !== index),
+                                                        bathroomFeatures: (prev.bathroomFeatures || []).filter(a => a !== `custom_${amenity}`)
+                                                    }));
+                                                    toast.success('Custom bathroom amenity removed!');
+                                                }}
+                                                className="text-red-500 hover:text-red-700"
+                                                title="Remove this custom amenity"
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Bathroom Type */}
+                        <div className="space-y-3">
+                            <Label className="font-semibold">Bathroom Type</Label>
+                            <div className="flex gap-6">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="bathroomType"
+                                        checked={formData.bathroomType === 'indian'}
+                                        onChange={() => setFormData(prev => ({
+                                            ...prev,
+                                            bathroomType: 'indian'
+                                        }))}
+                                        className="w-4 h-4"
+                                    />
+                                    <span className="text-sm">Indian Style</span>
+                                </label>
+
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="bathroomType"
+                                        checked={formData.bathroomType === 'western'}
+                                        onChange={() => setFormData(prev => ({
+                                            ...prev,
+                                            bathroomType: 'western'
+                                        }))}
+                                        className="w-4 h-4"
+                                    />
+                                    <span className="text-sm">Western Toilet</span>
+                                </label>
+
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="bathroomType"
+                                        checked={formData.bathroomType === 'both'}
+                                        onChange={() => setFormData(prev => ({
+                                            ...prev,
+                                            bathroomType: 'both'
+                                        }))}
+                                        className="w-4 h-4"
+                                    />
+                                    <span className="text-sm">Both Style Toilet</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        {/* Bathroom Amenities */}
+                        <div className="space-y-3">
+                            <Label className="font-semibold">Bathroom Amenities</Label>
+
+                            {/* Basic Bathroom Amenities - Grid Layout */}
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                {/* Bathroom Toiletries */}
+                                <label className="flex items-center gap-2 cursor-pointer">
                                     <input
                                         type="checkbox"
-                                        id={amenity.value}
-                                        checked={formData.amenities?.includes(amenity.value) || false}
+                                        checked={formData.bathroomFeatures?.includes('toiletries') || false}
                                         onChange={(e) => {
-                                            const currentAmenities = formData.amenities || [];
+                                            const current = formData.bathroomFeatures || [];
                                             if (e.target.checked) {
                                                 setFormData(prev => ({
                                                     ...prev,
-                                                    amenities: [...currentAmenities, amenity.value]
+                                                    bathroomFeatures: [...current, 'toiletries']
                                                 }));
                                             } else {
                                                 setFormData(prev => ({
                                                     ...prev,
-                                                    amenities: currentAmenities.filter(a => a !== amenity.value)
+                                                    bathroomFeatures: current.filter(a => a !== 'toiletries')
                                                 }));
                                             }
                                         }}
                                         className="w-4 h-4"
                                     />
-                                    <label htmlFor={amenity.value} className="text-sm cursor-pointer">
-                                        {amenity.label}
+                                    <span className="text-sm">Bathroom Toiletries</span>
+                                </label>
+                            </div>
+
+                            {/* Parent Amenities with Sub-options */}
+                            <div className="space-y-4 mt-4">
+                                {/* 1. LAUNDRY SERVICE - Parent with sub-amenities */}
+                                <div className="space-y-2">
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.bathroomFeatures?.includes('laundry') || false}
+                                            onChange={(e) => {
+                                                const current = formData.bathroomFeatures || [];
+                                                if (e.target.checked) {
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        bathroomFeatures: [...current, 'laundry']
+                                                    }));
+                                                } else {
+                                                    // Remove parent and all sub-amenities
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        bathroomFeatures: current.filter(a =>
+                                                            a !== 'laundry' &&
+                                                            a !== 'laundry_free' &&
+                                                            a !== 'laundry_chargeable'
+                                                        )
+                                                    }));
+                                                }
+                                            }}
+                                            className="w-4 h-4"
+                                        />
+                                        <span className="text-sm font-semibold">Laundry Service</span>
                                     </label>
+
+                                    {/* Laundry Sub-amenities - Only show if parent is checked */}
+                                    {formData.bathroomFeatures?.includes('laundry') && (
+                                        <div className="ml-6 flex gap-4">
+                                            <label className="flex items-center gap-2 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.bathroomFeatures?.includes('laundry_free') || false}
+                                                    onChange={(e) => {
+                                                        const current = formData.bathroomFeatures || [];
+                                                        if (e.target.checked) {
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                bathroomFeatures: [...current, 'laundry_free']
+                                                            }));
+                                                        } else {
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                bathroomFeatures: current.filter(a => a !== 'laundry_free')
+                                                            }));
+                                                        }
+                                                    }}
+                                                    className="w-4 h-4"
+                                                />
+                                                <span className="text-sm bg-pink-500 text-white px-2 py-1 rounded">Free</span>
+                                            </label>
+
+                                            <label className="flex items-center gap-2 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.bathroomFeatures?.includes('laundry_chargeable') || false}
+                                                    onChange={(e) => {
+                                                        const current = formData.bathroomFeatures || [];
+                                                        if (e.target.checked) {
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                bathroomFeatures: [...current, 'laundry_chargeable']
+                                                            }));
+                                                        } else {
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                bathroomFeatures: current.filter(a => a !== 'laundry_chargeable')
+                                                            }));
+                                                        }
+                                                    }}
+                                                    className="w-4 h-4"
+                                                />
+                                                <span className="text-sm bg-pink-500 text-white px-2 py-1 rounded">Chargeable</span>
+                                            </label>
+                                        </div>
+                                    )}
                                 </div>
-                            ))}
+
+                                {/* 2. BATHROOM GEYSER - Parent with sub-amenities */}
+                                <div className="space-y-2">
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.bathroomFeatures?.includes('geyser') || false}
+                                            onChange={(e) => {
+                                                const current = formData.bathroomFeatures || [];
+                                                if (e.target.checked) {
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        bathroomFeatures: [...current, 'geyser']
+                                                    }));
+                                                } else {
+                                                    // Remove parent and all sub-amenities
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        bathroomFeatures: current.filter(a =>
+                                                            a !== 'geyser' &&
+                                                            a !== 'geyser_electric' &&
+                                                            a !== 'geyser_gas'
+                                                        )
+                                                    }));
+                                                }
+                                            }}
+                                            className="w-4 h-4"
+                                        />
+                                        <span className="text-sm font-semibold">Bathroom Geyser</span>
+                                    </label>
+
+                                    {/* Geyser Sub-amenities - Only show if parent is checked */}
+                                    {formData.bathroomFeatures?.includes('geyser') && (
+                                        <div className="ml-6 flex gap-4">
+                                            <label className="flex items-center gap-2 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.bathroomFeatures?.includes('bathroom_shower') || false}
+                                                    onChange={(e) => {
+                                                        const current = formData.bathroomFeatures || [];
+                                                        if (e.target.checked) {
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                bathroomFeatures: [...current, 'bathroom_shower']
+                                                            }));
+                                                        } else {
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                bathroomFeatures: current.filter(a => a !== 'bathroom_shower')
+                                                            }));
+                                                        }
+                                                    }}
+                                                    className="w-4 h-4"
+                                                />
+                                                <span className="text-sm bg-pink-500 text-white px-2 py-1 rounded">BathRoom Shower</span>
+                                            </label>
+
+                                            <label className="flex items-center gap-2 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.bathroomFeatures?.includes('water_supply_govt') || false}
+                                                    onChange={(e) => {
+                                                        const current = formData.bathroomFeatures || [];
+                                                        if (e.target.checked) {
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                bathroomFeatures: [...current, 'water_supply_govt']
+                                                            }));
+                                                        } else {
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                bathroomFeatures: current.filter(a => a !== 'water_supply_govt')
+                                                            }));
+                                                        }
+                                                    }}
+                                                    className="w-4 h-4"
+                                                />
+                                                <span className="text-sm bg-pink-500 text-white px-2 py-1 rounded">Water Supply Govt</span>
+                                            </label>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* 3. SHARING STYLE - Parent with sub-amenities */}
+                                <div className="space-y-2">
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.bathroomFeatures?.includes('sharing') || false}
+                                            onChange={(e) => {
+                                                const current = formData.bathroomFeatures || [];
+                                                if (e.target.checked) {
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        bathroomFeatures: [...current, 'sharing']
+                                                    }));
+                                                } else {
+                                                    // Remove parent and all sub-amenities
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        bathroomFeatures: current.filter(a =>
+                                                            a !== 'sharing' &&
+                                                            a !== 'sharing_private' &&
+                                                            a !== 'sharing_in_room' &&
+                                                            a !== 'sharing_outside_room'
+                                                        )
+                                                    }));
+                                                }
+                                            }}
+                                            className="w-4 h-4"
+                                        />
+                                        <span className="text-sm font-semibold">Sharing Style</span>
+                                    </label>
+
+                                    {/* Sharing Style Sub-amenities - Only show if parent is checked */}
+                                    {formData.bathroomFeatures?.includes('sharing') && (
+                                        <div className="ml-6 flex gap-4 flex-wrap">
+                                            <label className="flex items-center gap-2 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.bathroomFeatures?.includes('sharing_private') || false}
+                                                    onChange={(e) => {
+                                                        const current = formData.bathroomFeatures || [];
+                                                        if (e.target.checked) {
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                bathroomFeatures: [...current, 'sharing_private']
+                                                            }));
+                                                        } else {
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                bathroomFeatures: current.filter(a => a !== 'sharing_private')
+                                                            }));
+                                                        }
+                                                    }}
+                                                    className="w-4 h-4"
+                                                />
+                                                <span className="text-sm bg-pink-500 text-white px-2 py-1 rounded">Private</span>
+                                            </label>
+
+                                            <label className="flex items-center gap-2 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.bathroomFeatures?.includes('sharing_in_room') || false}
+                                                    onChange={(e) => {
+                                                        const current = formData.bathroomFeatures || [];
+                                                        if (e.target.checked) {
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                bathroomFeatures: [...current, 'sharing_in_room']
+                                                            }));
+                                                        } else {
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                bathroomFeatures: current.filter(a => a !== 'sharing_in_room')
+                                                            }));
+                                                        }
+                                                    }}
+                                                    className="w-4 h-4"
+                                                />
+                                                <span className="text-sm bg-pink-500 text-white px-2 py-1 rounded">In Room</span>
+                                            </label>
+
+                                            <label className="flex items-center gap-2 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.bathroomFeatures?.includes('sharing_outside_room') || false}
+                                                    onChange={(e) => {
+                                                        const current = formData.bathroomFeatures || [];
+                                                        if (e.target.checked) {
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                bathroomFeatures: [...current, 'sharing_outside_room']
+                                                            }));
+                                                        } else {
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                bathroomFeatures: current.filter(a => a !== 'sharing_outside_room')
+                                                            }));
+                                                        }
+                                                    }}
+                                                    className="w-4 h-4"
+                                                />
+                                                <span className="text-sm bg-pink-500 text-white px-2 py-1 rounded">Outside Room</span>
+                                            </label>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
-                    </div>
-
-                    {/* Bathroom Style */}
-                    <div className="space-y-2">
-                        <Label>Bathroom Style</Label>
-                        <Select
-                            value={formData.bathroomStyle}
-                            onValueChange={(value) => setFormData(prev => ({ ...prev, bathroomStyle: value }))}
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select bathroom style" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="indian">Indian Style</SelectItem>
-                                <SelectItem value="western">Western Toilet</SelectItem>
-                                <SelectItem value="both">Both Style Toilet</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    {/* Parking Style */}
-                    <div className="space-y-2">
-                        <Label>Parking Style</Label>
-                        <Select
-                            value={formData.parkingStyle}
-                            onValueChange={(value) => setFormData(prev => ({ ...prev, parkingStyle: value }))}
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select parking style" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="two_wheeler">Two Wheeler</SelectItem>
-                                <SelectItem value="four_wheeler">Four Wheeler</SelectItem>
-                                <SelectItem value="both_wheeler">Both Wheeler</SelectItem>
-                                <SelectItem value="no_parking">No Parking</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    {/* Room Style */}
-                    <div className="space-y-2">
-                        <Label>Room Style</Label>
-                        <Select
-                            value={formData.roomStyle}
-                            onValueChange={(value) => setFormData(prev => ({ ...prev, roomStyle: value }))}
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select room style" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="interconnected">Interconnected Room</SelectItem>
-                                <SelectItem value="separated">Separated Room Style</SelectItem>
-                                <SelectItem value="new_developed">New Developed</SelectItem>
-                                <SelectItem value="old_already_built">Old Already Built</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    {/* Property Policies */}
-                    <div className="space-y-3">
-                        <Label className="text-base font-semibold">Property Policies</Label>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white border border-black rounded-md p-4">
-                            <div className="flex items-center justify-between">
-                                <Label htmlFor="petAllowed" className="cursor-pointer">Pet Allowed</Label>
-                                <Switch
-                                    id="petAllowed"
-                                    checked={formData.petAllowed || false}
-                                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, petAllowed: checked }))}
-                                />
-                            </div>
-                            <div className="flex items-center justify-between">
-                                <Label htmlFor="smokingAllowed" className="cursor-pointer">Smoking Allowed</Label>
-                                <Switch
-                                    id="smokingAllowed"
-                                    checked={formData.smokingAllowed || false}
-                                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, smokingAllowed: checked }))}
-                                />
-                            </div>
-                            <div className="flex items-center justify-between">
-                                <Label htmlFor="familyAllowed" className="cursor-pointer">Family Allowed</Label>
-                                <Switch
-                                    id="familyAllowed"
-                                    checked={formData.familyAllowed || false}
-                                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, familyAllowed: checked }))}
-                                />
-                            </div>
-                            <div className="flex items-center justify-between">
-                                <Label htmlFor="vegetarianOnly" className="cursor-pointer">Vegetarian Only</Label>
-                                <Switch
-                                    id="vegetarianOnly"
-                                    checked={formData.vegetarianOnly || false}
-                                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, vegetarianOnly: checked }))}
-                                />
-                            </div>
-                            <div className="flex items-center justify-between">
-                                <Label htmlFor="nonVegetarianAllowed" className="cursor-pointer">Non-Vegetarian Allowed</Label>
-                                <Switch
-                                    id="nonVegetarianAllowed"
-                                    checked={formData.nonVegetarianAllowed || false}
-                                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, nonVegetarianAllowed: checked }))}
-                                />
-                            </div>
-                            <div className="flex items-center justify-between">
-                                <Label htmlFor="alcoholAllowed" className="cursor-pointer">Alcohol Allowed</Label>
-                                <Switch
-                                    id="alcoholAllowed"
-                                    checked={formData.alcoholAllowed || false}
-                                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, alcoholAllowed: checked }))}
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Late Night Entry Time */}
-                    <div className="space-y-2">
-                        <Label>Late Night Entry Time</Label>
-                        <Input
-                            className="bg-white border border-black rounded-md p-2"
-                            name="lateNightEntryTime"
-                            type="time"
-                            value={formData.lateNightEntryTime}
-                            onChange={handleChange}
-                        />
-                    </div>
-
-                    {/* Availability */}
-                    <div className="space-y-2">
-                        <Label>Property Available From</Label>
-                        <Input
-                            className="bg-white border border-black rounded-md p-2"
-                            name="availableFrom"
-                            type="date"
-                            value={formData.availableFrom}
-                            onChange={handleChange}
-                        />
-                    </div>
-
-                    {/* Minimum Stay Duration */}
-                    <div className="space-y-2">
-                        <Label>Minimum Stay Duration</Label>
-                        <Select
-                            value={formData.minimumStay}
-                            onValueChange={(value) => setFormData(prev => ({ ...prev, minimumStay: value }))}
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select minimum stay" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="select_time_in">Select Time In</SelectItem>
-                                <SelectItem value="1_month">1 Month</SelectItem>
-                                <SelectItem value="3_months">3 Months</SelectItem>
-                                <SelectItem value="6_months">6 Months</SelectItem>
-                                <SelectItem value="1_year">1 Year</SelectItem>
-                                <SelectItem value="check_in_check_out">Check In Check Out</SelectItem>
-                            </SelectContent>
-                        </Select>
                     </div>
                 </div>
 
-                <hr className="my-6" />
 
+                {/* ============= SECTION 3: LIFT - ELEVATOR ============= */}
+                <div className="border border-gray-300 rounded-lg p-6 space-y-4">
+                    <h3 className="text-lg font-semibold mb-4">Lift - Elevator</h3>
+                    <div className="flex gap-6">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="lift"
+                                checked={formData.lift === 'accessible'}
+                                onChange={() => setFormData(prev => ({ ...prev, lift: 'accessible' }))}
+                                className="w-4 h-4"
+                            />
+                            <span className="text-sm">Accessible</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="lift"
+                                checked={formData.lift === 'non_accessible'}
+                                onChange={() => setFormData(prev => ({ ...prev, lift: 'non_accessible' }))}
+                                className="w-4 h-4"
+                            />
+                            <span className="text-sm">Non Accessible</span>
+                        </label>
+                    </div>
+                </div>
+
+                {/* ============= SECTION 4: CCTV CAMERA ============= */}
+                <div className="border border-gray-300 rounded-lg p-6 space-y-4">
+                    <h3 className="text-lg font-semibold mb-4">CCTV Camera</h3>
+                    <div className="flex gap-6">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="cctvCamera"
+                                checked={formData.cctvFeatures?.includes('yes') || false}
+                                onChange={() => {
+                                    // Set to 'yes' and keep any existing sub-amenities
+                                    setFormData(prev => ({
+                                        ...prev,
+                                        cctvFeatures: ['yes', ...(prev.cctvFeatures || []).filter(a => a !== 'no' && a !== 'yes')]
+                                    }));
+                                }}
+                                className="w-4 h-4"
+                            />
+                            <span className="text-sm font-semibold">Yes</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="cctvCamera"
+                                checked={formData.cctvFeatures?.includes('no') || false}
+                                onChange={() => {
+                                    // Set to 'no' and clear all sub-amenities
+                                    setFormData(prev => ({
+                                        ...prev,
+                                        cctvFeatures: ['no']
+                                    }));
+                                }}
+                                className="w-4 h-4"
+                            />
+                            <span className="text-sm">No</span>
+                        </label>
+                    </div>
+
+                    {/* CCTV Sub-amenities - Only show when Yes is checked */}
+                    {formData.cctvFeatures?.includes('yes') && (
+                        <div className="ml-6 grid grid-cols-2 gap-3">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={formData.cctvFeatures?.includes('in_complete_property') || false}
+                                    onChange={(e) => {
+                                        const current = formData.cctvFeatures || [];
+                                        if (e.target.checked) {
+                                            setFormData(prev => ({ ...prev, cctvFeatures: [...current, 'in_complete_property'] }));
+                                        } else {
+                                            setFormData(prev => ({ ...prev, cctvFeatures: current.filter(a => a !== 'in_complete_property') }));
+                                        }
+                                    }}
+                                    className="w-4 h-4"
+                                />
+                                <span className="text-sm bg-pink-500 text-white px-2 py-1 rounded">In Complete Property</span>
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={formData.cctvFeatures?.includes('in_front_of_main_gate') || false}
+                                    onChange={(e) => {
+                                        const current = formData.cctvFeatures || [];
+                                        if (e.target.checked) {
+                                            setFormData(prev => ({ ...prev, cctvFeatures: [...current, 'in_front_of_main_gate'] }));
+                                        } else {
+                                            setFormData(prev => ({ ...prev, cctvFeatures: current.filter(a => a !== 'in_front_of_main_gate') }));
+                                        }
+                                    }}
+                                    className="w-4 h-4"
+                                />
+                                <span className="text-sm bg-pink-500 text-white px-2 py-1 rounded">In Front Of Main Gate</span>
+                            </label>
+                        </div>
+                    )}
+                </div>
+
+                {/* ============= SECTION 5: PARKING ============= */}
+                <div className="border border-gray-300 rounded-lg p-6 space-y-4">
+                    <h3 className="text-lg font-semibold mb-4">Parking</h3>
+                    <div className="flex gap-6">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="parking"
+                                checked={formData.parkingAmenities?.includes('yes') || false}
+                                onChange={() => {
+                                    // Set to 'yes' and keep any existing sub-amenities
+                                    setFormData(prev => ({
+                                        ...prev,
+                                        parkingAmenities: ['yes', ...(prev.parkingAmenities || []).filter(a => a !== 'no' && a !== 'yes')]
+                                    }));
+                                }}
+                                className="w-4 h-4"
+                            />
+                            <span className="text-sm font-semibold">Yes</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="parking"
+                                checked={formData.parkingAmenities?.includes('no') || false}
+                                onChange={() => {
+                                    // Set to 'no' and clear all sub-amenities
+                                    setFormData(prev => ({
+                                        ...prev,
+                                        parkingAmenities: ['no']
+                                    }));
+                                }}
+                                className="w-4 h-4"
+                            />
+                            <span className="text-sm">No</span>
+                        </label>
+                    </div>
+
+                    {/* Parking Sub-amenities - Only show when Yes is checked */}
+                    {formData.parkingAmenities?.includes('yes') && (
+                        <>
+                            <div className="ml-6 grid grid-cols-2 md:grid-cols-3 gap-3">
+                                {['free_inhouse', 'not_reserved', 'paid_reserved', 'open', 'outside_premises'].map((item) => (
+                                    <label key={item} className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.parkingAmenities?.includes(item) || false}
+                                            onChange={(e) => {
+                                                const current = formData.parkingAmenities || [];
+                                                if (e.target.checked) {
+                                                    setFormData(prev => ({ ...prev, parkingAmenities: [...current, item] }));
+                                                } else {
+                                                    setFormData(prev => ({ ...prev, parkingAmenities: current.filter(a => a !== item) }));
+                                                }
+                                            }}
+                                            className="w-4 h-4"
+                                        />
+                                        <span className="text-sm bg-pink-500 text-white px-2 py-1 rounded capitalize">{item.replace(/_/g, ' ')}</span>
+                                    </label>
+                                ))}
+                            </div>
+
+                            {/* Custom Parking Amenities */}
+                            {formData.customParkingAmenities && formData.customParkingAmenities.length > 0 && (
+                                <div className="space-y-2 ml-6">
+                                    <Label className="text-sm font-semibold text-blue-600">Custom Parking Amenities:</Label>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                        {formData.customParkingAmenities.map((amenity, index) => (
+                                            <div key={index} className="flex items-center gap-2">
+                                                <label className="flex items-center gap-2 cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={formData.parkingAmenities?.includes(`custom_parking_${amenity}`) || false}
+                                                        onChange={(e) => {
+                                                            const current = formData.parkingAmenities || [];
+                                                            const customKey = `custom_parking_${amenity}`;
+                                                            if (e.target.checked) {
+                                                                setFormData(prev => ({ ...prev, parkingAmenities: [...current, customKey] }));
+                                                            } else {
+                                                                setFormData(prev => ({ ...prev, parkingAmenities: current.filter(a => a !== customKey) }));
+                                                            }
+                                                        }}
+                                                        className="w-4 h-4"
+                                                    />
+                                                    <span className="text-sm bg-green-500 text-white px-2 py-1 rounded">{amenity}</span>
+                                                </label>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setFormData(prev => ({
+                                                            ...prev,
+                                                            customParkingAmenities: prev.customParkingAmenities.filter((_, i) => i !== index),
+                                                            parkingAmenities: (prev.parkingAmenities || []).filter(a => a !== `custom_parking_${amenity}`)
+                                                        }));
+                                                        toast.success('Custom parking amenity removed!');
+                                                    }}
+                                                    className="text-red-500 hover:text-red-700"
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            <Button
+                                type="button"
+                                className="bg-blue-600 hover:bg-blue-700 text-white ml-6"
+                                onClick={() => setIsParkingAmenityModalOpen(true)}
+                            >
+                                Add More
+                            </Button>
+                        </>
+                    )}
+                </div>
+
+                {/* ============= SECTION 6: PARKING STYLE ============= */}
+                <div className="border border-gray-300 rounded-lg p-6 space-y-4">
+                    <h3 className="text-lg font-semibold mb-4">Parking Style</h3>
+                    <div className="flex gap-6">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="parkingStyle"
+                                checked={formData.parkingStyleOptions?.includes('yes') || false}
+                                onChange={() => {
+                                    // Set to 'yes' and keep any existing sub-options
+                                    setFormData(prev => ({
+                                        ...prev,
+                                        parkingStyleOptions: ['yes', ...(prev.parkingStyleOptions || []).filter(a => a !== 'no' && a !== 'yes')]
+                                    }));
+                                }}
+                                className="w-4 h-4"
+                            />
+                            <span className="text-sm font-semibold">Yes</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="parkingStyle"
+                                checked={formData.parkingStyleOptions?.includes('no') || false}
+                                onChange={() => {
+                                    // Set to 'no' and clear all sub-options
+                                    setFormData(prev => ({
+                                        ...prev,
+                                        parkingStyleOptions: ['no']
+                                    }));
+                                }}
+                                className="w-4 h-4"
+                            />
+                            <span className="text-sm">No</span>
+                        </label>
+                    </div>
+
+                    {/* Parking Style Sub-options - Only show when Yes is checked */}
+                    {formData.parkingStyleOptions?.includes('yes') && (
+                        <>
+                            <div className="ml-6 grid grid-cols-2 md:grid-cols-3 gap-3">
+                                {['two_wheeler', 'four_wheeler', '1_max_capacity_two_wheeler', '1_max_capacity_four_wheeler', '2_max_capacity_two_wheeler', '2_max_capacity_four_wheeler'].map((item) => (
+                                    <label key={item} className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.parkingStyleOptions?.includes(item) || false}
+                                            onChange={(e) => {
+                                                const current = formData.parkingStyleOptions || [];
+                                                if (e.target.checked) {
+                                                    setFormData(prev => ({ ...prev, parkingStyleOptions: [...current, item] }));
+                                                } else {
+                                                    setFormData(prev => ({ ...prev, parkingStyleOptions: current.filter(a => a !== item) }));
+                                                }
+                                            }}
+                                            className="w-4 h-4"
+                                        />
+                                        <span className="text-sm bg-pink-500 text-white px-2 py-1 rounded capitalize">{item.replace(/_/g, ' ')}</span>
+                                    </label>
+                                ))}
+                            </div>
+
+                            {/* Custom Parking Styles */}
+                            {formData.customParkingStyles && formData.customParkingStyles.length > 0 && (
+                                <div className="space-y-2 ml-6">
+                                    <Label className="text-sm font-semibold text-blue-600">Custom Parking Styles:</Label>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                        {formData.customParkingStyles.map((style, index) => (
+                                            <div key={index} className="flex items-center gap-2">
+                                                <label className="flex items-center gap-2 cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={formData.parkingStyleOptions?.includes(`custom_style_${style}`) || false}
+                                                        onChange={(e) => {
+                                                            const current = formData.parkingStyleOptions || [];
+                                                            const customKey = `custom_style_${style}`;
+                                                            if (e.target.checked) {
+                                                                setFormData(prev => ({ ...prev, parkingStyleOptions: [...current, customKey] }));
+                                                            } else {
+                                                                setFormData(prev => ({ ...prev, parkingStyleOptions: current.filter(a => a !== customKey) }));
+                                                            }
+                                                        }}
+                                                        className="w-4 h-4"
+                                                    />
+                                                    <span className="text-sm bg-green-500 text-white px-2 py-1 rounded">{style}</span>
+                                                </label>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setFormData(prev => ({
+                                                            ...prev,
+                                                            customParkingStyles: prev.customParkingStyles.filter((_, i) => i !== index),
+                                                            parkingStyleOptions: (prev.parkingStyleOptions || []).filter(a => a !== `custom_style_${style}`)
+                                                        }));
+                                                        toast.success('Custom parking style removed!');
+                                                    }}
+                                                    className="text-red-500 hover:text-red-700"
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            <Button
+                                type="button"
+                                className="bg-blue-600 hover:bg-blue-700 text-white ml-6"
+                                onClick={() => setIsParkingStyleModalOpen(true)}
+                            >
+                                Add More
+                            </Button>
+                        </>
+                    )}
+                </div>
+
+                {/* ============= SECTION 7: LATE NIGHT ENTRY TIME ============= */}
+                <div className="border border-gray-300 rounded-lg p-6 space-y-4">
+                    <h3 className="text-lg font-semibold mb-4">Late Night Entry Time</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label>Select Time In</Label>
+                            <Input
+                                type="time"
+                                value={formData.lateNightTimeIn || ''}
+                                onChange={(e) => setFormData(prev => ({ ...prev, lateNightTimeIn: e.target.value }))}
+                                className="bg-white border border-gray-400 rounded-md"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Select Time Out</Label>
+                            <Input
+                                type="time"
+                                value={formData.lateNightTimeOut || ''}
+                                onChange={(e) => setFormData(prev => ({ ...prev, lateNightTimeOut: e.target.value }))}
+                                className="bg-white border border-gray-400 rounded-md"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* ============= SECTION 8: ROOM STYLE ============= */}
+                <div className="border border-gray-300 rounded-lg p-6 space-y-4">
+                    <h3 className="text-lg font-semibold mb-4">Room Style</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        {['interconnected_room', 'separated_room_style', 'new_developed', 'old_already_age'].map((item) => (
+                            <label key={item} className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={formData.roomStyleOptions?.includes(item) || false}
+                                    onChange={(e) => {
+                                        const current = formData.roomStyleOptions || [];
+                                        if (e.target.checked) {
+                                            setFormData(prev => ({ ...prev, roomStyleOptions: [...current, item] }));
+                                        } else {
+                                            setFormData(prev => ({ ...prev, roomStyleOptions: current.filter(a => a !== item) }));
+                                        }
+                                    }}
+                                    className="w-4 h-4"
+                                />
+                                <span className="text-sm capitalize">{item.replace(/_/g, ' ')}</span>
+                            </label>
+                        ))}
+                    </div>
+                </div>
+
+                {/* ============= SECTION 9: PET REQUIREMENT ============= */}
+                <div className="border border-gray-300 rounded-lg p-6 space-y-4">
+                    <h3 className="text-lg font-semibold mb-4">Pet Requirement</h3>
+                    <div className="space-y-3">
+                        <div className="flex gap-6">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="petAllowed"
+                                    checked={formData.petAllowed === 'allowed'}
+                                    onChange={() => setFormData(prev => ({ ...prev, petAllowed: 'allowed' }))}
+                                    className="w-4 h-4"
+                                />
+                                <span className="text-sm">Allowed</span>
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="petAllowed"
+                                    checked={formData.petAllowed === 'not_allowed'}
+                                    onChange={() => setFormData(prev => ({ ...prev, petAllowed: 'not_allowed' }))}
+                                    className="w-4 h-4"
+                                />
+                                <span className="text-sm">Not Allowed</span>
+                            </label>
+                        </div>
+
+                        {/* Pet Shelter Sub-option */}
+                        {formData.petAllowed === 'allowed' && (
+                            <div className="ml-6 space-y-2">
+                                <Label className="text-sm font-semibold">If allowed then pet shelter Available</Label>
+                                <div className="flex gap-6">
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="petShelter"
+                                            checked={formData.petShelter === 'yes'}
+                                            onChange={() => setFormData(prev => ({ ...prev, petShelter: 'yes' }))}
+                                            className="w-4 h-4"
+                                        />
+                                        <span className="text-sm bg-pink-500 text-white px-2 py-1 rounded">Yes</span>
+                                    </label>
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="petShelter"
+                                            checked={formData.petShelter === 'no'}
+                                            onChange={() => setFormData(prev => ({ ...prev, petShelter: 'no' }))}
+                                            className="w-4 h-4"
+                                        />
+                                        <span className="text-sm bg-pink-500 text-white px-2 py-1 rounded">No</span>
+                                    </label>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* ============= SECTION 10: SMOKING ALLOWED ============= */}
+                <div className="border border-gray-300 rounded-lg p-6 space-y-4">
+                    <h3 className="text-lg font-semibold mb-4">Smoking Allowed</h3>
+                    <div className="flex gap-6">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="smokingAllowed"
+                                checked={formData.smokingAllowed === 'allowed'}
+                                onChange={() => setFormData(prev => ({ ...prev, smokingAllowed: 'allowed' }))}
+                                className="w-4 h-4"
+                            />
+                            <span className="text-sm">Allowed</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="smokingAllowed"
+                                checked={formData.smokingAllowed === 'not_allowed'}
+                                onChange={() => setFormData(prev => ({ ...prev, smokingAllowed: 'not_allowed' }))}
+                                className="w-4 h-4"
+                            />
+                            <span className="text-sm">Not Allowed</span>
+                        </label>
+                    </div>
+                </div>
+
+                {/* ============= SECTION 11: MUSLIM FAMILY ALLOWED ============= */}
+                <div className="border border-gray-300 rounded-lg p-6 space-y-4">
+                    <h3 className="text-lg font-semibold mb-4">Muslim Family Allowed</h3>
+                    <div className="flex gap-6">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="muslimFamilyAllowed"
+                                checked={formData.muslimFamilyAllowed === 'allowed'}
+                                onChange={() => setFormData(prev => ({ ...prev, muslimFamilyAllowed: 'allowed' }))}
+                                className="w-4 h-4"
+                            />
+                            <span className="text-sm">Allowed</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="muslimFamilyAllowed"
+                                checked={formData.muslimFamilyAllowed === 'not_allowed'}
+                                onChange={() => setFormData(prev => ({ ...prev, muslimFamilyAllowed: 'not_allowed' }))}
+                                className="w-4 h-4"
+                            />
+                            <span className="text-sm">Not Allowed</span>
+                        </label>
+                    </div>
+                </div>
+
+                {/* ============= SECTION 12: NON VEGETARIAN FOOD ============= */}
+                <div className="border border-gray-300 rounded-lg p-6 space-y-4">
+                    <h3 className="text-lg font-semibold mb-4">Non Vegetarian Food</h3>
+                    <div className="flex gap-6">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="nonVegAllowed"
+                                checked={formData.nonVegAllowed === 'allowed'}
+                                onChange={() => setFormData(prev => ({ ...prev, nonVegAllowed: 'allowed' }))}
+                                className="w-4 h-4"
+                            />
+                            <span className="text-sm">Allowed</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="nonVegAllowed"
+                                checked={formData.nonVegAllowed === 'not_allowed'}
+                                onChange={() => setFormData(prev => ({ ...prev, nonVegAllowed: 'not_allowed' }))}
+                                className="w-4 h-4"
+                            />
+                            <span className="text-sm">Not Allowed</span>
+                        </label>
+                    </div>
+                </div>
+
+                {/* ============= SECTION 13: ALCOHOL ALLOWED ============= */}
+                <div className="border border-gray-300 rounded-lg p-6 space-y-4">
+                    <h3 className="text-lg font-semibold mb-4">Alcohol Allowed</h3>
+                    <div className="flex gap-6">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="alcoholAllowed"
+                                checked={formData.alcoholAllowed === 'allowed'}
+                                onChange={() => setFormData(prev => ({ ...prev, alcoholAllowed: 'allowed' }))}
+                                className="w-4 h-4"
+                            />
+                            <span className="text-sm">Allowed</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="alcoholAllowed"
+                                checked={formData.alcoholAllowed === 'not_allowed'}
+                                onChange={() => setFormData(prev => ({ ...prev, alcoholAllowed: 'not_allowed' }))}
+                                className="w-4 h-4"
+                            />
+                            <span className="text-sm">Not Allowed</span>
+                        </label>
+                    </div>
+                </div>
+
+                {/* ============= SECTION 14: IN ROOM PARTY ALLOWED ============= */}
+                <div className="border border-gray-300 rounded-lg p-6 space-y-4">
+                    <h3 className="text-lg font-semibold mb-4">In Room Party Allowed</h3>
+                    <div className="flex gap-6">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="inRoomPartyAllowed"
+                                checked={formData.inRoomPartyAllowed === 'allowed'}
+                                onChange={() => setFormData(prev => ({ ...prev, inRoomPartyAllowed: 'allowed' }))}
+                                className="w-4 h-4"
+                            />
+                            <span className="text-sm">Allowed</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="inRoomPartyAllowed"
+                                checked={formData.inRoomPartyAllowed === 'not_allowed'}
+                                onChange={() => setFormData(prev => ({ ...prev, inRoomPartyAllowed: 'not_allowed' }))}
+                                className="w-4 h-4"
+                            />
+                            <span className="text-sm">Not Allowed</span>
+                        </label>
+                    </div>
+                </div>
+
+                {/* ============= SECTION 15: OUTSIDE VISITOR ALLOWED ============= */}
+                <div className="border border-gray-300 rounded-lg p-6 space-y-4">
+                    <h3 className="text-lg font-semibold mb-4">Outside Visitor Allowed</h3>
+                    <div className="flex gap-6">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="outsideVisitorAllowed"
+                                checked={formData.outsideVisitorAllowed === 'allowed'}
+                                onChange={() => setFormData(prev => ({ ...prev, outsideVisitorAllowed: 'allowed' }))}
+                                className="w-4 h-4"
+                            />
+                            <span className="text-sm">Allowed</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="outsideVisitorAllowed"
+                                checked={formData.outsideVisitorAllowed === 'not_allowed'}
+                                onChange={() => setFormData(prev => ({ ...prev, outsideVisitorAllowed: 'not_allowed' }))}
+                                className="w-4 h-4"
+                            />
+                            <span className="text-sm">Not Allowed</span>
+                        </label>
+                    </div>
+                </div>
+
+                {/* ============= SECTION 16: PROHIBITED GOODS ============= */}
+                <div className="border border-gray-300 rounded-lg p-6 space-y-4">
+                    <h3 className="text-lg font-semibold mb-4">Prohibited goods, or objectionable materials</h3>
+                    <div className="flex gap-6">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="prohibitedGoods"
+                                checked={formData.prohibitedGoods === 'allowed'}
+                                onChange={() => setFormData(prev => ({ ...prev, prohibitedGoods: 'allowed' }))}
+                                className="w-4 h-4"
+                            />
+                            <span className="text-sm">Allowed</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="prohibitedGoods"
+                                checked={formData.prohibitedGoods === 'not_allowed'}
+                                onChange={() => setFormData(prev => ({ ...prev, prohibitedGoods: 'not_allowed' }))}
+                                className="w-4 h-4"
+                            />
+                            <span className="text-sm">Not Allowed</span>
+                        </label>
+                    </div>
+                </div>
+
+                {/* ============= SECTION 17: VISITOR ENTRY TO GUEST ROOMS ============= */}
+                <div className="border border-gray-300 rounded-lg p-6 space-y-4">
+                    <h3 className="text-lg font-semibold mb-4">Visitor entry to guest rooms</h3>
+                    <div className="flex gap-6">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="visitorEntry"
+                                checked={formData.visitorEntry === 'allowed'}
+                                onChange={() => setFormData(prev => ({ ...prev, visitorEntry: 'allowed' }))}
+                                className="w-4 h-4"
+                            />
+                            <span className="text-sm">Allowed</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="visitorEntry"
+                                checked={formData.visitorEntry === 'strictly_prohibited'}
+                                onChange={() => setFormData(prev => ({ ...prev, visitorEntry: 'strictly_prohibited' }))}
+                                className="w-4 h-4"
+                            />
+                            <span className="text-sm">Strictly Prohibited</span>
+                        </label>
+                    </div>
+                </div>
+
+                {/* ============= SECTION 18: PHOTOGRAPHS AND VIDEOS ============= */}
+                <div className="border border-gray-300 rounded-lg p-6 space-y-4">
+                    <h3 className="text-lg font-semibold mb-4">Photographs and videos</h3>
+                    <div className="flex gap-6">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="photographsVideos"
+                                checked={formData.photographsVideos === 'allowed'}
+                                onChange={() => setFormData(prev => ({ ...prev, photographsVideos: 'allowed' }))}
+                                className="w-4 h-4"
+                            />
+                            <span className="text-sm">Allowed</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="photographsVideos"
+                                checked={formData.photographsVideos === 'strictly_prohibited'}
+                                onChange={() => setFormData(prev => ({ ...prev, photographsVideos: 'strictly_prohibited' }))}
+                                className="w-4 h-4"
+                            />
+                            <span className="text-sm">Strictly Prohibited</span>
+                        </label>
+                    </div>
+                </div>
+
+                {/* ============= SECTION 19: PRIOR NOTICE ============= */}
+                <div className="border border-gray-300 rounded-lg p-6 space-y-4">
+                    <h3 className="text-lg font-semibold mb-4">Prior Notice</h3>
+                    <div className="space-y-3">
+                        <div className="flex gap-6">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="priorNotice"
+                                    checked={formData.priorNotice === 'yes'}
+                                    onChange={() => setFormData(prev => ({ ...prev, priorNotice: 'yes' }))}
+                                    className="w-4 h-4"
+                                />
+                                <span className="text-sm">Yes</span>
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="priorNotice"
+                                    checked={formData.priorNotice === 'no'}
+                                    onChange={() => setFormData(prev => ({ ...prev, priorNotice: 'no' }))}
+                                    className="w-4 h-4"
+                                />
+                                <span className="text-sm">No</span>
+                            </label>
+                        </div>
+
+                        {/* If Yes - Time/Days selector */}
+                        {formData.priorNotice === 'yes' && (
+                            <div className="ml-6 space-y-2">
+                                <Label>Select Time Or Days</Label>
+                                <Select
+                                    value={formData.priorNoticeTime || ''}
+                                    onValueChange={(value) => setFormData(prev => ({ ...prev, priorNoticeTime: value }))}
+                                >
+                                    <SelectTrigger className="bg-white">
+                                        <SelectValue placeholder="Select time or days" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="1_hour">1 Hour</SelectItem>
+                                        <SelectItem value="2_hours">2 Hours</SelectItem>
+                                        <SelectItem value="6_hours">6 Hours</SelectItem>
+                                        <SelectItem value="12_hours">12 Hours</SelectItem>
+                                        <SelectItem value="1_day">1 Day</SelectItem>
+                                        <SelectItem value="2_days">2 Days</SelectItem>
+                                        <SelectItem value="3_days">3 Days</SelectItem>
+                                        <SelectItem value="1_week">1 Week</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* ============= SECTION 20: PROPERTY AVAILABLE FROM ============= */}
+                <div className="border border-gray-300 rounded-lg p-6 space-y-4">
+                    <h3 className="text-lg font-semibold mb-4">Property Available From</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label>Select Date</Label>
+                            <Input
+                                type="date"
+                                value={formData.propertyAvailableFrom || ''}
+                                onChange={(e) => setFormData(prev => ({ ...prev, propertyAvailableFrom: e.target.value }))}
+                                className="bg-white border border-gray-400 rounded-md"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Minimum Stay Allow</Label>
+                            <Select
+                                value={formData.minimumStayAllow || ''}
+                                onValueChange={(value) => setFormData(prev => ({ ...prev, minimumStayAllow: value }))}
+                            >
+                                <SelectTrigger className="bg-white">
+                                    <SelectValue placeholder="Select Number Of Month" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((month) => (
+                                        <SelectItem key={month} value={`${month}_month${month > 1 ? 's' : ''}`}>
+                                            {month} Month{month > 1 ? 's' : ''}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                </div>
+                <hr className="my-6" />
                 <div className="flex justify-start gap-4">
-                    <Button
+                    {/* <Button
                         type="submit"
                         disabled={loading}
                         className="bg-blue-600 hover:bg-blue-700"
@@ -2538,144 +4397,29 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                         >
                             Cancel Edit
                         </Button>
-                    )}
-                </div>
-
-
-                <div className="max-w-6xl mx-auto p-6 space-y-6">
-
-
-                    {/* ================= PROPERTY DETAILS ================= */}
-
-                    <div className="border p-5 rounded-lg space-y-6">
-
-                        <h2 className="font-semibold text-lg">Property Detail</h2>
-
-                        {/* Purpose */}
-                        <div className="grid grid-cols-3 gap-4">
-
-                            <Select><SelectTrigger><SelectValue placeholder="Detail For What" /></SelectTrigger></Select>
-
-                            <Input placeholder="Property Size Sqft" />
-                            <Input placeholder="Room Size" />
-
-                        </div>
-
-                        {/* Backup */}
-                        <div className="flex items-center gap-5">
-                            <span>Power Backup</span>
-                            <Switch />
-                            <span>Inverter</span>
-                            <Switch />
-                            <span>Generator</span>
-                            <Switch />
-                        </div>
-
-                        {/* Rooms */}
-                        <div className="grid grid-cols-3 gap-4">
-                            <Input placeholder="Number of Room" />
-                            <Input placeholder="Number of Bedroom" />
-                            <Input placeholder="Number of Bathroom" />
-                        </div>
-
-                        {/* Amenities */}
-                        <div className="space-y-2">
-                            <Label>Room Amenities</Label>
-                            <div className="grid grid-cols-4 gap-3">
-
-                                {["WiFi", "AC", "Bed", "TV", "Fridge", "Fan", "Desk", "Chair", "Iron", "Hair Dryer"].map(a =>
-
-                                    <label className="flex gap-2">
-                                        <input type="checkbox" />
-                                        {a}
-                                    </label>
-
-                                )}
-
-                            </div>
-                        </div>
-
-                        {/* Bathroom */}
-                        <div className="space-y-2">
-                            <Label>Bathroom Type</Label>
-                            <div className="flex gap-6">
-
-                                <label><input type="radio" name="bath" />Indian</label>
-                                <label><input type="radio" name="bath" />Western</label>
-                                <label><input type="radio" name="bath" />Both</label>
-
-                            </div>
-                        </div>
-
-                        {/* Parking */}
-                        <div className="space-y-2">
-                            <Label>Parking</Label>
-                            <div className="flex gap-6">
-                                <label><input type="radio" name="park" />Free</label>
-                                <label><input type="radio" name="park" />Reserved</label>
-                                <label><input type="radio" name="park" />Paid</label>
-                            </div>
-                        </div>
-
-                        {/* Time */}
-                        <div className="grid grid-cols-2 gap-4">
-                            <Input type="time" />
-                            <Input type="time" />
-                        </div>
-
-                    </div>
-
-                    {/* ================= POLICIES ================= */}
-
-                    <div className="border p-5 rounded-lg space-y-4">
-
-                        <h2 className="font-semibold text-lg">Policies</h2>
-
-                        <div className="grid grid-cols-3 gap-4">
-
-                            {[
-                                "Pet Allowed",
-                                "Smoking Allowed",
-                                "Family Allowed",
-                                "Veg Only",
-                                "Non Veg Allowed",
-                                "Alcohol Allowed"
-                            ].map(p =>
-
-                                <div className="flex justify-between border p-2 rounded">
-                                    <span>{p}</span>
-                                    <Switch />
-                                </div>
-
-                            )}
-
-                        </div>
-
-                    </div>
-
-                    {/* ================= AVAILABILITY ================= */}
-
-                    <div className="border p-5 rounded-lg space-y-4">
-
-                        <h2 className="font-semibold text-lg">Availability</h2>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <Input type="date" />
-                            <Select><SelectTrigger><SelectValue placeholder="Minimum Stay" /></SelectTrigger></Select>
-                        </div>
-
-                    </div>
-
+                    )} */}
                     {/* ================= SUBMIT ================= */}
 
-                    <Button className="w-full text-lg bg-blue-600 hover:bg-blue-700">
+                    <Button
+                        type="button"
+                        className="w-full text-lg bg-blue-600 hover:bg-blue-700"
+                        onClick={() => {
+                            // Validate that broker contact number OR email is entered
+                            const hasValidPhone = formData.contactNumbers && formData.contactNumbers[0] && formData.contactNumbers[0].length === 10;
+                            const hasValidEmail = formData.emailAddresses && formData.emailAddresses[0] && formData.emailAddresses[0].includes('@');
+
+                            if (!hasValidPhone && !hasValidEmail) {
+                                toast.error('Please enter either a valid 10-digit contact number or email address!');
+                                return;
+                            }
+
+                            // Open verification method selection modal
+                            setIsVerificationMethodModalOpen(true);
+                        }}
+                    >
                         Get OTP For Final Approval
                     </Button>
-
                 </div>
-
-
-
             </form>
             <h2 className="text-2xl font-bold mt-10 mb-4">Existing Properties Details</h2>
             <Table className="border border-black p-2">
@@ -2789,6 +4533,643 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                             Delete Property
                         </Button>
                     </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Custom Furnished Amenity Modal */}
+            <Dialog open={isFurnishedAmenityModalOpen} onOpenChange={setIsFurnishedAmenityModalOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Add Custom Furnished Amenity</DialogTitle>
+                        <DialogDescription>
+                            Add a new custom amenity for furnished rooms. It will be added to your local list.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <div className="flex gap-2">
+                            <Input
+                                placeholder="Enter amenity name..."
+                                value={furnishedAmenityInput}
+                                onChange={(e) => setFurnishedAmenityInput(e.target.value)}
+                                onKeyPress={(e) => {
+                                    if (e.key === 'Enter' && furnishedAmenityInput.trim()) {
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            furnishedAmenities: [
+                                                ...(prev.furnishedAmenities || []),
+                                                `custom_${furnishedAmenityInput.trim().toLowerCase().replace(/\s+/g, '_')}`
+                                            ],
+                                            customFurnishedAmenitiesLabels: {
+                                                ...(prev.customFurnishedAmenitiesLabels || {}),
+                                                [`custom_${furnishedAmenityInput.trim().toLowerCase().replace(/\s+/g, '_')}`]: furnishedAmenityInput.trim()
+                                            }
+                                        }));
+                                        toast.success('Furnished amenity added!');
+                                        setFurnishedAmenityInput('');
+                                    }
+                                }}
+                                className="flex-1"
+                            />
+                            <Button
+                                type="button"
+                                onClick={() => {
+                                    if (furnishedAmenityInput.trim()) {
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            furnishedAmenities: [
+                                                ...(prev.furnishedAmenities || []),
+                                                `custom_${furnishedAmenityInput.trim().toLowerCase().replace(/\s+/g, '_')}`
+                                            ],
+                                            customFurnishedAmenitiesLabels: {
+                                                ...(prev.customFurnishedAmenitiesLabels || {}),
+                                                [`custom_${furnishedAmenityInput.trim().toLowerCase().replace(/\s+/g, '_')}`]: furnishedAmenityInput.trim()
+                                            }
+                                        }));
+                                        toast.success('Furnished amenity added!');
+                                        setFurnishedAmenityInput('');
+                                    }
+                                }}
+                                className="bg-blue-600 hover:bg-blue-700"
+                            >
+                                Add
+                            </Button>
+                        </div>
+
+                        {/* Display custom amenities */}
+                        {formData.customFurnishedAmenitiesLabels && Object.keys(formData.customFurnishedAmenitiesLabels).length > 0 && (
+                            <div className="space-y-2">
+                                <Label className="text-sm font-semibold">Custom Amenities:</Label>
+                                <div className="flex flex-wrap gap-2">
+                                    {Object.entries(formData.customFurnishedAmenitiesLabels || {}).map(([key, label]) => (
+                                        <div
+                                            key={key}
+                                            className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-full"
+                                        >
+                                            <span className="text-sm">{label}</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setFormData(prev => {
+                                                        const newLabels = { ...prev.customFurnishedAmenitiesLabels };
+                                                        delete newLabels[key];
+                                                        return {
+                                                            ...prev,
+                                                            furnishedAmenities: (prev.furnishedAmenities || []).filter(a => a !== key),
+                                                            customFurnishedAmenitiesLabels: newLabels
+                                                        };
+                                                    });
+                                                    toast.success('Amenity removed!');
+                                                }}
+                                                className="text-red-500 hover:text-red-700"
+                                            >
+                                                <X className="w-3 h-3" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    <div className="flex justify-end gap-2 mt-4">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                                setIsFurnishedAmenityModalOpen(false);
+                                setFurnishedAmenityInput('');
+                            }}
+                        >
+                            Close
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Custom Bathroom Amenity Modal */}
+            <Dialog open={isBathroomAmenityModalOpen} onOpenChange={setIsBathroomAmenityModalOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Add Custom Bathroom Amenity</DialogTitle>
+                        <DialogDescription>
+                            Add a new custom amenity for bathrooms. It will be added to your local list.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <div className="flex gap-2">
+                            <Input
+                                placeholder="Enter amenity name..."
+                                value={bathroomAmenityInput}
+                                onChange={(e) => setBathroomAmenityInput(e.target.value)}
+                                onKeyPress={(e) => {
+                                    if (e.key === 'Enter' && bathroomAmenityInput.trim()) {
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            customBathroomAmenities: [
+                                                ...(prev.customBathroomAmenities || []),
+                                                bathroomAmenityInput.trim()
+                                            ]
+                                        }));
+                                        toast.success('Bathroom amenity added!');
+                                        setBathroomAmenityInput('');
+                                    }
+                                }}
+                                className="flex-1"
+                            />
+                            <Button
+                                type="button"
+                                onClick={() => {
+                                    if (bathroomAmenityInput.trim()) {
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            customBathroomAmenities: [
+                                                ...(prev.customBathroomAmenities || []),
+                                                bathroomAmenityInput.trim()
+                                            ]
+                                        }));
+                                        toast.success('Bathroom amenity added!');
+                                        setBathroomAmenityInput('');
+                                    }
+                                }}
+                                className="bg-blue-600 hover:bg-blue-700"
+                            >
+                                Add
+                            </Button>
+                        </div>
+
+                        {/* Display custom bathroom amenities */}
+                        {formData.customBathroomAmenities && formData.customBathroomAmenities.length > 0 && (
+                            <div className="space-y-2">
+                                <Label className="text-sm font-semibold">Custom Amenities:</Label>
+                                <div className="flex flex-wrap gap-2">
+                                    {formData.customBathroomAmenities.map((amenity, index) => (
+                                        <div
+                                            key={index}
+                                            className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-full"
+                                        >
+                                            <span className="text-sm">{amenity}</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        customBathroomAmenities: prev.customBathroomAmenities.filter((_, i) => i !== index)
+                                                    }));
+                                                    toast.success('Amenity removed!');
+                                                }}
+                                                className="text-red-500 hover:text-red-700"
+                                            >
+                                                <X className="w-3 h-3" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    <div className="flex justify-end gap-2 mt-4">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                                setIsBathroomAmenityModalOpen(false);
+                                setBathroomAmenityInput('');
+                            }}
+                        >
+                            Close
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Custom Tenant Type Modal */}
+            <Dialog open={isTenantTypeModalOpen} onOpenChange={setIsTenantTypeModalOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Add Custom Tenant Type</DialogTitle>
+                        <DialogDescription>
+                            Add a new custom tenant type. It will be added to your local list.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <div className="flex gap-2">
+                            <Input
+                                placeholder="Enter tenant type name..."
+                                value={tenantTypeInput}
+                                onChange={(e) => setTenantTypeInput(e.target.value)}
+                                onKeyPress={(e) => {
+                                    if (e.key === 'Enter' && tenantTypeInput.trim()) {
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            customTenantTypes: [
+                                                ...(prev.customTenantTypes || []),
+                                                tenantTypeInput.trim()
+                                            ]
+                                        }));
+                                        toast.success('Tenant type added!');
+                                        setTenantTypeInput('');
+                                    }
+                                }}
+                                className="flex-1"
+                            />
+                            <Button
+                                type="button"
+                                onClick={() => {
+                                    if (tenantTypeInput.trim()) {
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            customTenantTypes: [
+                                                ...(prev.customTenantTypes || []),
+                                                tenantTypeInput.trim()
+                                            ]
+                                        }));
+                                        toast.success('Tenant type added!');
+                                        setTenantTypeInput('');
+                                    }
+                                }}
+                            >
+                                Add
+                            </Button>
+                        </div>
+
+                        {/* Display custom tenant types */}
+                        {formData.customTenantTypes && formData.customTenantTypes.length > 0 && (
+                            <div className="space-y-2">
+                                <Label className="text-sm font-semibold">Custom Tenant Types:</Label>
+                                <div className="flex flex-wrap gap-2">
+                                    {formData.customTenantTypes.map((type, index) => (
+                                        <div
+                                            key={index}
+                                            className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-full"
+                                        >
+                                            <span className="text-sm">{type}</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        customTenantTypes: prev.customTenantTypes.filter((_, i) => i !== index),
+                                                        tenantTypeAllowed: (prev.tenantTypeAllowed || []).filter(t => t !== `custom_${type}`)
+                                                    }));
+                                                    toast.success('Tenant type removed!');
+                                                }}
+                                                className="text-red-500 hover:text-red-700"
+                                            >
+                                                <X className="w-3 h-3" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    <div className="flex justify-end gap-2 mt-4">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                                setIsTenantTypeModalOpen(false);
+                                setTenantTypeInput('');
+                            }}
+                        >
+                            Close
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Custom Parking Amenity Modal */}
+            <Dialog open={isParkingAmenityModalOpen} onOpenChange={setIsParkingAmenityModalOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Add Custom Parking Amenity</DialogTitle>
+                        <DialogDescription>
+                            Add a new custom parking amenity. It will be added to your local list.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <div className="flex gap-2">
+                            <Input
+                                placeholder="Enter parking amenity name..."
+                                value={parkingAmenityInput}
+                                onChange={(e) => setParkingAmenityInput(e.target.value)}
+                                onKeyPress={(e) => {
+                                    if (e.key === 'Enter' && parkingAmenityInput.trim()) {
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            customParkingAmenities: [
+                                                ...(prev.customParkingAmenities || []),
+                                                parkingAmenityInput.trim()
+                                            ]
+                                        }));
+                                        toast.success('Parking amenity added!');
+                                        setParkingAmenityInput('');
+                                    }
+                                }}
+                                className="flex-1"
+                            />
+                            <Button
+                                type="button"
+                                onClick={() => {
+                                    if (parkingAmenityInput.trim()) {
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            customParkingAmenities: [
+                                                ...(prev.customParkingAmenities || []),
+                                                parkingAmenityInput.trim()
+                                            ]
+                                        }));
+                                        toast.success('Parking amenity added!');
+                                        setParkingAmenityInput('');
+                                    }
+                                }}
+                            >
+                                Add
+                            </Button>
+                        </div>
+
+                        {/* Display custom parking amenities */}
+                        {formData.customParkingAmenities && formData.customParkingAmenities.length > 0 && (
+                            <div className="space-y-2">
+                                <Label className="text-sm font-semibold">Custom Parking Amenities:</Label>
+                                <div className="flex flex-wrap gap-2">
+                                    {formData.customParkingAmenities.map((amenity, index) => (
+                                        <div
+                                            key={index}
+                                            className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-full"
+                                        >
+                                            <span className="text-sm">{amenity}</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        customParkingAmenities: prev.customParkingAmenities.filter((_, i) => i !== index),
+                                                        parkingAmenities: (prev.parkingAmenities || []).filter(a => a !== `custom_parking_${amenity}`)
+                                                    }));
+                                                    toast.success('Parking amenity removed!');
+                                                }}
+                                                className="text-red-500 hover:text-red-700"
+                                            >
+                                                <X className="w-3 h-3" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    <div className="flex justify-end gap-2 mt-4">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                                setIsParkingAmenityModalOpen(false);
+                                setParkingAmenityInput('');
+                            }}
+                        >
+                            Close
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Custom Parking Style Modal */}
+            <Dialog open={isParkingStyleModalOpen} onOpenChange={setIsParkingStyleModalOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Add Custom Parking Style</DialogTitle>
+                        <DialogDescription>
+                            Add a new custom parking style. It will be added to your local list.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <div className="flex gap-2">
+                            <Input
+                                placeholder="Enter parking style name..."
+                                value={parkingStyleInput}
+                                onChange={(e) => setParkingStyleInput(e.target.value)}
+                                onKeyPress={(e) => {
+                                    if (e.key === 'Enter' && parkingStyleInput.trim()) {
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            customParkingStyles: [
+                                                ...(prev.customParkingStyles || []),
+                                                parkingStyleInput.trim()
+                                            ]
+                                        }));
+                                        toast.success('Parking style added!');
+                                        setParkingStyleInput('');
+                                    }
+                                }}
+                                className="flex-1"
+                            />
+                            <Button
+                                type="button"
+                                onClick={() => {
+                                    if (parkingStyleInput.trim()) {
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            customParkingStyles: [
+                                                ...(prev.customParkingStyles || []),
+                                                parkingStyleInput.trim()
+                                            ]
+                                        }));
+                                        toast.success('Parking style added!');
+                                        setParkingStyleInput('');
+                                    }
+                                }}
+                            >
+                                Add
+                            </Button>
+                        </div>
+
+                        {/* Display custom parking styles */}
+                        {formData.customParkingStyles && formData.customParkingStyles.length > 0 && (
+                            <div className="space-y-2">
+                                <Label className="text-sm font-semibold">Custom Parking Styles:</Label>
+                                <div className="flex flex-wrap gap-2">
+                                    {formData.customParkingStyles.map((style, index) => (
+                                        <div
+                                            key={index}
+                                            className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-full"
+                                        >
+                                            <span className="text-sm">{style}</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        customParkingStyles: prev.customParkingStyles.filter((_, i) => i !== index),
+                                                        parkingStyleOptions: (prev.parkingStyleOptions || []).filter(a => a !== `custom_style_${style}`)
+                                                    }));
+                                                    toast.success('Parking style removed!');
+                                                }}
+                                                className="text-red-500 hover:text-red-700"
+                                            >
+                                                <X className="w-3 h-3" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    <div className="flex justify-end gap-2 mt-4">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                                setIsParkingStyleModalOpen(false);
+                                setParkingStyleInput('');
+                            }}
+                        >
+                            Close
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Verification Method Selection Modal */}
+            <Dialog open={isVerificationMethodModalOpen} onOpenChange={setIsVerificationMethodModalOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Choose Verification Method</DialogTitle>
+                        <DialogDescription>
+                            Select how you want to receive your OTP for final approval
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="grid grid-cols-2 gap-4 py-4">
+                        {/* Mobile OTP Option */}
+                        <Button
+                            variant="outline"
+                            className="h-32 flex flex-col items-center justify-center gap-3 hover:bg-blue-50 hover:border-blue-500 transition-all"
+                            onClick={() => {
+                                if (!formData.contactNumbers || !formData.contactNumbers[0] || formData.contactNumbers[0].length !== 10) {
+                                    toast.error('Please enter a valid 10-digit contact number first!');
+                                    return;
+                                }
+                                setVerificationMethod('mobile');
+                                setIsVerificationMethodModalOpen(false);
+                                setIsOTPModalOpen(true);
+                            }}
+                            disabled={!formData.contactNumbers || !formData.contactNumbers[0] || formData.contactNumbers[0].length !== 10}
+                        >
+                            <svg className="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                            <div className="text-center">
+                                <div className="font-semibold">Mobile OTP</div>
+                                <div className="text-xs text-gray-500">
+                                    {formData.contactNumbers?.[0] ? `+91 ${formData.contactNumbers[0]}` : 'No number entered'}
+                                </div>
+                            </div>
+                        </Button>
+
+                        {/* Email OTP Option */}
+                        <Button
+                            variant="outline"
+                            className="h-32 flex flex-col items-center justify-center gap-3 hover:bg-green-50 hover:border-green-500 transition-all"
+                            onClick={() => {
+                                if (!formData.emailAddresses || !formData.emailAddresses[0] || !formData.emailAddresses[0].includes('@')) {
+                                    toast.error('Please enter a valid email address first!');
+                                    return;
+                                }
+                                setVerificationMethod('email');
+                                setIsVerificationMethodModalOpen(false);
+                                setIsOTPModalOpen(true);
+                            }}
+                            disabled={!formData.emailAddresses || !formData.emailAddresses[0] || !formData.emailAddresses[0].includes('@')}
+                        >
+                            <svg className="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            <div className="text-center">
+                                <div className="font-semibold">Email OTP</div>
+                                <div className="text-xs text-gray-500 truncate max-w-[120px]">
+                                    {formData.emailAddresses?.[0] || 'No email entered'}
+                                </div>
+                            </div>
+                        </Button>
+                    </div>
+
+                    <div className="text-xs text-center text-gray-500">
+                        OTP will be sent to your selected method for verification
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* OTP Verification Modal (Dynamic based on method) */}
+            <Dialog open={isOTPModalOpen} onOpenChange={setIsOTPModalOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>
+                            {verificationMethod === 'mobile' ? 'Verify Phone Number' : 'Verify Email Address'}
+                        </DialogTitle>
+                        <DialogDescription>
+                            {verificationMethod === 'mobile'
+                                ? 'An OTP will be sent to your mobile number for verification.'
+                                : 'An OTP will be sent to your email address for verification.'}
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    {verificationMethod === 'mobile' ? (
+                        <PhoneOTPVerification
+                            phoneNumber={formData.contactNumbers?.[0] || ''}
+                            onVerificationSuccess={(userData) => {
+                                console.log('Phone verified:', userData);
+                                toast.success('Phone number verified successfully!');
+                                setIsOTPModalOpen(false);
+                                setVerificationMethod('');
+
+                                // Show declaration form after verification
+                                setShowDeclarationForm(true);
+                            }}
+                        />
+                    ) : verificationMethod === 'email' ? (
+                        <EmailOTPVerification
+                            email={formData.emailAddresses?.[0] || ''}
+                            onVerificationSuccess={(userData) => {
+                                console.log('Email verified:', userData);
+                                toast.success('Email verified successfully!');
+                                setIsOTPModalOpen(false);
+                                setVerificationMethod('');
+
+                                // Show declaration form after verification
+                                setShowDeclarationForm(true);
+                            }}
+                        />
+                    ) : null}
+                </DialogContent>
+            </Dialog>
+
+            {/* Declaration Form Modal */}
+            <Dialog open={showDeclarationForm} onOpenChange={setShowDeclarationForm}>
+                <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+                    <DeclarationForm
+                        formData={formData}
+                        onSubmit={async (declarationData) => {
+                            console.log('Declaration submitted with signature:', declarationData);
+
+                            // Close the declaration modal
+                            setShowDeclarationForm(false);
+
+                            // Show submitting message
+                            toast.success('Declaration accepted! Submitting property...');
+
+                            // Submit the form with signature data
+                            const syntheticEvent = {
+                                preventDefault: () => { }
+                            };
+
+                            // Call handleSubmit with signature data
+                            await handleSubmit(syntheticEvent, declarationData);
+                        }}
+                        onCancel={() => {
+                            setShowDeclarationForm(false);
+                            toast.info('Declaration cancelled');
+                        }}
+                    />
                 </DialogContent>
             </Dialog>
         </div>
