@@ -110,13 +110,13 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
         parkingAvailable: "", // Added missing field
         parkingType: "", // Added missing field
         roomStyle: "",
-        petAllowed: false,
-        smokingAllowed: false,
+        petAllowed: "",
+        smokingAllowed: "",
         familyAllowed: false,
-        familyMembers: "", // Added missing field
+        familyMembers: "2", // Default to 2
         vegetarianOnly: false,
         nonVegetarianAllowed: false,
-        alcoholAllowed: false,
+        alcoholAllowed: "",
         lateNightEntryTime: "",
         availableFrom: "",
         minimumStay: "",
@@ -222,12 +222,10 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
             />
         </div>
     )
-    // console.log(propertyDetails)
     const fetchPropertyDetails = async () => {
         try {
             const response = await fetch("/api/propertyDetails?limit=10");
             const data = await response.json();
-            // console.log(data)
             setPropertyDetails(data.data);
         } catch (error) {
             toast.error("Failed to fetch property type");
@@ -258,13 +256,16 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
     // Handle input changes
     const handleChange = (e) => {
         const { name, value } = e.target;
+        if (name === "aadharCardNumber" && value.length > 12) {
+            toast.error("Aadhar Card Number cannot exceed 12 digits");
+            return;
+        }
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
     // Update property status
     const updatePropertyStatus = async (id, updates) => {
         try {
-            // console.log('Sending update request with:', { id, updates });
             const response = await fetch(`/api/createPropertyDetails?id=${id}`, {
                 method: 'PUT',
                 headers: {
@@ -274,7 +275,6 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
             });
 
             const responseData = await response.json();
-            // console.log('Update response:', { status: response.status, data: responseData });
 
             if (!response.ok) {
                 throw new Error(responseData.error || 'Failed to update property');
@@ -805,6 +805,10 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
 
     // Handle contact number changes
     const handleContactNumberChange = (index, value) => {
+        if (value.length > 10) {
+            toast.error("Contact Number cannot exceed 10 digits");
+            return;
+        }
         const newContactNumbers = [...formData.contactNumbers];
         newContactNumbers[index] = value;
         setFormData(prev => ({ ...prev, contactNumbers: newContactNumbers }));
@@ -963,7 +967,6 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 })
             };
 
-            console.log('Submitting property data:', formDataToSubmit);
 
             // ============= API SUBMISSION SECTION =============
 
@@ -1004,7 +1007,6 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
             // Show success message
             toast.success(editingProperty ? 'Property updated successfully!' : 'Property created successfully!');
 
-            console.log('Property saved successfully:', data.data);
 
             // Reset form and refresh data
             resetForm();
@@ -1031,45 +1033,64 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
             subLocationType: "",
             galiType: "",
             contactAddress: "",
+            landMarkDetails: "", // Added missing field
+            googleLocation: "", // Added missing field
             brokerName: "",
             ownerName: "",
+            sonDaughterWifeOf: "", // Added missing field
             contactNumbers: [""],
             emailAddresses: [""],
             aadharCardNumber: "",
             panCardNumber: "",
             rentPrice: "",
             maxRentPrice: "",
+            propertyName: "",
+            propertyForRentLocatedOn: "", // Added missing field
+            propertyFacingDirection: "", // Added missing field
+            highlights: [],
+            propertyFor: "",
+            isAvailable: true,
+            isTrending: false,
+            isActive: true,
+            propertyNameSlug: "",
             electricityCharges: { include: null, amount: '', type: '' },
             waterCharges: { include: null, amount: '', type: '' },
             securityDeposit: { required: null, amount: '', months: '' },
             maintenanceCharges: { required: null, amount: '', basis: '' },
-            propertyName: "",
-            propertyFor: "",
-            isTrending: false,
-            highlights: [],
             // New detailed property information fields
             tenantType: "",
             sizeInFeet: "",
             sizeInMeter: "",
+            sizeUnit: "", // Added missing field for unit selection
+            sizeLength: "", // Added missing field
+            sizeWidth: "", // Added missing field
             numberOfBedrooms: "",
-            numberOfBathrooms: "",
+            numberOfBathrooms: 0, // Changed to number
+            numberOfRooms: 0, // Added missing field
             furnishingStatus: "",
             amenities: [],
             bathroomStyle: "",
+            bathroomType: "", // Added missing field
             parkingStyle: "",
+            parkingAvailable: "", // Added missing field
+            parkingType: "", // Added missing field
             roomStyle: "",
-            petAllowed: false,
-            smokingAllowed: false,
+            petAllowed: "",
+            smokingAllowed: "",
             familyAllowed: false,
+            familyMembers: "2", // Default to 2
             vegetarianOnly: false,
             nonVegetarianAllowed: false,
-            alcoholAllowed: false,
+            alcoholAllowed: "",
             lateNightEntryTime: "",
             availableFrom: "",
             minimumStay: "",
             detailFor: "",
             powerBackup: "",
             powerBackupType: "",
+            powerBackupAvailable: null, // Added missing field
+            powerBackupSources: { inverter: false, generator: false }, // Added missing field
+            powerBackupCharge: null, // Added missing field
             floor: "",
             balcony: false,
             rooftop: false,
@@ -1079,9 +1100,36 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
             bathroomFeatures: [],
             cctv: "",
             cctvLocation: "",
-            parkingType: "",
             checkIn: "",
             checkOut: "",
+            customBathroomAmenities: [],
+            customFurnishedAmenitiesLabels: {},
+            furnishedAmenities: [],
+            // New comprehensive property detail fields
+            lift: "",
+            cctvFeatures: [],
+            parkingAmenities: [],
+            customParkingAmenities: [],
+            parkingStyleOptions: [],
+            customParkingStyles: [],
+            lateNightTimeIn: "",
+            lateNightTimeOut: "",
+            roomStyleOptions: [],
+            petShelter: "",
+            muslimFamilyAllowed: "",
+            nonVegAllowed: "",
+            inRoomPartyAllowed: "",
+            outsideVisitorAllowed: "",
+            prohibitedGoods: "",
+            visitorEntry: "",
+            photographsVideos: "",
+            priorNotice: "",
+            priorNoticeTime: "",
+            propertyAvailableFrom: "",
+            minimumStayAllow: "",
+            tenantTypeAllowed: [],
+            customTenantTypes: [],
+            stayAllowOnlyFor: "", // Added missing field
 
         });
 
@@ -1300,7 +1348,12 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                     <Label>Location</Label>
                     <Select
                         value={formData.locationType}
-                        onValueChange={(value) => setFormData(prev => ({ ...prev, locationType: value }))}
+                        onValueChange={(value) => setFormData(prev => ({
+                            ...prev,
+                            locationType: value,
+                            subLocationType: "", // reset sub when main changes
+                            galiType: "",        // reset gali too
+                        }))}
                     >
                         <SelectTrigger>
                             <SelectValue placeholder="Select location" />
@@ -1319,17 +1372,27 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                     <Label>Sub Location</Label>
                     <Select
                         value={formData.subLocationType}
-                        onValueChange={(value) => setFormData(prev => ({ ...prev, subLocationType: value }))}
+                        onValueChange={(value) => setFormData(prev => ({
+                            ...prev,
+                            subLocationType: value,
+                            galiType: "", // reset gali when sub changes
+                        }))}
+                        disabled={!formData.locationType}
                     >
                         <SelectTrigger>
-                            <SelectValue placeholder="Select sub location" />
+                            <SelectValue placeholder={formData.locationType ? "Select sub location" : "Select location first"} />
                         </SelectTrigger>
                         <SelectContent>
-                            {subLocationType.map((location, index) => (
-                                <SelectItem key={index + 1} value={location.subLocationType}>
-                                    {location.subLocationType}
-                                </SelectItem>
-                            ))}
+                            {subLocationType
+                                .filter(sub =>
+                                    sub.locationType === formData.locationType &&
+                                    sub.subLocationType?.trim() !== ""
+                                )
+                                .map((location, index) => (
+                                    <SelectItem key={index + 1} value={location.subLocationType}>
+                                        {location.subLocationType}
+                                    </SelectItem>
+                                ))}
                         </SelectContent>
                     </Select>
                 </div>
@@ -1339,16 +1402,23 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                     <Select
                         value={formData.galiType}
                         onValueChange={(value) => setFormData(prev => ({ ...prev, galiType: value }))}
+                        disabled={!formData.subLocationType}
                     >
                         <SelectTrigger>
-                            <SelectValue placeholder="Select gali location" />
+                            <SelectValue placeholder={formData.subLocationType ? "Select gali location" : "Select sub location first"} />
                         </SelectTrigger>
                         <SelectContent>
-                            {galiType.map((location, index) => (
-                                <SelectItem key={index + 1} value={location.galiName}>
-                                    {location.galiName}
-                                </SelectItem>
-                            ))}
+                            {galiType
+                                .filter(gali =>
+                                    gali.locationType === formData.locationType &&
+                                    gali.subLocationType === formData.subLocationType &&
+                                    gali.galiName?.trim() !== ""
+                                )
+                                .map((location, index) => (
+                                    <SelectItem key={index + 1} value={location.galiName}>
+                                        {location.galiName}
+                                    </SelectItem>
+                                ))}
                         </SelectContent>
                     </Select>
                 </div>
@@ -1750,6 +1820,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                                     value={formData.aadharCardNumber}
                                     onChange={handleChange}
                                     placeholder="Enter Aadhar Card Number"
+                                    maxLength={12}
                                 />
                                 <div className="flex items-center gap-4">
                                     <input
@@ -1861,6 +1932,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                                         value={number || ''}  // Changed from formData.contactNumbers to just number
                                         onChange={(e) => handleContactNumberChange(index, e.target.value)}
                                         placeholder={`Contact ${index + 1}`}
+                                        maxLength={10}
                                     />
                                     {formData.contactNumbers.length > 1 && (
                                         <Button
@@ -5033,7 +5105,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
             <Dialog open={isVerificationMethodModalOpen} onOpenChange={setIsVerificationMethodModalOpen}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Choose Verification Method</DialogTitle>
+                        <DialogTitle className="sr-only">Choose Verification Method</DialogTitle>
                         <DialogDescription>
                             Select how you want to receive your OTP for final approval
                         </DialogDescription>
@@ -5117,7 +5189,6 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                         <PhoneOTPVerification
                             phoneNumber={formData.contactNumbers?.[0] || ''}
                             onVerificationSuccess={(userData) => {
-                                console.log('Phone verified:', userData);
                                 toast.success('Phone number verified successfully!');
                                 setIsOTPModalOpen(false);
                                 setVerificationMethod('');
@@ -5130,7 +5201,6 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                         <EmailOTPVerification
                             email={formData.emailAddresses?.[0] || ''}
                             onVerificationSuccess={(userData) => {
-                                console.log('Email verified:', userData);
                                 toast.success('Email verified successfully!');
                                 setIsOTPModalOpen(false);
                                 setVerificationMethod('');
@@ -5145,11 +5215,20 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
 
             {/* Declaration Form Modal */}
             <Dialog open={showDeclarationForm} onOpenChange={setShowDeclarationForm}>
-                <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader className="sr-only">
+                    <DialogTitle>Declaration Form</DialogTitle>
+                    <DialogDescription>
+                        Declaration Form
+                    </DialogDescription>
+                </DialogHeader>
+                <DialogContent
+                    className="max-w-5xl max-h-[90vh] overflow-y-auto"
+                    onInteractOutside={(e) => e.preventDefault()}
+                    onEscapeKeyDown={(e) => e.preventDefault()}
+                >
                     <DeclarationForm
                         formData={formData}
                         onSubmit={async (declarationData) => {
-                            console.log('Declaration submitted with signature:', declarationData);
 
                             // Close the declaration modal
                             setShowDeclarationForm(false);

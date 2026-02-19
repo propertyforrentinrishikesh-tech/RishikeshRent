@@ -91,8 +91,6 @@ const hotelPropertyDetailsSchema = new mongoose.Schema({
     sizeUnit: { type: String },
     sizeLength: { type: String },
     sizeWidth: { type: String },
-    sizeInFeet: { type: String },
-    sizeInMeter: { type: String },
 
     // Power Backup
     powerBackupAvailable: { type: Boolean },
@@ -182,7 +180,10 @@ const hotelPropertyDetailsSchema = new mongoose.Schema({
     isActive: { type: Boolean, default: true },
 
     // Declaration & Verification
-    signatureUrl: { type: String },
+    signatureUrl:  {
+        url: { type: String},
+        key: { type: String}
+    },
     verificationDate: { type: String }, // Changed from Date to String to accept DD/MM/YYYY format
     declarationAccepted: { type: Boolean, default: false },
 

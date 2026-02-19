@@ -48,7 +48,7 @@ export default function DeclarationForm({ formData, onSubmit, onCancel }) {
                     loading: false
                 });
                 toast.success('Signature saved successfully!');
-                return data.url;
+                return { url: data.url, key: data.key || '' };
             } else {
                 console.error('Cloudinary upload failed:', data.error || 'Unknown error');
                 setSignatureImage(prev => ({ ...prev, loading: false }));
@@ -66,12 +66,12 @@ export default function DeclarationForm({ formData, onSubmit, onCancel }) {
     // Handle form submission
     const handleSubmit = async () => {
         // Save signature first
-        const signatureUrl = await saveSignature();
-        if (!signatureUrl) return;
+        const signatureData = await saveSignature();
+        if (!signatureData) return;
 
-        // Call parent submit with signature URL
+        // Call parent submit with signature URL object
         onSubmit({
-            signatureUrl,
+            signatureUrl: signatureData,
             verificationDate
         });
     };
@@ -99,8 +99,8 @@ export default function DeclarationForm({ formData, onSubmit, onCancel }) {
             {/* Declaration Text */}
             <div className="mb-6 space-y-4 text-sm leading-relaxed">
                 <p>
-                    I, <span className="font-semibold">[{formData.ownerName || 'Owner Full Name'}]</span>, son/daughter/wife of{' '}
-                    <span className="font-semibold">[{formData.brokerName || "Father/Husband's Name"}]</span>, currently residing at{' '}
+                    I, <span className="font-semibold">[{formData.brokerName || formData.ownerName || 'Owner Full Name'}]</span>, son/daughter/wife of{' '}
+                    <span className="font-semibold">[{formData.sonDaughterWifeOf || "Father/Husband's Name"}]</span>, currently residing at{' '}
                     <span className="font-semibold">[{formData.contactAddress || 'Your Full Permanent Address'}]</span>, do hereby solemnly affirm and declare as follows:
                 </p>
 
@@ -244,7 +244,7 @@ export default function DeclarationForm({ formData, onSubmit, onCancel }) {
 
                 <div className="mt-4">
                     <p className="text-sm">
-                        <span className="font-semibold">(Full Name:</span> {formData.ownerName || '______________________'})
+                        <span className="font-semibold">(Full Name:</span> {formData.ownerName || formData.brokerName ||'______________________'})
                     </p>
                 </div>
             </div>

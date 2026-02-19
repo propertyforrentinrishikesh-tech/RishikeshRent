@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectTrigger,
@@ -19,18 +20,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import Image from "next/image";
 import toast from "react-hot-toast";
 
 import { PencilIcon, Trash2Icon } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { useRef } from "react";
-import { UploadIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -42,6 +34,7 @@ import {
 const CreateSubLocation = ({
   subLocationType = [],
   setSubLocationType,
+  locationType = [],
 }) => {
   const [showDeleteModalSubLocation, setShowDeleteModalSubLocation] = useState(false);
   const [subLocationToDelete, setSubLocationToDelete] = useState(null);
@@ -50,16 +43,10 @@ const CreateSubLocation = ({
   const [formDataSubLocation, setFormDataSubLocation] = useState({
     locationType: "",
     subLocationType: "",
-    order: 1,
   });
 
-  // Set initial form data order based on props
   useEffect(() => {
-    if (subLocationType?.length > 0) {
-      const highestOrder = Math.max(...subLocationType.map((b) => b.order || 0));
-      setFormDataSubLocation((prev) => ({ ...prev, order: highestOrder + 1 }));
-      setSubLocations(subLocationType);
-    }
+    setSubLocations(subLocationType || []);
   }, [subLocationType]);
 
 
@@ -98,7 +85,7 @@ const CreateSubLocation = ({
         ...formDataSubLocation,
         id: editSubLocation,
       };
-      const response = await fetch("/api/createSubLocation", {
+      const response = await fetch("/api/hotels/createSubLocation", {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -112,17 +99,17 @@ const CreateSubLocation = ({
         );
         setEditSubLocation(null);
 
-        // Refresh banner list
-        const updatedBanners = await fetch("/api/createSubLocation").then((res) =>
+        // Refresh list and sync parent state
+        const updatedBanners = await fetch("/api/hotels/createSubLocation").then((res) =>
           res.json(),
         );
+        setSubLocations(updatedBanners);
         setSubLocationType(updatedBanners);
 
         // Reset form
         setFormDataSubLocation({
           locationType: "",
           subLocationType: "",
-          order: updatedBanners.length + 1,
         });
       } else {
         toast.error(data.error);
@@ -137,12 +124,11 @@ const CreateSubLocation = ({
     setFormDataSubLocation({
       locationType: banner.locationType,
       subLocationType: banner.subLocationType,
-      order: banner.order,
     });
   };
   const handleDeleteForSubLocation = async (id) => {
     try {
-      const response = await fetch("/api/createSubLocation", {
+      const response = await fetch("/api/hotels/createSubLocation", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
@@ -153,13 +139,12 @@ const CreateSubLocation = ({
       if (response.ok) {
         toast.success("Sub Location deleted successfully");
 
-        setSubLocations((prev) => prev.filter((banner) => banner._id !== id));
-
-        // Update order numbers
-        const updatedBanners = await fetch("/api/createSubLocation").then((res) =>
+        // Update list and sync parent state
+        const updatedBanners = await fetch("/api/hotels/createSubLocation").then((res) =>
           res.json(),
         );
         setSubLocations(updatedBanners);
+        setSubLocationType(updatedBanners);
       } else {
         toast.error(data.error);
       }
@@ -179,7 +164,38 @@ const CreateSubLocation = ({
     setShowDeleteModalSubLocation(false);
     setSubLocationToDelete(null);
   };
+  const handleStatusChangeSubLocation = async (id, isActive) => {
+    // Optimistically update local state
+    setSubLocations((prev) =>
+      prev.map((p) => (p._id === id ? { ...p, isActive } : p))
+    );
 
+    try {
+      const response = await fetch('/api/hotels/createSubLocation', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, isActive }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update status');
+      }
+
+      // Sync with server response
+      setSubLocations((prev) =>
+        prev.map((p) => (p._id === data._id ? data : p))
+      );
+      toast.success(`Status updated to ${isActive ? 'Active' : 'Inactive'}`);
+    } catch (error) {
+      // Revert optimistic update on failure
+      setSubLocations((prev) =>
+        prev.map((p) => (p._id === id ? { ...p, isActive: !isActive } : p))
+      );
+      toast.error(`Failed to update status: ${error.message}`);
+    }
+  };
 
   return (
     <div className="max-w-5xl mx-auto w-full">
@@ -205,13 +221,15 @@ const CreateSubLocation = ({
             <SelectTrigger>
               <SelectValue placeholder="Select Main Destination" />
             </SelectTrigger>
-            {/* <SelectContent>
-              {locations.filter(location => location.locationType && location.locationType.trim() !== '').map((location) => (
-                <SelectItem key={location.locationType} value={location.locationType}>
-                  {location.locationType}
-                </SelectItem>
-              ))}
-            </SelectContent> */}
+            <SelectContent>
+              {locationType
+                .filter((loc) => loc.locationType && loc.locationType.trim() !== '')
+                .map((loc) => (
+                  <SelectItem key={loc._id || loc.locationType} value={loc.locationType}>
+                    {loc.locationType}
+                  </SelectItem>
+                ))}
+            </SelectContent>
           </Select>
         </div>
         <div>
@@ -241,10 +259,6 @@ const CreateSubLocation = ({
                 setFormDataSubLocation({
                   locationType: "",
                   subLocationType: "",
-                  order:
-                    locations.length > 0
-                      ? Math.max(...locations.map((b) => b.order)) + 1
-                      : 1,
                 });
               }}
             >
@@ -270,55 +284,64 @@ const CreateSubLocation = ({
               Sub Location Type
             </TableHead>
             <TableHead className="border border-black text-center">
+              Status
+            </TableHead>
+            <TableHead className="border border-black text-center">
               Actions
             </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {subLocations.length > 0 ? (
-            // Sort by Location Type, then Sub Location Type
-            [...subLocations]
-              .sort((a, b) =>
-                a.locationType.localeCompare(b.locationType) ||
-                a.subLocationType.localeCompare(b.subLocationType)
-              )
-              .map((subLocation, index) => (
-                <TableRow key={subLocation._id} className="border border-black">
-                  <TableCell className="border border-black text-center">
-                    {index + 1}
-                  </TableCell>
-                  <TableCell className="border border-black text-center">
-                    {subLocation.locationType}
-                  </TableCell>
-                  <TableCell className="border border-black text-center">
-                    {subLocation.subLocationType}
-                  </TableCell>
-                  <TableCell className="border border-black text-center">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => handleEditForSubLocation(subLocation)}
-                      className="mr-2 "
-                    >
-                      <PencilIcon />
-                    </Button>
-                    <Button
-                      size="icon"
-                      onClick={() => {
-                        setShowDeleteModalSubLocation(true);
-                        setSubLocationToDelete(subLocation._id);
-                      }}
-                      variant="destructive"
-                    >
-                      <Trash2Icon />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
+            subLocations.map((subLocation, index) => (
+              <TableRow key={subLocation._id} className="border border-black">
+                <TableCell className="border border-black text-center">
+                  {index + 1}
+                </TableCell>
+                <TableCell className="border border-black text-center">
+                  {subLocation.locationType}
+                </TableCell>
+                <TableCell className="border border-black text-center">
+                  {subLocation.subLocationType}
+                </TableCell>
+                <TableCell className="border border-black text-center">
+                  <div className="flex items-center justify-center w-full gap-2">
+                    <Switch
+                      id={`status-${subLocation._id}`}
+                      checked={subLocation.isActive}
+                      onCheckedChange={(checked) => handleStatusChangeSubLocation(subLocation._id, checked)}
+                    />
+                    <Label htmlFor={`status-${subLocation._id}`} className="cursor-pointer">
+                      {subLocation.isActive ? 'Active' : 'Inactive'}
+                    </Label>
+                  </div>
+                </TableCell>
+                <TableCell className="border border-black text-center">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleEditForSubLocation(subLocation)}
+                    className="mr-2"
+                  >
+                    <PencilIcon />
+                  </Button>
+                  <Button
+                    size="icon"
+                    onClick={() => {
+                      setShowDeleteModalSubLocation(true);
+                      setSubLocationToDelete(subLocation._id);
+                    }}
+                    variant="destructive"
+                  >
+                    <Trash2Icon />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))
           ) : (
             <TableRow className="border border-black">
               <TableCell colSpan="5" className="text-center py-4">
-                No location types found
+                No sub location types found
               </TableCell>
             </TableRow>
           )}

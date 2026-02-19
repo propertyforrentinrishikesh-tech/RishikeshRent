@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 export default function PhoneOTPVerification({ phoneNumber: propPhoneNumber, onVerificationSuccess }) {
     const [phoneNumber, setPhoneNumber] = useState(propPhoneNumber || '');
     const [otp, setOtp] = useState('');
-    const [verificationId, setVerificationId] = useState('');
+    const [confirmationResult, setConfirmationResult] = useState(null);
     const [showOtpInput, setShowOtpInput] = useState(false);
     const [loading, setLoading] = useState(false);
     const [resendTimer, setResendTimer] = useState(0);
@@ -24,6 +24,20 @@ export default function PhoneOTPVerification({ phoneNumber: propPhoneNumber, onV
         }
         return () => clearInterval(interval);
     }, [resendTimer]);
+
+    // Cleanup reCAPTCHA on unmount to prevent stale verifier issues
+    useEffect(() => {
+        return () => {
+            if (window.recaptchaVerifier) {
+                try {
+                    window.recaptchaVerifier.clear();
+                } catch (error) {
+                    console.error('Error clearing reCAPTCHA:', error);
+                }
+                window.recaptchaVerifier = null;
+            }
+        };
+    }, []);
 
     // Initialize reCAPTCHA
     const setupRecaptcha = () => {
@@ -67,7 +81,7 @@ export default function PhoneOTPVerification({ phoneNumber: propPhoneNumber, onV
                 appVerifier
             );
 
-            setVerificationId(confirmationResult.verificationId);
+            setConfirmationResult(confirmationResult);
             setShowOtpInput(true);
             setResendTimer(30); // Start 30-second countdown
             toast.success('OTP sent successfully!');
@@ -101,12 +115,11 @@ export default function PhoneOTPVerification({ phoneNumber: propPhoneNumber, onV
 
         setLoading(true);
         try {
-            const credential = auth.PhoneAuthProvider.credential(
-                verificationId,
-                otp
-            );
+            if (!confirmationResult) {
+                throw new Error('No verification session found. Please request OTP again.');
+            }
+            const result = await confirmationResult.confirm(otp);
 
-            const result = await auth.signInWithCredential(credential);
             // Call the success callback with user data
             if (onVerificationSuccess) {
                 onVerificationSuccess({
@@ -174,7 +187,7 @@ export default function PhoneOTPVerification({ phoneNumber: propPhoneNumber, onV
                             onClick={() => {
                                 setShowOtpInput(false);
                                 setOtp('');
-                                setVerificationId('');
+                                setConfirmationResult(null);
                             }}
                             className="ml-2 text-blue-600 hover:underline"
                         >

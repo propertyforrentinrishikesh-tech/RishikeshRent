@@ -1,16 +1,9 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -19,18 +12,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import Image from "next/image";
 import toast from "react-hot-toast";
-
 import { PencilIcon, Trash2Icon } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { useRef } from "react";
-import { UploadIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -41,128 +24,25 @@ import {
 
 const PropertyType = ({
   propertyTypes = [],
-  locationType = [],
-  subLocationType = [],
-  galiType = [],
   setPropertyTypes,
-  setLocationType,
-  setSubLocationType,
-  setGaliType,
 }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [showDeleteModalLocation, setShowDeleteModalLocation] = useState(false);
-  const [showDeleteModalSubLocation, setShowDeleteModalSubLocation] = useState(false);
-  const [showDeleteModalForGali, setShowDeleteModalForGali] = useState(false);
   const [propertyToDelete, setPropertyToDelete] = useState(null);
-  const [locationToDelete, setLocationToDelete] = useState(null);
-  const [subLocationToDelete, setSubLocationToDelete] = useState(null);
-  const [galiToDelete, setGaliToDelete] = useState(null);
-  const [locations, setLocations] = useState([]);
-  const [subLocations, setSubLocations] = useState([]);
-  const [galis, setGalis] = useState([]);
-  // Use props instead of local state
   const [properties, setProperties] = useState(propertyTypes);
   const [editProperty, setEditProperty] = useState(null);
-  const [editLocation, setEditLocation] = useState(null);
-  const [editSubLocation, setEditSubLocation] = useState(null);
-  const [editGali, setEditGali] = useState(null);
   const [formData, setFormData] = useState({
     propertyType: "",
-    order: 1,
   });
-  const [formDataLocation, setFormDataLocation] = useState({
-    locationType: "",
-    subLocationType: "",
-    order: 1,
-  });
-  const [formDataSubLocation, setFormDataSubLocation] = useState({
-    locationType: "",
-    subLocationType: "",
-    order: 1,
-  });
-  const [formDataGali, setFormDataGali] = useState({
-    locationType: "",
-    subLocationType: "",
-    galiName: "",
-    order: 1,
-  });
-  // New state for fetched sub-locations
-  const [filteredSubLocations, setFilteredSubLocations] = useState([]);
-
-  // Fetch sub-locations when main location changes in Gali form
+  console.log(propertyTypes)
   useEffect(() => {
-    const fetchSubLocations = async () => {
-      if (!formDataGali.locationType) {
-        setFilteredSubLocations([]);
-        return;
-      }
-      try {
-        const res = await fetch("/api/createSubLocation");
-        if (res.ok) {
-          const data = await res.json();
-          const filtered = data.filter(item => item.locationType === formDataGali.locationType);
-          setFilteredSubLocations(filtered);
-        }
-      } catch (error) {
-        console.error("Failed to fetch sub locations", error);
-      }
-    };
-    fetchSubLocations();
-  }, [formDataGali.locationType]);
-
-
-  // Set initial form data order based on props
-  useEffect(() => {
-    if (propertyTypes?.length > 0) {
-      const highestOrder = Math.max(...propertyTypes.map((b) => b.order || 0));
-      setFormData((prev) => ({ ...prev, order: highestOrder + 1 }));
-      setProperties(propertyTypes);
-    }
-    if (locationType?.length > 0) {
-      const highestOrder = Math.max(...locationType.map((b) => b.order || 0));
-      setFormDataLocation((prev) => ({ ...prev, order: highestOrder + 1 }));
-      setLocations(locationType);
-    }
-    if (subLocationType?.length > 0) {
-      const highestOrder = Math.max(...subLocationType.map((b) => b.order || 0));
-      setFormDataSubLocation((prev) => ({ ...prev, order: highestOrder + 1 }));
-      setSubLocations(subLocationType);
-    }
-    if (galiType?.length > 0) {
-      const highestOrder = Math.max(...galiType.map((b) => b.order || 0));
-      setFormDataGali((prev) => ({ ...prev, order: highestOrder + 1 }));
-      setGalis(galiType);
-    }
-  }, [propertyTypes, locationType, subLocationType]);
+    setProperties(propertyTypes || []);
+  }, [propertyTypes]);
 
   const handleInputChangeForProperty = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value || "", // Ensure we never set undefined
-    }));
-  };
-
-  const handleInputChangeForLocation = (e) => {
-    const { name, value } = e.target;
-    setFormDataLocation((prev) => ({
-      ...prev,
-      [name]: value || "", // Ensure we never set undefined
-    }));
-  };
-
-  const handleInputChangeForSubLocation = (e) => {
-    const { name, value } = e.target;
-    setFormDataSubLocation((prev) => ({
-      ...prev,
-      [name]: value || "", // Ensure we never set undefined
-    }));
-  };
-  const handleInputChangeForGali = (e) => {
-    const { name, value } = e.target;
-    setFormDataGali((prev) => ({
-      ...prev,
-      [name]: value || "", // Ensure we never set undefined
+      [name]: value || "",
     }));
   };
 
@@ -189,7 +69,7 @@ const PropertyType = ({
         ...formData,
         id: editProperty,
       };
-      const response = await fetch("/api/createProperty", {
+      const response = await fetch("/api/hotels/propertyType", {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -202,16 +82,16 @@ const PropertyType = ({
         );
         setEditProperty(null);
 
-        // Refresh banner list
-        const updatedBanners = await fetch("/api/createProperty").then((res) =>
+        // Refresh list and sync parent state
+        const updatedBanners = await fetch("/api/hotels/propertyType").then((res) =>
           res.json(),
         );
         setProperties(updatedBanners);
+        setPropertyTypes(updatedBanners);
 
         // Reset form
         setFormData({
           propertyType: "",
-          order: updatedBanners.length + 1,
         });
       } else {
         toast.error(data.error);
@@ -220,222 +100,17 @@ const PropertyType = ({
       toast.error("Something went wrong");
     }
   };
-  const handleSubmitforLocation = async (e) => {
-    if (!formDataLocation.locationType) {
-      toast.error("Location Type is required");
-      return;
-    }
-    e.preventDefault();
-    const isDuplicate = locations.some(
-      (location) =>
-        location.locationType.toLowerCase() ===
-        formDataLocation.locationType.trim().toLowerCase() &&
-        (!editLocation || location._id !== editLocation), // Skip current item when editing
-    );
-
-    if (isDuplicate) {
-      toast.error("This location already exists");
-      return;
-    }
-    try {
-      const method = editLocation ? "PATCH" : "POST";
-      // Compose payload with coupon details
-      const payload = {
-        ...formDataLocation,
-        id: editLocation,
-      };
-      const response = await fetch("/api/createLocation", {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        toast.success(
-          `Location ${editLocation ? "updated" : "added"} successfully`,
-        );
-        setEditLocation(null);
-
-        // Refresh banner list
-        const updatedBanners = await fetch("/api/createLocation").then((res) =>
-          res.json(),
-        );
-        setLocations(updatedBanners);
-
-        // Reset form
-        setFormDataLocation({
-          locationType: "",
-          subLocationType: "",
-          order: updatedBanners.length + 1,
-        });
-      } else {
-        toast.error(data.error);
-      }
-    } catch (error) {
-      toast.error("Something went wrong");
-    }
-  };
-  const handleSubmitforSubLocationType = async (e) => {
-    if (!formDataSubLocation.subLocationType) {
-      toast.error("Sub Location Type is required");
-      return;
-    }
-    e.preventDefault();
-    // Check for duplicates within the same Location
-    const isDuplicate = subLocations.some(
-      (subLocation) =>
-        subLocation.subLocationType.toLowerCase() ===
-        formDataSubLocation.subLocationType.trim().toLowerCase() &&
-        subLocation.locationType === formDataSubLocation.locationType &&
-        (!editSubLocation || subLocation._id !== editSubLocation)
-    );
-
-    if (isDuplicate) {
-      toast.error("This Sub Location already exists in the selected Main Location.");
-      return;
-    }
-    try {
-      const method = editSubLocation ? "PATCH" : "POST";
-      // Compose payload with coupon details
-      const payload = {
-        ...formDataSubLocation,
-        id: editSubLocation,
-      };
-      const response = await fetch("/api/createSubLocation", {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        toast.success(
-          `Sub Location ${editSubLocation ? "updated" : "added"} successfully`,
-        );
-        setEditSubLocation(null);
-
-        // Refresh banner list
-        const updatedBanners = await fetch("/api/createSubLocation").then((res) =>
-          res.json(),
-        );
-        setSubLocationType(updatedBanners);
-
-        // Reset form
-        setFormDataSubLocation({
-          locationType: "",
-          subLocationType: "",
-          order: updatedBanners.length + 1,
-        });
-      } else {
-        toast.error(data.error);
-      }
-    } catch (error) {
-      toast.error("Something went wrong");
-    }
-  };
-  const handleSubmitforGali = async (e) => {
-    if (!formDataGali.galiName) {
-      toast.error("Gali Name is required");
-      return;
-    }
-    e.preventDefault();
-    // Check for duplicates within the same Location AND Sub Location
-    const isDuplicate = galis.some(
-      (gali) =>
-        gali.galiName.toLowerCase() === formDataGali.galiName.trim().toLowerCase() &&
-        gali.locationType === formDataGali.locationType &&
-        gali.subLocationType === formDataGali.subLocationType &&
-        (!editGali || gali._id !== editGali)
-    );
-
-    if (isDuplicate) {
-      toast.error("This Gali already exists in the selected Location and Sub Location.");
-      return;
-    }
-    try {
-      const method = editGali ? "PATCH" : "POST";
-      // Compose payload with coupon details
-      const payload = {
-        ...formDataGali,
-        id: editGali,
-      };
-      const response = await fetch("/api/createGali", {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        toast.success(
-          `Gali Name ${editGali ? "updated" : "added"} successfully`,
-        );
-        setEditGali(null);
-
-        // Refresh banner list
-        const updatedBanners = await fetch("/api/createGali").then((res) =>
-          res.json(),
-        );
-        setGalis(updatedBanners);
-
-        // Reset form
-        setFormDataGali({
-          galiName: "",
-          locationType: "",
-          subLocationType: "",
-          order: updatedBanners.length + 1,
-        });
-      } else {
-        toast.error(data.error);
-      }
-    } catch (error) {
-      toast.error("Something went wrong");
-    }
-  };
-
   const handleEditForProperty = (banner) => {
     setEditProperty(banner._id);
     // console.log(banner)
     setFormData({
       propertyType: banner.propertyType,
-      order: banner.order,
-    });
-  };
-  const handleEditForLocation = (banner) => {
-    setEditLocation(banner._id);
-    // console.log(banner)
-    setFormDataLocation({
-      locationType: banner.locationType,
-      order: banner.order,
-    });
-  };
-  const handleEditForSubLocation = (banner) => {
-    setEditSubLocation(banner._id);
-    // console.log(banner)
-    setFormDataSubLocation({
-      locationType: banner.locationType,
-      subLocationType: banner.subLocationType,
-      order: banner.order,
-    });
-  };
-  const handleEditForGali = (banner) => {
-    setEditGali(banner._id);
-    // console.log(banner)
-    setFormDataGali({
-      galiName: banner.galiName,
-      locationType: banner.locationType,
-      subLocationType: banner.subLocationType,
-      order: banner.order,
     });
   };
 
   const handleDeleteForProperty = async (id) => {
     try {
-      const response = await fetch("/api/createProperty", {
+      const response = await fetch("/api/hotels/propertyType", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
@@ -445,14 +120,12 @@ const PropertyType = ({
 
       if (response.ok) {
         toast.success("Property Type deleted successfully");
-
-        setProperties((prev) => prev.filter((banner) => banner._id !== id));
-
-        // Update order numbers
-        const updatedBanners = await fetch("/api/createProperty").then((res) =>
+        // Re-fetch and sync both local and parent state
+        const updatedBanners = await fetch("/api/hotels/propertyType").then((res) =>
           res.json(),
         );
         setProperties(updatedBanners);
+        setPropertyTypes(updatedBanners);
       } else {
         toast.error(data.error);
       }
@@ -460,87 +133,7 @@ const PropertyType = ({
       toast.error("Something went wrong");
     }
   };
-  const handleDeleteForLocation = async (id) => {
-    try {
-      const response = await fetch("/api/createLocation", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id }),
-      });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        toast.success("Location deleted successfully");
-
-        setLocations((prev) => prev.filter((banner) => banner._id !== id));
-
-        // Update order numbers
-        const updatedBanners = await fetch("/api/createLocation").then((res) =>
-          res.json(),
-        );
-        setLocations(updatedBanners);
-      } else {
-        toast.error(data.error);
-      }
-    } catch (error) {
-      toast.error("Something went wrong");
-    }
-  };
-  const handleDeleteForSubLocation = async (id) => {
-    try {
-      const response = await fetch("/api/createSubLocation", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        toast.success("Sub Location deleted successfully");
-
-        setSubLocations((prev) => prev.filter((banner) => banner._id !== id));
-
-        // Update order numbers
-        const updatedBanners = await fetch("/api/createSubLocation").then((res) =>
-          res.json(),
-        );
-        setSubLocations(updatedBanners);
-      } else {
-        toast.error(data.error);
-      }
-    } catch (error) {
-      toast.error("Something went wrong");
-    }
-  };
-  const handleDeleteForGali = async (id) => {
-    try {
-      const response = await fetch("/api/createGali", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        toast.success("Gali deleted successfully");
-
-        setGalis((prev) => prev.filter((banner) => banner._id !== id));
-
-        // Update order numbers
-        const updatedBanners = await fetch("/api/createGali").then((res) =>
-          res.json(),
-        );
-        setGalis(updatedBanners);
-      } else {
-        toast.error(data.error);
-      }
-    } catch (error) {
-      toast.error("Something went wrong");
-    }
-  };
   const confirmDeleteForProperty = async () => {
     if (propertyToDelete) {
       await handleDeleteForProperty(propertyToDelete);
@@ -548,45 +141,43 @@ const PropertyType = ({
       setShowDeleteModal(false);
     }
   };
-  const confirmDeleteForLocation = async () => {
-    if (locationToDelete) {
-      await handleDeleteForLocation(locationToDelete);
-      setLocationToDelete(null);
-      setShowDeleteModalLocation(false);
-    }
-  };
-  const confirmDeleteForSubLocation = async () => {
-    if (subLocationToDelete) {
-      await handleDeleteForSubLocation(subLocationToDelete);
-      setSubLocationToDelete(null);
-      setShowDeleteModalSubLocation(false);
-    }
-  };
-  const confirmDeleteForGali = async () => {
-    if (galiToDelete) {
-      await handleDeleteForGali(galiToDelete);
-      setGaliToDelete(null);
-      setShowDeleteModalForGali(false);
-    }
-  };
 
   const cancelDeleteForProperty = () => {
     setShowDeleteModal(false);
     setPropertyToDelete(null);
   };
-  const cancelDeleteForLocation = () => {
-    setShowDeleteModalLocation(false);
-    setLocationToDelete(null);
-  };
-  const cancelDeleteForSubLocation = () => {
-    setShowDeleteModalSubLocation(false);
-    setSubLocationToDelete(null);
-  };
-  const cancelDeleteForGali = () => {
-    setShowDeleteModalForGali(false);
-    setGaliToDelete(null);
-  };
+  const handleStatusChange = async (id, isActive) => {
+    // Optimistically update local state
+    setProperties((prev) =>
+      prev.map((p) => (p._id === id ? { ...p, isActive } : p))
+    );
 
+    try {
+      const response = await fetch('/api/hotels/propertyType', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, isActive }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update status');
+      }
+
+      // Sync with server response
+      setProperties((prev) =>
+        prev.map((p) => (p._id === data._id ? data : p))
+      );
+      toast.success(`Status updated to ${isActive ? 'Active' : 'Inactive'}`);
+    } catch (error) {
+      // Revert optimistic update on failure
+      setProperties((prev) =>
+        prev.map((p) => (p._id === id ? { ...p, isActive: !isActive } : p))
+      );
+      toast.error(`Failed to update status: ${error.message}`);
+    }
+  };
   return (
     <div className="max-w-5xl mx-auto w-full">
       <h2 className="text-2xl font-bold mb-6">
@@ -620,10 +211,6 @@ const PropertyType = ({
                 setEditProperty(null);
                 setFormData({
                   propertyType: "",
-                  order:
-                    properties.length > 0
-                      ? Math.max(...properties.map((b) => b.order)) + 1
-                      : 1,
                 });
               }}
             >
@@ -644,6 +231,9 @@ const PropertyType = ({
               Property Type
             </TableHead>
             <TableHead className="border border-black text-center">
+              Status
+            </TableHead>
+            <TableHead className="border border-black text-center">
               Actions
             </TableHead>
           </TableRow>
@@ -657,6 +247,19 @@ const PropertyType = ({
                 </TableCell>
                 <TableCell className="border border-black text-center">
                   {property.propertyType}
+                </TableCell>
+                {/* Status */}
+                <TableCell>
+                  <div className="flex items-center justify-center space-x-2">
+                    <Switch
+                      id={`status-${property._id}`}
+                      checked={property.isActive}
+                      onCheckedChange={(checked) => handleStatusChange(property._id, checked)}
+                    />
+                    <Label htmlFor={`status-${property._id}`} className="cursor-pointer">
+                      {property.isActive ? 'Active' : 'Inactive'}
+                    </Label>
+                  </div>
                 </TableCell>
                 <TableCell className="border border-black text-center">
                   <Button

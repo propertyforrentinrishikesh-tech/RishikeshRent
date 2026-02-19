@@ -9,10 +9,10 @@ import PropertyDetails from "@/components/Admin/PropertySidebar/PropertyDetails"
 import CreateLocation from "@/components/Admin/PropertySidebar/CreateLocation";
 import CreateSubLocation from "@/components/Admin/PropertySidebar/CreateSubLocation";
 import CreateGali from "@/components/Admin/PropertySidebar/CreateGali";
-// import AllProperties from "@/AllProperties";
-// import Availability from "@/Availability";
-// import SearchProperty from "@/SearchProperty";
-// import Enquiry from "@/Enquiry";
+import AllProperties from "@/components/Admin/PropertySidebar/AllProperties";
+import TotalPropertyType from "@/components/Admin/PropertySidebar/TotalPropertyType";
+import SearchProperty from "@/components/Admin/PropertySidebar/SearchProperty";
+import PropertyEnquiry from "@/components/Admin/PropertySidebar/PropertyEnquiry";
 
 const PropertiesDashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -37,10 +37,10 @@ const PropertiesDashboard = () => {
           subLocResponse,
           galiResponse,
         ] = await Promise.all([
-          fetch("/api/createProperty"),
-          fetch("/api/createLocation"),
-          fetch("/api/createSubLocation"),
-          fetch("/api/createGali"),
+          fetch("/api/hotels/propertyType"),
+          fetch("/api/hotels/createLocation"),
+          fetch("/api/hotels/createSubLocation"),
+          fetch("/api/hotels/createGali"),
         ]);
 
         const [
@@ -126,22 +126,22 @@ const PropertiesDashboard = () => {
         {
           key: "all_property",
           label: "Total Property Type",
-        //   component: () => <AllProperties {...sharedProps} />,
+          component: () => <AllProperties {...sharedProps} />,
         },
         {
           key: "available",
-          label: "Available / Not Available",
-        //   component: () => <Availability {...sharedProps} />,
+          label: "Total Property Type",
+          component: () => <TotalPropertyType {...sharedProps} />,
         },
         {
           key: "search",
           label: "Search Property",
-        //   component: () => <SearchProperty {...sharedProps} />,
+          component: () => <SearchProperty {...sharedProps} />,
         },
         {
           key: "enquiry",
           label: "Property Enquiry",
-        //   component: () => <Enquiry {...sharedProps} />,
+          component: () => <PropertyEnquiry {...sharedProps} />,
         },
       ],
     },

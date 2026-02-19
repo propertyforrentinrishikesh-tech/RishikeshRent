@@ -19,18 +19,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import Image from "next/image";
+import { Switch } from "@/components/ui/switch"
 import toast from "react-hot-toast";
 
 import { PencilIcon, Trash2Icon } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { useRef } from "react";
-import { UploadIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -61,33 +53,20 @@ const CreateGali = ({
     locationType: "",
     subLocationType: "",
     galiName: "",
-    order: 1,
   });
-  // New state for fetched sub-locations
-  const [filteredSubLocations, setFilteredSubLocations] = useState([]);
 
-  // Fetch sub-locations when main location changes in Gali form
   useEffect(() => {
-    const fetchSubLocations = async () => {
-      if (!formDataGali.locationType) {
-        setFilteredSubLocations([]);
-        return;
-      }
-      try {
-        const res = await fetch("/api/createSubLocation");
-        if (res.ok) {
-          const data = await res.json();
-          const filtered = data.filter(item => item.locationType === formDataGali.locationType);
-          setFilteredSubLocations(filtered);
-        }
-      } catch (error) {
-        console.error("Failed to fetch sub locations", error);
-      }
-    };
-    fetchSubLocations();
-  }, [formDataGali.locationType]);
+    setGalis(galiType || []);
+  }, [galiType]);
 
+  useEffect(() => {
+    setLocations(locationType || []);
+  }, [locationType]);
 
+  // Derived: sub-locations filtered by selected main location
+  const filteredSubLocations = subLocationType.filter(
+    (sub) => sub.locationType === formDataGali.locationType && sub.subLocationType?.trim() !== ""
+  );
 
   const handleInputChangeForGali = (e) => {
     const { name, value } = e.target;
@@ -108,6 +87,7 @@ const CreateGali = ({
         gali.galiName.toLowerCase() === formDataGali.galiName.trim().toLowerCase() &&
         gali.locationType === formDataGali.locationType &&
         gali.subLocationType === formDataGali.subLocationType &&
+        gali.galiType === formDataGali.galiType &&
         (!editGali || gali._id !== editGali)
     );
 
@@ -122,7 +102,7 @@ const CreateGali = ({
         ...formDataGali,
         id: editGali,
       };
-      const response = await fetch("/api/createGali", {
+      const response = await fetch("/api/hotels/createGali", {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -136,18 +116,18 @@ const CreateGali = ({
         );
         setEditGali(null);
 
-        // Refresh banner list
-        const updatedBanners = await fetch("/api/createGali").then((res) =>
+        // Refresh list and sync parent state
+        const updatedBanners = await fetch("/api/hotels/createGali").then((res) =>
           res.json(),
         );
         setGalis(updatedBanners);
+        setGaliType(updatedBanners);
 
         // Reset form
         setFormDataGali({
           galiName: "",
           locationType: "",
           subLocationType: "",
-          order: updatedBanners.length + 1,
         });
       } else {
         toast.error(data.error);
@@ -163,13 +143,12 @@ const CreateGali = ({
       galiName: banner.galiName,
       locationType: banner.locationType,
       subLocationType: banner.subLocationType,
-      order: banner.order,
     });
   };
 
   const handleDeleteForGali = async (id) => {
     try {
-      const response = await fetch("/api/createGali", {
+      const response = await fetch("/api/hotels/createGali", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
@@ -180,13 +159,12 @@ const CreateGali = ({
       if (response.ok) {
         toast.success("Gali deleted successfully");
 
-        setGalis((prev) => prev.filter((banner) => banner._id !== id));
-
-        // Update order numbers
-        const updatedBanners = await fetch("/api/createGali").then((res) =>
+        // Update list and sync parent state
+        const updatedBanners = await fetch("/api/hotels/createGali").then((res) =>
           res.json(),
         );
         setGalis(updatedBanners);
+        setGaliType(updatedBanners);
       } else {
         toast.error(data.error);
       }
@@ -206,6 +184,37 @@ const CreateGali = ({
     setGaliToDelete(null);
   };
 
+  const handleStatusChange = async (id, isActive) => {
+    setGalis((prev) =>
+      prev.map((p) => (p._id === id ? { ...p, isActive } : p))
+    );
+
+    try {
+      const response = await fetch('/api/hotels/createGali', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, isActive }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update status');
+      }
+
+      // Sync with server response
+      setGalis((prev) =>
+        prev.map((p) => (p._id === data._id ? data : p))
+      );
+      toast.success(`Status updated to ${isActive ? 'Active' : 'Inactive'}`);
+    } catch (error) {
+      // Revert optimistic update on failure
+      setGalis((prev) =>
+        prev.map((p) => (p._id === id ? { ...p, isActive: !isActive } : p))
+      );
+      toast.error(`Failed to update status: ${error.message}`);
+    }
+  };
   return (
     <div className="max-w-5xl mx-auto w-full">
       {/* add new gali/ mohalla location type */}
@@ -226,6 +235,7 @@ const CreateGali = ({
               setFormDataGali((prev) => ({
                 ...prev,
                 locationType: value,
+                subLocationType: "", // reset sub when main changes
               }))
             }
           >
@@ -257,20 +267,20 @@ const CreateGali = ({
               <SelectValue placeholder="Select Sub Location type" />
             </SelectTrigger>
             <SelectContent>
-              {filteredSubLocations
-                .filter(
-                  (subLoc) =>
-                    subLoc.subLocationType &&
-                    subLoc.subLocationType.trim() !== ""
-                )
-                .map((subLoc) => (
-                  <SelectItem
-                    key={subLoc._id}
-                    value={subLoc.subLocationType}
-                  >
-                    {subLoc.subLocationType}
+              {/* Fallback: show current value if not in filtered list (e.g. editing old data) */}
+              {formDataGali.subLocationType &&
+                !filteredSubLocations.some(
+                  (s) => s.subLocationType === formDataGali.subLocationType
+                ) && (
+                  <SelectItem value={formDataGali.subLocationType}>
+                    {formDataGali.subLocationType}
                   </SelectItem>
-                ))}
+                )}
+              {filteredSubLocations.map((subLoc) => (
+                <SelectItem key={subLoc._id} value={subLoc.subLocationType}>
+                  {subLoc.subLocationType}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -302,10 +312,6 @@ const CreateGali = ({
                   locationType: "",
                   subLocationType: "",
                   galiName: "",
-                  order:
-                    locations.length > 0
-                      ? Math.max(...locations.map((b) => b.order)) + 1
-                      : 1,
                 });
               }}
             >
@@ -334,6 +340,9 @@ const CreateGali = ({
               Gali/ Mohalla
             </TableHead>
             <TableHead className="border border-black text-center">
+              Status
+            </TableHead>
+            <TableHead className="border border-black text-center">
               Actions
             </TableHead>
           </TableRow>
@@ -341,52 +350,58 @@ const CreateGali = ({
         <TableBody>
           {galis.length > 0 ? (
             // Sort by Location -> SubLocation -> GaliName
-            [...galis]
-              .sort((a, b) =>
-                a.locationType.localeCompare(b.locationType) ||
-                a.subLocationType.localeCompare(b.subLocationType) ||
-                a.galiName.localeCompare(b.galiName)
-              )
-              .map((gali, index) => (
-                <TableRow key={gali._id} className="border border-black">
-                  <TableCell className="border border-black text-center">
-                    {index + 1}
-                  </TableCell>
-                  <TableCell className="border border-black text-center">
-                    {gali.locationType}
-                  </TableCell>
-                  <TableCell className="border border-black text-center">
-                    {gali.subLocationType}
-                  </TableCell>
-                  <TableCell className="border border-black text-center">
-                    {gali.galiName}
-                  </TableCell>
-                  <TableCell className="border border-black text-center">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => handleEditForGali(gali)}
-                      className="mr-2 "
-                    >
-                      <PencilIcon />
-                    </Button>
-                    <Button
-                      size="icon"
-                      onClick={() => {
-                        setShowDeleteModalForGali(true);
-                        setGaliToDelete(gali._id);
-                      }}
-                      variant="destructive"
-                    >
-                      <Trash2Icon />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
+            galis.map((gali, index) => (
+              <TableRow key={gali._id} className="border border-black">
+                <TableCell className="border border-black text-center">
+                  {index + 1}
+                </TableCell>
+                <TableCell className="border border-black text-center">
+                  {gali.locationType}
+                </TableCell>
+                <TableCell className="border border-black text-center">
+                  {gali.subLocationType}
+                </TableCell>
+                <TableCell className="border border-black text-center">
+                  {gali.galiName}
+                </TableCell>
+                <TableCell className="border border-black text-center">
+                  <div className="flex items-center justify-center w-full gap-2">
+                    <Switch
+                      id={`status-${gali._id}`}
+                      checked={gali.isActive}
+                      onCheckedChange={(checked) => handleStatusChange(gali._id, checked)}
+                    />
+                    <Label htmlFor={`status-${gali._id}`} className="cursor-pointer">
+                      {gali.isActive ? 'Active' : 'Inactive'}
+                    </Label>
+                  </div>
+                </TableCell>
+                <TableCell className="border border-black text-center">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleEditForGali(gali)}
+                    className="mr-2 "
+                  >
+                    <PencilIcon />
+                  </Button>
+                  <Button
+                    size="icon"
+                    onClick={() => {
+                      setShowDeleteModalForGali(true);
+                      setGaliToDelete(gali._id);
+                    }}
+                    variant="destructive"
+                  >
+                    <Trash2Icon />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))
           ) : (
             <TableRow className="border border-black">
               <TableCell colSpan="5" className="text-center py-4">
-                No location types found
+                No Gali types found
               </TableCell>
             </TableRow>
           )}

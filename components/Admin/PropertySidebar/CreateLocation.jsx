@@ -5,13 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Table,
   TableBody,
   TableCell,
@@ -19,18 +12,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import Image from "next/image";
 import toast from "react-hot-toast";
-
+import { Switch } from "@/components/ui/switch";
 import { PencilIcon, Trash2Icon } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { useRef } from "react";
-import { UploadIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -50,41 +34,9 @@ const CreatePropertyType = ({
   const [editLocation, setEditLocation] = useState(null);
   const [formDataLocation, setFormDataLocation] = useState({
     locationType: "",
-    subLocationType: "",
-    order: 1,
   });
-  // New state for fetched sub-locations
-  const [filteredSubLocations, setFilteredSubLocations] = useState([]);
-
-  // Fetch sub-locations when main location changes in Gali form
-//   useEffect(() => {
-//     const fetchSubLocations = async () => {
-//       if (!formDataGali.locationType) {
-//         setFilteredSubLocations([]);
-//         return;
-//       }
-//       try {
-//         const res = await fetch("/api/createSubLocation");
-//         if (res.ok) {
-//           const data = await res.json();
-//           const filtered = data.filter(item => item.locationType === formDataGali.locationType);
-//           setFilteredSubLocations(filtered);
-//         }
-//       } catch (error) {
-//         console.error("Failed to fetch sub locations", error);
-//       }
-//     };
-//     fetchSubLocations();
-//   }, [formDataGali.locationType]);
-
-
-  // Set initial form data order based on props
   useEffect(() => {
-    if (locationType?.length > 0) {
-      const highestOrder = Math.max(...locationType.map((b) => b.order || 0));
-      setFormDataLocation((prev) => ({ ...prev, order: highestOrder + 1 }));
-      setLocations(locationType);
-    }
+    setLocations(locationType || []);
   }, [locationType]);
 
   const handleInputChangeForLocation = (e) => {
@@ -119,7 +71,7 @@ const CreatePropertyType = ({
         ...formDataLocation,
         id: editLocation,
       };
-      const response = await fetch("/api/createLocation", {
+      const response = await fetch("/api/hotels/createLocation", {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -133,17 +85,16 @@ const CreatePropertyType = ({
         );
         setEditLocation(null);
 
-        // Refresh banner list
-        const updatedBanners = await fetch("/api/createLocation").then((res) =>
+        // Refresh list and sync parent state
+        const updatedBanners = await fetch("/api/hotels/createLocation").then((res) =>
           res.json(),
         );
         setLocations(updatedBanners);
+        setLocationType(updatedBanners);
 
         // Reset form
         setFormDataLocation({
           locationType: "",
-          subLocationType: "",
-          order: updatedBanners.length + 1,
         });
       } else {
         toast.error(data.error);
@@ -158,13 +109,12 @@ const CreatePropertyType = ({
     // console.log(banner)
     setFormDataLocation({
       locationType: banner.locationType,
-      order: banner.order,
     });
   };
 
   const handleDeleteForLocation = async (id) => {
     try {
-      const response = await fetch("/api/createLocation", {
+      const response = await fetch("/api/hotels/createLocation", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
@@ -175,13 +125,12 @@ const CreatePropertyType = ({
       if (response.ok) {
         toast.success("Location deleted successfully");
 
-        setLocations((prev) => prev.filter((banner) => banner._id !== id));
-
-        // Update order numbers
-        const updatedBanners = await fetch("/api/createLocation").then((res) =>
+        // Update list and sync parent state
+        const updatedBanners = await fetch("/api/hotels/createLocation").then((res) =>
           res.json(),
         );
         setLocations(updatedBanners);
+        setLocationType(updatedBanners);
       } else {
         toast.error(data.error);
       }
@@ -204,7 +153,38 @@ const CreatePropertyType = ({
     setLocationToDelete(null);
   };
 
+  const handleStatusChange = async (id, isActive) => {
+    // Optimistically update local state
+    setLocations((prev) =>
+      prev.map((p) => (p._id === id ? { ...p, isActive } : p))
+    );
 
+    try {
+      const response = await fetch('/api/hotels/createLocation', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, isActive }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update status');
+      }
+
+      // Sync with server response
+      setLocations((prev) =>
+        prev.map((p) => (p._id === data._id ? data : p))
+      );
+      toast.success(`Status updated to ${isActive ? 'Active' : 'Inactive'}`);
+    } catch (error) {
+      // Revert optimistic update on failure
+      setLocations((prev) =>
+        prev.map((p) => (p._id === id ? { ...p, isActive: !isActive } : p))
+      );
+      toast.error(`Failed to update status: ${error.message}`);
+    }
+  };
   return (
     <div className="max-w-5xl mx-auto w-full">
       {/* Location Type */}
@@ -241,10 +221,6 @@ const CreatePropertyType = ({
                 setEditLocation(null);
                 setFormDataLocation({
                   locationType: "",
-                  order:
-                    locations.length > 0
-                      ? Math.max(...locations.map((b) => b.order)) + 1
-                      : 1,
                 });
               }}
             >
@@ -267,6 +243,9 @@ const CreatePropertyType = ({
               Location Type
             </TableHead>
             <TableHead className="border border-black text-center">
+              Status
+            </TableHead>
+            <TableHead className="border border-black text-center">
               Actions
             </TableHead>
           </TableRow>
@@ -280,6 +259,19 @@ const CreatePropertyType = ({
                 </TableCell>
                 <TableCell className="border border-black text-center">
                   {location.locationType}
+                </TableCell>
+                {/* Status */}
+                <TableCell className="border border-black text-center">
+                  <div className="flex items-center justify-center w-full gap-2">
+                    <Switch
+                      id={`status-${location._id}`}
+                      checked={location.isActive}
+                      onCheckedChange={(checked) => handleStatusChange(location._id, checked)}
+                    />
+                    <Label htmlFor={`status-${location._id}`} className="cursor-pointer">
+                      {location.isActive ? 'Active' : 'Inactive'}
+                    </Label>
+                  </div>
                 </TableCell>
                 <TableCell className="border border-black text-center">
                   <Button

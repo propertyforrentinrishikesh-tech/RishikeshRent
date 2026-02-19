@@ -11,7 +11,6 @@ export async function POST(request) {
         // Parse the request body
         const formData = await request.json();
 
-        console.log('Received form data:', JSON.stringify(formData, null, 2));
 
         // Basic validation
         if (!formData.propertyType) {
@@ -62,7 +61,6 @@ export async function POST(request) {
         // Save to database
         await property.save();
 
-        console.log('Property saved successfully:', property._id);
 
         return NextResponse.json(
             {
@@ -124,10 +122,42 @@ export async function GET(request) {
         const limit = parseInt(searchParams.get('limit')) || 15;
         const skip = (page - 1) * limit;
 
-        const query = HotelPropertyDetails.find({}).sort({ createdAt: -1 }).skip(skip).limit(limit);
+        // Build dynamic filter
+        const filter = {};
 
-        const total = await HotelPropertyDetails.countDocuments({});
-        const properties = await query.exec();
+        const search = searchParams.get('search');
+        if (search) {
+            filter.$or = [
+                { propertyName: { $regex: search, $options: 'i' } },
+                { locationType: { $regex: search, $options: 'i' } },
+                { subLocationType: { $regex: search, $options: 'i' } },
+                { contactAddress: { $regex: search, $options: 'i' } },
+                { brokerName: { $regex: search, $options: 'i' } },
+                { ownerName: { $regex: search, $options: 'i' } },
+            ];
+        }
+        if (searchParams.get('propertyType')) filter.propertyType = searchParams.get('propertyType');
+        if (searchParams.get('locationType')) filter.locationType = searchParams.get('locationType');
+        if (searchParams.get('subLocationType')) filter.subLocationType = searchParams.get('subLocationType');
+        if (searchParams.get('propertyFor')) filter.propertyFor = searchParams.get('propertyFor');
+        if (searchParams.get('isActive') !== null && searchParams.get('isActive') !== undefined && searchParams.get('isActive') !== '') {
+            filter.isActive = searchParams.get('isActive') === 'true';
+        }
+        // Rent range filter
+        const minRent = searchParams.get('minRent');
+        const maxRent = searchParams.get('maxRent');
+        if (minRent || maxRent) {
+            filter.rentPrice = {};
+            if (minRent) filter.rentPrice.$gte = Number(minRent);
+            if (maxRent) filter.rentPrice.$lte = Number(maxRent);
+        }
+
+        const total = await HotelPropertyDetails.countDocuments(filter);
+        const properties = await HotelPropertyDetails.find(filter)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .exec();
 
         return NextResponse.json({
             success: true,
