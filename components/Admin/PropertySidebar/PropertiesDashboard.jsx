@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
+import { Menu, X } from "lucide-react";
 
 // ===== IMPORT YOUR COMPONENTS =====
 import PropertyType from "@/components/Admin/PropertySidebar/PropertyType";
@@ -24,6 +25,7 @@ const PropertiesDashboard = () => {
 
   const [activeParent, setActiveParent] = useState("property_type");
   const [activeChild, setActiveChild] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // ================= FETCH DATA =================
   useEffect(() => {
@@ -175,60 +177,100 @@ const PropertiesDashboard = () => {
 
   // ================= UI =================
   return (
-    <div className="flex min-h-[85vh]">
+    <div className="flex flex-col md:flex-row min-h-[85vh] relative">
+
+      {/* ================= MOBILE HEADER ================= */}
+      <div className="md:hidden p-4 bg-white border-b border-gray-200 flex items-center justify-between sticky top-0 z-30">
+        <button
+          onClick={() => setIsSidebarOpen(true)}
+          className="p-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 transition"
+        >
+          <Menu className="w-6 h-6" />
+        </button>
+        <h2 className="font-bold text-lg text-slate-800">Dashboard Menu</h2>
+      </div>
+
+      {/* ================= SIDEBAR OVERLAY (Mobile) ================= */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
 
       {/* ================= SIDEBAR ================= */}
-      <div className="w-[260px] bg-gray-200 h-fit p-3 flex flex-col gap-3">
+      <div className={`
+        fixed inset-y-0 left-0 z-50 w-[280px] bg-gray-100 h-full shadow-2xl transform transition-transform duration-300 ease-in-out
+        md:relative md:translate-x-0 md:w-[260px] md:shadow-none md:bg-gray-200 md:h-auto md:min-h-full
+        ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
+      `}>
 
-        {sectionConfig.map(section => (
-          <div key={section.key}>
+        {/* Mobile Sidebar Header */}
+        <div className="flex items-center justify-between p-4 md:hidden border-b border-gray-200 mb-2">
+          <span className="font-bold text-lg text-slate-800">Navigation</span>
+          <button
+            onClick={() => setIsSidebarOpen(false)}
+            className="p-2 text-slate-500 hover:bg-slate-200 rounded-full transition"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
-            {/* Parent Button */}
-            <button
-              onClick={() => {
-                setActiveParent(section.key);
-                setActiveChild(null);
-              }}
-              className={`w-full text-left px-4 py-3 rounded-xl font-semibold transition
-              ${
-                activeParent === section.key
-                  ? "bg-blue-600 text-white shadow"
-                  : "bg-blue-100 hover:bg-blue-300"
-              }`}
-            >
-              {section.label}
-            </button>
+        <div className="p-3 flex flex-col gap-3 overflow-y-auto h-full max-h-[calc(100vh-60px)] md:max-h-none md:h-auto">
+          {sectionConfig.map(section => (
+            <div key={section.key}>
 
-            {/* Children */}
-            {section.children && activeParent === section.key && (
-              <div className="ml-3 mt-2 flex flex-col gap-2">
+              {/* Parent Button */}
+              <button
+                onClick={() => {
+                  setActiveParent(section.key);
+                  setActiveChild(null);
+                  if (!section.children) setIsSidebarOpen(false);
+                }}
+                className={`w-full text-left px-4 py-3 rounded-xl font-semibold transition
+                ${activeParent === section.key
+                    ? "bg-blue-600 text-white shadow-md shadow-blue-200"
+                    : "bg-white md:bg-blue-100/50 hover:bg-blue-200 text-slate-700"
+                  }`}
+              >
+                {section.label}
+              </button>
 
-                {section.children.map(child => (
-                  <button
-                    key={child.key}
-                    onClick={() => setActiveChild(child.key)}
-                    className={`text-left px-3 py-2 rounded-lg transition
-                    ${
-                      activeChild === child.key
-                        ? "bg-green-600 text-white"
-                        : "bg-green-100 hover:bg-green-300"
-                    }`}
-                  >
-                    {child.label}
-                  </button>
-                ))}
+              {/* Children */}
+              {section.children && activeParent === section.key && (
+                <div className="ml-3 mt-2 flex flex-col gap-2 border-l-2 border-slate-200 pl-3">
 
-              </div>
-            )}
+                  {section.children.map(child => (
+                    <button
+                      key={child.key}
+                      onClick={() => {
+                        setActiveChild(child.key);
+                        setIsSidebarOpen(false);
+                      }}
+                      className={`text-left px-3 py-2.5 rounded-lg text-sm font-medium transition
+                      ${activeChild === child.key
+                          ? "bg-green-600 text-white shadow-sm"
+                          : "bg-white md:bg-green-100/50 hover:bg-green-200 text-slate-600 hover:text-slate-900"
+                        }`}
+                    >
+                      {child.label}
+                    </button>
+                  ))}
 
-          </div>
-        ))}
+                </div>
+              )}
+
+            </div>
+          ))}
+        </div>
 
       </div>
 
       {/* ================= CONTENT AREA ================= */}
-      <div className="flex-1 p-5 rounded-l-3xl">
-        {renderContent()}
+      <div className="flex-1 p-1 md:p-6 w-full overflow-hidden">
+        <div className="bg-white rounded-2xl md:rounded-l-3xl md:rounded-r-none min-h-full">
+          {renderContent()}
+        </div>
       </div>
 
     </div>

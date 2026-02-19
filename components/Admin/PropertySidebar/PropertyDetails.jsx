@@ -1194,56 +1194,103 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
             subLocationType: property.subLocationType || "",
             galiType: property.galiType || "",
             contactAddress: property.contactAddress || "",
+            landMarkDetails: property.landMarkDetails || "",
+            googleLocation: property.googleLocation || "",
             brokerName: property.brokerName || "",
             ownerName: property.ownerName || "",
+            sonDaughterWifeOf: property.sonDaughterWifeOf || "",
             contactNumbers: property.contactNumbers?.length ? [...property.contactNumbers] : [""],
             emailAddresses: property.emailAddresses?.length ? [...property.emailAddresses] : [""],
             rentPrice: property.rentPrice || "",
             maxRentPrice: property.maxRentPrice || "",
             propertyName: property.propertyName || "",
+            propertyForRentLocatedOn: property.propertyForRentLocatedOn || "", // Added missing field
+            propertyFacingDirection: property.propertyFacingDirection || "", // Added missing field
             highlights: property.highlights?.length ? [...property.highlights] : [""],
             aadharCardNumber: property.aadharCardNumber || "",
             panCardNumber: property.panCardNumber || "",
-            electricityCharges: { include: null, amount: '', type: '' },
-            waterCharges: { include: null, amount: '', type: '' },
-            securityDeposit: { required: null, amount: '', months: '' },
-            maintenanceCharges: { required: null, amount: '', basis: '' },
+            electricityCharges: property.electricityCharges || { include: null, amount: '', type: '' },
+            waterCharges: property.waterCharges || { include: null, amount: '', type: '' },
+            securityDeposit: property.securityDeposit || { required: null, amount: '', months: '' },
+            maintenanceCharges: property.maintenanceCharges || { required: null, amount: '', basis: '' },
             propertyFor: property.propertyFor || "",
+            isAvailable: property.isAvailable !== undefined ? property.isAvailable : true,
+            isTrending: property.isTrending !== undefined ? property.isTrending : false,
+            isActive: property.isActive !== undefined ? property.isActive : true,
+            propertyNameSlug: property.propertyNameSlug || "",
             // New detailed property information fields
             tenantType: property.tenantType || "",
             sizeInFeet: property.sizeInFeet || "",
             sizeInMeter: property.sizeInMeter || "",
+            sizeUnit: property.sizeUnit || "", // Added missing field
+            sizeLength: property.sizeLength || "", // Added missing field
+            sizeWidth: property.sizeWidth || "", // Added missing field
             numberOfBedrooms: property.numberOfBedrooms || "",
-            numberOfBathrooms: property.numberOfBathrooms || "",
+            numberOfBathrooms: property.numberOfBathrooms || 0,
+            numberOfRooms: property.numberOfRooms || 0, // Added missing field
             furnishingStatus: property.furnishingStatus || "",
             amenities: property.amenities || [],
             bathroomStyle: property.bathroomStyle || "",
+            bathroomType: property.bathroomType || "", // Added missing field
             parkingStyle: property.parkingStyle || "",
+            parkingAvailable: property.parkingAvailable || "", // Added missing field
+            parkingType: property.parkingType || "", // Added missing field
             roomStyle: property.roomStyle || "",
-            petAllowed: property.petAllowed || false,
-            smokingAllowed: property.smokingAllowed || false,
+            petAllowed: property.petAllowed || "",
+            smokingAllowed: property.smokingAllowed || "",
             familyAllowed: property.familyAllowed || false,
+            familyMembers: property.familyMembers || "2", // Default to "2" if missing, or use property value
             vegetarianOnly: property.vegetarianOnly || false,
             nonVegetarianAllowed: property.nonVegetarianAllowed || false,
-            alcoholAllowed: property.alcoholAllowed || false,
+            alcoholAllowed: property.alcoholAllowed || "",
             lateNightEntryTime: property.lateNightEntryTime || "",
             availableFrom: property.availableFrom || "",
             minimumStay: property.minimumStay || "",
-            detailFor: "",
-            powerBackup: "",
-            powerBackupType: "",
-            floor: "",
-            balcony: false,
-            rooftop: false,
-            wheelchair: false,
-            housekeeping: false,
-            roomAmenities: [],
-            bathroomFeatures: [],
-            cctv: "",
-            cctvLocation: "",
-            parkingType: "",
-            checkIn: "",
-            checkOut: "",
+            detailFor: property.detailFor || "",
+            powerBackup: property.powerBackup || "",
+            powerBackupType: property.powerBackupType || "",
+            powerBackupAvailable: property.powerBackupAvailable ?? null, // Added missing field
+            powerBackupSources: property.powerBackupSources || { inverter: false, generator: false }, // Added missing field
+            powerBackupCharge: property.powerBackupCharge ?? null, // Added missing field
+            floor: property.floor || "",
+            balcony: property.balcony || false,
+            rooftop: property.rooftop || false,
+            wheelchair: property.wheelchair || false,
+            housekeeping: property.housekeeping || false,
+            roomAmenities: property.roomAmenities || [],
+            bathroomFeatures: property.bathroomFeatures || [],
+            cctv: property.cctv || "",
+            cctvLocation: property.cctvLocation || "",
+            checkIn: property.checkIn || "",
+            checkOut: property.checkOut || "",
+            customBathroomAmenities: property.customBathroomAmenities || [],
+            customFurnishedAmenitiesLabels: property.customFurnishedAmenitiesLabels || {},
+            furnishedAmenities: property.furnishedAmenities || [],
+            // New comprehensive property detail fields
+            lift: property.lift || "",
+            cctvFeatures: property.cctvFeatures || [],
+            parkingAmenities: property.parkingAmenities || [],
+            customParkingAmenities: property.customParkingAmenities || [],
+            parkingStyleOptions: property.parkingStyleOptions || [],
+            customParkingStyles: property.customParkingStyles || [],
+            lateNightTimeIn: property.lateNightTimeIn || "",
+            lateNightTimeOut: property.lateNightTimeOut || "",
+            roomStyleOptions: property.roomStyleOptions || [],
+            petShelter: property.petShelter || "",
+            muslimFamilyAllowed: property.muslimFamilyAllowed || "",
+            nonVegAllowed: property.nonVegAllowed || "",
+            inRoomPartyAllowed: property.inRoomPartyAllowed || "",
+            outsideVisitorAllowed: property.outsideVisitorAllowed || "",
+            prohibitedGoods: property.prohibitedGoods || "",
+            visitorEntry: property.visitorEntry || "",
+            photographsVideos: property.photographsVideos || "",
+            priorNotice: property.priorNotice || "",
+            priorNoticeTime: property.priorNoticeTime || "",
+            propertyAvailableFrom: property.propertyAvailableFrom || "",
+            minimumStayAllow: property.minimumStayAllow || "",
+            tenantTypeAllowed: property.tenantTypeAllowed || [],
+            customTenantTypes: property.customTenantTypes || [],
+            stayAllowOnlyFor: property.stayAllowOnlyFor || "", // Added missing field
 
         });
 
@@ -1299,10 +1346,6 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
             setPropertyToDelete(null);
         }
     };
-
-
-
-
     return (
         <div className="container mx-auto p-2">
             <h1 className="text-2xl font-bold mb-6">Add New Property</h1>
@@ -1424,7 +1467,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 </div>
                 {/* Address */}
                 <div className="space-y-2">
-                    <div className="flex gap-2">
+                    <div className="grid grid-cols-1 md:grid-cols-1 gap-2">
                         <div className="w-full">
                             <Label>Address</Label>
                             <Textarea
@@ -1600,10 +1643,10 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 {/* Broker Info */}
                 <div className="space-y-4">
                     <h3 className="text-xl font-medium underline"> Broker / Owner / Property Information</h3>
-                    <div className="flex gap-5 items-center">
+                    <div className="flex flex-col md:flex-row gap-5 items-start md:items-center">
 
                         {/* Property Name */}
-                        <div className="w-[50%]">
+                        <div className="w-full md:w-[50%]">
                             <Label>Property Name</Label>
                             <Input
                                 className="bg-white border border-black rounded-md p-2"
@@ -1613,7 +1656,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                                 placeholder="Enter Property Name"
                             />
                         </div>
-                        <div className="w-[25%]">
+                        <div className="w-full md:w-[25%]">
                             <Label>Property For Rent Located On</Label>
                             <Select
                                 value={formData.propertyForRentLocatedOn}
@@ -1632,7 +1675,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                                 </SelectContent>
                             </Select>
                         </div>
-                        <div className="w-[25%]">
+                        <div className="w-full md:w-[25%]">
                             <Label>Property Facing Direction</Label>
                             <Select
                                 value={formData.propertyFacingDirection}
@@ -1748,14 +1791,14 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                         </div>
                     </div>
                     {/* Broker or Owner Name */}
-                    <div className="flex items-center gap-2 w-full">
-                        <div className="space-y-2 w-48">
+                    <div className="flex flex-col xl:flex-row xl:flex-nowrap gap-2 w-full">
+                        {/* Select Type */}
+                        <div className="space-y-2 w-full xl:w-48">
                             <Label>Select Type</Label>
                             <Select
                                 value={brokerOrOwner}
                                 onValueChange={(value) => {
                                     setBrokerOrOwner(value);
-                                    // Clear the opposite field when switching
                                     if (value === 'broker') {
                                         setFormData(prev => ({ ...prev, ownerName: "" }));
                                     } else {
@@ -1772,50 +1815,55 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                                 </SelectContent>
                             </Select>
                         </div>
-                        <div className="space-y-2 flex-1">
-                            {/* Conditionally show Broker Name or Owner Name input */}
+
+                        {/* Name Field */}
+                        <div className="space-y-2 w-full">
                             {brokerOrOwner === 'broker' ? (
-                                <div className="space-y-2">
+                                <>
                                     <Label>Broker Name</Label>
                                     <Input
-                                        className="bg-white border border-black rounded-md p-2"
+                                        className="bg-white border border-black rounded-md p-2 w-full"
                                         name="brokerName"
                                         value={formData.brokerName}
                                         onChange={handleChange}
                                         placeholder="Enter broker name"
                                     />
-                                </div>
+                                </>
                             ) : (
-                                <div className="space-y-2">
+                                <>
                                     <Label>Owner Name</Label>
                                     <Input
-                                        className="bg-white border border-black rounded-md p-2"
+                                        className="bg-white border border-black rounded-md p-2 w-full"
                                         name="ownerName"
                                         value={formData.ownerName}
                                         onChange={handleChange}
                                         placeholder="Enter owner name"
                                     />
-                                </div>
+                                </>
                             )}
                         </div>
-                        <div className="space-y-2 flex-1">
+
+                        {/* Relation */}
+                        <div className="space-y-2 w-full">
                             <Label>Son / Daughter / Wife Of</Label>
                             <Input
-                                className="bg-white border border-black rounded-md p-2"
+                                className="bg-white border border-black rounded-md p-2 w-full"
                                 name="sonDaughterWifeOf"
                                 value={formData.sonDaughterWifeOf}
                                 onChange={handleChange}
                                 placeholder="Enter Name"
                             />
                         </div>
-                    </div>
-                    <div className="flex items-center gap-2">
 
-                        <div className="">
+                    </div>
+
+                    <div className="flex flex-col xl:flex-row items-start xl:items-center gap-4">
+
+                        <div className="w-full">
                             <Label>Aadhar Card Number</Label>
-                            <div className="flex items-center gap-4">
+                            <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
                                 <Input
-                                    className="bg-white border border-black rounded-md p-2"
+                                    className="bg-white border border-black rounded-md p-2 w-full"
                                     name="aadharCardNumber"
                                     value={formData.aadharCardNumber}
                                     onChange={handleChange}
@@ -1866,11 +1914,11 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                                 </div>
                             )}
                         </div>
-                        <div className="">
+                        <div className="w-full">
                             <Label>Pan Card Number</Label>
-                            <div className="flex items-center gap-4">
+                            <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
                                 <Input
-                                    className="bg-white border border-black rounded-md p-2"
+                                    className="bg-white border border-black rounded-md p-2 w-full"
                                     name="panCardNumber"
                                     value={formData.panCardNumber}
                                     onChange={handleChange}
@@ -1901,10 +1949,10 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                                     )}
                                 </div>
                             </div>
-                            {formData.panCardNumber.url && (
+                            {formData.panImage.url && (
                                 <div className="relative w-48 h-32 mt-2 border rounded overflow-hidden">
                                     <Image
-                                        src={formData.panCardNumber.url}
+                                        src={formData.panImage.url}
                                         alt="Main property"
                                         fill
                                         className="object-cover"
@@ -1921,13 +1969,13 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                             )}
                         </div>
                     </div>
-                    <div className="flex  items-center gap-2">
-                        <div className="flex-1">
+                    <div className="flex flex-col md:flex-row items-center gap-4 w-full">
+                        <div className="flex-1 w-full">
                             <Label>Contact Numbers</Label>
                             {formData.contactNumbers.map((number, index) => (
                                 <div key={index} className="flex gap-2 pb-1">
                                     <Input
-                                        className="bg-white border border-black rounded-md p-2"
+                                        className="bg-white border border-black rounded-md p-2 w-full"
                                         type="number"
                                         value={number || ''}  // Changed from formData.contactNumbers to just number
                                         onChange={(e) => handleContactNumberChange(index, e.target.value)}
@@ -1962,12 +2010,12 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                                 + Add Another Number
                             </Button>
                         </div>
-                        <div className="flex-1">
+                        <div className="flex-1 w-full">
                             <Label>Email Address</Label>
                             {formData.emailAddresses.map((number, index) => (
                                 <div key={index} className="flex gap-2 pb-1">
                                     <Input
-                                        className="bg-white border border-black rounded-md p-2"
+                                        className="bg-white border border-black rounded-md p-2 w-full"
                                         type="email"
                                         value={number || ''}  // Changed from formData.contactNumbers to just number
                                         onChange={(e) => handleEmailChange(index, e.target.value)}
@@ -2053,7 +2101,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
 
                     </div>
                 </div>
-                <div className="flex items-center gap-5 w-full">
+                <div className="flex flex-col md:flex-row items-center gap-5 w-full">
                     <div className="w-full">
                         <Label>Minimum Rent Amount</Label>
                         <Input
@@ -2079,7 +2127,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 </div>
                 {/* Electricity Charges */}
                 <div className="space-y-3">
-                    <div className="flex items-center gap-4">
+                    <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
                         <Label className="font-semibold">Electricity Charges</Label>
                         <div className="flex items-center gap-2">
                             <input
@@ -2120,7 +2168,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                     </div>
 
                     {formData.electricityCharges?.include && (
-                        <div className="flex items-center gap-4 ml-6">
+                        <div className="flex flex-col md:flex-row items-start md:items-center gap-4 ml-0 md:ml-6 mt-2">
                             <Label>If Yes Include So How Much Amount</Label>
                             <Select
                                 value={formData.electricityCharges?.type || ''}
@@ -2129,7 +2177,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                                     electricityCharges: { ...prev.electricityCharges, type: value }
                                 }))}
                             >
-                                <SelectTrigger className="w-48">
+                                <SelectTrigger className="w-full md:w-48">
                                     <SelectValue placeholder="Type Amount" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -2154,7 +2202,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
 
                 {/* Water Charges */}
                 <div className="space-y-3">
-                    <div className="flex items-center gap-4">
+                    <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
                         <Label className="font-semibold">Water Charges</Label>
                         <div className="flex items-center gap-2">
                             <input
@@ -2195,7 +2243,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                     </div>
 
                     {formData.waterCharges?.include && (
-                        <div className="flex items-center gap-4 ml-6">
+                        <div className="flex flex-col md:flex-row items-start md:items-center gap-4 ml-0 md:ml-6 mt-2">
                             <Label>If Yes Include So How Much Amount</Label>
                             <Select
                                 value={formData.waterCharges?.type || ''}
@@ -2204,7 +2252,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                                     waterCharges: { ...prev.waterCharges, type: value }
                                 }))}
                             >
-                                <SelectTrigger className="w-48">
+                                <SelectTrigger className="w-full md:w-48">
                                     <SelectValue placeholder="Type Amount" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -2229,7 +2277,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
 
                 {/* Security Deposit Amount */}
                 <div className="space-y-3">
-                    <div className="flex items-center gap-4">
+                    <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
                         <Label className="font-semibold">Security Deposit Amount</Label>
                         <div className="flex items-center gap-2">
                             <input
@@ -2270,7 +2318,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                     </div>
 
                     {formData.securityDeposit?.required && (
-                        <div className="flex items-center gap-4 ml-6">
+                        <div className="flex flex-col md:flex-row items-start md:items-center gap-4 ml-0 md:ml-6 mt-2">
                             <Label>If Yes So How Much Amount And Number Of Month</Label>
                             <Input
                                 className="bg-white border border-black rounded-md p-2 flex-1"
@@ -2311,7 +2359,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
 
                 {/* Property Maintenance Charges */}
                 <div className="space-y-3">
-                    <div className="flex items-center gap-4">
+                    <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
                         <Label className="font-semibold">Property Maintenance Charges</Label>
                         <div className="flex items-center gap-2">
                             <input
@@ -2352,7 +2400,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                     </div>
 
                     {formData.maintenanceCharges?.required && (
-                        <div className="flex items-center gap-4 ml-6">
+                        <div className="flex flex-col md:flex-row items-start md:items-center gap-4 ml-0 md:ml-6 mt-2">
                             <Label>If Yes So How Much Amount</Label>
                             <Input
                                 className="bg-white border border-black rounded-md p-2 flex-1"
@@ -2415,9 +2463,9 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
 
                     {/* Always show at least one input field */}
                     {(formData.highlights?.length === 0 ? [''] : formData.highlights || []).map((highlight, index, array) => (
-                        <div key={index} className="flex gap-2 items-center">
+                        <div key={index} className="flex flex-col md:flex-row gap-2 items-start md:items-center">
                             <Input
-                                className="bg-white border border-black rounded-md p-2 flex-1"
+                                className="bg-white border border-black rounded-md p-2 w-full md:flex-1"
                                 value={highlight || ''}
                                 onChange={(e) => handleHighlightChange(index, e.target.value)}
                                 placeholder={`Highlight ${index + 1}`}
@@ -2452,10 +2500,10 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                     />
                 </div>
                 <div className="space-y-2">
-                    <div className="flex items-start gap-2">
-                        <div>
+                    <div className="flex flex-col xl:flex-row items-start gap-5">
+                        <div className="w-full xl:w-auto">
                             <h2 className="font-semibold text-lg">Tenant Type Allow</h2>
-                            <div className="grid grid-cols-4 gap-2">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                                 {["Single", "Couple", "Married", "Bachelor", "Job Person", "Boys Only", "Girls Only", "Student", "All Religion", "Govt Retired"].map((type, index) => (
                                     <label key={index} className="flex gap-2 items-center cursor-pointer">
                                         <input
@@ -2486,7 +2534,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                             {formData.customTenantTypes && formData.customTenantTypes.length > 0 && (
                                 <div className="space-y-2 mt-4">
                                     <Label className="text-sm font-semibold text-blue-600">Custom Tenant Types:</Label>
-                                    <div className="grid grid-cols-4 gap-2">
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                                         {formData.customTenantTypes.map((type, index) => (
                                             <div key={index} className="flex items-center gap-2">
                                                 <label className="flex items-center gap-2 cursor-pointer">
@@ -2523,6 +2571,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                                                         toast.success('Custom tenant type removed!');
                                                     }}
                                                     className="text-red-500 hover:text-red-700"
+                                                    title="Remove this custom amenity"
                                                 >
                                                     <X className="w-4 h-4" />
                                                 </button>
@@ -2541,7 +2590,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                             </Button>
 
                         </div>
-                        <div className="flex-1">
+                        <div className="flex-1 w-full">
                             <Label>Stay Allow Only For</Label>
                             <Select
                                 value={formData.stayAllowOnlyFor}
@@ -2563,7 +2612,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 <hr className="my-6 border border-gray-300" />
 
                 {/* property Details */}
-                <div className=" grid grid-cols-2 space-x-3 ">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 space-x-0">
                     {/* SELECT TYPE */}
                     <div>
                         <Label>Detail For What</Label>
@@ -2605,12 +2654,12 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 </div>
 
                 {/* PowerBackUp Facility */}
-                <div className="rounded-xl p-4 space-y-4">
+                <div className="rounded-xl p-2 space-y-2">
 
                     <Label className="font-semibold">Powerbackup Facility</Label>
 
                     {/* AVAILABLE */}
-                    <div className="flex gap-6 items-center">
+                    <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
 
                         <span className="text-sm font-medium">Available</span>
 
@@ -2645,9 +2694,9 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                     </div>
                     {/* IF YES SECTION */}
                     {available === true && (
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-col xl:flex-row items-start xl:items-center gap-4">
                             {/* SOURCES */}
-                            <div className="flex gap-6 items-center">
+                            <div className="flex flex-wrap gap-4 items-center">
 
                                 <span className="text-sm font-medium">If Yes</span>
 
@@ -2677,7 +2726,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                             </div>
 
                             {/* CHARGE */}
-                            <div className="flex gap-6 items-center">
+                            <div className="flex flex-wrap gap-4 items-center">
 
                                 <span className="text-sm font-bold px-2">Charge</span>
 
@@ -2783,7 +2832,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                             </div>
 
                             {/* Furnished/Non-Furnished Radio Buttons (Same Line) */}
-                            <div className="flex items-center gap-6 mt-3">
+                            <div className="flex w-full flex-row md:flex-row justify-between md:justify-start items-center gap-6 my-3">
                                 <label className="flex items-center gap-2 cursor-pointer">
                                     <input
                                         type="radio"
@@ -2817,7 +2866,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
 
                             {/* If Furnished Section with Parent-Child Amenities */}
                             {formData.furnishingStatus === 'furnished' && (
-                                <div className="ml-6 space-y-4 mt-4">
+                                <div className="space-y-4 mt-4">
                                     <Label className="font-semibold">If Furnished Please Choose Room Amenities</Label>
 
                                     {/* Parent Amenities with Sub-Amenities */}
@@ -3316,7 +3365,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                         {/* Bathroom Type */}
                         <div className="space-y-3">
                             <Label className="font-semibold">Bathroom Type</Label>
-                            <div className="flex gap-6">
+                            <div className="flex flex-col md:flex-row gap-4 md:gap-6">
                                 <label className="flex items-center gap-2 cursor-pointer">
                                     <input
                                         type="radio"
@@ -3426,7 +3475,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
 
                                     {/* Laundry Sub-amenities - Only show if parent is checked */}
                                     {formData.bathroomFeatures?.includes('laundry') && (
-                                        <div className="ml-6 flex gap-4">
+                                        <div className="ml-6 flex flex-wrap gap-4">
                                             <label className="flex items-center gap-2 cursor-pointer">
                                                 <input
                                                     type="checkbox"
@@ -3508,7 +3557,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
 
                                     {/* Geyser Sub-amenities - Only show if parent is checked */}
                                     {formData.bathroomFeatures?.includes('geyser') && (
-                                        <div className="ml-6 flex gap-4">
+                                        <div className="ml-6 flex flex-wrap gap-4">
                                             <label className="flex items-center gap-2 cursor-pointer">
                                                 <input
                                                     type="checkbox"
@@ -3670,7 +3719,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
 
 
                 {/* ============= SECTION 3: LIFT - ELEVATOR ============= */}
-                <div className="border border-gray-300 rounded-lg p-6 space-y-4">
+                <div className="border border-gray-300 rounded-lg p-6 space-y-2">
                     <h3 className="text-lg font-semibold mb-4">Lift - Elevator</h3>
                     <div className="flex gap-6">
                         <label className="flex items-center gap-2 cursor-pointer">
@@ -3736,7 +3785,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
 
                     {/* CCTV Sub-amenities - Only show when Yes is checked */}
                     {formData.cctvFeatures?.includes('yes') && (
-                        <div className="ml-6 grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-2 gap-3">
                             <label className="flex items-center gap-2 cursor-pointer">
                                 <input
                                     type="checkbox"
@@ -3776,7 +3825,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 {/* ============= SECTION 5: PARKING ============= */}
                 <div className="border border-gray-300 rounded-lg p-6 space-y-4">
                     <h3 className="text-lg font-semibold mb-4">Parking</h3>
-                    <div className="flex gap-6">
+                    <div className="flex md:flex-row gap-4 md:gap-6">
                         <label className="flex items-center gap-2 cursor-pointer">
                             <input
                                 type="radio"
@@ -3814,7 +3863,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                     {/* Parking Sub-amenities - Only show when Yes is checked */}
                     {formData.parkingAmenities?.includes('yes') && (
                         <>
-                            <div className="ml-6 grid grid-cols-2 md:grid-cols-3 gap-3">
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                                 {['free_inhouse', 'not_reserved', 'paid_reserved', 'open', 'outside_premises'].map((item) => (
                                     <label key={item} className="flex items-center gap-2 cursor-pointer">
                                         <input
@@ -3837,7 +3886,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
 
                             {/* Custom Parking Amenities */}
                             {formData.customParkingAmenities && formData.customParkingAmenities.length > 0 && (
-                                <div className="space-y-2 ml-6">
+                                <div className="space-y-2">
                                     <Label className="text-sm font-semibold text-blue-600">Custom Parking Amenities:</Label>
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                         {formData.customParkingAmenities.map((amenity, index) => (
@@ -3893,7 +3942,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 {/* ============= SECTION 6: PARKING STYLE ============= */}
                 <div className="border border-gray-300 rounded-lg p-6 space-y-4">
                     <h3 className="text-lg font-semibold mb-4">Parking Style</h3>
-                    <div className="flex gap-6">
+                    <div className="flex md:flex-row gap-4 md:gap-6">
                         <label className="flex items-center gap-2 cursor-pointer">
                             <input
                                 type="radio"
@@ -3931,7 +3980,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                     {/* Parking Style Sub-options - Only show when Yes is checked */}
                     {formData.parkingStyleOptions?.includes('yes') && (
                         <>
-                            <div className="ml-6 grid grid-cols-2 md:grid-cols-3 gap-3">
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                                 {['two_wheeler', 'four_wheeler', '1_max_capacity_two_wheeler', '1_max_capacity_four_wheeler', '2_max_capacity_two_wheeler', '2_max_capacity_four_wheeler'].map((item) => (
                                     <label key={item} className="flex items-center gap-2 cursor-pointer">
                                         <input
@@ -3954,7 +4003,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
 
                             {/* Custom Parking Styles */}
                             {formData.customParkingStyles && formData.customParkingStyles.length > 0 && (
-                                <div className="space-y-2 ml-6">
+                                <div className="space-y-2">
                                     <Label className="text-sm font-semibold text-blue-600">Custom Parking Styles:</Label>
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                         {formData.customParkingStyles.map((style, index) => (
@@ -4010,7 +4059,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 {/* ============= SECTION 7: LATE NIGHT ENTRY TIME ============= */}
                 <div className="border border-gray-300 rounded-lg p-6 space-y-4">
                     <h3 className="text-lg font-semibold mb-4">Late Night Entry Time</h3>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label>Select Time In</Label>
                             <Input
@@ -4061,7 +4110,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 <div className="border border-gray-300 rounded-lg p-6 space-y-4">
                     <h3 className="text-lg font-semibold mb-4">Pet Requirement</h3>
                     <div className="space-y-3">
-                        <div className="flex gap-6">
+                        <div className="flex md:flex-row gap-4 md:gap-6">
                             <label className="flex items-center gap-2 cursor-pointer">
                                 <input
                                     type="radio"
@@ -4086,9 +4135,9 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
 
                         {/* Pet Shelter Sub-option */}
                         {formData.petAllowed === 'allowed' && (
-                            <div className="ml-6 space-y-2">
+                            <div className="space-y-2">
                                 <Label className="text-sm font-semibold">If allowed then pet shelter Available</Label>
-                                <div className="flex gap-6">
+                                <div className="flex flex-col md:flex-row gap-4 md:gap-6">
                                     <label className="flex items-center gap-2 cursor-pointer">
                                         <input
                                             type="radio"
@@ -4118,7 +4167,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 {/* ============= SECTION 10: SMOKING ALLOWED ============= */}
                 <div className="border border-gray-300 rounded-lg p-6 space-y-4">
                     <h3 className="text-lg font-semibold mb-4">Smoking Allowed</h3>
-                    <div className="flex gap-6">
+                    <div className="flex md:flex-row gap-4 md:gap-6">
                         <label className="flex items-center gap-2 cursor-pointer">
                             <input
                                 type="radio"
@@ -4145,7 +4194,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 {/* ============= SECTION 11: MUSLIM FAMILY ALLOWED ============= */}
                 <div className="border border-gray-300 rounded-lg p-6 space-y-4">
                     <h3 className="text-lg font-semibold mb-4">Muslim Family Allowed</h3>
-                    <div className="flex gap-6">
+                    <div className="flex md:flex-row gap-4 md:gap-6">
                         <label className="flex items-center gap-2 cursor-pointer">
                             <input
                                 type="radio"
@@ -4172,7 +4221,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 {/* ============= SECTION 12: NON VEGETARIAN FOOD ============= */}
                 <div className="border border-gray-300 rounded-lg p-6 space-y-4">
                     <h3 className="text-lg font-semibold mb-4">Non Vegetarian Food</h3>
-                    <div className="flex gap-6">
+                    <div className="flex md:flex-row gap-4 md:gap-6">
                         <label className="flex items-center gap-2 cursor-pointer">
                             <input
                                 type="radio"
@@ -4199,7 +4248,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 {/* ============= SECTION 13: ALCOHOL ALLOWED ============= */}
                 <div className="border border-gray-300 rounded-lg p-6 space-y-4">
                     <h3 className="text-lg font-semibold mb-4">Alcohol Allowed</h3>
-                    <div className="flex gap-6">
+                    <div className="flex md:flex-row gap-4 md:gap-6">
                         <label className="flex items-center gap-2 cursor-pointer">
                             <input
                                 type="radio"
@@ -4226,7 +4275,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 {/* ============= SECTION 14: IN ROOM PARTY ALLOWED ============= */}
                 <div className="border border-gray-300 rounded-lg p-6 space-y-4">
                     <h3 className="text-lg font-semibold mb-4">In Room Party Allowed</h3>
-                    <div className="flex gap-6">
+                    <div className="flex md:flex-row gap-4 md:gap-6">
                         <label className="flex items-center gap-2 cursor-pointer">
                             <input
                                 type="radio"
@@ -4253,7 +4302,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 {/* ============= SECTION 15: OUTSIDE VISITOR ALLOWED ============= */}
                 <div className="border border-gray-300 rounded-lg p-6 space-y-4">
                     <h3 className="text-lg font-semibold mb-4">Outside Visitor Allowed</h3>
-                    <div className="flex gap-6">
+                    <div className="flex md:flex-row gap-4 md:gap-6">
                         <label className="flex items-center gap-2 cursor-pointer">
                             <input
                                 type="radio"
@@ -4280,7 +4329,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 {/* ============= SECTION 16: PROHIBITED GOODS ============= */}
                 <div className="border border-gray-300 rounded-lg p-6 space-y-4">
                     <h3 className="text-lg font-semibold mb-4">Prohibited goods, or objectionable materials</h3>
-                    <div className="flex gap-6">
+                    <div className="flex md:flex-row gap-4 md:gap-6">
                         <label className="flex items-center gap-2 cursor-pointer">
                             <input
                                 type="radio"
@@ -4307,7 +4356,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 {/* ============= SECTION 17: VISITOR ENTRY TO GUEST ROOMS ============= */}
                 <div className="border border-gray-300 rounded-lg p-6 space-y-4">
                     <h3 className="text-lg font-semibold mb-4">Visitor entry to guest rooms</h3>
-                    <div className="flex gap-6">
+                    <div className="flex md:flex-row gap-4 md:gap-6">
                         <label className="flex items-center gap-2 cursor-pointer">
                             <input
                                 type="radio"
@@ -4334,7 +4383,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 {/* ============= SECTION 18: PHOTOGRAPHS AND VIDEOS ============= */}
                 <div className="border border-gray-300 rounded-lg p-6 space-y-4">
                     <h3 className="text-lg font-semibold mb-4">Photographs and videos</h3>
-                    <div className="flex gap-6">
+                    <div className="flex md:flex-row gap-4 md:gap-6">
                         <label className="flex items-center gap-2 cursor-pointer">
                             <input
                                 type="radio"
@@ -4362,7 +4411,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 <div className="border border-gray-300 rounded-lg p-6 space-y-4">
                     <h3 className="text-lg font-semibold mb-4">Prior Notice</h3>
                     <div className="space-y-3">
-                        <div className="flex gap-6">
+                        <div className="flex md:flex-row gap-4 md:gap-6">
                             <label className="flex items-center gap-2 cursor-pointer">
                                 <input
                                     type="radio"
@@ -4447,140 +4496,133 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 </div>
                 <hr className="my-6" />
                 <div className="flex justify-start gap-4">
-                    {/* <Button
-                        type="submit"
-                        disabled={loading}
-                        className="bg-blue-600 hover:bg-blue-700"
-                    >
-                        {loading
-                            ? 'Saving...'
-                            : editingProperty
-                                ? 'Update Property'
-                                : 'Save Property'
-                        }
-                    </Button>
-                    {editingProperty && (
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={resetForm}
-                            disabled={loading}
-                            className="border-red-500 text-red-600 hover:bg-red-50"
-                        >
-                            Cancel Edit
-                        </Button>
-                    )} */}
                     {/* ================= SUBMIT ================= */}
 
-                    <Button
-                        type="button"
-                        className="w-full text-lg bg-blue-600 hover:bg-blue-700"
-                        onClick={() => {
-                            // Validate that broker contact number OR email is entered
-                            const hasValidPhone = formData.contactNumbers && formData.contactNumbers[0] && formData.contactNumbers[0].length === 10;
-                            const hasValidEmail = formData.emailAddresses && formData.emailAddresses[0] && formData.emailAddresses[0].includes('@');
+                    <div className="flex flex-col md:flex-row gap-4 w-full">
+                        <Button
+                            type="button"
+                            className="flex-1 text-lg bg-blue-600 hover:bg-blue-700"
+                            onClick={() => {
+                                // Validate that broker contact number OR email is entered
+                                const hasValidPhone = formData.contactNumbers && formData.contactNumbers[0] && formData.contactNumbers[0].length === 10;
+                                const hasValidEmail = formData.emailAddresses && formData.emailAddresses[0] && formData.emailAddresses[0].includes('@');
 
-                            if (!hasValidPhone && !hasValidEmail) {
-                                toast.error('Please enter either a valid 10-digit contact number or email address!');
-                                return;
-                            }
+                                if (!hasValidPhone && !hasValidEmail) {
+                                    toast.error('Please enter either a valid 10-digit contact number or email address!');
+                                    return;
+                                }
 
-                            // Open verification method selection modal
-                            setIsVerificationMethodModalOpen(true);
-                        }}
-                    >
-                        Get OTP For Final Approval
-                    </Button>
+                                // Open verification method selection modal
+                                setIsVerificationMethodModalOpen(true);
+                            }}
+                        >
+                            {editingProperty ? 'Update Property (Get OTP)' : 'Get OTP For Final Approval'}
+                        </Button>
+
+                        {editingProperty && (
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={resetForm}
+                                className="border-red-500 text-red-600 hover:bg-red-50 px-8"
+                            >
+                                Cancel Edit
+                            </Button>
+                        )}
+                    </div>
                 </div>
             </form>
             <h2 className="text-2xl font-bold mt-10 mb-4">Existing Properties Details</h2>
-            <Table className="border border-black p-2">
-                <TableHeader>
-                    <TableRow className="bg-gray-200 border border-black">
-                        <TableHead className="border border-black text-center">Image</TableHead>
-                        <TableHead className="border border-black text-center">Broker / Owner Name</TableHead>
-                        <TableHead className="border border-black text-center">Property Type</TableHead>
-                        <TableHead className="border border-black text-center">Location Type</TableHead>
-                        <TableHead className="border border-black text-center">Price</TableHead>
-                        <TableHead className="border border-black text-center">Is Available</TableHead>
-                        <TableHead className="border border-black text-center">Is Trending</TableHead>
-                        <TableHead className="border border-black text-center">Actions</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {Array.isArray(propertyDetails) && propertyDetails.length === 0 ? (
-                        <TableRow>
-                            <TableCell colSpan={7} className="text-center py-4">
-                                No properties found
-                            </TableCell>
+            <div className="overflow-x-auto">
+                <Table className="border border-black p-2 min-w-[800px]">
+                    <TableHeader>
+                        <TableRow className="bg-gray-200 border border-black">
+                            <TableHead className="border border-black text-center">Image</TableHead>
+                            <TableHead className="border border-black text-center">Broker / Owner Name</TableHead>
+                            <TableHead className="border border-black text-center">Property Type</TableHead>
+                            <TableHead className="border border-black text-center">Location Type</TableHead>
+                            <TableHead className="border border-black text-center">Price</TableHead>
+                            <TableHead className="border border-black text-center">Is Available</TableHead>
+                            <TableHead className="border border-black text-center">Is Trending</TableHead>
+                            <TableHead className="border border-black text-center">Actions</TableHead>
                         </TableRow>
-                    ) : (
-                        propertyDetails.map((property) => (
-                            <TableRow key={property._id}>
-                                <TableCell className="border border-black flex items-center justify-center">
-                                    {property.mainImage?.url ? (
-                                        <Image
-                                            height={100}
-                                            width={100}
-                                            src={property.mainImage.url}
-                                            alt={property.propertyName}
-                                            loading='lazy'
-                                            className="h-16 w-16 object-cover rounded"
-                                        />
-                                    ) : (
-                                        <div className="h-16 w-16 bg-gray-200 rounded" />
-                                    )}
-                                </TableCell>
-                                <TableCell className="font-medium border border-black text-center">{property.brokerName || property.ownerName}</TableCell>
-                                <TableCell className="border border-black text-center">{property.propertyType}</TableCell>
-                                <TableCell className="border border-black text-center">{property.locationType}</TableCell>
-                                <TableCell className="border border-black text-center">₹{property.rentPrice?.toLocaleString()}</TableCell>
-                                <TableCell className="border border-black text-center">
-                                    <div className="flex justify-center">
-                                        <Switch
-                                            checked={property.isActive}
-                                            onCheckedChange={() => toggleAvailable(property)}
-                                            className="data-[state=checked]:bg-blue-600"
-                                        />
-                                    </div>
-                                </TableCell>
-                                <TableCell className="border border-black text-center">
-                                    <div className="flex justify-center">
-                                        <Switch
-                                            checked={property.isTrending}
-                                            onCheckedChange={() => toggleTrending(property)}
-                                            className="data-[state=checked]:bg-green-600"
-                                        />
-                                    </div>
-                                </TableCell>
-                                <TableCell className="text-center border border-black">
-                                    <Button
-                                        variant="outline"
-                                        size="icon"
-                                        className="text-blue-600 hover:bg-blue-50 px-10 py-2 border"
-                                        onClick={() => handleEdit(property)}
-                                    >
-                                        <Edit className="h-4 w-4" />
-                                        Edit
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        size="icon"
-                                        className="text-red-600 hover:bg-red-50 px-10 py-2 border"
-                                        onClick={() => handleDelete(property._id)}
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                        Delete
-                                    </Button>
+                    </TableHeader>
+                    <TableBody>
+                        {Array.isArray(propertyDetails) && propertyDetails.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={7} className="text-center py-4">
+                                    No properties found
                                 </TableCell>
                             </TableRow>
-                        ))
-                    )}
-                </TableBody>
-            </Table>
+                        ) : (
+                            propertyDetails.map((property) => (
+                                <TableRow key={property._id}>
+                                    <TableCell className="border border-black flex items-center justify-center">
+                                        {property.mainImage?.url ? (
+                                            <Image
+                                                height={100}
+                                                width={100}
+                                                src={property.mainImage.url}
+                                                alt={property.propertyName}
+                                                loading='lazy'
+                                                className="h-16 w-16 object-cover rounded"
+                                            />
+                                        ) : (
+                                            <div className="h-16 w-16 bg-gray-200 rounded" />
+                                        )}
+                                    </TableCell>
+                                    <TableCell className="font-medium border border-black text-center">{property.brokerName || property.ownerName}</TableCell>
+                                    <TableCell className="border border-black text-center">{property.propertyType}</TableCell>
+                                    <TableCell className="border border-black text-center">{property.locationType}</TableCell>
+                                    <TableCell className="border border-black text-center">₹{property.rentPrice?.toLocaleString()}</TableCell>
+                                    <TableCell className="border border-black text-center">
+                                        <div className="flex justify-center">
+                                            <Switch
+                                                checked={property.isActive}
+                                                onCheckedChange={() => toggleAvailable(property)}
+                                                className="data-[state=checked]:bg-blue-600"
+                                            />
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="border border-black text-center">
+                                        <div className="flex justify-center">
+                                            <Switch
+                                                checked={property.isTrending}
+                                                onCheckedChange={() => toggleTrending(property)}
+                                                className="data-[state=checked]:bg-green-600"
+                                            />
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="text-center border border-black">
+                                        <Button
+                                            variant="outline"
+                                            size="icon"
+                                            className="text-blue-600 hover:bg-blue-50 px-10 py-2 border"
+                                            onClick={() => handleEdit(property)}
+                                        >
+                                            <Edit className="h-4 w-4" />
+                                            Edit
+                                        </Button>
+                                        <Button
+                                            variant="destructive"
+                                            size="icon"
+                                            className="text-white hover:bg-red-50 ml-2 px-10 py-2 border"
+                                            onClick={() => handleDelete(property._id)}
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                            Delete
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
+
 
             {/* Delete Confirmation Dialog */}
-            <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+            <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen} >
                 <DialogContent className="max-w-md">
                     <DialogHeader>
                         <DialogTitle>Confirm Delete</DialogTitle>
@@ -4609,7 +4651,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
             </Dialog>
 
             {/* Custom Furnished Amenity Modal */}
-            <Dialog open={isFurnishedAmenityModalOpen} onOpenChange={setIsFurnishedAmenityModalOpen}>
+            <Dialog open={isFurnishedAmenityModalOpen} onOpenChange={setIsFurnishedAmenityModalOpen} >
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle>Add Custom Furnished Amenity</DialogTitle>
@@ -4718,7 +4760,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
             </Dialog>
 
             {/* Custom Bathroom Amenity Modal */}
-            <Dialog open={isBathroomAmenityModalOpen} onOpenChange={setIsBathroomAmenityModalOpen}>
+            <Dialog open={isBathroomAmenityModalOpen} onOpenChange={setIsBathroomAmenityModalOpen} >
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle>Add Custom Bathroom Amenity</DialogTitle>
@@ -4814,7 +4856,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
             </Dialog>
 
             {/* Custom Tenant Type Modal */}
-            <Dialog open={isTenantTypeModalOpen} onOpenChange={setIsTenantTypeModalOpen}>
+            <Dialog open={isTenantTypeModalOpen} onOpenChange={setIsTenantTypeModalOpen} >
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle>Add Custom Tenant Type</DialogTitle>
@@ -4910,7 +4952,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
             </Dialog>
 
             {/* Custom Parking Amenity Modal */}
-            <Dialog open={isParkingAmenityModalOpen} onOpenChange={setIsParkingAmenityModalOpen}>
+            <Dialog open={isParkingAmenityModalOpen} onOpenChange={setIsParkingAmenityModalOpen} >
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle>Add Custom Parking Amenity</DialogTitle>
@@ -5006,7 +5048,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
             </Dialog>
 
             {/* Custom Parking Style Modal */}
-            <Dialog open={isParkingStyleModalOpen} onOpenChange={setIsParkingStyleModalOpen}>
+            <Dialog open={isParkingStyleModalOpen} onOpenChange={setIsParkingStyleModalOpen} >
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle>Add Custom Parking Style</DialogTitle>
@@ -5102,7 +5144,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
             </Dialog>
 
             {/* Verification Method Selection Modal */}
-            <Dialog open={isVerificationMethodModalOpen} onOpenChange={setIsVerificationMethodModalOpen}>
+            <Dialog open={isVerificationMethodModalOpen} onOpenChange={setIsVerificationMethodModalOpen} >
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle className="sr-only">Choose Verification Method</DialogTitle>
@@ -5172,7 +5214,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
             </Dialog>
 
             {/* OTP Verification Modal (Dynamic based on method) */}
-            <Dialog open={isOTPModalOpen} onOpenChange={setIsOTPModalOpen}>
+            <Dialog open={isOTPModalOpen} onOpenChange={setIsOTPModalOpen} >
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle>
@@ -5214,7 +5256,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
             </Dialog>
 
             {/* Declaration Form Modal */}
-            <Dialog open={showDeclarationForm} onOpenChange={setShowDeclarationForm}>
+            <Dialog open={showDeclarationForm} onOpenChange={setShowDeclarationForm} >
                 <DialogHeader className="sr-only">
                     <DialogTitle>Declaration Form</DialogTitle>
                     <DialogDescription>
@@ -5251,7 +5293,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                     />
                 </DialogContent>
             </Dialog>
-        </div>
+        </div >
 
     );
 };

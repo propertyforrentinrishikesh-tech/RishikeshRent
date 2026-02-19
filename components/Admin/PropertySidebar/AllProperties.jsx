@@ -339,8 +339,8 @@ const AllProperties = ({ propertyTypes = [], locationType = [], subLocationType 
 
                 {/* Row 1: Property For checkboxes */}
                 <div className="flex items-center gap-6 mb-3 pb-3 border-b border-slate-100">
-                    <span className="text-xs font-semibold text-slate-600 min-w-[90px]">Property For:</span>
-                    <div className="flex items-center gap-5">
+                    <span className="text-xs font-semibold text-slate-600 min-w-[50px]">Property For:</span>
+                    <div className="flex flex-col md:flex-row items-start md:items-center gap-5 justify-start">
                         <div className="flex items-center gap-2">
                             <Checkbox
                                 id="filter-residential"
@@ -700,7 +700,7 @@ const PropertyViewModal = ({ property, onToggleActive, onToggleTrending, togglin
             {/* Modal Header with main image bg */}
             <div className="relative h-48 bg-gradient-to-br from-slate-700 to-slate-900 overflow-hidden flex-shrink-0">
                 {property.mainImage?.url && (
-                    <Image src={property.mainImage.url} alt={property.propertyName}
+                    <Image src={property.mainImage.url || ""} alt={property.propertyName}
                         fill className="object-cover opacity-40" sizes="100vw" />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
@@ -876,6 +876,11 @@ const PropertyViewModal = ({ property, onToggleActive, onToggleTrending, togglin
                         <InfoRow label="Room Style" value={property.roomStyle} />
                         <InfoRow label="Lift" value={property.lift} />
                     </div>
+                    {property.roomStyleOptions?.length > 0 && (
+                        <div className="mt-2">
+                            <TagList label="Room Style Options" items={property.roomStyleOptions} color="pink" />
+                        </div>
+                    )}
                     {/* Boolean features */}
                     <div className="flex flex-wrap gap-2 mt-3">
                         {[
@@ -931,8 +936,14 @@ const PropertyViewModal = ({ property, onToggleActive, onToggleTrending, togglin
                         {property.parkingAmenities?.length > 0 && (
                             <TagList label="Parking Amenities" items={property.parkingAmenities} color="orange" />
                         )}
+                        {property.customParkingAmenities?.length > 0 && (
+                            <TagList label="Custom Parking Amenities" items={property.customParkingAmenities} color="orange" />
+                        )}
                         {property.parkingStyleOptions?.length > 0 && (
                             <TagList label="Parking Style Options" items={property.parkingStyleOptions} color="amber" />
+                        )}
+                        {property.customParkingStyles?.length > 0 && (
+                            <TagList label="Custom Parking Styles" items={property.customParkingStyles} color="amber" />
                         )}
                     </Section>
                 )}
@@ -993,6 +1004,9 @@ const PropertyViewModal = ({ property, onToggleActive, onToggleTrending, togglin
                     </div>
                     {property.tenantTypeAllowed?.length > 0 && (
                         <TagList label="Tenant Types Allowed" items={property.tenantTypeAllowed} color="indigo" />
+                    )}
+                    {property.customTenantTypes?.length > 0 && (
+                        <TagList label="Custom Tenant Types" items={property.customTenantTypes} color="indigo" />
                     )}
                 </Section>
 
@@ -1078,8 +1092,13 @@ const PropertyViewModal = ({ property, onToggleActive, onToggleTrending, togglin
                         {property.signatureUrl && (
                             <div>
                                 <p className="text-xs text-slate-500 mb-1.5 font-medium">Signature</p>
-                                <Image src={property.signatureUrl} alt="Signature" height={80} width={200}
-                                    className="border border-slate-200 rounded-lg bg-white p-2 max-h-20 object-contain" />
+                                <Image
+                                    src={typeof property.signatureUrl === 'string' ? property.signatureUrl : (property.signatureUrl?.url || "")}
+                                    alt="Signature"
+                                    height={80}
+                                    width={200}
+                                    className="border border-slate-200 rounded-lg bg-white p-2 max-h-20 object-contain"
+                                />
                             </div>
                         )}
                     </Section>
