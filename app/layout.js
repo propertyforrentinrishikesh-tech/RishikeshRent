@@ -48,7 +48,7 @@ async function getMenuItems() {
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/getMenuCategories`,
-      { cache: "no-store" }
+      { next: { revalidate: 3600 } }
     );
 
     if (!res.ok) return [];
@@ -74,14 +74,14 @@ export default async function RootLayout({ children }) {
             <SessionWrapper>
               {/* <CartSyncOnLogin /> */}
               <SearchProvider>
-                 <MenuProvider menuItems={menuItems}>
+                <MenuProvider menuItems={menuItems}>
                   <Header menuItems={menuItems} />
-                {/* <GoogleTranslate /> */}
-                <main>
-                  <OverlayButton />
-                  {children}
-                </main>
-                <Footer />
+                  {/* <GoogleTranslate /> */}
+                  <main>
+                    <OverlayButton />
+                    {children}
+                  </main>
+                  <Footer />
                 </MenuProvider>
               </SearchProvider>
             </SessionWrapper>
