@@ -14,29 +14,23 @@ import { PencilIcon, Trash2Icon } from "lucide-react";
 import { useRef } from "react";
 import { UploadIcon } from "lucide-react";
 
-const ChangeBannerImage = () => {
+const ChangeBannerImage = ({section="frontend"}) => {
     const fileInputRef = useRef(null);
     const [banners, setBanners] = useState([]);
     const [editBanner, setEditBanner] = useState(null);
     const [formData, setFormData] = useState({
         buttonLink: "",
         frontImg: { url: "", key: "" },
+        frontImg: { url: "", key: "" },
         mobileImg: { url: "", key: "" },
-        order: 1,
     });
     // Fetch banners and determine the next order number
     useEffect(() => {
         const fetchBanners = async () => {
             try {
-                const response = await fetch("/api/addBanner");
+                const response = await fetch(`/api/addBanner?section=${section}`);
                 const data = await response.json();
                 setBanners(data);
-
-                // Auto-set next order number
-                if (data.length > 0) {
-                    const highestOrder = Math.max(...data.map((b) => b.order));
-                    setFormData((prev) => ({ ...prev, order: highestOrder + 1 }));
-                }
             } catch (error) {
                 toast.error("Failed to fetch banners");
             }
@@ -113,6 +107,7 @@ const ChangeBannerImage = () => {
             const payload = {
                 ...formData,
                 id: editBanner,
+                section: section,
             };
             const response = await fetch("/api/addBanner", {
                 method,
@@ -127,16 +122,14 @@ const ChangeBannerImage = () => {
                 setEditBanner(null);
 
                 // Refresh banner list
-                const updatedBanners = await fetch("/api/addBanner").then((res) => res.json());
+                const updatedBanners = await fetch(`/api/addBanner?section=${section}`).then((res) => res.json());
                 setBanners(updatedBanners);
 
                 // Reset form
                 setFormData({
                     buttonLink: "",
-                    order: updatedBanners.length + 1,
                     frontImg: { url: "", key: "" },
                     mobileImg: { url: "", key: "" },
-
                 });
             } else {
                 toast.error(data.error);
@@ -150,7 +143,6 @@ const ChangeBannerImage = () => {
         setEditBanner(banner._id);
         setFormData({
             buttonLink: banner.buttonLink,
-            order: banner.order,
             frontImg: banner.frontImg || { url: "", key: "" },
             mobileImg: banner.mobileImg || { url: "", key: "" },
         });
@@ -171,8 +163,8 @@ const ChangeBannerImage = () => {
 
                 setBanners((prev) => prev.filter((banner) => banner._id !== id));
 
-                // Update order numbers
-                const updatedBanners = await fetch("/api/addBanner").then((res) => res.json());
+                // Update banner list
+                const updatedBanners = await fetch(`/api/addBanner?section=${section}`).then((res) => res.json());
                 setBanners(updatedBanners);
             } else {
                 toast.error(data.error);
@@ -278,10 +270,6 @@ const ChangeBannerImage = () => {
                     <Label>Button Link</Label>
                     <Input name="buttonLink" placeholder="Enter Image URL Link" type="url" value={formData.buttonLink} onChange={handleInputChange} />
                 </div>
-                <div>
-                    <Label>Order</Label>
-                    <Input name="order" placeholder="Enter order" type="number" value={formData.order} readOnly className="bg-gray-100 cursor-not-allowed" />
-                </div>
 
                 <div className="flex gap-2">
                     <Button type="submit" className="bg-blue-600 hover:bg-blue-500">
@@ -296,9 +284,8 @@ const ChangeBannerImage = () => {
                                 setEditBanner(null);
                                 setFormData({
                                     buttonLink: "",
-                                    order: banners.length + 1,
                                     frontImg: { url: "", key: "" },
-
+                                    mobileImg: { url: "", key: "" },
                                 });
                             }}
                         >
@@ -312,7 +299,7 @@ const ChangeBannerImage = () => {
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Order</TableHead>
+                        <TableHead>S.No</TableHead>
                         <TableHead>Laptop Image</TableHead>
                         <TableHead>Mobile Image</TableHead>
                         <TableHead>Button Link</TableHead>
@@ -321,9 +308,9 @@ const ChangeBannerImage = () => {
                 </TableHeader>
                 <TableBody>
                     {banners.length > 0 ? (
-                        banners.map((banner) => (
+                        banners.map((banner, index) => (
                             <TableRow key={banner._id}>
-                                <TableCell className="px-5">{banner.order}</TableCell>
+                                <TableCell className="px-5">{index + 1}</TableCell>
                                 <TableCell className="flex gap-4 items-center justify-start h-24">
                                     {banner.frontImg?.url ? (
                                         <Image src={banner.frontImg.url} alt="Front" width={100} height={100} className="rounded-lg mb-1 w-60 object-contain" />

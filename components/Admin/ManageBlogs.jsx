@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 const TiptapEditor = ({ value, onChange }) => (
     <textarea className="w-full border rounded p-2" value={value} onChange={e => onChange(e.target.value)} placeholder="Rich text editor coming soon..." />
 );
-const Blogs = () => {
+const Blogs = ({ section = "frontend" }) => {
     // All the state and logic from your provided code, adapted for Next.js and UI kit usage
     const [selectedImages, setSelectedImages] = useState([]);
     const [imageUploading, setImageUploading] = useState(false);
@@ -34,7 +34,7 @@ const Blogs = () => {
     const fetchBlogs = async () => {
         try {
             setLoadingReviews(true);
-            const res = await fetch('/api/blogs');
+            const res = await fetch(`/api/blogs?section=${section}`);
             if (!res.ok) throw new Error('Failed to fetch blogs');
             const data = await res.json();
             setBlogs(data.blogs || []);
@@ -196,6 +196,7 @@ const Blogs = () => {
                 shortDescription,
                 longDescription,
                 images: selectedImages.map(img => ({ url: img.url, key: img.key })),
+                section: section,
             };
             let res, data;
             if (editMode && editingBlogId) {

@@ -23,12 +23,13 @@ import Image from "next/image"
 import { deleteFileFromCloudinary } from "@/utils/Utapi"
 import { useRef } from "react"
 import ProductProfile from './ProductProfile';
-const ManageProductsCategory = () => {
+const ManageProductsCategory = ({ section = "frontend" }) => {
     const { handleSubmit, register, setValue, reset } = useForm()
     const [menuItems, setMenuItems] = useState([])
     const [selectedMenu, setSelectedMenu] = useState("")
     const [editItem, setEditItem] = useState(null)
     const [bannerImage, setBannerImage] = useState(null)
+    const [showOnFrontend, setShowOnFrontend] = useState(section === "frontend")
     // const [profileImage, setProfileImage] = useState(null)
     // Separate state for edit dialog
     const [editBannerImage, setEditBannerImage] = useState(null);
@@ -77,11 +78,14 @@ const ManageProductsCategory = () => {
     // const profileFileInputRef = useRef(null);
     // console.log(menuItems)
     useEffect(() => {
-        fetch("/api/getAllMenuItems")
+        setShowOnFrontend(section === "frontend")
+    }, [section])
+    useEffect(() => {
+        fetch(`/api/getAllMenuItems?section=${section}`)
             .then(res => res.json())
             .then(data => setMenuItems(data))
         // console.log(menuItems)
-    }, [])
+    }, [section])
 
 
     const onSubmit = async (data) => {
@@ -106,11 +110,15 @@ const ManageProductsCategory = () => {
         const url = data.subMenu.title ? data.subMenu.title.replace(/\s+/g, '_').toLowerCase() : ""
 
         data.id = menuItems.filter(item => item.title === selectedMenu)[0]._id
+        data.section = section
         data.subMenu = {
             title: data.subMenu.title,
             url: url,
             profileImage: profileImage,
             active: true,
+            showOnFrontend: section === "frontend"
+                ? true
+                : showOnFrontend,
             order: (menuItems.find(item => item.title === selectedMenu)?.subMenu.length || 0) + 1,
             banner: bannerImage,
             // gallery: galleryImages
@@ -120,7 +128,7 @@ const ManageProductsCategory = () => {
             const result = await fetch("/api/admin/website-manage/addSubMenu", {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data),
+                body: JSON.stringify({ ...data, section }),
             })
 
             const res = await result.json()
@@ -133,6 +141,7 @@ const ManageProductsCategory = () => {
                 setSelectedMenu("")
                 setBannerImage(null)
                 setProfileImage(null)
+                setShowOnFrontend(section === "frontend")
                 toast.success("Sub Menu added successfully!", { style: { borderRadius: "10px", border: "2px solid green" } })
                 window.location.reload()
             }
@@ -154,6 +163,7 @@ const ManageProductsCategory = () => {
                 body: JSON.stringify({
                     id: data.id,
                     subMenuId: editItem._id,
+                    section,
                     subMenu: { title: data.subMenu.title, order: data.subMenu.order, banner: editBannerImage, profileImage: editProfileImage }
                 }),
             })
@@ -179,7 +189,7 @@ const ManageProductsCategory = () => {
             const response = await fetch(`/api/admin/website-manage/addSubMenu`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id, subMenuId, active: !currentStatus }),
+                body: JSON.stringify({ id, subMenuId, section, active: !currentStatus }),
             })
 
             if (response.ok) {
@@ -233,7 +243,7 @@ const ManageProductsCategory = () => {
             const response = await fetch(`/api/admin/website-manage/addSubMenu`, {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id, subMenuId }),
+                body: JSON.stringify({ id, subMenuId, section }),
             })
 
             const res = await response.json()
@@ -285,6 +295,14 @@ const ManageProductsCategory = () => {
                             className="md:w-96 border-2 border-blue-600 focus:border-dashed focus:border-blue-500 focus:outline-none focus-visible:ring-0"
                             {...register("subMenu.title")}
                         />
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Switch
+                            checked={showOnFrontend}
+                            onCheckedChange={setShowOnFrontend}
+                            className={`rounded-full transition-colors ${showOnFrontend ? "!bg-green-500" : "!bg-red-500"}`}
+                        />
+                        <Label>Show on Frontend</Label>
                     </div>
                     <div className="flex flex-col gap-2">
                         <Label>Upload Category Profile Image</Label>
@@ -400,10 +418,10 @@ const ManageProductsCategory = () => {
                                         .flatMap(menuItem => menuItem.subMenu.sort((a, b) => a.order - b.order).map((subItem) => (
                                             <TableRow key={subItem._id}>
                                                 <TableCell className="border font-semibold border-blue-600">
-                                                    <Link href={`/admin/manage_products_category/addSubMenuPackage/${subItem._id}`} variant="outline" className="bg-white border-2 border-blue-500 p-2 rounded-full text-blue-600 hover:text-blue-500 focus:text-blue-500 flex items-center justify-center">
-                                                        <span className="xl:mr-6 mr-2 bg-blue-100 rounded py-1 px-3">{subItem?.products?.length !== 0 ? subItem?.products?.length : 0}</span>
+                                                    <Link href={`/admin/manage_packages_category/addSubMenuPackage/${subItem._id}`} variant="outline" className="bg-white border-2 border-blue-500 p-2 rounded-full text-blue-600 hover:text-blue-500 focus:text-blue-500 flex items-center justify-center">
+                                                        <span className="xl:mr-6 mr-2 bg-blue-100 rounded py-1 px-3">{subItem?.packages?.length !== 0 ? subItem?.packages?.length : 0}</span>
                                                         <Plus className="w-4 h-4" />
-                                                        <span>Add Product</span>
+                                                        <span>Add Package</span>
                                                     </Link>
                                                 </TableCell>
                                                 <TableCell className="border font-semibold border-blue-600">{subItem?.title}</TableCell>

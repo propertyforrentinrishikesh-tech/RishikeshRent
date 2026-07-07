@@ -20,10 +20,16 @@ const shuffleArray = (array) => {
     return newArray;
 };
 
-export const GET = async () => {
+export const GET = async (req) => {
     try {
         await connectDB();
-        const packages = await FeaturedPackageCard.find();
+        const url = new URL(req.url, `http://${req.headers.get('host') || 'localhost'}`);
+        const section = url.searchParams.get('section');
+        const query = {};
+        if (section) {
+            query.section = section;
+        }
+        const packages = await FeaturedPackageCard.find(query);
         const shuffledPackages = shuffleArray(packages);
         return NextResponse.json({
             success: true,
@@ -42,7 +48,7 @@ export const POST = async (req) => {
     try {
         await connectDB();
         const body = await req.json();
-        const { title, image, link } = body;
+        const { title, image, link, section } = body;
 
         if (!title || !image) {
             return NextResponse.json(
@@ -85,7 +91,8 @@ export const POST = async (req) => {
             image: {
                 url: imageUrl,
                 public_id: imagePublicId
-            }
+            },
+            section: section || "frontend"
         });
 
         await newPackage.save();

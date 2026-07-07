@@ -16,7 +16,7 @@ import { UploadIcon } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "../ui/textarea";
 
-const ConsultancyBanner = () => {
+const ConsultancyBanner = ({section="frontend"}) => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [bannerToDelete, setBannerToDelete] = useState(null);
     const [banners, setBanners] = useState([]);
@@ -29,7 +29,6 @@ const ConsultancyBanner = () => {
         rating: 0,
         shortDescription: "",
         image: { url: "", key: "" },
-        order: 1,
     });
     const [wordCount, setWordCount] = useState(0);
     const maxWords = 80;
@@ -38,15 +37,9 @@ const ConsultancyBanner = () => {
     useEffect(() => {
         const fetchBanners = async () => {
             try {
-                const response = await fetch("/api/addConsultancyBanner");
+                const response = await fetch(`/api/addConsultancyBanner?section=${section}`);
                 const data = await response.json();
                 setBanners(data);
-
-                // Auto-set next order number
-                if (data.length > 0) {
-                    const highestOrder = Math.max(...data.map((b) => b.order));
-                    setFormData((prev) => ({ ...prev, order: highestOrder + 1 }));
-                }
             } catch (error) {
                 toast.error("Failed to fetch consultancy banners");
             }
@@ -116,6 +109,7 @@ const ConsultancyBanner = () => {
             const payload = {
                 ...formData,
                 id: editBanner,
+                section: section
             };
             const response = await fetch("/api/addConsultancyBanner", {
                 method,
@@ -130,7 +124,7 @@ const ConsultancyBanner = () => {
                 setEditBanner(null);
 
                 // Refresh banner list
-                const updatedBanners = await fetch("/api/addConsultancyBanner").then((res) => res.json());
+                const updatedBanners = await fetch(`/api/addConsultancyBanner?section=${section}`).then((res) => res.json());
                 setBanners(updatedBanners);
 
                 // Reset form
@@ -141,7 +135,6 @@ const ConsultancyBanner = () => {
                     buttonLink: "",
                     rating: 0,
                     shortDescription: "",
-                    order: updatedBanners.length + 1,
                     image: { url: "", key: "" },
                 });
 
@@ -164,7 +157,6 @@ const ConsultancyBanner = () => {
             title: banner.title,
             buttonLink: banner.buttonLink,
             rating: Number(banner.rating) || 0,
-            order: banner.order,
             image: banner.image,
             shortDescription: description,
         });
@@ -186,7 +178,7 @@ const ConsultancyBanner = () => {
                 setBanners((prev) => prev.filter((banner) => banner._id !== id));
 
                 // Update order numbers
-                const updatedBanners = await fetch("/api/addConsultancyBanner").then((res) => res.json());
+                const updatedBanners = await fetch(`/api/addConsultancyBanner?section=${section}`).then((res) => res.json());
                 setBanners(updatedBanners);
             } else {
                 toast.error(data.error);
@@ -316,10 +308,6 @@ const ConsultancyBanner = () => {
                     <Label>Button Link</Label>
                     <Input name="buttonLink" placeholder="Enter button link" type="url" value={formData.buttonLink} onChange={handleInputChange} />
                 </div>
-                <div>
-                    <Label>Order</Label>
-                    <Input name="order" placeholder="Enter order" type="number" value={formData.order} readOnly className="bg-gray-100 cursor-not-allowed" />
-                </div>
 
                 <div className="flex gap-3">
                     <Button type="submit" className="bg-blue-600 hover:bg-blue-500">
@@ -339,7 +327,6 @@ const ConsultancyBanner = () => {
                                     buttonLink: "",
                                     rating: 0,
                                     shortDescription: "",
-                                    order: banners.length > 0 ? Math.max(...banners.map(b => b.order)) + 1 : 1,
                                     image: { url: "", key: "" },
                                 });
                             }}
@@ -354,7 +341,7 @@ const ConsultancyBanner = () => {
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Order</TableHead>
+                        <TableHead>S.No</TableHead>
                         <TableHead>Title</TableHead>
                         <TableHead>Rating</TableHead>
                         <TableHead>Button Link</TableHead>
@@ -364,9 +351,9 @@ const ConsultancyBanner = () => {
                 </TableHeader>
                 <TableBody>
                     {banners.length > 0 ? (
-                        banners.map((banner) => (
+                        banners.map((banner, index) => (
                             <TableRow key={banner._id}>
-                                <TableCell>{banner.order}</TableCell>
+                                <TableCell>{index + 1}</TableCell>
                                 <TableCell>{banner.title}</TableCell>
                                 <TableCell>{banner.rating}</TableCell>
                                 <TableCell>

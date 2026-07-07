@@ -34,7 +34,7 @@ import { useSession } from "next-auth/react"
 const data = {
   user: {
     name: "Welcome, Admin",
-    email: "info@rishikeshrent.com",
+    email: "care.kagpremiumhomes@gmail.com",
   },
   projects: [
     {
@@ -44,42 +44,18 @@ const data = {
     },
     { divider: true },
     {
-      name: "Properties Extranet",
-      url: "/admin/properties_extrant",
-      icon: Plus,
+      name: "Create/Manage Admin",
+      url: "/admin/create_user",
+      icon: User,
     },
     { divider: true },
     {
-      name: "Hotel Extranet",
-      url: "/admin/hotel_extranet",
-      icon: Plus,
-    },
-    { divider: true },
-    {
-      name: "Pilgrimage Extranet",
-      url: "#",
-      icon: Plus,
-    },
-    { divider: true },
-    {
-      name: "Restaurant Extranet",
-      url: "#",
+      name: "Company Basic Information",
+      url: "/admin/company_basic_information",
       icon: Plus,
     },
     { divider: true },
 
-    // {
-    //   name: "View / Edit Management",
-    //   url: "/admin/edit_management",
-    //   icon: User,
-    // },
-    // { divider: true },
-
-    // {
-    //   name: "Add Direct Product",
-    //   url: "/admin/add_direct_product",
-    //   icon: Plus,
-    // },
     // { divider: true },
     // {
     //   name: "Create Discount",
@@ -98,84 +74,126 @@ const data = {
     //   url: "/admin/add_activity",
     //   icon: Plus,
     // },
-    // { divider: true },
     // {
     //   name: "Add Associates",
     //   url: "/admin/add_associate",
     //   icon: Plus,
     // },
-    // { divider: true },
-    // {
-    //   name: "Top Advertisment Banner",
-    //   url: "/admin/top_advertisment_banner",
-    //   icon: Image
-    // },
-    // {
-    //   name: "Promotional Banner",
-    //   url: "/admin/promotional_banner",
-    //   icon: Image
-    // },
-    // {
-    //   name: "Featured Offered Banner",
-    //   url: "/admin/featured_offered_banner",
-    //   icon: Image
-    // },
-    // {
-    //   name: "Category Advertisment",
-    //   url: "/admin/category_advertisment",
-    //   icon: Image
-    // },
-    // {
-    //   name: "PopUp Banner",
-    //   url: "/admin/popup_banner",
-    //   icon: Image
-    // },
-    // {
-    //   name: "Consultancy Banner",
-    //   url: "/admin/consultancy_banner",
-    //   icon: Image
-    // },
-    // {
-    //   name: "Banner Section 1st",
-    //   url: "/admin/banner_section_1st",
-    //   icon: Image
-    // },
-    // {
-    //   name: "Banner Section 2nd",
-    //   url: "/admin/banner_section_2nd",
-    //   icon: Image
-    // },
-    // {
-    //   name: "Banner Section 3rd",
-    //   url: "/admin/banner_section_3rd",
-    //   icon: Image
-    // },
-
-    // { divider: true },
-    // {
-    //   name: "Insta or Facebook Post",
-    //   url: "/admin/insta_fb_post",
-    //   icon: Image
-    // },
-    // {
-    //   name: "Manage Blogs",
-    //   url: "/admin/manage_blogs",
-    //   icon: Rss,
-    // },
-    // {
-    //   name: "News",
-    //   url: "/admin/news",
-    //   icon: Rss,
-    // },
-
-    // { divider: true },
 
 
-    // {
-    //   name: "Manage Featured Product",
-    //   url: "/admin/manage_featured_packages",
-    //   icon: Image,
-    // },
+    {
+      name: "Manage MenuBar Section",
+      icon: MenuIcon,
+      items: [
+        {
+          name: "Manage Navbar Section",
+          url: "/admin/navbar_section",
+          icon: MenuIcon,
+        },
+        {
+          name: "Manage Menu Section",
+          url: "/admin/manage_menu",
+          icon: MenuIcon,
+        },
+        {
+          name: "Manage Sub Menu Section",
+          url: "/admin/manage_sub_menu",
+          icon: MenuIcon,
+        },
+        {
+          name: "Manage Products & Category",
+          url: "/admin/manage_packages_category",
+          icon: Boxes,
+        },
+      ]
+    },
+    { divider: true, },
+    {
+      name: "Manage Banner Section",
+      icon: Image,
+      items: [
+        {
+          name: "Top Advertisment Banner",
+          url: "/admin/top_advertisment_banner",
+          icon: Image,
+        },
+        {
+          name: "Promotional Banner",
+          url: "/admin/promotional_banner",
+          icon: Image
+        },
+        {
+          name: "Manage Banner",
+          url: "/admin/change_banner_image",
+          icon: Image,
+        },
+        {
+          name: "Featured Offered Banner",
+          url: "/admin/featured_offered_banner",
+          icon: Image
+        },
+        {
+          name: "Manage Featured Product",
+          url: "/admin/manage_featured_packages",
+          icon: Image,
+        },
+        {
+          name: "Category Advertisment",
+          url: "/admin/category_advertisment",
+          icon: Image
+        },
+        {
+          name: "PopUp Banner",
+          url: "/admin/popup_banner",
+          icon: Image
+        },
+        {
+          name: "Consultancy Banner",
+          url: "/admin/consultancy_banner",
+          icon: Image
+        },
+        {
+          name: "Banner Section 1st",
+          url: "/admin/banner_section_1st",
+          icon: Image
+        },
+        {
+          name: "Banner Section 2nd",
+          url: "/admin/banner_section_2nd",
+          icon: Image
+        },
+        {
+          name: "Banner Section 3rd",
+          url: "/admin/banner_section_3rd",
+          icon: Image
+        },
+      ],
+    },
+    { divider: true },
+    {
+      name: "Insta or Facebook Post",
+      url: "/admin/insta_fb_post",
+      icon: Image
+    },
+    {
+      name: "Manage Blogs",
+      url: "/admin/manage_blogs",
+      icon: Rss,
+    },
+    {
+      name: "News",
+      url: "/admin/news",
+      icon: Rss,
+    },
+    {
+      name: "FAQ",
+      url: "/admin/faq",
+      icon: Star,
+    },
+    { divider: true },
+
+
+
     // {
     //   name: "Manage Menu Section",
     //   url: "/admin/manage_menu",
@@ -188,7 +206,7 @@ const data = {
     // },
     // {
     //   name: "Manage Products & Category",
-    //   url: "/admin/manage_products_category",
+    //   url: "/admin/manage_packages_category",
     //   icon: Boxes,
     // },
     // {
@@ -201,12 +219,8 @@ const data = {
     //   url: "/admin/manage_reviews",
     //   icon: Star,
     // },
-    // {
-    //   name: "FAQ",
-    //   url: "/admin/faq",
-    //   icon: Star,
-    // },
-    // { divider: true },
+
+
     // {
     //   name: "Enquiry Order",
     //   url: "/admin/enquiry_order",
@@ -235,47 +249,57 @@ const data = {
     // },
     // { divider: true },
 
-    // {
-    //   name: "Manage Webpages",
-    //   url: "/admin/manage_webpage",
-    //   icon: StickyNote,
-    // },
-
-    // { divider: true },
-
-    // {
-    //   name: "Contact Page Enquiry",
-    //   url: "/admin/contact_page_enquiry",
-    //   icon: MessageCircleMore,
-    // },
-    // {
-    //   name: "Enquiry Chat Page",
-    //   url: "/admin/chat",
-    //   icon: MessageCircleMore,
-    // },
-
-  
-    // { divider: true },
-
-   
-
-    // {
-    //   name: "Send Promotional Emails",
-    //   url: "/admin/send_promotional_emails",
-    //   icon: Send,
-    // },
-    // {
-    //   name: "User Login Logs/Report",
-    //   url: "/admin/user_login_logs",
-    //   icon: Users,
-    // },
+    {
+      name: "Manage Webpages",
+      icon: StickyNote,
+      items: [
+        {
+          name: "Create Webpages Pages",
+          url: "/admin/create_webpage",
+          icon: StickyNote,
+        },
+        {
+          name: "Manage Webpages",
+          url: "/admin/manage_webpage",
+          icon: StickyNote,
+        },
+      ]
+    },
+    { divider: true },
+    {
+      name: "Enquiry Page",
+      icon: MessageCircleMore,
+      items: [
+        {
+          name: "Contact Page Enquiry",
+          url: "/admin/contact_page_enquiry",
+          icon: MessageCircleMore,
+        },
+        {
+          name: "Enquiry Chat Page",
+          url: "/admin/chat",
+          icon: MessageCircleMore,
+        },
+      ],
+    },
+    { divider: true },
+    {
+      name: "Send Promotional Emails",
+      url: "/admin/send_promotional_emails",
+      icon: Send,
+    },
+    {
+      name: "User Login Logs/Report",
+      url: "/admin/user_login_logs",
+      icon: Users,
+    },
   ],
 }
 
 const dataManager = {
   user: {
     name: "Welcome, Manager",
-    email: "info@rishikeshrent.com",
+    email: "care.kagpremiumhomes@gmail.com",
   },
   projects: [
     {

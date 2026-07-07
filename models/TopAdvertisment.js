@@ -4,7 +4,7 @@ const TopAdvertismentBannerSchema = new Schema({
     title:{type:String},
     buttonLink: { type: String},
     isActive:{default:true,type:Boolean},
-    order: { type: Number, required: true },
+    section:{type:String,default:"frontend"},
 }, { timestamps: true });
 
 export default models.TopAdvertismentBanner || model("TopAdvertismentBanner", TopAdvertismentBannerSchema);

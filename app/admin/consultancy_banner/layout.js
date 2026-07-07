@@ -1,5 +1,5 @@
 import '@/app/globals.css'
-import { AppSidebar } from '@/components/sidebar/hotel-sidebar'
+import { AppSidebar } from '@/components/app-sidebar'
 import { SidebarProvider } from '@/components/ui/sidebar'
 
 export const metadata = {

@@ -3,10 +3,9 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import toast from "react-hot-toast";
-// import { UploadButton } from "@/utils/cloudinary"; // Removed UploadThing
 import { PencilIcon, Trash2Icon } from "lucide-react";
 
-const InstaFbPost = () => {
+const InstaFbPost = ({ section = "frontend" }) => {
     const [posts, setPosts] = useState([]);
     const [editPost, setEditPost] = useState(null);
     const [postFormData, setPostFormData] = useState({
@@ -34,7 +33,7 @@ const InstaFbPost = () => {
     useEffect(() => {
         const fetchPosts = async () => {
             try {
-                const url = activeTab === "instagram" ? instaUrl : fbUrl;
+                const url = activeTab === "instagram" ? `${instaUrl}?section=${section}` : `${fbUrl}?section=${section}`;
                 const response = await fetch(url);
                 const data = await response.json();
                 setPosts(data);
@@ -43,7 +42,7 @@ const InstaFbPost = () => {
             }
         };
         fetchPosts();
-    }, [activeTab]);
+    }, [activeTab, section]);
 
     const handlePostInputChange = (e) => {
         setPostFormData({ ...postFormData, [e.target.name]: e.target.value });
@@ -86,6 +85,7 @@ const InstaFbPost = () => {
                     url: postFormData.link,
                     id: editPost,
                     type: activeTab,
+                    section: section,
                 }),
             });
             const data = await response.json();
@@ -93,7 +93,7 @@ const InstaFbPost = () => {
                 toast.success(`${activeTab} post ${editPost ? "updated" : "added"} successfully`);
                 setEditPost(null);
                 // Refresh posts
-                const updatedPosts = await fetch(activeTab === "instagram" ? instaUrl : fbUrl).then((res) => res.json());
+                const updatedPosts = await fetch(`${activeTab === "instagram" ? instaUrl : fbUrl}?section=${section}`).then((res) => res.json());
                 setPosts(updatedPosts);
                 setPostFormData({ image: { url: "", key: "" }, link: "" });
             } else {
@@ -144,6 +144,7 @@ const InstaFbPost = () => {
                     url: fbFormData.link,
                     id: editPost,
                     type: "facebook",
+                    section: section,
                 }),
             });
             const data = await response.json();
@@ -151,7 +152,7 @@ const InstaFbPost = () => {
                 toast.success(`Facebook post ${editPost ? "updated" : "added"} successfully`);
                 setEditPost(null);
                 // Refresh posts
-                const updatedPosts = await fetch(fbUrl).then((res) => res.json());
+                const updatedPosts = await fetch(`${fbUrl}?section=${section}`).then((res) => res.json());
                 setPosts(updatedPosts);
                 setFbFormData({ image: { url: "", key: "" }, link: "" });
             } else {

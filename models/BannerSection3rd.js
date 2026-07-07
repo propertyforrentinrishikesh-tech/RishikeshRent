@@ -4,7 +4,7 @@ const BannerSection3rdSchema = new Schema({
     buttonLink: { type: String},
     image: { url: { type: String }, key: { type: String } },
     mobileImage: { url: { type: String }, key: { type: String } },
-    order: { type: Number, required: true },
+    section: {type: String, required: true}
 }, { timestamps: true });
 
 export default models.BannerSection3rd || model("BannerSection3rd", BannerSection3rdSchema);

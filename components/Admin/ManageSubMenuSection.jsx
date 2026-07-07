@@ -10,7 +10,7 @@ import { Pencil, Trash2 } from "lucide-react"
 import React, { useEffect, useState } from "react"
 import toast from "react-hot-toast"
 
-const ManageSubMenuSection = () => {
+const ManageSubMenuSection = ({ section = "frontend" }) => {
     const [categories, setCategories] = useState([])
     const [editItem, setEditItem] = useState(null)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
@@ -21,17 +21,17 @@ const ManageSubMenuSection = () => {
     const [selectedSubcategory, setSelectedSubcategory] = useState(null)
 
     // Form states
-    const [categoryForm, setCategoryForm] = useState({ catTitle: '' })
-    const [subCategoryForm, setSubCategoryForm] = useState({ categoryId: '', subCatTitle: '' })
-    const [packageForm, setPackageForm] = useState({ subCategoryId: '', subCatPackageTitle: '', subCatPackageUrl: '' })
+    const [categoryForm, setCategoryForm] = useState({ catTitle: '', showOnFrontend: section === "frontend" })
+    const [subCategoryForm, setSubCategoryForm] = useState({ categoryId: '', subCatTitle: '', showOnFrontend: section === "frontend" })
+    const [packageForm, setPackageForm] = useState({ subCategoryId: '', subCatPackageTitle: '', subCatPackageUrl: '', showOnFrontend: section === "frontend" })
 
     useEffect(() => {
         fetchCategories()
-    }, [])
+    }, [section])
 
     const fetchCategories = async () => {
         try {
-            const res = await fetch("/api/subMenuFixed")
+            const res = await fetch(`/api/subMenuFixed?section=${section}`)
             const data = await res.json()
             setCategories(data)
         } catch (error) {
@@ -53,7 +53,11 @@ const ManageSubMenuSection = () => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     type: "category",
-                    catTitle: categoryForm.catTitle
+                    section,
+                    catTitle: categoryForm.catTitle,
+                    showOnFrontend: section === "frontend"
+                        ? true
+                        : categoryForm.showOnFrontend
                 }),
             })
 
@@ -61,7 +65,7 @@ const ManageSubMenuSection = () => {
 
             if (response.ok) {
                 toast.success("Category added successfully!")
-                setCategoryForm({ catTitle: '' })
+                setCategoryForm({ catTitle: '', showOnFrontend: section === "frontend" })
                 fetchCategories()
             } else {
                 toast.error(responseData.message || "Failed to add category")
@@ -80,14 +84,18 @@ const ManageSubMenuSection = () => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     type: "subcategory",
+                    section,
                     categoryId: subCategoryForm.categoryId,
-                    subCatTitle: subCategoryForm.subCatTitle
+                    subCatTitle: subCategoryForm.subCatTitle,
+                    showOnFrontend: section === "frontend"
+                        ? true
+                        : subCategoryForm.showOnFrontend
                 }),
             })
 
             if (response.ok) {
                 toast.success("Subcategory added successfully!")
-                setSubCategoryForm({ categoryId: '', subCatTitle: '' })
+                setSubCategoryForm({ categoryId: '', subCatTitle: '', showOnFrontend: section === "frontend" })
                 fetchCategories()
             } else {
                 toast.error("Failed to add subcategory")
@@ -105,15 +113,19 @@ const ManageSubMenuSection = () => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     type: "package",
+                    section,
                     subCategoryId: packageForm.subCategoryId,
                     title: packageForm.subCatPackageTitle,
-                    url: packageForm.subCatPackageUrl
+                    url: packageForm.subCatPackageUrl,
+                    showOnFrontend: section === "frontend"
+                        ? true
+                        : packageForm.showOnFrontend
                 }),
             })
 
             if (response.ok) {
                 toast.success("Package added successfully!")
-                setPackageForm({ subCategoryId: '', subCatPackageTitle: '', subCatPackageUrl: '' })
+                setPackageForm({ subCategoryId: '', subCatPackageTitle: '', subCatPackageUrl: '', showOnFrontend: section === "frontend" })
                 fetchCategories()
             } else {
                 toast.error("Failed to add package")
@@ -135,19 +147,21 @@ const ManageSubMenuSection = () => {
 
             if (editType === 'category') {
                 endpoint = `/api/subMenuFixed/${editItem._id}`
-                body = { catTitle: title }
+                body = { catTitle: title, section }
             } else if (editType === 'subcategory') {
                 endpoint = `/api/subMenuFixed/subCategory/${editItem._id}`
                 body = {
                     categoryId: editItem.parentId,
-                    title: title
+                    title: title,
+                    section
                 }
             } else if (editType === 'package') {
                 endpoint = `/api/subMenuFixed/package/${editItem._id}`
                 body = {
                     subCategoryId: editItem.parentId,
                     title: title,
-                    url: url
+                    url: url,
+                    section
                 }
             }
 
@@ -172,13 +186,16 @@ const ManageSubMenuSection = () => {
     const handleDelete = async () => {
         try {
             let endpoint = "/api/subMenuFixed"
+            const searchParams = new URLSearchParams({ section })
 
             if (editType === 'category') {
-                endpoint = `/api/subMenuFixed/${itemToDelete._id}`
+                endpoint = `/api/subMenuFixed/${itemToDelete._id}?${searchParams.toString()}`
             } else if (editType === 'subcategory') {
-                endpoint = `/api/subMenuFixed/subCategory/${itemToDelete._id}?categoryId=${itemToDelete.parentId}`
+                searchParams.set('categoryId', itemToDelete.parentId)
+                endpoint = `/api/subMenuFixed/subCategory/${itemToDelete._id}?${searchParams.toString()}`
             } else if (editType === 'package') {
-                endpoint = `/api/subMenuFixed/package/${itemToDelete._id}?subCategoryId=${itemToDelete.parentId}`
+                searchParams.set('subCategoryId', itemToDelete.parentId)
+                endpoint = `/api/subMenuFixed/package/${itemToDelete._id}?${searchParams.toString()}`
             }
 
             const response = await fetch(endpoint, {
@@ -202,7 +219,7 @@ const ManageSubMenuSection = () => {
             const response = await fetch(`/api/subMenuFixed/${item._id}/toggle-active`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ type, parentId, active: !item.active }),
+                body: JSON.stringify({ type, parentId, section, active: !item.active }),
             })
 
             if (!response.ok) {
@@ -263,6 +280,13 @@ const ManageSubMenuSection = () => {
                                 placeholder="Enter Category Title"
                                 required
                             />
+                            <div className="flex items-center gap-2 pt-2">
+                                <Switch
+                                    checked={categoryForm.showOnFrontend}
+                                    onCheckedChange={(checked) => setCategoryForm({ ...categoryForm, showOnFrontend: checked })}
+                                />
+                                <Label>Show on Frontend</Label>
+                            </div>
                         </div>
                         <Button type="submit" className="bg-blue-600 hover:bg-blue-700">Add Category</Button>
                     </form>
@@ -293,6 +317,13 @@ const ManageSubMenuSection = () => {
                                     placeholder="Enter SubCategory Title"
                                     required
                                 />
+                            </div>
+                            <div className="flex items-center gap-2 pt-2">
+                                <Switch
+                                    checked={subCategoryForm.showOnFrontend}
+                                    onCheckedChange={(checked) => setSubCategoryForm({ ...subCategoryForm, showOnFrontend: checked })}
+                                />
+                                <Label>Show on Frontend</Label>
                             </div>
                         </div>
                         <Button type="submit" className="bg-blue-600 hover:bg-blue-700">Add SubCategory</Button>
@@ -334,6 +365,13 @@ const ManageSubMenuSection = () => {
                                     onChange={(e) => setPackageForm({ ...packageForm, subCatPackageUrl: e.target.value })}
                                     placeholder="Enter Package URL"
                                 />
+                            </div>
+                            <div className="flex items-center gap-2 pt-2">
+                                <Switch
+                                    checked={packageForm.showOnFrontend}
+                                    onCheckedChange={(checked) => setPackageForm({ ...packageForm, showOnFrontend: checked })}
+                                />
+                                <Label>Show on Frontend</Label>
                             </div>
                         </div>
                         <Button type="submit" className="bg-blue-600 hover:bg-blue-700">Add Package</Button>

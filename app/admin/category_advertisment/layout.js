@@ -1,9 +1,9 @@
 import '@/app/globals.css'
-import { AppSidebar } from '@/components/sidebar/hotel-sidebar'
+import { AppSidebar } from '@/components/app-sidebar'
 import { SidebarProvider } from '@/components/ui/sidebar'
 
 export const metadata = {
-    title: "",
+    title: "Category Advertisment Page",
 }
 
 export default function RootLayout({

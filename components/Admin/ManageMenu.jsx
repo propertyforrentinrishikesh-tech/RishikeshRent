@@ -13,21 +13,19 @@ import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import toast from "react-hot-toast"
 
-const Page = () => {
+const Page = ({ section = "frontend" }) => {
     const { data: session } = useSession()
     const { handleSubmit, register, setValue } = useForm()
     const [menuItems, setMenuItems] = useState([])
     const [editItem, setEditItem] = useState(null);
 
     useEffect(() => {
-        fetch("/api/getAllMenuItems")
+        fetch(`/api/getAllMenuItems?section=${section}`)
             .then(res => res.json())
             .then(data => setMenuItems(data))
-    }, [])
+    }, [section])
 
     const onSubmit = async (data) => {
-
-       
         if (!data.title) {
             toast.error("Menu Title is required", {
                 style: {
@@ -40,6 +38,8 @@ const Page = () => {
 
         data.active = true
         data.order = menuItems.length + 1
+        data.section = section;
+        data.showOnFrontend=section==="frontend"
 
         try {
             const result = await fetch("/api/admin/website-manage/addMenu", {
@@ -80,7 +80,7 @@ const Page = () => {
             const response = await fetch(`/api/admin/website-manage/addMenu`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id: editItem._id, ...data }),
+                body: JSON.stringify({ id: editItem._id, section, ...data }),
             });
 
             if (response.ok) {
@@ -116,7 +116,7 @@ const Page = () => {
             const response = await fetch(`/api/admin/website-manage/addMenu`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id, active: !currentStatus }),
+                body: JSON.stringify({ id, section, active: !currentStatus }),
             });
 
             const result = await response.json();
@@ -149,7 +149,7 @@ const Page = () => {
             const response = await fetch(`/api/admin/website-manage/addMenu`, {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id }),
+                body: JSON.stringify({ id, section }),
             });
 
             if (response.ok) {
@@ -173,7 +173,7 @@ const Page = () => {
         }
     }
 
-    if (session?.user?.isSubAdmin) {
+    if (session?.user?.isSubAdmin && section === "frontend") {
         return window.location.replace("/admin/send_promotional_emails")
     }
 
@@ -204,6 +204,7 @@ const Page = () => {
                                     <TableRow>
                                         <TableHead className="text-center !text-black w-1/3">Menu Title</TableHead>
                                         <TableHead className="text-center !text-black w-1/3">Order</TableHead>
+                                        <TableHead className="text-center !text-black w-1/6">Frontend</TableHead>
                                         <TableHead className="w-1/3 !text-black text-center">Action</TableHead>
                                     </TableRow>
                                 </TableHeader>
@@ -212,6 +213,30 @@ const Page = () => {
                                         <TableRow key={item._id}>
                                             <TableCell className="border font-semibold border-blue-600">{item.title}</TableCell>
                                             <TableCell className="border font-semibold border-blue-600">{item.order}</TableCell>
+                                            <TableCell className="border font-semibold border-blue-600">
+                                                <div className="flex items-center justify-center gap-2">
+                                                    <Switch
+                                                        id={`frontend-switch-${item._id}`}
+                                                        checked={Boolean(item.showOnFrontend)}
+                                                        onCheckedChange={async () => {
+                                                            const nextValue = !item.showOnFrontend;
+                                                            const response = await fetch(`/api/admin/website-manage/addMenu`, {
+                                                                method: "PUT",
+                                                                headers: { "Content-Type": "application/json" },
+                                                                body: JSON.stringify({ id: item._id, section, showOnFrontend: nextValue }),
+                                                            });
+
+                                                            if (response.ok) {
+                                                                setMenuItems(menuItems.map((menuItem) => menuItem._id === item._id ? { ...menuItem, showOnFrontend: nextValue } : menuItem));
+                                                            }
+                                                        }}
+                                                        className={`rounded-full transition-colors ${item.showOnFrontend ? "!bg-green-500" : "!bg-red-500"}`}
+                                                    />
+                                                    <Label htmlFor={`frontend-switch-${item._id}`} className="text-black">
+                                                        {item.showOnFrontend ? "Yes" : "No"}
+                                                    </Label>
+                                                </div>
+                                            </TableCell>
                                             <TableCell className="border font-semibold border-blue-600">
                                                 <div className="flex items-center justify-center gap-6">
                                                     <Button size="icon" onClick={() => handleEdit(item)} variant="outline">

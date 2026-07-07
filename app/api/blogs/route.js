@@ -3,10 +3,16 @@ import connectDB from "@/lib/connectDB";
 import Blog from "@/models/Blog";
 
 // GET: Fetch all blogs
-export async function GET() {
+export async function GET(req) {
   await connectDB();
   try {
-    const blogs = await Blog.find().sort({ date: -1 });
+    const url = new URL(req.url, `http://${req.headers.get('host') || 'localhost'}`);
+    const section = url.searchParams.get('section');
+    const query = {};
+    if (section) {
+        query.section = section;
+    }
+    const blogs = await Blog.find(query).sort({ date: -1 });
     return NextResponse.json({ blogs }, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -34,6 +40,7 @@ export async function POST(req) {
           shortDescription: data.shortDescription || '',
           longDescription: data.longDescription || '',
           images,
+          section: data.section || 'frontend',
         });
     // const blog = new Blog(body);
     await blog.save();

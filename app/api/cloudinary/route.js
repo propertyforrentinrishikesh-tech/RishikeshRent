@@ -8,14 +8,6 @@ cloudinary.config({
   secure: true,
 });
 
-export const config = {
-  api: {
-    bodyParser: {
-      bodyParser: false,
-    },
-  },
-};
-
 export async function POST(req) {
   try {
     // Expecting multipart/form-data with a file

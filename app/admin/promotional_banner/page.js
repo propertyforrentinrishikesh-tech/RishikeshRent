@@ -12,7 +12,7 @@ const  PromotinalBannerPage = () => {
             </header>
             <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
                 <h1 className="text-4xl px-12 font-semibold">Promotional Banner</h1>
-                <PromotinalBanner />
+                <PromotinalBanner section="frontend"/>
             </div>
         </SidebarInset>
     )
