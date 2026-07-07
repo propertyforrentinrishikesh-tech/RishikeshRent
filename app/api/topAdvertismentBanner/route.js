@@ -1,10 +1,16 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/connectDB";
 import TopAdvertismentBanner from "@/models/TopAdvertisment";
-export async function GET() {
+export async function GET(req) {
     await connectDB();
     try {
-        const banners = await TopAdvertismentBanner.find().sort({ order: 1 });
+        const url = new URL(req.url, `http://${req.headers.get('host') || 'localhost'}`);
+        const section = url.searchParams.get('section');
+        const query = {};
+        if (section) {
+            query.section = section;
+        }
+        const banners = await TopAdvertismentBanner.find(query).sort({ createdAt: 1 });
         return NextResponse.json(banners, { status: 200 });
     } catch (error) {
         return NextResponse.json({ error: "Failed to fetch banners" }, { status: 500 });
@@ -14,13 +20,14 @@ export async function GET() {
 export async function POST(req) {
     await connectDB();
     try {
-        const { title,buttonLink, order } = await req.json();
+        const { title, buttonLink, section } = await req.json();
 
-        // Find the highest order number
-        const lastBanner = await TopAdvertismentBanner.findOne().sort({ order: -1 });
-        const nextOrder = lastBanner ? lastBanner.order + 1 : 1; // Auto-increment order
 
-        const newBanner = new TopAdvertismentBanner({ buttonLink, order: nextOrder, title });
+        const newBanner = new TopAdvertismentBanner({ 
+            buttonLink, 
+            title,
+            section: section || "frontend"
+        });
         await newBanner.save();
         return NextResponse.json(newBanner, { status: 201 });
     } catch (error) {
@@ -31,13 +38,12 @@ export async function POST(req) {
 export async function PATCH(req) {
     await connectDB();
     try {
-        const { id, buttonLink, title, order, isActive } = await req.json();
+        const { id, buttonLink, title, isActive } = await req.json();
         const updateData = {};
         
         // Only include fields that are provided in the request
         if (buttonLink !== undefined) updateData.buttonLink = buttonLink;
         if (title !== undefined) updateData.title = title;
-        if (order !== undefined) updateData.order = order;
         if (isActive !== undefined) updateData.isActive = isActive;
 
         const updatedBanner = await TopAdvertismentBanner.findByIdAndUpdate(

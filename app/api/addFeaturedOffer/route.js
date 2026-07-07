@@ -4,10 +4,16 @@ import FeaturedBanner from "@/models/FeaturedBanner";
 import { deleteFileFromCloudinary } from "@/utils/cloudinary";
 
 
-export async function GET() {
+export async function GET(req) {
     await connectDB();
     try {
-        const banners = await FeaturedBanner.find()
+        const url = new URL(req.url, `http://${req.headers.get('host') || 'localhost'}`);
+        const section = url.searchParams.get('section');
+        const query = {};
+        if (section) {
+            query.section = section;
+        }
+        const banners = await FeaturedBanner.find(query).sort({ createdAt: -1 });
         return NextResponse.json(banners, { status: 200 });
     } catch (error) {
         return NextResponse.json({ error: "Failed to fetch banners" }, { status: 500 });
@@ -17,11 +23,17 @@ export async function GET() {
 export async function POST(req) {
     await connectDB();
     try {
-        const { propertyName, propertyType, propertySubDestination, price, buttonLink, image } = await req.json();
+        const { propertyName, propertyType, propertySubDestination, price, buttonLink, image, section } = await req.json();
 
-        const lastBanner = await FeaturedBanner.findOne().sort({});
-
-        const newBanner = new FeaturedBanner({ propertyName, propertyType, propertySubDestination, price, buttonLink, image });
+        const newBanner = new FeaturedBanner({ 
+            propertyName, 
+            propertyType, 
+            propertySubDestination, 
+            price, 
+            buttonLink, 
+            image,
+            section: section || 'frontend'
+        });
         await newBanner.save();
         return NextResponse.json(newBanner, { status: 201 });
     } catch (error) {
@@ -32,8 +44,18 @@ export async function POST(req) {
 export async function PATCH(req) {
     await connectDB();
     try {
-        const { id, propertyName, propertyType, propertySubDestination, price, buttonLink, image } = await req.json();
-        const updatedBanner = await FeaturedBanner.findByIdAndUpdate(id, { propertyName, propertyType, propertySubDestination, price, buttonLink, image }, { new: true });
+        const { id, propertyName, propertyType, propertySubDestination, price, buttonLink, image, section } = await req.json();
+        
+        const updateData = {};
+        if (propertyName !== undefined) updateData.propertyName = propertyName;
+        if (propertyType !== undefined) updateData.propertyType = propertyType;
+        if (propertySubDestination !== undefined) updateData.propertySubDestination = propertySubDestination;
+        if (price !== undefined) updateData.price = price;
+        if (buttonLink !== undefined) updateData.buttonLink = buttonLink;
+        if (image !== undefined) updateData.image = image;
+        if (section !== undefined) updateData.section = section;
+
+        const updatedBanner = await FeaturedBanner.findByIdAndUpdate(id, updateData, { new: true });
         return NextResponse.json(updatedBanner, { status: 200 });
     } catch (error) {
         return NextResponse.json({ error: "Failed to update banner" }, { status: 500 });

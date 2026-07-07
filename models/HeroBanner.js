@@ -4,7 +4,7 @@ const HeroBannerSchema = new Schema({
     buttonLink: { type: String },
     frontImg: { url: { type: String }, key: { type: String } },
     mobileImg: { url: { type: String }, key: { type: String } },
-    order: { type: Number, required: true },
+    section: { type: String, required: true },
 }, { timestamps: true });
 
 export default models.HeroBanner || model("HeroBanner", HeroBannerSchema);

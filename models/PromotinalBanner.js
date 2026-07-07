@@ -3,7 +3,7 @@ import { Schema, models, model } from "mongoose";
 const PromotinalBannerSchema = new Schema({
     buttonLink: { type: String},
     image: { url: { type: String }, key: { type: String } },
-    order: { type: Number, required: true },
+    section: { type: String, default: "frontend", index: true },
 }, { timestamps: true });
 
 export default models.PromotinalBanner || model("PromotinalBanner", PromotinalBannerSchema);

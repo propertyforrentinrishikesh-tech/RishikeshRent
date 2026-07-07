@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
-import { CalendarClock, MapPin, Heart, Bookmark, ArrowRight, Globe, X, Star } from "lucide-react";
+import { ArrowRight, Globe, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Carousel,
@@ -19,6 +19,7 @@ import QuickViewProductCard from "./QuickViewProductCard";
 import { useCart } from "../context/CartContext";
 import { toast } from "react-hot-toast"
 import { useInView } from 'react-intersection-observer';
+import PropertyCard from "./PropertyCard";
 
 
 function slugify(text) {
@@ -30,56 +31,14 @@ function slugify(text) {
     .replace(/[^a-z0-9\-]/g, '')
     .replace(/\-+/g, '-');
 }
-
 const RandomTourPackageSection = () => {
   const router = useRouter();
-  // ...existing state and hooks
-  const handleAddToCart = (item) => {
-    const price = item?.quantity?.variants[0].price;
-    const coupon = item.coupon || item.coupons?.coupon;
-    let discountedPrice = price;
-    let couponApplied = false;
-    let couponCode = "";
-
-    if (coupon && typeof coupon.percent === 'number' && coupon.percent > 0) {
-      discountedPrice = price - (price * coupon.percent) / 100;
-      couponApplied = true;
-      couponCode = coupon.couponCode;
-    } else if (coupon && typeof coupon.amount === 'number' && coupon.amount > 0) {
-      discountedPrice = price - coupon.amount;
-      couponApplied = true;
-      couponCode = coupon.couponCode;
-    }
-
-    addToCart({
-      id: item._id,
-      name: item.title,
-      image: item?.gallery?.mainImage || "/placeholder.jpeg",
-      price: Math.round(discountedPrice),
-      size: item?.quantity?.variants[0]?.size,
-      weight: item?.quantity?.variants[0]?.weight ? item.quantity.variants[0].weight / 1000 : 0, // Convert grams to kg
-      color: item?.quantity?.variants[0].color,
-      originalPrice: price,
-      qty: 1,
-      couponApplied,
-      couponCode: couponApplied ? couponCode : undefined,
-      productCode: item.code || item.productCode || '',
-      discountPercent: coupon && typeof coupon.percent === 'number' ? coupon.percent : undefined,
-      discountAmount: coupon && typeof coupon.amount === 'number' ? coupon.amount : undefined,
-      cgst: (item.taxes && item.taxes.cgst) || item.cgst || (item.tax && item.tax.cgst) || 0,
-      sgst: (item.taxes && item.taxes.sgst) || item.sgst || (item.tax && item.tax.sgst) || 0,
-      totalQuantity: item?.quantity?.variants[0]?.qty || 0,
-    });
-    toast.success("Added to cart!");
-  };
 
   const { addToCart, addToWishlist, removeFromWishlist, wishlist } = useCart();
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-
   const [isartisanLoading, setIsArtisanLoading] = useState(true);
-
-  const [artisan, setArtisan] = useState([])
+  const [artisan, setArtisan] = useState([]);
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [loading1, setLoading1] = useState(true);
   const [bannerSection3rd, setBannerSection3rd] = useState([]);
@@ -91,15 +50,87 @@ const RandomTourPackageSection = () => {
     triggerOnce: false
   });
 
-  // Prevent background scroll when Quick View is open
+  // Booking modal state
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [selectedBookingProperty, setSelectedBookingProperty] = useState(null);
+  const [contactMethod, setContactMethod] = useState('call');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [agreeToContact, setAgreeToContact] = useState(false);
+
+  // Prevent background scroll when Quick View or booking modal is open
   useEffect(() => {
-    if (quickViewProduct) {
+    if (quickViewProduct || showBookingModal) {
       document.body.classList.add("overflow-hidden");
     } else {
       document.body.classList.remove("overflow-hidden");
     }
     return () => document.body.classList.remove("overflow-hidden");
-  }, [quickViewProduct]);
+  }, [quickViewProduct, showBookingModal]);
+
+  // Handle booking form submission
+  const handleBookingSubmit = async (e) => {
+    e.preventDefault();
+    if (!agreeToContact) {
+      toast.error("Please agree to be contacted");
+      return;
+    }
+
+    if ((contactMethod === 'call' || contactMethod === 'whatsapp') && !phone) {
+      toast.error("Please enter your phone number");
+      return;
+    }
+
+    if (contactMethod === 'email' && !email) {
+      toast.error("Please enter your email");
+      return;
+    }
+
+    try {
+      const propertySource = selectedBookingProperty || {};
+      const payload = {
+        contactMethod,
+        phone: contactMethod !== 'email' ? phone : undefined,
+        email: contactMethod === 'email' ? email : undefined,
+        propertyId: propertySource?._id,
+        propertyName: propertySource?.propertyName || propertySource?.title || "",
+        propertyNameSlug: propertySource?.propertyNameSlug || "",
+        locationType: propertySource?.locationType || "",
+        subLocationType: propertySource?.subLocationType || "",
+        propertyPrice: propertySource?.price || propertySource?.rentPrice || null,
+        propertyImage: propertySource?.mainImage?.url || propertySource?.gallery?.mainImage?.url || "",
+        sourcePage: window.location.pathname,
+        message: `Booking enquiry for ${propertySource?.propertyName || propertySource?.title || "selected property"}`,
+      };
+
+      const response = await fetch('/api/property/propertyEnquiry', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || 'Failed to submit enquiry');
+      }
+
+      toast.success("Your booking request has been sent successfully!");
+
+      setPhone('');
+      setEmail('');
+      setContactMethod('call');
+      setAgreeToContact(false);
+      setSelectedBookingProperty(null);
+      setShowBookingModal(false);
+    } catch (error) {
+      toast.error(error?.message || "Error submitting booking request");
+    }
+  };
+
+  const sectionProducts = Array.isArray(products) ? products.slice(0, 6) : [];
 
 
 
@@ -125,12 +156,12 @@ const RandomTourPackageSection = () => {
     }
   };
   // Fetch Prouducts
-  const fetchProducts = useCallback(async () => {
+  const fetchProperties = useCallback(async () => {
     if (loading || !hasMore) return;
 
     setLoading(true);
     try {
-      const res = await fetch(`/api/createPropertyDetails?page=${page}&limit=15`);
+      const res = await fetch(`/api/property/propertyDetails?page=${page}&limit=15&showOnFront=true`);
       const data = await res.json();
       // console.log("Product API response:", data);
       const products = Array.isArray(data?.data)
@@ -159,9 +190,9 @@ const RandomTourPackageSection = () => {
   }, [page, loading, hasMore]);
   useEffect(() => {
     if (inView && hasMore) {
-      fetchProducts();
+      fetchProperties();
     }
-  }, [inView, hasMore, fetchProducts]);
+  }, [inView, hasMore, fetchProperties]);
   const fetchBannerSection3rd = async () => {
     try {
       const response = await fetch('/api/bannerSection3rd');
@@ -194,7 +225,7 @@ const RandomTourPackageSection = () => {
   };
   useEffect(() => {
     fetchArtisan();
-    fetchProducts();
+    fetchProperties();
     fetchBannerSection3rd();
     fetchPromotinalBanner();
   }, []);
@@ -213,724 +244,665 @@ const RandomTourPackageSection = () => {
       .replace(/\s+/g, '-')   // spaces → -
       .replace(/[^\w-]+/g, '') // remove special chars
       .replace(/--+/g, '-');   // remove double -
-
   return (
     <section className="bg-[#fcf7f1] md:mt-19 w-full overflow-hidden max-w-screen overflow-x-hidden">
-      <div className=" w-full h-full overflow-hidden max-w-screen">
-        {/* Product Section */}
-        <div className="w-full py-10 px-2 bg-[#FCF7F1]">
-          {/* <h1 className="text-xl md:text-3xl lg:text-4xl font-bold text-center md:mt-10 uppercase">
-          Equip Your Next Adventure.
-          </h1>
-          <p className=" text-gray-600 py-4 text-center font-barlow md:w-[50%] w-full mx-auto">
-            Discover the hottest deals with our Trending Products! Curated
-            daily, these top-rated picks offer the best value and quality —
-            handpicked for professionals who demand the best, today. Don’t miss
-            out — elevate your experience now!
-          </p> */}
-          <Carousel
-            className={`w-full md:w-[95%] mx-auto my-4 ${products.length > 0 ? "block" : "hidden"}`}
-          >
-            <CarouselContent className="w-full gap-2">
-              {products.length > 0 &&
-                products.map((item, index) => (
-                  <CarouselItem
-                    key={index}
-                    className="md:basis-1/2 lg:basis-1/3 xl:basis-1/4 min-w-0 snap-start"
-                    ref={index === products.length - 3 ? ref : null}
-                  >
-                    <div className="flex flex-col md:w-[290px]">
-                      {/* Image Section */}
-                      <div className="relative w-full md:h-96 rounded-3xl overflow-hidden flex items-center justify-center group/image">
-                        {/* GET 10% OFF Tag */}
-                        {(() => {
-                          const coupon = item.coupon || item.coupons?.coupon;
-                          if (!coupon?.couponCode) return null;
-
-                          const { percent, amount, couponCode } = coupon;
-
-                          let offerText;
-                          if (typeof percent === 'number' && percent > 0) {
-                            offerText = <>GET {percent}% OFF</>;
-                          } else if (typeof amount === 'number' && amount > 0) {
-                            offerText = <>GET ₹{amount} OFF</>;
-                          }
-
-                          return (
-                            <div className="absolute top-6 left-4 z-10 bg-white rounded-full px-4 py-1 text-sm font-bold shadow text-black tracking-tight" style={{ letterSpacing: 0 }}>
-                              {offerText}
-                            </div>
-                          );
-                        })()}
-                        <Image
-                          src={item?.mainImage?.url || "/placeholder.jpeg"}
-                          alt={item?.title || "Tour package image"}
-                          width={400}
-                          height={500}
-                          quality={60}
-                          className="object-cover w-full h-full rounded-3xl transition-transform duration-300 group-hover/image:scale-105"
-                        />
-                        {/* Quick View Button - Slide Up from Bottom on Hover (image only) */}
-                        <div className="absolute left-0 right-0 bottom-0 flex items-center justify-center translate-y-10 opacity-0 group-hover/image:translate-y-0 group-hover/image:opacity-100 transition-all duration-300 py-4 ">
-                          <Button
-                            className="bg-black text-white hover:bg-gray-800 transition-colors duration-300 uppercase text-sm font-bold px-8 py-3 rounded-full shadow-lg border-2 border-white"
-                            onClick={() => setQuickViewProduct(item.product ? item.product : item) // Ensure we always pass the actual product object, not a wrapper
-                            }
-                          >
-                            QUICK VIEW
-                          </Button>
-
-                        </div>
-                      </div>
-                      {/* Name and Price Section */}
-                      <div className="flex flex-col items-start px-1 pt-4 pb-2 mt-0 gap-2">
-                        <Link
-                          href={`/property/${item.propertyNameSlug}`}
-                          className="font-bold hover:underline text-md text-gray-900 leading-tight truncate cursor-pointer break-words whitespace-normal"
-                        >
-                          {item?.propertyName}
-                        </Link>
-                        <div className="flex items-center gap-2 justify-between w-full">
-
-                          <p className="text-black text-md font-semibold">{item?.locationType}</p>
-                          <Link href={`/properties/${slugify(item.propertyName)}/${slugify(item.propertyNameSlug)}`} className="text-md font-semibold px-4 py-1 hover:bg-gray-800 hover:text-white bg-black rounded-full text-white">View Details </Link>
-                        </div>
-                      </div>
-                    </div>
-                  </CarouselItem>
-                ))}
-            </CarouselContent>
-            <CarouselPrevious className="absolute left-2 top-60 md:top-1/2 -translate-y-1/2 p-5" />
-            <CarouselNext className="absolute right-2 top-60 md:top-1/2 -translate-y-1/2 p-5" />
-          </Carousel>
+  
+      {/* New Unrivaled Offer Section */}
+      <section className="w-full py-12 px-4 md:px-10 bg-white">
+        <div className="flex flex-col mb-8">
+          <div className="flex justify-between items-end border-b border-gray-200 pb-2">
+            <div className="flex flex-col">
+              <span className="text-xs uppercase tracking-widest text-gray-500 mb-1">Experience the Unrivaled: Our Deluxe Room Offer</span>
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900">A Quiet Escape For Modern Travelers Like You</h2>
+            </div>
+            <Link href="/properties" className="text-sm font-semibold text-gray-800 hover:underline mb-1 hidden md:block">
+              View More
+            </Link>
+          </div>
+          <div className="mt-2 text-xs text-gray-500 uppercase tracking-wide">
+            Hospitality Reimagined, Modern Amenities Refined. Hot & Trending Venues
+          </div>
         </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {sectionProducts.map((item) => (
+            <PropertyCard
+              key={item?._id || item?.id}
+              item={item}
+              onDetailsClick={(item, location, slug) => {
+                router.push(`/properties/${slugify(location)}/${slugify(slug)}`);
+              }}
+              onBookingClick={(item) => {
+                setSelectedBookingProperty(item);
+                setShowBookingModal(true);
+              }}
+              onQuickViewClick={(item) => setQuickViewProduct(item)}
+              slugify={slugify}
+            />
+          ))}
 
+          {/* Promo banner card as last item */}
+          <div key="promo-banner" className="bg-[#0f5886] text-white rounded-xl overflow-hidden shadow-sm flex flex-col h-full p-6">
+            <div className="flex flex-col flex-grow">
+              <h3 className="text-2xl md:text-3xl font-bold mb-2">Stay Longer, Save More</h3>
+              <p className="text-sm text-white/90 mb-4">It's simple: the longer you stay, the more you save!</p>
 
-        {/* New Unrivaled Offer Section */}
-        <section className="w-full py-12 px-4 md:px-10 bg-white">
-          <div className="flex flex-col mb-8">
-            <div className="flex justify-between items-end border-b border-gray-200 pb-2">
-              <div className="flex flex-col">
-                <span className="text-xs uppercase tracking-widest text-gray-500 mb-1">Experience the Unrivaled: Our Deluxe Room Offer</span>
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900">A Quiet Escape For Modern Travelers Like You</h2>
+              <div className="flex items-start gap-4 text-sm mb-6">
+                <div className="border-l border-white/40 pl-4">
+                  <p className="mb-2"><span className="font-semibold">Save up to 30%</span> on daily rate for stays longer than 14 nights</p>
+                  <p><span className="font-semibold">Save up to 20%</span> off the nightly rate on stays between 7-14 nights</p>
+                </div>
               </div>
-              <Link href="/properties" className="text-sm font-semibold text-gray-800 hover:underline mb-1 hidden md:block">
-                View More
+            </div>
+            <div className="mt-auto">
+              <Link href="/properties" className="bg-white hover:bg-gray-200 text-[#0f5886] font-bold rounded-md px-4 py-2">
+                Choose Properties
               </Link>
             </div>
-            <div className="mt-2 text-xs text-gray-500 uppercase tracking-wide">
-              Hospitality Reimagined, Modern Amenities Refined. Hot & Trending Venues
-            </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {[
-              {
-                id: 1,
-                title: "Long Beach",
-                rating: 4.8,
-                desc: "Cicero famously orated against his political opponent Lucius Sergius Catilina.",
-                priceMin: 492,
-                priceMax: 799,
-                rooms: 120,
-                image: "https://images.unsplash.com/photo-1540541338287-41700207dee6?q=80&w=1000&auto=format&fit=crop"
-              },
-              {
-                id: 2,
-                title: "Jacksonville",
-                rating: 4.7,
-                desc: "Cicero famously orated against his political opponent Lucius Sergius Catilina.",
-                priceMin: 492,
-                priceMax: 799,
-                rooms: 78,
-                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
-              },
-              {
-                id: 3,
-                title: "Kansas City",
-                rating: 4.9,
-                desc: "Cicero famously orated against his political opponent Lucius Sergius Catilina.",
-                priceMin: 492,
-                priceMax: 799,
-                rooms: 65,
-                image: "https://images.unsplash.com/photo-1512918760383-edaebe36037c?q=80&w=1000&auto=format&fit=crop"
-              },
-              {
-                id: 4,
-                title: "Los Angeles",
-                rating: 4.6,
-                desc: "Cicero famously orated against his political opponent Lucius Sergius Catilina.",
-                priceMin: 492,
-                priceMax: 799,
-                rooms: 23,
-                image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop"
-              },
-              {
-                id: 5,
-                title: "Miami Beach",
-                rating: 4.8,
-                desc: "Cicero famously orated against his political opponent Lucius Sergius Catilina.",
-                priceMin: 550,
-                priceMax: 900,
-                rooms: 45,
-                image: "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?q=80&w=1000&auto=format&fit=crop"
-              }
-            ].map((item) => (
-              <div
-                key={item.id}
-                className="bg-white rounded-xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col h-full"
-              >
-                {/* Image */}
-                <div className="relative h-48 w-full overflow-hidden">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+        </div>
+      </section>
+
+      {bannerSection3rd.length > 0 && (
+        <section className="relative w-full">
+          {loading1 ? (
+            // Skeleton loader
+            <div className="w-full">
+              <div className="grid grid-cols-1 gap-5 md:gap-4">
+                {[...Array(2)].map((_, idx) => (
+                  <div
+                    key={idx}
+                    className="h-[220px] md:h-[400px] rounded-2xl overflow-hidden bg-gray-200 animate-pulse"
                   />
-                </div>
-
-                {/* Content */}
-                <div className="p-5 flex flex-col flex-grow">
-                  <div className="flex justify-between items-center mb-2">
-                    <h3 className="text-lg font-bold">{item.title}</h3>
-                    <span className="text-sm font-bold">{item.rating}</span>
-                  </div>
-
-                  <p className="text-gray-500 text-sm mb-6 line-clamp-2">
-                    {item.desc}
-                  </p>
-
-                  <div className="mt-auto">
-                    <div className="flex justify-between mb-4 text-sm">
-                      <span className="font-bold">${item.priceMin} - ${item.priceMax}</span>
-                      <span>{item.rooms} Rooms</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex gap-2 p-4">
-                  {/* View Details */}
-                  <Button
-                    variant="outline"
-                    className="flex-1 border-gray-200 text-gray-700 hover:bg-gray-100 text-sm font-semibold rounded-lg"
-                    onClick={() => router.push(`/hotels/rishikesh/${slugify(item.title)}`)}
-                  >
-                    View Details
-                  </Button>
-
-                  {/* Request Book */}
-                  <Button className="flex-1 bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 font-bold text-sm rounded-lg">
-                    Request Book <ArrowRight className="w-4 h-4 ml-1" />
-                  </Button>
-
-                  {/* Wishlist */}
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="bg-emerald-50 border-none text-emerald-500 hover:bg-emerald-100 rounded-lg w-10 h-10"
-                  >
-                    <Heart className="w-5 h-5 fill-current" />
-                  </Button>
-                </div>
-
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          ) : (
+            // Actual content
+            bannerSection3rd.map((item, idx) => (
+              <div className="w-full" key={item._id}>
+                <div className="grid grid-cols-1 gap-5 md:gap-4 overflow-hidden">
+                  <div className="hidden md:flex flex-col md:h-[430px] overflow-hidden relative group">
+                    <Link
+                      href={item.buttonLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="absolute inset-0 flex items-center justify-center group-hover:opacity-100 transition-opacity duration-300"
+                    >
+                      <img
+                        src={item.image?.url}
+                        alt={item.title}
+                        className="absolute inset-0 w-full h-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
+                      />
+                    </Link>
+                  </div>
+                  <div className="md:hidden flex flex-col h-[450px] overflow-hidden relative group">
+                    <Link
+                      href={item.buttonLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="absolute inset-0 flex items-center justify-center group-hover:opacity-100 transition-opacity duration-300"
+                    >
+                      <img
+                        src={item.mobileImage?.url}
+                        alt={item.title}
+                        className="absolute inset-0 w-full h-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
+                      />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </section>
-        {bannerSection3rd.length > 0 && (
-          <section className="relative w-full">
-            {loading1 ? (
-              // Skeleton loader
-              <div className="w-full">
-                <div className="grid grid-cols-1 gap-5 md:gap-4">
-                  {[...Array(2)].map((_, idx) => (
-                    <div
-                      key={idx}
-                      className="h-[220px] md:h-[400px] rounded-2xl overflow-hidden bg-gray-200 animate-pulse"
-                    />
-                  ))}
+      )}
+
+      {/* Artisan Carousel Section */}
+      {artisan.length > 0 && (
+        <div className="w-full py-10 md:py-20">
+          {/* Desktop: Grid/List */}
+          <div className="w-full max-w-[90%] mx-auto mb-16">
+            <div className="flex flex-col md:flex-row items-start gap-5">
+              {/* Left: Heading and description */}
+              <div className="flex-1 flex flex-col justify-center md:pr-8">
+                <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-start mb-5 uppercase">Our Industry Experts</h2>
+                {/* <h2 className="text-xl font-bold mb-2">Celebrating the Art of Craftsmanship. Honoring the Hands That Shape Beauty</h2> */}
+                <div className="text-md text-gray-700 text-justify mb-6">
+                  At the heart of every great expedition is dependable gear—and that’s where we come in. As a leading provider of adventure and expedition equipment, we specialize in supplying high-performance, safety-tested gear for professionals, outdoor enthusiasts, rescue teams, and expedition leaders. Our commitment goes beyond products; we offer end-to-end gear solutions designed for extreme conditions, rugged terrains, and mission-critical operations. Backed by trusted global brands and decades of field experience, our management philosophy focuses on quality, innovation, and reliability. Whether you're preparing for a Himalayan ascent, a wilderness survival course, or a high-altitude rescue mission, we ensure you’re equipped to go further—safely, efficiently, and confidently.
                 </div>
+
               </div>
-            ) : (
-              // Actual content
-              bannerSection3rd.map((item, idx) => (
-                <div className="w-full" key={item._id}>
-                  <div className="grid grid-cols-1 gap-5 md:gap-4 overflow-hidden">
-                    <div className="hidden md:flex flex-col md:h-[430px] overflow-hidden relative group">
-                      <Link
-                        href={item.buttonLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="absolute inset-0 flex items-center justify-center group-hover:opacity-100 transition-opacity duration-300"
-                      >
+              {/* Right: Top 2 artisan cards in new style */}
+              <div className="hidden md:flex flex-row gap-4 justify-end">
+                {(artisan && artisan.slice(0, 2).map((item, idx) => {
+                  const card = {
+                    id: item._id || idx,
+                    slug: item.slug,
+                    name: `${item.title ? item.title + " " : ""}${item.firstName || ''} ${item.lastName || ''}`.trim() || "Unknown Artisan",
+                    date: item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase() : "N/A",
+                    image: item.profileImage?.url || item.image || "/bg-custom-1.jpg",
+                    title: item.specializations && item.specializations.length > 0 ? item.specializations.join(", ") : "Artisan",
+                    subtitle: item.shgName || "",
+                    experience: item.yearsOfExperience ? `${item.yearsOfExperience} years experience` : "",
+                    location: item.address ? `${item.address.city}, ${item.address.state}` : "",
+                    socials: [
+                      {
+                        icon: (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-facebook-icon lucide-facebook"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" /></svg>
+                        ), url: item.socialPlugin?.facebook || "#"
+                      },
+                      {
+                        icon: (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-instagram-icon lucide-instagram"><rect width="20" height="20" x="2" y="2" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" x2="17.51" y1="6.5" y2="6.5" /></svg>
+                        ), url: item.socialPlugin?.instagram || "#"
+                      },
+                      {
+                        icon: (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-youtube-icon lucide-youtube"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17" /><path d="m10 15 5-3-5-3z" /></svg>
+                        ), url: item.socialPlugin?.youtube || "#"
+                      },
+                      {
+                        icon: (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="black" viewBox="0 0 24 24">
+                            <path d="M21.35 11.1h-9.18v2.83h5.43c-.24 1.38-1.42 4.04-5.43 4.04-3.27 0-5.94-2.71-5.94-6.05s2.67-6.05 5.94-6.05c1.86 0 3.11.8 3.82 1.49l2.6-2.57C17.36 3.43 15.01 2.5 12 2.5 6.95 2.5 2.9 6.53 2.9 11.5S6.95 20.5 12 20.5c6.89 0 9.1-4.82 9.1-7.22 0-.48-.05-.8-.15-1.18z" />
+                          </svg>
+                        ), url: item.socialPlugin?.google || "#"
+                      },
+                      {
+                        icon: (
+                          <Globe />
+                        ), url: item.socialPlugin?.website || "#"
+                      },
+                    ],
+                  };
+                  return (
+                    <div key={card.id} className="relative rounded-2xl shadow-md group transition-all h-full w-[340px] flex flex-col bg-[#fbeff2] overflow-hidden">
+
+
+                      {/* Card Image */}
+                      <div className="relative w-full h-96">
                         <img
-                          src={item.image?.url}
-                          alt={item.title}
-                          className="absolute inset-0 w-full h-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
+                          src={card.image}
+                          alt={card.name}
+                          className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
+                          style={{ objectFit: 'cover' }}
                         />
-                      </Link>
-                    </div>
-                    <div className="md:hidden flex flex-col h-[450px] overflow-hidden relative group">
-                      <Link
-                        href={item.buttonLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="absolute inset-0 flex items-center justify-center group-hover:opacity-100 transition-opacity duration-300"
-                      >
-                        <img
-                          src={item.mobileImage?.url}
-                          alt={item.title}
-                          className="absolute inset-0 w-full h-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
-                        />
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </section>
-        )}
-
-        {/* Artisan Carousel Section */}
-        {artisan.length > 0 && (
-          <div className="w-full py-10 md:py-20">
-            {/* Desktop: Grid/List */}
-            <div className="w-full max-w-[90%] mx-auto mb-16">
-              <div className="flex flex-col md:flex-row items-start gap-5">
-                {/* Left: Heading and description */}
-                <div className="flex-1 flex flex-col justify-center md:pr-8">
-                  <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-start mb-5 uppercase">Our Industry Experts</h2>
-                  {/* <h2 className="text-xl font-bold mb-2">Celebrating the Art of Craftsmanship. Honoring the Hands That Shape Beauty</h2> */}
-                  <div className="text-md text-gray-700 text-justify mb-6">
-                    At the heart of every great expedition is dependable gear—and that’s where we come in. As a leading provider of adventure and expedition equipment, we specialize in supplying high-performance, safety-tested gear for professionals, outdoor enthusiasts, rescue teams, and expedition leaders. Our commitment goes beyond products; we offer end-to-end gear solutions designed for extreme conditions, rugged terrains, and mission-critical operations. Backed by trusted global brands and decades of field experience, our management philosophy focuses on quality, innovation, and reliability. Whether you're preparing for a Himalayan ascent, a wilderness survival course, or a high-altitude rescue mission, we ensure you’re equipped to go further—safely, efficiently, and confidently.
-                  </div>
-
-                </div>
-                {/* Right: Top 2 artisan cards in new style */}
-                <div className="hidden md:flex flex-row gap-4 justify-end">
-                  {(artisan && artisan.slice(0, 2).map((item, idx) => {
-                    const card = {
-                      id: item._id || idx,
-                      slug: item.slug,
-                      name: `${item.title ? item.title + " " : ""}${item.firstName || ''} ${item.lastName || ''}`.trim() || "Unknown Artisan",
-                      date: item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase() : "N/A",
-                      image: item.profileImage?.url || item.image || "/bg-custom-1.jpg",
-                      title: item.specializations && item.specializations.length > 0 ? item.specializations.join(", ") : "Artisan",
-                      subtitle: item.shgName || "",
-                      experience: item.yearsOfExperience ? `${item.yearsOfExperience} years experience` : "",
-                      location: item.address ? `${item.address.city}, ${item.address.state}` : "",
-                      socials: [
-                        {
-                          icon: (
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-facebook-icon lucide-facebook"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" /></svg>
-                          ), url: item.socialPlugin?.facebook || "#"
-                        },
-                        {
-                          icon: (
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-instagram-icon lucide-instagram"><rect width="20" height="20" x="2" y="2" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" x2="17.51" y1="6.5" y2="6.5" /></svg>
-                          ), url: item.socialPlugin?.instagram || "#"
-                        },
-                        {
-                          icon: (
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-youtube-icon lucide-youtube"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17" /><path d="m10 15 5-3-5-3z" /></svg>
-                          ), url: item.socialPlugin?.youtube || "#"
-                        },
-                        {
-                          icon: (
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="black" viewBox="0 0 24 24">
-                              <path d="M21.35 11.1h-9.18v2.83h5.43c-.24 1.38-1.42 4.04-5.43 4.04-3.27 0-5.94-2.71-5.94-6.05s2.67-6.05 5.94-6.05c1.86 0 3.11.8 3.82 1.49l2.6-2.57C17.36 3.43 15.01 2.5 12 2.5 6.95 2.5 2.9 6.53 2.9 11.5S6.95 20.5 12 20.5c6.89 0 9.1-4.82 9.1-7.22 0-.48-.05-.8-.15-1.18z" />
-                            </svg>
-                          ), url: item.socialPlugin?.google || "#"
-                        },
-                        {
-                          icon: (
-                            <Globe />
-                          ), url: item.socialPlugin?.website || "#"
-                        },
-                      ],
-                    };
-                    return (
-                      <div key={card.id} className="relative rounded-2xl shadow-md group transition-all h-full w-[340px] flex flex-col bg-[#fbeff2] overflow-hidden">
-
-
-                        {/* Card Image */}
-                        <div className="relative w-full h-96">
-                          <img
-                            src={card.image}
-                            alt={card.name}
-                            className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
-                            style={{ objectFit: 'cover' }}
-                          />
+                      </div>
+                      {/* Card Content Overlay */}
+                      <div className="absolute left-0 bottom-0 w-full flex justify-between items-end p-6 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
+                        <div>
+                          <Link
+                            href={`/artisan/${card.slug}`}
+                            className="font-bold text-2xl text-white mb-3 leading-tight drop-shadow-md hover:underline hover:decoration-2 hover:underline-offset-4 transition cursor-pointer"
+                            title={card.name}
+                          >
+                            {card.name}
+                          </Link>
+                          <div className="text-md text-white drop-shadow-md">{card.title}</div>
                         </div>
-                        {/* Card Content Overlay */}
-                        <div className="absolute left-0 bottom-0 w-full flex justify-between items-end p-6 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
-                          <div>
-                            <Link
-                              href={`/artisan/${card.slug}`}
-                              className="font-bold text-2xl text-white mb-3 leading-tight drop-shadow-md hover:underline hover:decoration-2 hover:underline-offset-4 transition cursor-pointer"
-                              title={card.name}
-                            >
-                              {card.name}
-                            </Link>
-                            <div className="text-md text-white drop-shadow-md">{card.title}</div>
-                          </div>
-                          {/* Arrow Button with Socials on Hover */}
-                          <div className="relative group/arrow">
-                            <button className="bg-white text-black rounded-full w-12 h-12 flex items-center justify-center shadow transition group-hover/arrow:bg-[#e84393] group-hover/arrow:text-white">
-                              <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                              </svg>
-                            </button>
-                            {/* Social Icons: show on arrow hover */}
-                            <div className="absolute bottom-12 right-0 flex flex-col gap-4 opacity-0 group-hover/arrow:opacity-100 transition-opacity duration-300 z-30 items-center">
-                              {card.socials.slice(0, 6).map((s, i) => (
-                                <a
-                                  key={i}
-                                  href={s.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className={`
+                        {/* Arrow Button with Socials on Hover */}
+                        <div className="relative group/arrow">
+                          <button className="bg-white text-black rounded-full w-12 h-12 flex items-center justify-center shadow transition group-hover/arrow:bg-[#e84393] group-hover/arrow:text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                            </svg>
+                          </button>
+                          {/* Social Icons: show on arrow hover */}
+                          <div className="absolute bottom-12 right-0 flex flex-col gap-4 opacity-0 group-hover/arrow:opacity-100 transition-opacity duration-300 z-30 items-center">
+                            {card.socials.slice(0, 6).map((s, i) => (
+                              <a
+                                key={i}
+                                href={s.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={`
                           bg-white rounded-full w-12 h-12 flex items-center justify-center shadow hover:bg-gray-100 transition
                           transform translate-y-5 group-hover/arrow:translate-y-0
                         `}
-                                  style={{
-                                    transitionProperty: 'transform, opacity, background-color, box-shadow',
-                                    transitionDuration: '0.6s',
-                                    transitionTimingFunction: 'cubic-bezier(0.4,0,0.2,1)',
-                                    transitionDelay: `${i * 60}ms`
-                                  }}
-                                >
-                                  {s.icon}
-                                </a>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  }))}
-                </div>
-              </div>
-              {/* Carousel for remaining artisans in new style in Laptop View*/}
-              {artisan && artisan.length > 2 && (
-                <div className="hidden md:flex mt-10">
-                  <Carousel className="w-full">
-                    <CarouselContent className="flex gap-4">
-                      {artisan.slice(2).map((item, idx) => {
-                        const card = {
-                          id: item._id || idx,
-                          slug: item.slug,
-                          name: `${item.title ? item.title + " " : ""}${item.firstName || ''} ${item.lastName || ''}`.trim() || "Unknown Artisan",
-                          date: item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase() : "N/A",
-                          image: item.profileImage?.url || item.image || "/bg-custom-1.jpg",
-                          title: item.specializations && item.specializations.length > 0 ? item.specializations.join(", ") : "Artisan",
-                          subtitle: item.shgName || "",
-                          experience: item.yearsOfExperience ? `${item.yearsOfExperience} years experience` : "",
-                          location: item.address ? `${item.address.city}, ${item.address.state}` : "",
-                          socials: [
-                            {
-                              icon: (
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-facebook-icon lucide-facebook"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" /></svg>
-                              ), url: item.socialPlugin?.facebook || "#"
-                            },
-                            {
-                              icon: (
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-instagram-icon lucide-instagram"><rect width="20" height="20" x="2" y="2" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" x2="17.51" y1="6.5" y2="6.5" /></svg>
-                              ), url: item.socialPlugin?.instagram || "#"
-                            },
-                            {
-                              icon: (
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-youtube-icon lucide-youtube"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17" /><path d="m10 15 5-3-5-3z" /></svg>
-                              ), url: item.socialPlugin?.youtube || "#"
-                            },
-                            {
-                              icon: (
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="black" viewBox="0 0 24 24">
-                                  <path d="M21.35 11.1h-9.18v2.83h5.43c-.24 1.38-1.42 4.04-5.43 4.04-3.27 0-5.94-2.71-5.94-6.05s2.67-6.05 5.94-6.05c1.86 0 3.11.8 3.82 1.49l2.6-2.57C17.36 3.43 15.01 2.5 12 2.5 6.95 2.5 2.9 6.53 2.9 11.5S6.95 20.5 12 20.5c6.89 0 9.1-4.82 9.1-7.22 0-.48-.05-.8-.15-1.18z" />
-                                </svg>
-                              ), url: item.socialPlugin?.google || "#"
-                            },
-                            {
-                              icon: (
-                                <Globe />
-                              ), url: item.socialPlugin?.website || "#"
-                            },
-                          ],
-                        };
-                        return (
-                          <CarouselItem key={card.id} className="pl-5 md:basis-1/2 lg:basis-1/4 min-w-0 snap-start">
-                            <div className="relative rounded-2xl overflow-hidden shadow-md group transition-all h-full flex flex-col bg-[#fbeff2]">
-
-
-                              {/* Card Image */}
-                              <div className="relative w-full h-96">
-                                <img
-                                  src={card.image}
-                                  alt={card.name}
-                                  className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
-                                  style={{ objectFit: 'cover' }}
-                                />
-                              </div>
-                              {/* Card Content Overlay */}
-                              <div className="absolute left-0 bottom-0 w-full flex justify-between items-end p-6 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
-                                <div>
-                                  <Link
-                                    href={`/artisan/${card.slug}`}
-                                    className="font-bold text-2xl text-white mb-3 leading-tight drop-shadow-md hover:underline hover:decoration-2 hover:underline-offset-4 transition cursor-pointer"
-                                    title={card.name}
-                                  >
-                                    {card.name}
-                                  </Link>
-                                  <div className="text-md text-white drop-shadow-md">{card.title}</div>
-                                </div>
-                                {/* Arrow Button with Socials on Hover */}
-                                <div className="relative group/arrow">
-                                  <button className="bg-white text-black rounded-full w-12 h-12 flex items-center justify-center shadow transition group-hover/arrow:bg-[#e84393] group-hover/arrow:text-white">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                                    </svg>
-                                  </button>
-                                  {/* Social Icons: show on arrow hover */}
-                                  <div className="absolute bottom-14 right-0 flex flex-col gap-4 opacity-0 group-hover/arrow:opacity-100 transition-opacity duration-300 z-30 items-center">
-                                    {card.socials.slice(0, 6).map((s, i) => (
-                                      <a
-                                        key={i}
-                                        href={s.url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className={`
-                                bg-white rounded-full w-12 h-12 flex items-center justify-center shadow hover:bg-gray-100 transition
-                                transform translate-y-5 group-hover/arrow:translate-y-0
-                              `}
-                                        style={{
-                                          transitionProperty: 'transform, opacity, background-color, box-shadow',
-                                          transitionDuration: '0.6s',
-                                          transitionTimingFunction: 'cubic-bezier(0.4,0,0.2,1)',
-                                          transitionDelay: `${i * 60}ms`
-                                        }}
-                                      >
-                                        {s.icon}
-                                      </a>
-                                    ))}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </CarouselItem>
-                        );
-                      })}
-                    </CarouselContent>
-                    <div className="flex items-center gap-3 mt-4 justify-center">
-                      <CarouselPrevious className="bg-[#f7eedd] !rounded-full !w-12 !h-12 !flex !items-center !justify-center transition" />
-                      <CarouselNext className="bg-[#f7eedd] !rounded-full !w-12 !h-12 !flex !items-center !justify-center transition" />
-                    </div>
-                  </Carousel>
-                </div>
-              )}
-              {/* Carousel for remaining artisans in new style */}
-              {artisan && artisan.length > 1 && (
-                <div className="md:hidden lg:hidden mt-10">
-                  <Carousel className="w-full">
-                    <CarouselContent className="flex gap-4">
-                      {artisan.map((item, idx) => {
-                        const card = {
-                          id: item._id || idx,
-                          slug: item.slug,
-                          name: `${item.title ? item.title + " " : ""}${item.firstName || ''} ${item.lastName || ''}`.trim() || "Unknown Artisan",
-                          date: item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase() : "N/A",
-                          image: item.profileImage?.url || item.image || "/bg-custom-1.jpg",
-                          title: item.specializations && item.specializations.length > 0 ? item.specializations.join(", ") : "Artisan",
-                          subtitle: item.shgName || "",
-                          experience: item.yearsOfExperience ? `${item.yearsOfExperience} years experience` : "",
-                          location: item.address ? `${item.address.city}, ${item.address.state}` : "",
-                          socials: [
-                            {
-                              icon: (
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-facebook-icon lucide-facebook"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" /></svg>
-                              ), url: item.socialPlugin?.facebook || "#"
-                            },
-                            {
-                              icon: (
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-instagram-icon lucide-instagram"><rect width="20" height="20" x="2" y="2" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" x2="17.51" y1="6.5" y2="6.5" /></svg>
-                              ), url: item.socialPlugin?.instagram || "#"
-                            },
-                            {
-                              icon: (
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-youtube-icon lucide-youtube"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17" /><path d="m10 15 5-3-5-3z" /></svg>
-                              ), url: item.socialPlugin?.youtube || "#"
-                            },
-                            {
-                              icon: (
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="black" viewBox="0 0 24 24">
-                                  <path d="M21.35 11.1h-9.18v2.83h5.43c-.24 1.38-1.42 4.04-5.43 4.04-3.27 0-5.94-2.71-5.94-6.05s2.67-6.05 5.94-6.05c1.86 0 3.11.8 3.82 1.49l2.6-2.57C17.36 3.43 15.01 2.5 12 2.5 6.95 2.5 2.9 6.53 2.9 11.5S6.95 20.5 12 20.5c6.89 0 9.1-4.82 9.1-7.22 0-.48-.05-.8-.15-1.18z" />
-                                </svg>
-                              ), url: item.socialPlugin?.google || "#"
-                            },
-                            {
-                              icon: (
-                                <Globe />
-                              ), url: item.socialPlugin?.website || "#"
-                            },
-                          ],
-                        };
-                        return (
-                          <CarouselItem key={card.id} className="pl-5 md:basis-1/2 lg:basis-1/4 min-w-0 snap-start">
-                            <div className="relative rounded-2xl overflow-hidden shadow-md group transition-all h-full flex flex-col bg-[#fbeff2]">
-
-                              {/* Card Image */}
-                              <div className="relative w-full h-96">
-                                <img
-                                  src={card.image}
-                                  alt={card.name}
-                                  className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
-                                  style={{ objectFit: 'cover' }}
-                                />
-                              </div>
-                              {/* Card Content Overlay */}
-                              <div className="absolute left-0 bottom-0 w-full flex justify-between items-end p-6 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
-                                <div>
-                                  <Link
-                                    href={`/artisan/${card.slug}`}
-                                    className="font-bold text-2xl text-white mb-3 leading-tight drop-shadow-md hover:underline hover:decoration-2 hover:underline-offset-4 transition cursor-pointer"
-                                    title={card.name}
-                                  >
-                                    {card.name}
-                                  </Link>
-                                  <div className="text-md text-white drop-shadow-md">{card.title}</div>
-                                </div>
-                                {/* Arrow Button with Socials on Hover */}
-                                <div className="relative group/arrow">
-                                  <button className="bg-white text-black rounded-full w-12 h-12 flex items-center justify-center shadow transition group-hover/arrow:bg-[#e84393] group-hover/arrow:text-white">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                                    </svg>
-                                  </button>
-                                  {/* Social Icons: show on arrow hover */}
-                                  <div className="absolute bottom-14 right-0 flex flex-col gap-4 opacity-0 group-hover/arrow:opacity-100 transition-opacity duration-300 z-30 items-center">
-                                    {card.socials.slice(0, 6).map((s, i) => (
-                                      <a
-                                        key={i}
-                                        href={s.url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className={`
-                                bg-white rounded-full w-12 h-12 flex items-center justify-center shadow hover:bg-gray-100 transition
-                                transform translate-y-5 group-hover/arrow:translate-y-0
-                              `}
-                                        style={{
-                                          transitionProperty: 'transform, opacity, background-color, box-shadow',
-                                          transitionDuration: '0.6s',
-                                          transitionTimingFunction: 'cubic-bezier(0.4,0,0.2,1)',
-                                          transitionDelay: `${i * 60}ms`
-                                        }}
-                                      >
-                                        {s.icon}
-                                      </a>
-                                    ))}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </CarouselItem>
-                        );
-                      })}
-                    </CarouselContent>
-                    <div className="flex items-center gap-3 mt-4 justify-center">
-                      <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 p-5" />
-                      <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 p-5" />
-                    </div>
-                  </Carousel>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-        {consultancyBanner.length > 0 && (
-          <div className="w-full px-2 md:py-10">
-            <h2 className="text-2xl md:text-3xl font-bold text-center mb-2 uppercase">A true reflection of authenticity and tradition.</h2>
-            <p className="text-gray-600 text-center py-4 mx-auto md:w-[50%]"> We deliver a true reflection of authenticity and tradition. Our unwavering commitment to time-honored methods ensures a superior, distinct character that mass production will never replicate.</p>
-            <Carousel className="w-full px-5 md:px-20 mx-auto">
-              <CarouselContent>
-                {consultancyBanner.map((item, idx) => (
-                  <CarouselItem key={item._id || idx} className="w-full md:basis-1/2">
-
-                    <div className="flex flex-col gap-5 md:flex-row md:h-[400px] h-[700px] rounded-xl overflow-hidden group px-2">
-                      {/* Image Section */}
-                      <div className="w-full h-full overflow-hidden border rounded-md border-gray-300">
-                        <div className="relative w-full h-full">
-                          <Image
-                            src={item?.image?.url || "/placeholder.jpeg"}
-                            alt={item?.title || "Consultancy Service"}
-                            fill
-                            className="object-cover transition-transform duration-500 group-hover:scale-110"
-                            priority={idx === 0}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Content Section */}
-                      <div className="w-full bg-[#FAF2F2] p-6 flex flex-col justify-center rounded-md border border-gray-300">
-                        <div>
-                          <div className="flex items-center">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <svg
-                                key={star}
-                                className={`w-7 h-7 ${star <= (item.rating || 0) ? 'text-orange-400' : 'text-gray-300'}`}
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                                xmlns="http://www.w3.org/2000/svg"
+                                style={{
+                                  transitionProperty: 'transform, opacity, background-color, box-shadow',
+                                  transitionDuration: '0.6s',
+                                  transitionTimingFunction: 'cubic-bezier(0.4,0,0.2,1)',
+                                  transitionDelay: `${i * 60}ms`
+                                }}
                               >
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                              </svg>
+                                {s.icon}
+                              </a>
                             ))}
-                            <span className="ml-2 text-sm text-gray-600">{item.rating || 0}/5</span>
                           </div>
-                          <h3 className="text-2xl md:text-xl font-bold text-gray-900 my-3 line-clamp-2">
-                            {item.title || 'Title Come Here'}
-                          </h3>
-                          <p className="text-gray-600 max-h-60 overflow-hidden">
-                            {item.shortDescription || 'Short Description'}
-                          </p>
-                        </div>
-                        <div className="mt-4">
-                          <button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              window.open(item.buttonLink, '_blank', 'noopener,noreferrer');
-                            }}
-                            className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center gap-2 mx-auto md:mx-0 w-full justify-center"
-                          >
-                            Explore Now <ArrowRight className="w-4 h-4" />
-                          </button>
                         </div>
                       </div>
                     </div>
-
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              <CarouselNext className="!right-2 !top-1/2 !-translate-y-1/2 z-10 bg-white/80 hover:bg-white w-10 h-10 rounded-full shadow-md" />
-              <CarouselPrevious className="!left-2 !top-1/2 !-translate-y-1/2 z-10 bg-white/80 hover:bg-white w-10 h-10 rounded-full shadow-md" />
-            </Carousel>
-          </div>
-        )}
-
-        {/* Quick View Modal */}
-        {quickViewProduct && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setQuickViewProduct(null)}>
-            <div className="bg-white rounded-2xl shadow-xl mx-auto md:max-w-4xl w-full relative overflow-y-auto max-h-[90vh]" onClick={e => e.stopPropagation()}>
-              {/* Close Button */}
-              <button
-                className="absolute top-4 right-4 text-2xl font-bold z-50 rounded-full w-8 h-8 border border-black bg-black text-white flex items-center justify-center hover:bg-gray-100 hover:text-black focus:outline-none"
-                onClick={() => setQuickViewProduct(null)}
-                aria-label="Close quick view"
-              >
-                <X />
-              </button>
-              <QuickViewProductCard product={quickViewProduct} onClose={() => setQuickViewProduct(null)} />
+                  );
+                }))}
+              </div>
             </div>
-          </div>
-        )}
+            {/* Carousel for remaining artisans in new style in Laptop View*/}
+            {artisan && artisan.length > 2 && (
+              <div className="hidden md:flex mt-10">
+                <Carousel className="w-full">
+                  <CarouselContent className="flex gap-4">
+                    {artisan.slice(2).map((item, idx) => {
+                      const card = {
+                        id: item._id || idx,
+                        slug: item.slug,
+                        name: `${item.title ? item.title + " " : ""}${item.firstName || ''} ${item.lastName || ''}`.trim() || "Unknown Artisan",
+                        date: item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase() : "N/A",
+                        image: item.profileImage?.url || item.image || "/bg-custom-1.jpg",
+                        title: item.specializations && item.specializations.length > 0 ? item.specializations.join(", ") : "Artisan",
+                        subtitle: item.shgName || "",
+                        experience: item.yearsOfExperience ? `${item.yearsOfExperience} years experience` : "",
+                        location: item.address ? `${item.address.city}, ${item.address.state}` : "",
+                        socials: [
+                          {
+                            icon: (
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-facebook-icon lucide-facebook"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" /></svg>
+                            ), url: item.socialPlugin?.facebook || "#"
+                          },
+                          {
+                            icon: (
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-instagram-icon lucide-instagram"><rect width="20" height="20" x="2" y="2" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" x2="17.51" y1="6.5" y2="6.5" /></svg>
+                            ), url: item.socialPlugin?.instagram || "#"
+                          },
+                          {
+                            icon: (
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-youtube-icon lucide-youtube"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17" /><path d="m10 15 5-3-5-3z" /></svg>
+                            ), url: item.socialPlugin?.youtube || "#"
+                          },
+                          {
+                            icon: (
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="black" viewBox="0 0 24 24">
+                                <path d="M21.35 11.1h-9.18v2.83h5.43c-.24 1.38-1.42 4.04-5.43 4.04-3.27 0-5.94-2.71-5.94-6.05s2.67-6.05 5.94-6.05c1.86 0 3.11.8 3.82 1.49l2.6-2.57C17.36 3.43 15.01 2.5 12 2.5 6.95 2.5 2.9 6.53 2.9 11.5S6.95 20.5 12 20.5c6.89 0 9.1-4.82 9.1-7.22 0-.48-.05-.8-.15-1.18z" />
+                              </svg>
+                            ), url: item.socialPlugin?.google || "#"
+                          },
+                          {
+                            icon: (
+                              <Globe />
+                            ), url: item.socialPlugin?.website || "#"
+                          },
+                        ],
+                      };
+                      return (
+                        <CarouselItem key={card.id} className="pl-5 md:basis-1/2 lg:basis-1/4 min-w-0 snap-start">
+                          <div className="relative rounded-2xl overflow-hidden shadow-md group transition-all h-full flex flex-col bg-[#fbeff2]">
 
-      </div>
+
+                            {/* Card Image */}
+                            <div className="relative w-full h-96">
+                              <img
+                                src={card.image}
+                                alt={card.name}
+                                className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
+                                style={{ objectFit: 'cover' }}
+                              />
+                            </div>
+                            {/* Card Content Overlay */}
+                            <div className="absolute left-0 bottom-0 w-full flex justify-between items-end p-6 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
+                              <div>
+                                <Link
+                                  href={`/artisan/${card.slug}`}
+                                  className="font-bold text-2xl text-white mb-3 leading-tight drop-shadow-md hover:underline hover:decoration-2 hover:underline-offset-4 transition cursor-pointer"
+                                  title={card.name}
+                                >
+                                  {card.name}
+                                </Link>
+                                <div className="text-md text-white drop-shadow-md">{card.title}</div>
+                              </div>
+                              {/* Arrow Button with Socials on Hover */}
+                              <div className="relative group/arrow">
+                                <button className="bg-white text-black rounded-full w-12 h-12 flex items-center justify-center shadow transition group-hover/arrow:bg-[#e84393] group-hover/arrow:text-white">
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                                  </svg>
+                                </button>
+                                {/* Social Icons: show on arrow hover */}
+                                <div className="absolute bottom-14 right-0 flex flex-col gap-4 opacity-0 group-hover/arrow:opacity-100 transition-opacity duration-300 z-30 items-center">
+                                  {card.socials.slice(0, 6).map((s, i) => (
+                                    <a
+                                      key={i}
+                                      href={s.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className={`
+                                bg-white rounded-full w-12 h-12 flex items-center justify-center shadow hover:bg-gray-100 transition
+                                transform translate-y-5 group-hover/arrow:translate-y-0
+                              `}
+                                      style={{
+                                        transitionProperty: 'transform, opacity, background-color, box-shadow',
+                                        transitionDuration: '0.6s',
+                                        transitionTimingFunction: 'cubic-bezier(0.4,0,0.2,1)',
+                                        transitionDelay: `${i * 60}ms`
+                                      }}
+                                    >
+                                      {s.icon}
+                                    </a>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </CarouselItem>
+                      );
+                    })}
+                  </CarouselContent>
+                  <div className="flex items-center gap-3 mt-4 justify-center">
+                    <CarouselPrevious className="bg-[#f7eedd] !rounded-full !w-12 !h-12 !flex !items-center !justify-center transition" />
+                    <CarouselNext className="bg-[#f7eedd] !rounded-full !w-12 !h-12 !flex !items-center !justify-center transition" />
+                  </div>
+                </Carousel>
+              </div>
+            )}
+            {/* Carousel for remaining artisans in new style */}
+            {artisan && artisan.length > 1 && (
+              <div className="md:hidden lg:hidden mt-10">
+                <Carousel className="w-full">
+                  <CarouselContent className="flex gap-4">
+                    {artisan.map((item, idx) => {
+                      const card = {
+                        id: item._id || idx,
+                        slug: item.slug,
+                        name: `${item.title ? item.title + " " : ""}${item.firstName || ''} ${item.lastName || ''}`.trim() || "Unknown Artisan",
+                        date: item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase() : "N/A",
+                        image: item.profileImage?.url || item.image || "/bg-custom-1.jpg",
+                        title: item.specializations && item.specializations.length > 0 ? item.specializations.join(", ") : "Artisan",
+                        subtitle: item.shgName || "",
+                        experience: item.yearsOfExperience ? `${item.yearsOfExperience} years experience` : "",
+                        location: item.address ? `${item.address.city}, ${item.address.state}` : "",
+                        socials: [
+                          {
+                            icon: (
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-facebook-icon lucide-facebook"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" /></svg>
+                            ), url: item.socialPlugin?.facebook || "#"
+                          },
+                          {
+                            icon: (
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-instagram-icon lucide-instagram"><rect width="20" height="20" x="2" y="2" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" x2="17.51" y1="6.5" y2="6.5" /></svg>
+                            ), url: item.socialPlugin?.instagram || "#"
+                          },
+                          {
+                            icon: (
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-youtube-icon lucide-youtube"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17" /><path d="m10 15 5-3-5-3z" /></svg>
+                            ), url: item.socialPlugin?.youtube || "#"
+                          },
+                          {
+                            icon: (
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="black" viewBox="0 0 24 24">
+                                <path d="M21.35 11.1h-9.18v2.83h5.43c-.24 1.38-1.42 4.04-5.43 4.04-3.27 0-5.94-2.71-5.94-6.05s2.67-6.05 5.94-6.05c1.86 0 3.11.8 3.82 1.49l2.6-2.57C17.36 3.43 15.01 2.5 12 2.5 6.95 2.5 2.9 6.53 2.9 11.5S6.95 20.5 12 20.5c6.89 0 9.1-4.82 9.1-7.22 0-.48-.05-.8-.15-1.18z" />
+                              </svg>
+                            ), url: item.socialPlugin?.google || "#"
+                          },
+                          {
+                            icon: (
+                              <Globe />
+                            ), url: item.socialPlugin?.website || "#"
+                          },
+                        ],
+                      };
+                      return (
+                        <CarouselItem key={card.id} className="pl-5 md:basis-1/2 lg:basis-1/4 min-w-0 snap-start">
+                          <div className="relative rounded-2xl overflow-hidden shadow-md group transition-all h-full flex flex-col bg-[#fbeff2]">
+
+                            {/* Card Image */}
+                            <div className="relative w-full h-96">
+                              <img
+                                src={card.image}
+                                alt={card.name}
+                                className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
+                                style={{ objectFit: 'cover' }}
+                              />
+                            </div>
+                            {/* Card Content Overlay */}
+                            <div className="absolute left-0 bottom-0 w-full flex justify-between items-end p-6 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
+                              <div>
+                                <Link
+                                  href={`/artisan/${card.slug}`}
+                                  className="font-bold text-2xl text-white mb-3 leading-tight drop-shadow-md hover:underline hover:decoration-2 hover:underline-offset-4 transition cursor-pointer"
+                                  title={card.name}
+                                >
+                                  {card.name}
+                                </Link>
+                                <div className="text-md text-white drop-shadow-md">{card.title}</div>
+                              </div>
+                              {/* Arrow Button with Socials on Hover */}
+                              <div className="relative group/arrow">
+                                <button className="bg-white text-black rounded-full w-12 h-12 flex items-center justify-center shadow transition group-hover/arrow:bg-[#e84393] group-hover/arrow:text-white">
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                                  </svg>
+                                </button>
+                                {/* Social Icons: show on arrow hover */}
+                                <div className="absolute bottom-14 right-0 flex flex-col gap-4 opacity-0 group-hover/arrow:opacity-100 transition-opacity duration-300 z-30 items-center">
+                                  {card.socials.slice(0, 6).map((s, i) => (
+                                    <a
+                                      key={i}
+                                      href={s.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className={`
+                                bg-white rounded-full w-12 h-12 flex items-center justify-center shadow hover:bg-gray-100 transition
+                                transform translate-y-5 group-hover/arrow:translate-y-0
+                              `}
+                                      style={{
+                                        transitionProperty: 'transform, opacity, background-color, box-shadow',
+                                        transitionDuration: '0.6s',
+                                        transitionTimingFunction: 'cubic-bezier(0.4,0,0.2,1)',
+                                        transitionDelay: `${i * 60}ms`
+                                      }}
+                                    >
+                                      {s.icon}
+                                    </a>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </CarouselItem>
+                      );
+                    })}
+                  </CarouselContent>
+                  <div className="flex items-center gap-3 mt-4 justify-center">
+                    <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 p-5" />
+                    <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 p-5" />
+                  </div>
+                </Carousel>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      {consultancyBanner.length > 0 && (
+        <div className="w-full px-2 md:py-10">
+          <h2 className="text-2xl md:text-3xl font-bold text-center mb-2 uppercase">A true reflection of authenticity and tradition.</h2>
+          <p className="text-gray-600 text-center py-4 mx-auto md:w-[50%]"> We deliver a true reflection of authenticity and tradition. Our unwavering commitment to time-honored methods ensures a superior, distinct character that mass production will never replicate.</p>
+          <Carousel className="w-full px-5 md:px-20 mx-auto">
+            <CarouselContent>
+              {consultancyBanner.map((item, idx) => (
+                <CarouselItem key={item._id || idx} className="w-full md:basis-1/2">
+
+                  <div className="flex flex-col gap-5 md:flex-row md:h-[400px] h-[700px] rounded-xl overflow-hidden group px-2">
+                    {/* Image Section */}
+                    <div className="w-full h-full overflow-hidden border rounded-md border-gray-300">
+                      <div className="relative w-full h-full">
+                        <Image
+                          src={item?.image?.url || "/placeholder.jpeg"}
+                          alt={item?.title || "Consultancy Service"}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-110"
+                          priority={idx === 0}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Content Section */}
+                    <div className="w-full bg-[#FAF2F2] p-6 flex flex-col justify-center rounded-md border border-gray-300">
+                      <div>
+                        <div className="flex items-center">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <svg
+                              key={star}
+                              className={`w-7 h-7 ${star <= (item.rating || 0) ? 'text-orange-400' : 'text-gray-300'}`}
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                          ))}
+                          <span className="ml-2 text-sm text-gray-600">{item.rating || 0}/5</span>
+                        </div>
+                        <h3 className="text-2xl md:text-xl font-bold text-gray-900 my-3 line-clamp-2">
+                          {item.title || 'Title Come Here'}
+                        </h3>
+                        <p className="text-gray-600 max-h-60 overflow-hidden">
+                          {item.shortDescription || 'Short Description'}
+                        </p>
+                      </div>
+                      <div className="mt-4">
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            window.open(item.buttonLink, '_blank', 'noopener,noreferrer');
+                          }}
+                          className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center gap-2 mx-auto md:mx-0 w-full justify-center"
+                        >
+                          Explore Now <ArrowRight className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselNext className="!right-2 !top-1/2 !-translate-y-1/2 z-10 bg-white/80 hover:bg-white w-10 h-10 rounded-full shadow-md" />
+            <CarouselPrevious className="!left-2 !top-1/2 !-translate-y-1/2 z-10 bg-white/80 hover:bg-white w-10 h-10 rounded-full shadow-md" />
+          </Carousel>
+        </div>
+      )}
+
+      {/* Quick View Modal */}
+      {quickViewProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setQuickViewProduct(null)}>
+          <div className="bg-white rounded-2xl shadow-xl mx-auto md:max-w-4xl w-full relative overflow-y-auto max-h-[90vh]" onClick={e => e.stopPropagation()}>
+            {/* Close Button */}
+            <button
+              className="absolute top-4 right-4 text-2xl font-bold z-50 rounded-full w-8 h-8 border border-black bg-black text-white flex items-center justify-center hover:bg-gray-100 hover:text-black focus:outline-none"
+              onClick={() => setQuickViewProduct(null)}
+              aria-label="Close quick view"
+            >
+              <X />
+            </button>
+            <QuickViewProductCard product={quickViewProduct} onClose={() => setQuickViewProduct(null)} />
+          </div>
+        </div>
+      )}
+
+      {/* Booking Request Modal */}
+      {showBookingModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowBookingModal(false)}>
+          <div className="bg-[#f5a962] rounded-2xl shadow-xl mx-auto w-full max-w-sm relative overflow-hidden" onClick={e => e.stopPropagation()}>
+            {/* Close Button */}
+            <button
+              className="absolute top-3 right-3 p-2 text-2xl font-bold z-50 rounded-full bg-black text-white flex items-center justify-center hover:bg-gray-800 focus:outline-none"
+              onClick={() => setShowBookingModal(false)}
+              aria-label="Close booking form"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <form onSubmit={handleBookingSubmit} className="p-6 pt-8">
+              <h2 className="text-2xl font-bold text-center mb-6 text-black">Enquriy For</h2>
+
+              {selectedBookingProperty && (
+                <div className="mb-4 rounded-xl bg-white/40 p-3 text-black">
+                  <p className="text-sm font-semibold">{selectedBookingProperty.propertyName || selectedBookingProperty.title}</p>
+                  <p className="text-xs">{selectedBookingProperty.locationType || selectedBookingProperty.subLocationType || ''}</p>
+                </div>
+              )}
+              {/* Contact Method Selection */}
+              <div className="flex gap-6 mb-6">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="contact"
+                    value="call"
+                    checked={contactMethod === 'call'}
+                    onChange={(e) => setContactMethod(e.target.value)}
+                    className="w-4 h-4"
+                  />
+                  <span className="text-sm font-medium text-black">Call</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="contact"
+                    value="whatsapp"
+                    checked={contactMethod === 'whatsapp'}
+                    onChange={(e) => setContactMethod(e.target.value)}
+                    className="w-4 h-4"
+                  />
+                  <span className="text-sm font-medium text-black">What's App</span>
+                </label>
+              </div>
+
+              {/* Phone Input (for Call or WhatsApp) */}
+              {(contactMethod === 'call' || contactMethod === 'whatsapp') && (
+                <div className="mb-4">
+                  <div className="flex gap-2">
+                    <div className="bg-red-600 text-white rounded-lg px-3 py-2 font-bold flex items-center">
+                      +91
+                    </div>
+                    <input
+                      type="tel"
+                      placeholder="Call Number Or Whats App Number"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                      maxLength="10"
+                      className="flex-1 px-4 py-2 rounded-lg bg-white/90 text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-300"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Email Section */}
+              <div className="mb-4">
+                <div className="text-black text-center py-1 rounded text-md font-bold mb-2">Or Email</div>
+                <input
+                  type="email"
+                  placeholder="Enter Your Email Here"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-4 py-2 rounded-lg bg-blue-100 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-300"
+                />
+              </div>
+
+              {/* Agreement Checkbox */}
+              <div className="mb-6 flex gap-3">
+                <input
+                  type="checkbox"
+                  id="agree"
+                  checked={agreeToContact}
+                  onChange={(e) => setAgreeToContact(e.target.checked)}
+                  className="w-4 h-4 mt-1 accent-black"
+                />
+                <label htmlFor="agree" className="text-xs text-black leading-tight">
+                  We Appreciate Your Interest! A Member of Our Team Will Reach Out to You Soon to Discuss Your Offer
+                </label>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                className="w-full bg-black text-white font-bold py-3 rounded-full hover:bg-gray-800 transition-colors"
+              >
+                Submit
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+
     </section>
   );
 }

@@ -7,6 +7,7 @@ const FeaturedBannerSchema = new Schema({
     price: { type: String},
     buttonLink: { type: String},
     image: { url: { type: String }, key: { type: String } },
+    section: { type: String, default: 'frontend' },
 }, { timestamps: true });
 
 export default models.FeaturedBanner || model("FeaturedBanner", FeaturedBannerSchema);

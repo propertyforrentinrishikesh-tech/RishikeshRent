@@ -15,30 +15,25 @@ import { useRef } from "react";
 import { UploadIcon } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
-const PopUpBanner = () => {
+const PopUpBanner = ({section="frontend"}) => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [bannerToDelete, setBannerToDelete] = useState(null);
     const [banners, setBanners] = useState([]);
     const [editBanner, setEditBanner] = useState(null);
     const [formData, setFormData] = useState({
+        heading: "",
+        paragraph: "",
         buttonLink: "",
         image: { url: "", key: "" },
-        order: 1,
     });
 
     // Fetch banners and determine the next order number
     useEffect(() => {
         const fetchBanners = async () => {
             try {
-                const response = await fetch("/api/popupBanner");
+                const response = await fetch(`/api/popupBanner?section=${section}`);
                 const data = await response.json();
                 setBanners(data);
-
-                // Auto-set next order number
-                if (data.length > 0) {
-                    const highestOrder = Math.max(...data.map((b) => b.order));
-                    setFormData((prev) => ({ ...prev, order: highestOrder + 1 }));
-                }
             } catch (error) {
                 toast.error("Failed to fetch banners");
             }
@@ -47,7 +42,7 @@ const PopUpBanner = () => {
     }, []);
 
     const handleInputChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        setFormData({ ...formData, heading: e.target.name === "heading" ? e.target.value : formData.heading, paragraph: e.target.name === "paragraph" ? e.target.value : formData.paragraph, [e.target.name]: e.target.value });
     };
 
     // Cloudinary-style image upload (like AddGallery.jsx)
@@ -65,7 +60,7 @@ const PopUpBanner = () => {
             });
             const data = await res.json();
             if (res.ok && data.url) {
-                setFormData(prev => ({ ...prev, image: { url: data.url, key: data.key || '' } }));
+                setFormData(prev => ({ ...prev, heading: prev.heading, paragraph: prev.paragraph, image: { url: data.url, key: data.key || '' } }));
                 toast.success('Image uploaded!');
             } else {
                 toast.error('Cloudinary upload failed: ' + (data.error || 'Unknown error'));
@@ -87,6 +82,7 @@ const PopUpBanner = () => {
             const payload = {
                 ...formData,
                 id: editBanner,
+                section: section
             };
             const response = await fetch("/api/popupBanner", {
                 method,
@@ -101,13 +97,14 @@ const PopUpBanner = () => {
                 setEditBanner(null);
 
                 // Refresh banner list
-                const updatedBanners = await fetch("/api/popupBanner").then((res) => res.json());
+                const updatedBanners = await fetch(`/api/popupBanner?section=${section}`).then((res) => res.json());
                 setBanners(updatedBanners);
 
                 // Reset form
                 setFormData({
+                    heading: "",
+                    paragraph: "",
                     buttonLink: "",
-                    order: updatedBanners.length + 1,
                     image: { url: "", key: "" },
                 });
 
@@ -123,9 +120,10 @@ const PopUpBanner = () => {
         setEditBanner(banner._id);
         // console.log(banner)
         setFormData({
-            buttonLink: banner.buttonLink,
-            order: banner.order,
-            image: banner.image,
+            heading: banner.heading || "",
+            paragraph: banner.paragraph || "",
+            buttonLink: banner.buttonLink || "",
+            image: banner.image || { url: "", key: "" },
         });
     };
 
@@ -145,7 +143,7 @@ const PopUpBanner = () => {
                 setBanners((prev) => prev.filter((banner) => banner._id !== id));
 
                 // Update order numbers
-                const updatedBanners = await fetch("/api/popupBanner").then((res) => res.json());
+                const updatedBanners = await fetch(`/api/popupBanner?section=${section}`).then((res) => res.json());
                 setBanners(updatedBanners);
             } else {
                 toast.error(data.error);
@@ -170,7 +168,7 @@ const PopUpBanner = () => {
 
     // Remove image from formData only
     const handleDeleteImage = () => {
-        setFormData(prev => ({ ...prev, image: { url: '', key: '' } }));
+        setFormData(prev => ({ ...prev, heading: prev.heading, paragraph: prev.paragraph, image: { url: '', key: '' } }));
     };
 
 
@@ -179,11 +177,11 @@ const PopUpBanner = () => {
 
     return (
         <div className="max-w-5xl mx-auto py-10 w-full">
-            <h2 className="text-2xl font-bold mb-6">{editBanner ? "Edit Popup Banner" : "Add New Popup Banner"}</h2>
+            <h2 className="text-2xl font-bold mb-6">{editBanner ? "Edit PopUp Banner" : "Add New PopUp Banner"}</h2>
             <form onSubmit={handleSubmit} className="bg-white shadow-lg rounded-lg p-6 space-y-4">
                 {/* Banner Image Upload */}
                 <div className="mb-4">
-                    <Label className="block mb-2 font-bold">Popup Image</Label>
+                    <Label className="block mb-2 font-bold">PopUp Banner Image</Label>
                     <input
                         type="file"
                         accept="image/*"
@@ -198,7 +196,7 @@ const PopUpBanner = () => {
                         className="mb-2 flex items-center gap-2 bg-blue-500 text-white"
                         onClick={() => fileInputRef.current && fileInputRef.current.click()}
                     >
-                        <span>Select Popup Image</span>
+                        <span>Select PopUp Banner Image</span>
                         <UploadIcon className="w-4 h-4" />
                     </Button>
                     {uploading && <div className="text-blue-600 font-semibold">Uploading...</div>}
@@ -206,7 +204,7 @@ const PopUpBanner = () => {
                         <div className="relative w-48 h-28 border rounded overflow-hidden mb-2">
                             <Image
                                 src={formData.image.url}
-                                alt="Popup Image Preview"
+                                alt="PopUp Image Preview"
                                 fill
                                 className="object-cover"
                             />
@@ -222,16 +220,19 @@ const PopUpBanner = () => {
                     )}
                 </div>
                 <div>
+                    <Label>Heading</Label>
+                    <Input name="heading" placeholder="Enter Heading Line" type="text" value={formData.heading} onChange={handleInputChange} />
+                </div>  <div>
+                    <Label>Paragraph</Label>
+                    <Input name="paragraph" placeholder="Enter Paragraph" type="text" value={formData.paragraph} onChange={handleInputChange} />
+                </div>
+                <div>
                     <Label>Button Link</Label>
                     <Input name="buttonLink" placeholder="Enter button link" type="url" value={formData.buttonLink} onChange={handleInputChange} />
                 </div>
-                <div>
-                    <Label>Order</Label>
-                    <Input name="order" placeholder="Enter order" type="number" value={formData.order} readOnly className="bg-gray-100 cursor-not-allowed" />
-                </div>
                 <div className="flex gap-3">
                     <Button type="submit" className="bg-blue-600 hover:bg-blue-500">
-                        {editBanner ? "Update Popup Banner" : "Add Popup Banner"}
+                        {editBanner ? "Update PopUp Banner" : "Add PopUp Banner"}
                     </Button>
                     {editBanner && (
                         <Button
@@ -241,8 +242,9 @@ const PopUpBanner = () => {
                             onClick={() => {
                                 setEditBanner(null);
                                 setFormData({
+                                    heading: "",
+                                    paragraph: "",
                                     buttonLink: "",
-                                    order: banners.length > 0 ? Math.max(...banners.map(b => b.order)) + 1 : 1,
                                     image: { url: "", key: "" },
                                 });
                             }}
@@ -257,7 +259,7 @@ const PopUpBanner = () => {
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Order</TableHead>
+                        <TableHead>S.No</TableHead>
                         <TableHead>Button Link</TableHead>
                         <TableHead>Image</TableHead>
                         <TableHead>Actions</TableHead>
@@ -265,9 +267,9 @@ const PopUpBanner = () => {
                 </TableHeader>
                 <TableBody>
                     {banners.length > 0 ? (
-                        banners.map((banner) => (
+                        banners.map((banner, index) => (
                             <TableRow key={banner._id}>
-                                <TableCell>{banner.order}</TableCell>
+                                <TableCell>{index + 1}</TableCell>
                                 <TableCell>
                                     <TooltipProvider>
                                         <Tooltip>
@@ -283,7 +285,7 @@ const PopUpBanner = () => {
                                 <TableCell>
                                     <Image
                                         src={banner.image?.url || "/placeholder.jpeg"}
-                                        alt="Popup Image"
+                                        alt="PopUp Image"
                                         width={100}
                                         height={50}
                                         className="rounded-xl"

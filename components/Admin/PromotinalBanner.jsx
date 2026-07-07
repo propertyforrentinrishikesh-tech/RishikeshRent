@@ -15,7 +15,7 @@ import { useRef } from "react";
 import { UploadIcon } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
-const PromotinalBanner = () => {
+const PromotinalBanner = ({section="frontend"}) => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [bannerToDelete, setBannerToDelete] = useState(null);
     const [banners, setBanners] = useState([]);
@@ -23,22 +23,15 @@ const PromotinalBanner = () => {
     const [formData, setFormData] = useState({
         buttonLink: "",
         image: { url: "", key: "" },
-        order: 1,
     });
 
     // Fetch banners and determine the next order number
     useEffect(() => {
         const fetchBanners = async () => {
             try {
-                const response = await fetch("/api/addPromotinalBanner");
+                const response = await fetch(`/api/addPromotinalBanner?section=${section}`);
                 const data = await response.json();
                 setBanners(data);
-
-                // Auto-set next order number
-                if (data.length > 0) {
-                    const highestOrder = Math.max(...data.map((b) => b.order));
-                    setFormData((prev) => ({ ...prev, order: highestOrder + 1 }));
-                }
             } catch (error) {
                 toast.error("Failed to fetch banners");
             }
@@ -86,6 +79,7 @@ const PromotinalBanner = () => {
             const payload = {
                 ...formData,
                 id: editBanner,
+                section: section,
             };
             const response = await fetch("/api/addPromotinalBanner", {
                 method,
@@ -100,13 +94,12 @@ const PromotinalBanner = () => {
                 setEditBanner(null);
 
                 // Refresh banner list
-                const updatedBanners = await fetch("/api/addPromotinalBanner").then((res) => res.json());
+                const updatedBanners = await fetch(`/api/addPromotinalBanner?section=${section}`).then((res) => res.json());
                 setBanners(updatedBanners);
 
                 // Reset form
                 setFormData({
                     buttonLink: "",
-                    order: updatedBanners.length + 1,
                     image: { url: "", key: "" },
                 });
 
@@ -123,7 +116,6 @@ const PromotinalBanner = () => {
         // console.log(banner)
         setFormData({
             buttonLink: banner.buttonLink,
-            order: banner.order,
             image: banner.image,
         });
     };
@@ -144,7 +136,7 @@ const PromotinalBanner = () => {
                 setBanners((prev) => prev.filter((banner) => banner._id !== id));
 
                 // Update order numbers
-                const updatedBanners = await fetch("/api/addPromotinalBanner").then((res) => res.json());
+                const updatedBanners = await fetch(`/api/addPromotinalBanner?section=${section}`).then((res) => res.json());
                 setBanners(updatedBanners);
             } else {
                 toast.error(data.error);
@@ -224,11 +216,6 @@ const PromotinalBanner = () => {
                     <Label>Button Link</Label>
                     <Input name="buttonLink" placeholder="Enter button link" type="url" value={formData.buttonLink} onChange={handleInputChange} />
                 </div>
-                <div>
-                    <Label>Order</Label>
-                    <Input name="order" placeholder="Enter order" type="number" value={formData.order} readOnly className="bg-gray-100 cursor-not-allowed" />
-                </div>
-
                 <div className="flex gap-3">
                     <Button type="submit" className="bg-blue-600 hover:bg-blue-500">
                         {editBanner ? "Update Promotinal Banner" : "Add Promotinal Banner"}
@@ -244,7 +231,6 @@ const PromotinalBanner = () => {
                                     title: "",
                                     coupon: "",
                                     buttonLink: "",
-                                    order: banners.length > 0 ? Math.max(...banners.map(b => b.order)) + 1 : 1,
                                     image: { url: "", key: "" },
                                 });
                             }}
@@ -259,16 +245,17 @@ const PromotinalBanner = () => {
             <Table>
                 <TableHeader>
                     <TableRow>
+                        <TableHead>S.No</TableHead>
                         <TableHead>Button Link</TableHead>
-                        <TableHead>Order</TableHead>
                         <TableHead>Image</TableHead>
                         <TableHead>Actions</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {banners.length > 0 ? (
-                        banners.map((banner) => (
+                        banners.map((banner, index) => (
                             <TableRow key={banner._id}>
+                                <TableCell>{index+1}</TableCell>
                                 <TableCell>
                                     <TooltipProvider>
                                         <Tooltip>
@@ -281,7 +268,6 @@ const PromotinalBanner = () => {
                                         </Tooltip>
                                     </TooltipProvider>
                                 </TableCell>
-                                <TableCell>{banner.order}</TableCell>
                                 <TableCell>
                                     <Image src={banner.image.url} alt="Promotinal Image" width={100} height={50} className="rounded-xl" />
                                 </TableCell>

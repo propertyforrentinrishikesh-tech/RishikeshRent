@@ -3,29 +3,37 @@ import InstagramPost from '@/models/InstagramPost';
 
 export async function GET(req) {
   await connectDB();
-  const posts = await InstagramPost.find().sort({ createdAt: -1 });
+  const url = new URL(req.url, `http://${req.headers.get('host') || 'localhost'}`);
+  const section = url.searchParams.get('section');
+  const query = {};
+  if (section) {
+      query.section = section;
+  }
+  const posts = await InstagramPost.find(query).sort({ createdAt: -1 });
   return Response.json(posts);
 }
 
 export async function POST(req) {
   await connectDB();
   const body = await req.json();
-  const { image, url } = body;
+  const { image, url, section } = body;
   if (!image || !url) {
     return new Response(JSON.stringify({ error: 'Image and url are required.' }), { status: 400 });
   }
-  const post = await InstagramPost.create({ image, url, type: "instagram" });
+  const post = await InstagramPost.create({ image, url, type: "instagram", section: section || "frontend" });
   return Response.json(post, { status: 201 });
 }
 
 export async function PATCH(req) {
   await connectDB();
   const body = await req.json();
-  const { image, url, id } = body;
+  const { image, url, id, section } = body;
   if (!image || !url || !id) {
     return new Response(JSON.stringify({ error: 'Image, url, and id are required.' }), { status: 400 });
   }
-  const post = await InstagramPost.findByIdAndUpdate(id, { image, url, type: "instagram" }, { new: true });
+  const updateData = { image, url, type: "instagram" };
+  if (section !== undefined) updateData.section = section;
+  const post = await InstagramPost.findByIdAndUpdate(id, updateData, { new: true });
   return Response.json(post, { status: 200 });
 }
 

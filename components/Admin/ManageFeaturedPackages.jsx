@@ -6,11 +6,9 @@ import Image from "next/image";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-// import { UploadButton } from "@uploadthing/react"; // Removed UploadThing
-// import { deleteFileFromUploadthing } from "@/utils/Utapi"; // Removed UploadThing
 import { X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-const ManageFeaturedPackages = () => {
+const ManageFeaturedPackages = ({section="frontend"}) => {
     const [packages, setPackages] = useState([]);
     const [editingPackage, setEditingPackage] = useState(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -25,7 +23,7 @@ const ManageFeaturedPackages = () => {
 
     const fetchPackages = async () => {
         try {
-            const response = await fetch("/api/featured-packages");
+            const response = await fetch(`/api/featured-packages?section=${section}`);
             const data = await response.json();
             // console.log('API Response:', data);
 
@@ -67,7 +65,8 @@ const ManageFeaturedPackages = () => {
             const dataToSend = {
                 title: formData.title,
                 link: formData.link,
-                image: formData.image
+                image: formData.image,
+                section: section
             };
 
             const url = editingPackage

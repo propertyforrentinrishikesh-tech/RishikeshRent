@@ -16,7 +16,7 @@ export const PUT = async (req, { params }) => {
         const { id } = await params; // Await the params
         
         const body = await req.json();
-        const { title, image, link } = body;
+        const { title, image, link, section } = body;
 
         let imageUrl = null;
         let imagePublicId = null;
@@ -41,6 +41,7 @@ export const PUT = async (req, { params }) => {
         const updateData = { 
             ...(title && { title }),
             ...(link && { link }),
+            ...(section !== undefined && { section }),
             ...(imageUrl && { 
                 image: { 
                     url: imageUrl, 

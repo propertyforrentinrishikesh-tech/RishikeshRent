@@ -4,10 +4,16 @@ import ConsultancyBanner from "@/models/ConsultancyBanner";
 import { deleteFileFromCloudinary } from "@/utils/cloudinary";
 
 
-export async function GET() {
+export async function GET(req) {
     await connectDB();
     try {
-        const banners = await ConsultancyBanner.find().sort({ order: 1 });
+        const url = new URL(req.url, `http://${req.headers.get('host') || 'localhost'}`);
+        const section = url.searchParams.get('section');
+        const query = {};
+        if (section) {
+            query.section = section;
+        }
+        const banners = await ConsultancyBanner.find(query).sort({ createdAt: -1 });
         return NextResponse.json(banners, { status: 200 });
     } catch (error) {
         return NextResponse.json({ error: "Failed to fetch banners" }, { status: 500 });
@@ -17,13 +23,9 @@ export async function GET() {
 export async function POST(req) {
     await connectDB();
     try {
-        const { title, buttonLink,rating, image, shortDescription,order } = await req.json();
+        const { title, buttonLink, rating, image, shortDescription, section } = await req.json();
 
-        // Find the highest order number
-        const lastBanner = await ConsultancyBanner.findOne().sort({ order: -1 });
-        const nextOrder = lastBanner ? lastBanner.order + 1 : 1; // Auto-increment order
-
-        const newBanner = new ConsultancyBanner({ title, buttonLink,rating, shortDescription, order: nextOrder, image });
+        const newBanner = new ConsultancyBanner({ title, buttonLink, rating, shortDescription, image, section: section || "frontend" });
         await newBanner.save();
         return NextResponse.json(newBanner, { status: 201 });
     } catch (error) {
@@ -34,8 +36,16 @@ export async function POST(req) {
 export async function PATCH(req) {
     await connectDB();
     try {
-        const { id, title, buttonLink, image,rating, shortDescription, order } = await req.json();
-        const updatedBanner = await ConsultancyBanner.findByIdAndUpdate(id, { title, buttonLink,rating, shortDescription, order, image }, { new: true });
+        const { id, title, buttonLink, image, rating, shortDescription, section } = await req.json();
+        const updateData = {};
+        if (title !== undefined) updateData.title = title;
+        if (buttonLink !== undefined) updateData.buttonLink = buttonLink;
+        if (rating !== undefined) updateData.rating = rating;
+        if (shortDescription !== undefined) updateData.shortDescription = shortDescription;
+        if (image !== undefined) updateData.image = image;
+        if (section !== undefined) updateData.section = section;
+
+        const updatedBanner = await ConsultancyBanner.findByIdAndUpdate(id, updateData, { new: true });
         return NextResponse.json(updatedBanner, { status: 200 });
     } catch (error) {
         return NextResponse.json({ error: "Failed to update banner" }, { status: 500 });

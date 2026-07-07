@@ -1,6 +1,6 @@
 import connectDB from "@/lib/connectDB";
 import { NextResponse } from "next/server";
-import Package from "@/models/Package";
+import Package from "@/models/Piligrimage/Package";
 
 export async function POST(req) {
     try {

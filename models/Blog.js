@@ -6,6 +6,7 @@ const BlogSchema = new mongoose.Schema({
   shortDescription: { type: String }, // as HTML
   longDescription: { type: String }, // as HTML
   images: [{ url: String, key: String }],
+  section: { type: String,required:true },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 }, { timestamps: true });

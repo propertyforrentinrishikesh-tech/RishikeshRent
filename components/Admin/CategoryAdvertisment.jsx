@@ -15,7 +15,7 @@ import { useRef } from "react";
 import { UploadIcon } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
-const CategoryAdvertisment = () => {
+const CategoryAdvertisment = ({section="frontend"}) => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [bannerToDelete, setBannerToDelete] = useState(null);
     const [banners, setBanners] = useState([]);
@@ -23,22 +23,15 @@ const CategoryAdvertisment = () => {
     const [formData, setFormData] = useState({
         buttonLink: "",
         image: { url: "", key: "" },
-        order: 1,
     });
 
     // Fetch banners and determine the next order number
     useEffect(() => {
         const fetchBanners = async () => {
             try {
-                const response = await fetch("/api/categoryAdvertisment");
+                const response = await fetch(`/api/categoryAdvertisment?section=${section}`);
                 const data = await response.json();
                 setBanners(data);
-
-                // Auto-set next order number
-                if (data.length > 0) {
-                    const highestOrder = Math.max(...data.map((b) => b.order));
-                    setFormData((prev) => ({ ...prev, order: highestOrder + 1 }));
-                }
             } catch (error) {
                 toast.error("Failed to fetch banners");
             }
@@ -85,7 +78,7 @@ const CategoryAdvertisment = () => {
             const response = await fetch("/api/categoryAdvertisment", {
                 method,
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ ...formData, id: editBanner }),
+                body: JSON.stringify({ ...formData, id: editBanner, section: section }),
             });
 
             const data = await response.json();
@@ -95,13 +88,12 @@ const CategoryAdvertisment = () => {
                 setEditBanner(null);
 
                 // Refresh banner list
-                const updatedBanners = await fetch("/api/categoryAdvertisment").then((res) => res.json());
+                const updatedBanners = await fetch(`/api/categoryAdvertisment?section=${section}`).then((res) => res.json());
                 setBanners(updatedBanners);
 
                 // Reset form
                 setFormData({
                     buttonLink: "",
-                    order: updatedBanners.length + 1,
                     image: { url: "", key: "" },
                 });
             } else {
@@ -117,7 +109,6 @@ const CategoryAdvertisment = () => {
         // console.log(banner)
         setFormData({
             buttonLink: banner.buttonLink,
-            order: banner.order,
             image: banner.image,
         });
     };
@@ -167,11 +158,11 @@ const CategoryAdvertisment = () => {
 
     return (
         <div className="max-w-5xl mx-auto py-10 w-full">
-            <h2 className="text-2xl font-bold mb-6">{editBanner ? "Edit Banner" : "Add New Banner Offer"}</h2>
+            <h2 className="text-2xl font-bold mb-6">{editBanner ? "Edit Category Advertisment Banner" : "Add New Category Advertisment Banner"}</h2>
             <form onSubmit={handleSubmit} className="bg-white shadow-lg rounded-lg p-6 space-y-4">
                 {/* Banner Image Upload */}
                 <div className="mb-4">
-                    <Label className="block mb-2 font-bold">Advertisment Banner Image</Label>
+                    <Label className="block mb-2 font-bold">Category Advertisment Banner Image</Label>
                     <input
                         type="file"
                         accept="image/*"
@@ -186,7 +177,7 @@ const CategoryAdvertisment = () => {
                         className="mb-2 flex items-center gap-2 bg-blue-500 text-white"
                         onClick={() => fileInputRef.current && fileInputRef.current.click()}
                     >
-                        <span>Select Featured Offer Image</span>
+                        <span>Select Category Advertisment Banner Image</span>
                         <UploadIcon className="w-4 h-4" />
                     </Button>
                     {uploading && <div className="text-blue-600 font-semibold">Uploading...</div>}
@@ -194,7 +185,7 @@ const CategoryAdvertisment = () => {
                         <div className="relative w-48 h-28 border rounded overflow-hidden mb-2">
                             <Image
                                 src={formData.image.url}
-                                alt="Featured Offer Image Preview"
+                                alt="Category Advertisment Banner Image Preview"
                                 fill
                                 className="object-cover"
                             />
@@ -213,14 +204,10 @@ const CategoryAdvertisment = () => {
                     <Label>URL Link</Label>
                     <Input name="buttonLink" placeholder="Enter URL link" type="url" value={formData.buttonLink} onChange={handleInputChange} />
                 </div>
-                <div>
-                    <Label>Order</Label>
-                    <Input name="order" placeholder="Enter order" type="number" value={formData.order} readOnly className="bg-gray-100 cursor-not-allowed" />
-                </div>
 
                 <div className="flex gap-2 mt-4">
                     <Button type="submit" className="bg-blue-600 hover:bg-blue-500">
-                        {editBanner ? "Update Banner Offer" : "Add Banner Offer"}
+                        {editBanner ? "Update Category Advertisment Banner" : "Add Category Advertisment Banner"}
                     </Button>
                     {editBanner && (
                         <Button
@@ -231,7 +218,6 @@ const CategoryAdvertisment = () => {
                                 setEditBanner(null);
                                 setFormData({
                                     buttonLink: "",
-                                    order: banners.length > 0 ? Math.max(...banners.map(b => b.order)) + 1 : 1,
                                     image: { url: "", key: "" },
                                 });
                             }}
@@ -246,7 +232,7 @@ const CategoryAdvertisment = () => {
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Order</TableHead>
+                        <TableHead>S.No</TableHead>
                         <TableHead>Image</TableHead>
                         <TableHead>Button Link</TableHead>
                         <TableHead>Actions</TableHead>
@@ -254,9 +240,9 @@ const CategoryAdvertisment = () => {
                 </TableHeader>
                 <TableBody>
                     {banners.length > 0 ? (
-                        banners.map((banner) => (
+                        banners.map((banner, index) => (
                             <TableRow key={banner._id}>
-                                <TableCell>{banner.order}</TableCell>
+                                <TableCell>{index + 1}</TableCell>
                                 <TableCell>
                                     <Image src={banner.image.url} alt="Featured Offer Image" width={100} height={50} className="rounded-lg" />
                                 </TableCell>

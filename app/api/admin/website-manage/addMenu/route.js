@@ -1,14 +1,17 @@
 import connectDB from "@/lib/connectDB";
 import { NextResponse } from "next/server";
 import MenuBar from "@/models/MenuBar";
-import Product from "@/models/Product";
+import Package from "@/models/Piligrimage/Package";
 import { deleteFileFromCloudinary } from "@/utils/cloudinary";
+import { normalizeAdminSection } from "@/lib/admin-section";
 
 export async function POST(req) {
     await connectDB();
     const body = await req.json();
 
     try {
+        body.section = normalizeAdminSection(body.section);
+        body.showOnFrontend = Boolean(body.showOnFrontend);
         await MenuBar.create(body);
         return NextResponse.json({ message: "Menu added successfully!" }, { status: 201 });
     } catch (error) {
@@ -21,6 +24,13 @@ export async function PUT(req) {
     const { id, ...data } = await req.json();
 
     try {
+        if (data.section) {
+            data.section = normalizeAdminSection(data.section);
+        }
+        if (data.showOnFrontend !== undefined) {
+            data.showOnFrontend = Boolean(data.showOnFrontend);
+        }
+
         const updatedMenu = await MenuBar.findByIdAndUpdate(id, data, { new: true });
 
         if (!updatedMenu) {
@@ -76,7 +86,7 @@ export async function DELETE(req) {
                 // Loop through packages in submenus and gather image keys
                 for (const productId of subMenu.products) {
                     // Fetch the package and collect the gallery image keys
-                    const pkg = await Product.findById(productId);
+                    const pkg = await Package.findById(productId);
                     if (pkg) {
                         for (const galleryItem of pkg.gallery) {
                             if (galleryItem.key) {

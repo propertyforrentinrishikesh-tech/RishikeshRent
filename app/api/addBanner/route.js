@@ -2,10 +2,17 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/connectDB";
 import HeroBanner from "@/models/HeroBanner";
 import { deleteFileFromCloudinary } from "@/utils/cloudinary";
-export async function GET() {
+export async function GET(req) {
     await connectDB();
     try {
-        const banners = await HeroBanner.find().sort({ order: 1 });
+        const url = new URL(req.url, `http://${req.headers.get('host') || 'localhost'}`);
+        const section = url.searchParams.get('section');
+        // console.log(section)
+        const query = {};
+        if (section) {
+            query.section = section;
+        }
+        const banners = await HeroBanner.find(query).sort({ createdAt: -1 });
         return NextResponse.json(banners, { status: 200 });
     } catch (error) {
         return NextResponse.json({ error: "Failed to fetch banners" }, { status: 500 });
@@ -15,18 +22,13 @@ export async function GET() {
 export async function POST(req) {
     await connectDB();
     try {
-        const { buttonLink, frontImg, mobileImg, order } = await req.json();
-
-        // Find the highest order number
-        const lastBanner = await HeroBanner.findOne().sort({ order: -1 });
-        const nextOrder = lastBanner ? lastBanner.order + 1 : 1; // Auto-increment order
+        const { buttonLink, frontImg, mobileImg, section } = await req.json();
 
         const newBanner = new HeroBanner({
             buttonLink,
-            order: nextOrder,
             frontImg,
-            mobileImg
-
+            mobileImg,
+            section: section || "frontend"
         });
         await newBanner.save();
         return NextResponse.json(newBanner, { status: 201 });
@@ -38,15 +40,17 @@ export async function POST(req) {
 export async function PATCH(req) {
     await connectDB();
     try {
-        const { id, buttonLink, frontImg, mobileImg, order } = await req.json();
+        const { id, buttonLink, frontImg, mobileImg, section } = await req.json();
+        
+        const updateData = {};
+        if (buttonLink !== undefined) updateData.buttonLink = buttonLink;
+        if (frontImg !== undefined) updateData.frontImg = frontImg;
+        if (mobileImg !== undefined) updateData.mobileImg = mobileImg;
+        if (section !== undefined) updateData.section = section;
+
         const updatedBanner = await HeroBanner.findByIdAndUpdate(
             id,
-            {
-                buttonLink,
-                order,
-                frontImg,
-                mobileImg
-            },
+            updateData,
             { new: true }
         );
         return NextResponse.json(updatedBanner, { status: 200 });

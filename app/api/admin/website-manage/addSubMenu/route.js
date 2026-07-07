@@ -1,15 +1,18 @@
 import connectDB from "@/lib/connectDB";
 import { NextResponse } from "next/server";
 import MenuBar from "@/models/MenuBar";
-import Product from "@/models/Product";
-
+import Package from "@/models/Piligrimage/Package";
+import { getAdminSectionFilter, normalizeAdminSection } from "@/lib/admin-section";
 export async function GET(req) {
     await connectDB();
-    const menu = await MenuBar.find({})
+    const { searchParams } = new URL(req.url)
+    const section = normalizeAdminSection(searchParams.get("section"))
+
+    const menu = await MenuBar.find(getAdminSectionFilter(section))
         .sort({ order: 1 })
         .populate({
-            path: "subMenu.product",
-            model: "Product",
+            path: "subMenu.packages",
+            model: "Package",
         });
     return NextResponse.json(menu);
 }
@@ -17,13 +20,18 @@ export async function GET(req) {
 export async function PATCH(req) {
     await connectDB();
     const body = await req.json();
+    const section = normalizeAdminSection(body.section)
+    const showOnFrontend =
+    body.subMenu?.showOnFrontend !== undefined
+        ? Boolean(body.subMenu.showOnFrontend)
+        : false
 
     if (!body.subMenuId && (!body.id || !body.subMenu || typeof body.subMenu.title !== "string" || typeof body.subMenu.url !== "string")) {
         return NextResponse.json({ message: "Invalid request body" }, { status: 400 });
     }
 
     try {
-        const existingMenu = body.id ? await MenuBar.findById(body.id) : await MenuBar.findOne({ "subMenu._id": body.subMenuId });
+        const existingMenu = body.id ? await MenuBar.findOne({ _id: body.id, ...getAdminSectionFilter(section) }) : await MenuBar.findOne({ "subMenu._id": body.subMenuId, ...getAdminSectionFilter(section) });
 
         if (!existingMenu) {
             return NextResponse.json({ message: "Menu not found" }, { status: 404 });
@@ -76,6 +84,9 @@ export async function PATCH(req) {
             if (body.subMenu.profileImage !== undefined) {
                 updateFields["subMenu.$.profileImage"] = body.subMenu.profileImage;
             }
+            if (body.subMenu.showOnFrontend !== undefined) {
+                updateFields["subMenu.$.showOnFrontend"] = Boolean(body.subMenu.showOnFrontend);
+            }
 
             const updatedMenu = await MenuBar.findOneAndUpdate(
                 { "subMenu._id": body.subMenuId },
@@ -90,9 +101,9 @@ export async function PATCH(req) {
 
         // Ensure profileImage is included in submenu data if sent from frontend
         // body.subMenu.profileImage should be an object { url, key }
-        const updatedMenu = await MenuBar.findByIdAndUpdate(
-            body.id,
-            { $push: { subMenu: body.subMenu } },
+        const updatedMenu = await MenuBar.findOneAndUpdate(
+            { _id: body.id, ...getAdminSectionFilter(section) },
+            { $push: { subMenu: { ...body.subMenu, showOnFrontend } } },
             { new: true, runValidators: true }
         );
 
@@ -119,8 +130,8 @@ export async function DELETE(req) {
         const submenu = menu.subMenu.find((sub) => sub._id.toString() === body.subMenuId);
         if (!submenu) return NextResponse.json({ message: "Submenu not found" }, { status: 404 });
 
-        if (Array.isArray(submenu.product) && submenu.product.length > 0) {
-            return NextResponse.json({ message: "Cannot delete submenu with products" }, { status: 400 });
+        if (Array.isArray(submenu.packages) && submenu.packages.length > 0) {
+            return NextResponse.json({ message: "Cannot delete submenu with packages" }, { status: 400 });
         }
 
         const updatedMenu = await MenuBar.findByIdAndUpdate(

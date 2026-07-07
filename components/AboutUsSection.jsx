@@ -10,6 +10,7 @@ const AboutUsSection = () => {
     const [featuredPackages, setFeaturedPackages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [loading1, setLoading1] = useState(true);
+    const [offerDetails, setOfferDetails] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [bannerSection1st, setBannerSection1st] = useState([]);
     const fetchPackages = async () => {
@@ -43,32 +44,20 @@ const AboutUsSection = () => {
     useEffect(() => {
         fetchPackages();
         fetchBannerSection1st();
+        fetch("/api/offerDetails")
+            .then(res => res.json())
+            .then(data => { if (data) setOfferDetails(data); })
+            .catch(() => { });
     }, []);
-
     return (
         <>
-            {featuredPackages.length > 0 &&(
+            {featuredPackages.length > 0 && (
                 <section className="relative py-10 w-full px-5 overflow-hidden max-w-screen overflow-x-hidden">
                     <div className="w-full">
-                        <h2 className="font-bold text-2xl md:text-4xl text-center mt-7">Find Your Peaceful Home Amidst the Rishikesh Himalayas.
+                        <h2 className="font-bold text-2xl md:text-4xl text-center mt-7">Home Away From Home is Waiting.
                         </h2>
                         <p className=" text-xl font-lg md:text-xl text-center mt-2">
-                            "Where the Ganga Flows, Your New Home Awaits"
-                        </p>
-                        <hr className="h-[2px] w-full md:w-[50%] mx-auto bg-black" />
-
-                        <p className="text-gray-600 py-8 text-center font-barlow  w-full px-2 md:w-[50%] mx-auto">
-                            At Find Your Best Choice, we take pride in connecting people with the finest
-                            commercial and residential rental properties across the scenic city of Rishikesh.
-                            Whether you're seeking a peaceful home near the Ganges, a modern apartment
-                            in the city center, or a well-located space for your business, we bring you the best
-                            deals and trusted options. Our dedicated team ens   ures every property meets the
-                            highest standards of comfort, convenience, and value. With deep local expertise
-                            and a commitment to customer satisfaction,
-
-                            <br />
-                            we help you find not just a property - but the perfect place to live, work, and grow
-                            in the serene beauty of Rishikesh.
+                            "personalized experience tailored just for you."
                         </p>
                         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 mx-auto">
                             {loading ? (
@@ -119,6 +108,51 @@ const AboutUsSection = () => {
                     </div>
                 </section>
             )}
+            <section className="w-full md:w-[95%] mx-auto py-4 space-y-3 px-3 sm:px-4 md:px-0">
+                {/* Banner 1 */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gradient-to-r from-[#fde8e2] via-[#fdf0ec] to-[#fef6f4] rounded-xl px-4 sm:px-5 py-4 shadow-sm border border-orange-100/60">
+
+                    <div className="flex items-start sm:items-center gap-3 sm:gap-4">
+                        <Image src="/clockImage.png" alt="clock" width={40} height={40} className="w-8 h-8 sm:w-10 sm:h-10 object-contain" />
+
+                        <div>
+                            <h4 className="text-sm sm:text-base md:text-lg font-bold text-gray-900">
+                                {offerDetails?.lastMinuteDeal?.heading || 'Last Minute Deal'}
+                            </h4>
+                            <p className="text-xs sm:text-sm text-gray-500">
+                                {offerDetails?.lastMinuteDeal?.description || 'Up to 75% off on selected hotels'}
+                            </p>
+                        </div>
+                    </div>
+
+                    <Link
+                        href={offerDetails?.lastMinuteDeal?.link || ''}
+                        className="w-full sm:w-auto text-center text-sm text-nowrap bg-white font-medium text-gray-700 border border-gray-300 rounded-full px-4 sm:px-5 py-2 hover:bg-gray-800 hover:text-white transition-all duration-200"
+                    >
+                        Know More
+                    </Link>
+                </div>
+
+                {/* Banner 2 */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gradient-to-r from-[#ede4f5] via-[#f3eef9] to-[#f8f5fc] rounded-xl px-4 sm:px-5 py-4 shadow-sm border border-purple-100/60">
+
+                    <div className="flex items-start sm:items-center gap-3 sm:gap-4">
+                        <Image src="/banner1.png" alt="card" width={40} height={40} className="w-8 h-8 sm:w-10 sm:h-10 object-contain" />
+
+                        <p className="text-xs sm:text-sm md:text-base text-gray-700">
+                            {offerDetails?.promoBanner?.description || 'Save ₹2,000 on Hotels by using Adani One ICICI Bank credit card.'}
+                        </p>
+                    </div>
+
+                    <Link
+                        href={offerDetails?.promoBanner?.link || ''}
+                        className="w-full sm:w-auto text-center text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-full px-5 py-2 hover:bg-gray-800 hover:text-white transition-all duration-200"
+                    >
+                        Apply
+                    </Link>
+                </div>
+
+            </section>
             <section className="bg-[#ededed] relative w-full">
                 {loading1 ? (
                     // Skeleton loader

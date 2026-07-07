@@ -7,9 +7,13 @@ export async function GET(req) {
   await connectDB();
   const { searchParams } = new URL(req.url);
   const excludeId = searchParams.get('exclude');
+  const section = searchParams.get('section');
   let filter = {};
   if (excludeId) {
-    filter = { _id: { $ne: excludeId } };
+    filter._id = { $ne: excludeId };
+  }
+  if (section) {
+    filter.section = section;
   }
   try {
     const blogs = await Blog.find(filter).sort({ createdAt: -1 });

@@ -1,9 +1,9 @@
 import { Schema, models, model } from "mongoose";
 
 const CategoryAdvertismentSchema = new Schema({
-    buttonLink: { type: String},
+    buttonLink: { type: String },
     image: { url: { type: String }, key: { type: String } },
-    order: { type: Number, required: true },
+    section: { type: String, required: true },
 }, { timestamps: true });
 
 export default models.CategoryAdvertisment || model("CategoryAdvertisment", CategoryAdvertismentSchema);

@@ -21,6 +21,7 @@ const SearchSection = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [checkInDate, setCheckInDate] = useState('');
   const [guestCount, setGuestCount] = useState(1);
+  const [maxPrice, setMaxPrice] = useState(50000);
   const router = useRouter();
 
   // Reusable Number Input Component
@@ -177,6 +178,7 @@ const SearchSection = () => {
       // Filters (query params)
       if (propertyFor) params.append('propertyFor', propertyFor);
       if (propertyType) params.append('propertyType', slugify(propertyType));
+      if (maxPrice) params.append('maxPrice', maxPrice);
 
       if (checkInDate) {
         const formattedDate = new Date(checkInDate)
@@ -226,349 +228,99 @@ const SearchSection = () => {
     if (params.get('propertyType')) setPropertyType(params.get('propertyType'));
     if (params.get('checkInDate')) setCheckInDate(params.get('checkInDate'));
     if (params.get('guests')) setGuestCount(parseInt(params.get('guests')));
+    if (params.get('maxPrice')) setMaxPrice(params.get('maxPrice'));
   }, []);
 
   return (
-    <section className="md:p-5 bg-gray-100 w-full md:w-[80%] mx-auto my-10 rounded-lg shadow-md border border-gray-400">
-      <div className="container mx-auto px-4">
-        {/* Tabs */}
-        <Tabs
-          defaultValue="property"
-          className="w-full"
-          onValueChange={setActiveTab}
-        >
-          <TabsList className="grid w-full grid-cols-1 gap-2 md:grid-cols-3 mb-8 bg-white rounded-lg shadow-sm">
-            <TabsTrigger
-              value="property"
-              className="flex items-center gap-2 py-4 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 border border-gray-400"
+    <section className="w-full max-w-[1200px] mx-auto px-4 md:px-8 py-10">
+      <div className="bg-[#64a8b1] rounded-3xl shadow-xl p-6 md:p-10 flex flex-col gap-5">
+        <div className="text-black">
+          <h2 className="text-2xl md:text-3xl font-bold mb-1 tracking-tight">Best Stays, Better Prices: Book Direct.</h2>
+          <p className="text-base md:text-lg font-semibold text-white">
+            Authentic Comfort. Exceptional Value. Your Home Away From Home In Rishikesh.
+          </p>
+        </div>
+
+        <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-end gap-4 w-full">
+          {/* Location */}
+          <div className="w-full md:w-1/4">
+            <Select
+              value={location}
+              onValueChange={(value) => setLocation(value)}
+              disabled={isLoading}
             >
-              <Home className="h-4 w-4" />
-              Search Property
-            </TabsTrigger>
-            <TabsTrigger
-              value="hotel"
-              className="flex items-center gap-2 py-4 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 border border-gray-400"
+              <SelectTrigger className="w-full bg-white h-10 rounded-full px-5 text-black border-none text-sm font-semibold focus:ring-0 shadow-md">
+                <SelectValue placeholder="Select Location" />
+              </SelectTrigger>
+              <SelectContent>
+                {locations.map((loc, index) => (
+                  <SelectItem key={`loc-${index}`} value={loc.locationType}>
+                    {loc.locationType || `Location ${index + 1}`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Property Type */}
+          <div className="w-full md:w-1/4">
+            <Select
+              value={propertyType}
+              onValueChange={(value) => setPropertyType(value)}
+              disabled={isLoading}
             >
-              <Hotel className="h-4 w-4" />
-              Search Hotels And Home Stay
-            </TabsTrigger>
-            <TabsTrigger
-              value="homestay"
-              className="flex items-center gap-2 py-4 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 border border-gray-400 "
+              <SelectTrigger className="w-full bg-white h-10 rounded-full px-5 text-black border-none text-sm font-semibold focus:ring-0 shadow-md">
+                <SelectValue placeholder="Property Type" />
+              </SelectTrigger>
+              <SelectContent>
+                {propertyTypes.map((type, index) => (
+                  <SelectItem key={`type-${index}`} value={type.propertyType}>
+                    {type.propertyType || `Type ${index + 1}`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Price Range Slider */}
+          <div className="w-full md:w-1/4 flex flex-col text-black font-bold px-3">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-xs font-semibold">Low</span>
+              <span className="text-sm font-bold">Price Range</span>
+              <span className="text-xs font-semibold">Max</span>
+            </div>
+            <div className="relative flex items-center w-full mt-1">
+               <input
+                type="range"
+                min="5000"
+                max="100000"
+                step="1000"
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(e.target.value)}
+                className="w-full h-1 bg-black rounded-lg appearance-none cursor-pointer accent-red-600 focus:outline-none"
+              />
+            </div>
+            <div className="flex justify-between items-center mt-1 text-[10px] font-semibold">
+              <span>5000</span>
+              <span>1,00,000</span>
+            </div>
+          </div>
+
+          {/* Search Button */}
+          <div className="w-full md:w-1/4">
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full h-10 bg-[#ff6b00] hover:bg-[#e66000] text-black text-sm font-bold rounded-full transition-colors shadow-md"
             >
-              <Home className="h-4 w-4" />
-              Tours & Attractions
-            </TabsTrigger>
-          </TabsList>
+              {isLoading ? "Searching..." : "Search Now"}
+            </Button>
+          </div>
+        </form>
 
-          <TabsContent value="property">
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                {/* Location Select */}
-                <div className="w-full">
-                  <Select
-                    value={location}
-                    onValueChange={(value) => setLocation(value)}
-                    disabled={isLoading}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select Location" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {locations.map((loc, index) => (
-                        <SelectItem key={`loc-${index}`} value={loc.locationType}>
-                          {loc.locationType || `Location ${index + 1}`}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Property For Select */}
-                <Select
-                  value={propertyFor}
-                  onValueChange={(value) => setPropertyFor(value)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Property For" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {propertyForOptions.map((option, index) => (
-                      <SelectItem key={`for-${index}`} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                {/* Property Type Select */}
-                <div className="w-full">
-                  <Select
-                    value={propertyType}
-                    onValueChange={(value) => setPropertyType(value)}
-                    disabled={isLoading}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select Property Type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {propertyTypes.map((type, index) => (
-                        <SelectItem key={`type-${index}`} value={type.propertyType}>
-                          {type.propertyType || `Type ${index + 1}`}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                </div>
-
-
-                <Button
-                  type="submit"
-                  className="bg-green-600 hover:bg-green-700 text-white py-2 px-6"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <span className="flex items-center">
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Searching...
-                    </span>
-                  ) : (
-                    <span className="flex items-center">
-                      <Search className="mr-2 h-4 w-4" /> Search
-                    </span>
-                  )}
-                </Button>
-              </form>
-              <div className="mt-8">
-                <div className="flex items-center gap-2 text-gray-700 mb-4">
-                  <Star className="h-5 w-5 text-yellow-500" />
-                  <h3 className="text-lg font-semibold">Trending Properties</h3>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {trendingSearches.length > 0 ? (
-                    trendingSearches.map((property, index) => (
-                      <Button
-                        key={index}
-                        variant="outline"
-                        className="rounded-full px-4 py-1 text-sm hover:bg-blue-50 hover:text-blue-600 border-gray-200"
-                        asChild
-                      >
-                        <Link href={`/properties/${property.propertyNameSlug}`}>
-                          {property.propertyName}
-                        </Link>
-                      </Button>
-                    ))
-                  ) : (
-                    <p className="text-sm text-gray-500">No trending properties found</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="hotel">
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                {/* Location Select */}
-                <div className="w-full">
-                  <Select
-                    value={location}
-                    onValueChange={(value) => setLocation(value)}
-                    disabled={isLoading}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select Location" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {locations.map((loc, index) => (
-                        <SelectItem key={`loc-${index}`} value={loc.locationType}>
-                          {loc.locationType || `Location ${index + 1}`}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Property For Select */}
-                <Select
-                  value={propertyFor}
-                  onValueChange={(value) => setPropertyFor(value)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Accommodation Be Like" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {accommodationType.map((option, index) => (
-                      <SelectItem key={`for-${index}`} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                {/* Property Type Select */}
-                <div className="w-full">
-                  <Input type="date" value={checkInDate} onChange={(e) => setCheckInDate(e.target.value)} />
-                </div>
-                <Button
-                  type="submit"
-                  className="bg-green-600 hover:bg-green-700 text-white py-2 px-6"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <span className="flex items-center">
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Searching...
-                    </span>
-                  ) : (
-                    <span className="flex items-center">
-                      <Search className="mr-2 h-4 w-4" /> Search
-                    </span>
-                  )}
-                </Button>
-              </form>
-              <div className="mt-8">
-                <div className="flex items-center gap-2 text-gray-700 mb-4">
-                  <Star className="h-5 w-5 text-yellow-500" />
-                  <h3 className="text-lg font-semibold">Trending Properties</h3>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {trendingSearches.length > 0 ? (
-                    trendingSearches.map((property, index) => (
-                      <Button
-                        key={index}
-                        variant="outline"
-                        className="rounded-full px-4 py-1 text-sm hover:bg-blue-50 hover:text-blue-600 border-gray-200"
-                        asChild
-                      >
-                        <Link href={`/properties/${property.propertyNameSlug}`}>
-                          {property.propertyName}
-                        </Link>
-                      </Button>
-                    ))
-                  ) : (
-                    <p className="text-sm text-gray-500">No trending properties found</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="homestay">
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                {/* Location Select */}
-                <div className="w-full">
-                  <Select
-                    value={propertyType}
-                    onValueChange={(value) => handleSelectChange('propertyType', value)}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Pilgrimage Type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {pilgrimType.map((option, index) => (
-                        <SelectItem key={`pilgrim-${index}`} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Property For Select */}
-                <div className="w-full">
-                  <Select
-                    value={propertyFor}
-                    onValueChange={(value) => handleSelectChange('propertyFor', value)}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Yatra Type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {yatraType.map((option, index) => (
-                        <SelectItem key={`yatra-${index}`} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Check-in Date */}
-                <div className="w-full">
-                  <Input
-                    type="date"
-                    name="checkInDate"
-                    value={checkInDate}
-                    onChange={handleInputChange}
-                    min={new Date().toISOString().split('T')[0]}
-                  />
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <NumberInput
-                    value={guestCount}
-                    onChange={setGuestCount}
-                    min={1}
-                    max={20}
-                    className=""
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  className="bg-green-600 hover:bg-green-700 text-white"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <span className="flex items-center">
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Searching...
-                    </span>
-                  ) : (
-                    <span className="flex items-center">
-                      <Search className="mr-2 h-4 w-4" /> Search Packages
-                    </span>
-                  )}
-                </Button>
-              </form>
-              <div className="mt-8">
-                <div className="flex items-center gap-2 text-gray-700 mb-4">
-                  <Star className="h-5 w-5 text-yellow-500" />
-                  <h3 className="text-lg font-semibold">Trending Properties</h3>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {trendingSearches.length > 0 ? (
-                    trendingSearches.map((property, index) => (
-                      <Button
-                        key={index}
-                        variant="outline"
-                        className="rounded-full px-4 py-1 text-sm hover:bg-blue-50 hover:text-blue-600 border-gray-200"
-                        asChild
-                      >
-                        <Link href={`/properties/${property.propertyNameSlug}`}>
-                          {property.propertyName}
-                        </Link>
-                      </Button>
-                    ))
-                  ) : (
-                    <p className="text-sm text-gray-500">No trending properties found</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
+        <p className="text-white text-xs md:text-sm font-medium max-w-5xl mt-1 leading-relaxed">
+          Discover your next getaway without the compromise. We pride ourselves on offering the best rates for your stay, ensuring that luxury and comfort remain perfectly within your budget. Your perfect home away from home is waiting—at the price you deserve.
+        </p>
       </div>
     </section>
   );

@@ -15,7 +15,7 @@ import { useRef } from "react";
 import { UploadIcon } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
-const FeaturedOffer = () => {
+const FeaturedOffer = ({section="frontend"}) => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [offerToDelete, setOfferToDelete] = useState(null);
     const [banners, setBanners] = useState([]);
@@ -32,7 +32,7 @@ const FeaturedOffer = () => {
     useEffect(() => {
         const fetchBanners = async () => {
             try {
-                const response = await fetch("/api/addFeaturedOffer");
+                const response = await fetch(`/api/addFeaturedOffer?section=${section}`);
                 const data = await response.json();
                 setBanners(data);
 
@@ -88,6 +88,7 @@ const FeaturedOffer = () => {
             const payload = {
                 ...formData,
                 id: editBanner,
+                section: section,
             };
             const response = await fetch("/api/addFeaturedOffer", {
                 method,
@@ -102,7 +103,7 @@ const FeaturedOffer = () => {
                 setEditBanner(null);
 
                 // Refresh banner list
-                const updatedBanners = await fetch("/api/addFeaturedOffer").then((res) => res.json());
+                const updatedBanners = await fetch(`/api/addFeaturedOffer?section=${section}`).then((res) => res.json());
                 setBanners(updatedBanners);
 
                 // Reset form
@@ -150,7 +151,7 @@ const FeaturedOffer = () => {
                 setBanners((prev) => prev.filter((banner) => banner._id !== id));
 
                 // Update order numbers
-                const updatedBanners = await fetch("/api/addFeaturedOffer").then((res) => res.json());
+                const updatedBanners = await fetch(`/api/addFeaturedOffer?section=${section}`).then((res) => res.json());
                 setBanners(updatedBanners);
             } else {
                 toast.error(data.error);
@@ -241,10 +242,6 @@ const FeaturedOffer = () => {
                 <div>
                     <Label>Price</Label>
                     <Input name="price" placeholder="Enter price" type="number" value={formData.price} onChange={handleInputChange} />
-                </div>
-                <div>
-                    <Label>Property Name</Label>
-                    <Input name="propertyName" placeholder="Enter property name" type="text" value={formData.propertyName} onChange={handleInputChange} />
                 </div>
                 <div>
                     <Label>View Detail Link</Label>
