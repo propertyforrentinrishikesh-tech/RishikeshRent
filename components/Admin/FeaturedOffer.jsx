@@ -15,7 +15,7 @@ import { useRef } from "react";
 import { UploadIcon } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
-const FeaturedOffer = ({section="frontend"}) => {
+const FeaturedOffer = ({ section = "frontend" }) => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [offerToDelete, setOfferToDelete] = useState(null);
     const [banners, setBanners] = useState([]);
