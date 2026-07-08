@@ -136,7 +136,7 @@ const AllProperties = ({ propertyTypes = [], locationType = [], subLocationType 
             if (appliedFilters.subLocation !== "all") params.set("subLocationType", appliedFilters.subLocation);
             if (appliedFilters.propertyFor) params.set("propertyFor", appliedFilters.propertyFor);
 
-            const res = await fetch(`/api/propertyDetails?${params.toString()}`);
+            const res = await fetch(`/api/property/propertyDetails?${params.toString()}`);
             const data = await res.json();
             if (data.success) {
                 setProperties(data.data || []);
@@ -184,7 +184,7 @@ const AllProperties = ({ propertyTypes = [], locationType = [], subLocationType 
     const toggleActive = async (property) => {
         setTogglingId(property._id + "_active");
         try {
-            const res = await fetch(`/api/propertyDetails?id=${property._id}`, {
+            const res = await fetch(`/api/property/propertyDetails?id=${property._id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ isActive: !property.isActive }),
@@ -212,7 +212,7 @@ const AllProperties = ({ propertyTypes = [], locationType = [], subLocationType 
     const toggleTrending = async (property) => {
         setTogglingId(property._id + "_trending");
         try {
-            const res = await fetch(`/api/propertyDetails?id=${property._id}`, {
+            const res = await fetch(`/api/property/propertyDetails?id=${property._id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ isTrending: !property.isTrending }),
@@ -236,12 +236,40 @@ const AllProperties = ({ propertyTypes = [], locationType = [], subLocationType 
         }
     };
 
+    const toggleShowOnFront = async (property) => {
+        setTogglingId(property._id + "_showOnFront");
+        try {
+            const res = await fetch(`/api/property/propertyDetails?id=${property._id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ showOnFront: !property.showOnFront }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                toast.success(`${!property.showOnFront ? "Added to" : "Removed from"} Front Page`);
+                setProperties((prev) =>
+                    prev.map((p) => p._id === property._id ? { ...p, showOnFront: !p.showOnFront } : p)
+                );
+                if (selectedProperty?._id === property._id) {
+                    setSelectedProperty((prev) => ({ ...prev, showOnFront: !prev.showOnFront }));
+                }
+            } else {
+                toast.error("Failed to update in front page");
+            }
+        } catch {
+            toast.error("Error updating to set in front page");
+        } finally {
+            setTogglingId(null);
+        }
+    };
+
+
     // ─── Delete ─────────────────────────────────────────────────────────────────
     const handleDelete = async () => {
         if (!propertyToDelete) return;
         setDeletingId(propertyToDelete._id);
         try {
-            const res = await fetch(`/api/propertyDetails?id=${propertyToDelete._id}`, { method: "DELETE" });
+            const res = await fetch(`/api/property/propertyDetails?id=${propertyToDelete._id}`, { method: "DELETE" });
             const data = await res.json();
             if (data.success) {
                 toast.success("Property deleted successfully");
@@ -509,6 +537,7 @@ const AllProperties = ({ propertyTypes = [], locationType = [], subLocationType 
                                     <TableHead className="text-slate-600 font-semibold text-xs">Contact</TableHead>
                                     <TableHead className="text-center text-slate-600 font-semibold text-xs">Active</TableHead>
                                     <TableHead className="text-center text-slate-600 font-semibold text-xs">Trending</TableHead>
+                                    <TableHead className="text-center text-slate-600 font-semibold text-xs">Show On Front</TableHead>
                                     <TableHead className="text-center text-slate-600 font-semibold text-xs">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -516,6 +545,7 @@ const AllProperties = ({ propertyTypes = [], locationType = [], subLocationType 
                                 {properties.map((property, idx) => {
                                     const isTogglingActive = togglingId === property._id + "_active";
                                     const isTogglingTrending = togglingId === property._id + "_trending";
+                                    const isTogglingShowOnFront=togglingId===property._id+"_showOnFront";
                                     return (
                                         <TableRow key={property._id}
                                             className={`hover:bg-blue-50/40 transition-colors ${!property.isActive ? "opacity-60" : ""}`}>
@@ -577,6 +607,13 @@ const AllProperties = ({ propertyTypes = [], locationType = [], subLocationType 
                                                 <Switch checked={property.isTrending}
                                                     onCheckedChange={() => toggleTrending(property)}
                                                     disabled={isTogglingTrending}
+                                                    className="data-[state=checked]:bg-amber-500" />
+                                            </TableCell>
+                                            {/* Show on Front Page */}
+                                            <TableCell className="text-center">
+                                                <Switch checked={property.showOnFront || false}
+                                                    onCheckedChange={() => toggleShowOnFront(property)}
+                                                    disabled={isTogglingShowOnFront}
                                                     className="data-[state=checked]:bg-amber-500" />
                                             </TableCell>
                                             {/* Actions */}
@@ -654,6 +691,7 @@ const AllProperties = ({ propertyTypes = [], locationType = [], subLocationType 
                             property={selectedProperty}
                             onToggleActive={toggleActive}
                             onToggleTrending={toggleTrending}
+                            onToggleShowOnFront={toggleShowOnFront}
                             togglingId={togglingId}
                             formatPrice={formatPrice}
                             formatDate={formatDate}
@@ -691,7 +729,7 @@ const AllProperties = ({ propertyTypes = [], locationType = [], subLocationType 
 };
 
 // ─── Property View Modal ───────────────────────────────────────────────────────
-const PropertyViewModal = ({ property, onToggleActive, onToggleTrending, togglingId, formatPrice, formatDate }) => {
+const PropertyViewModal = ({ property, onToggleActive, onToggleTrending,onToggleShowOnFront, togglingId, formatPrice, formatDate }) => {
     const isTogglingActive = togglingId === property._id + "_active";
     const isTogglingTrending = togglingId === property._id + "_trending";
 
@@ -755,6 +793,14 @@ const PropertyViewModal = ({ property, onToggleActive, onToggleTrending, togglin
                             disabled={isTogglingTrending} className="data-[state=checked]:bg-amber-500" />
                         <span className={`text-xs font-semibold ${property.isTrending ? "text-amber-600" : "text-slate-400"}`}>
                             {property.isTrending ? "Yes" : "No"}
+                        </span>
+                    </div>
+                      <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-3 py-2 shadow-sm">
+                        <span className="text-xs font-medium text-slate-600">Show on Front Page</span>
+                        <Switch checked={property.showOnFront} onCheckedChange={() => onToggleShowOnFront(property)}
+                            disabled={isTogglingTrending} className="data-[state=checked]:bg-amber-500" />
+                        <span className={`text-xs font-semibold ${property.isTrending ? "text-amber-600" : "text-slate-400"}`}>
+                            {property.showOnFront ? "Yes" : "No"}
                         </span>
                     </div>
                     <div className="ml-auto text-xs text-slate-400 flex items-center gap-1">

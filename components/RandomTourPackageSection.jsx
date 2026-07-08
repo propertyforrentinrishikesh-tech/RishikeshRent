@@ -130,7 +130,7 @@ const RandomTourPackageSection = () => {
     }
   };
 
-  const sectionProducts = Array.isArray(products) ? products.slice(0, 6) : [];
+  const sectionProducts = Array.isArray(products) ? products.slice(0, 7) : [];
 
 
 

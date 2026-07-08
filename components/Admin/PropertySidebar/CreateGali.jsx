@@ -102,7 +102,7 @@ const CreateGali = ({
         ...formDataGali,
         id: editGali,
       };
-      const response = await fetch("/api/hotels/createGali", {
+      const response = await fetch("/api/property/createGali", {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -117,7 +117,7 @@ const CreateGali = ({
         setEditGali(null);
 
         // Refresh list and sync parent state
-        const updatedBanners = await fetch("/api/hotels/createGali").then((res) =>
+        const updatedBanners = await fetch("/api/property/createGali").then((res) =>
           res.json(),
         );
         setGalis(updatedBanners);
@@ -148,7 +148,7 @@ const CreateGali = ({
 
   const handleDeleteForGali = async (id) => {
     try {
-      const response = await fetch("/api/hotels/createGali", {
+      const response = await fetch("/api/property/createGali", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
@@ -160,7 +160,7 @@ const CreateGali = ({
         toast.success("Gali deleted successfully");
 
         // Update list and sync parent state
-        const updatedBanners = await fetch("/api/hotels/createGali").then((res) =>
+        const updatedBanners = await fetch("/api/property/createGali").then((res) =>
           res.json(),
         );
         setGalis(updatedBanners);
@@ -190,7 +190,7 @@ const CreateGali = ({
     );
 
     try {
-      const response = await fetch('/api/hotels/createGali', {
+      const response = await fetch('/api/property/createGali', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, isActive }),

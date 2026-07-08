@@ -6,16 +6,17 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Skeleton } from "./ui/skeleton";
 
-const AboutUsSection = () => {
+const AboutUsSection = ({ section = "frontend" }) => {
     const [featuredPackages, setFeaturedPackages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [loading1, setLoading1] = useState(true);
-    const [offerDetails, setOfferDetails] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+      const [offerDetails, setOfferDetails] = useState(null);
     const [bannerSection1st, setBannerSection1st] = useState([]);
+    // console.log(featuredPackages)
     const fetchPackages = async () => {
         try {
-            const response = await fetch('/api/featured-packages');
+            const response = await fetch(`/api/featured-packages?section=${section}`);
             const data = await response.json();
             // console.log(data);
             setFeaturedPackages(data.data || []); // Access the data property from the response
@@ -29,7 +30,7 @@ const AboutUsSection = () => {
     };
     const fetchBannerSection1st = async () => {
         try {
-            const response = await fetch('/api/bannerSection1st');
+            const response = await fetch(`/api/bannerSection1st?section=${section}`);
             const data = await response.json();
             // console.log(data);
             setBannerSection1st(data); // Use dummy data if API returns empty
@@ -45,14 +46,14 @@ const AboutUsSection = () => {
         fetchPackages();
         fetchBannerSection1st();
         fetch("/api/offerDetails")
-            .then(res => res.json())
-            .then(data => { if (data) setOfferDetails(data); })
-            .catch(() => { });
-    }, []);
+          .then(res => res.json())
+          .then(data => { if (data) setOfferDetails(data); })
+          .catch(() => { });
+    }, [section]);
     return (
         <>
             {featuredPackages.length > 0 && (
-                <section className="relative py-10 w-full px-5 overflow-hidden max-w-screen overflow-x-hidden">
+                <section className="relative w-full px-5 overflow-hidden max-w-screen overflow-x-hidden">
                     <div className="w-full">
                         <h2 className="font-bold text-2xl md:text-4xl text-center mt-7">Home Away From Home is Waiting.
                         </h2>
@@ -108,7 +109,7 @@ const AboutUsSection = () => {
                     </div>
                 </section>
             )}
-            <section className="w-full md:w-[95%] mx-auto py-4 space-y-3 px-3 sm:px-4 md:px-0">
+            <section className="w-full md:w-[95%] mx-auto space-y-3 px-3 sm:px-4 md:px-0">
                 {/* Banner 1 */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gradient-to-r from-[#fde8e2] via-[#fdf0ec] to-[#fef6f4] rounded-xl px-4 sm:px-5 py-4 shadow-sm border border-orange-100/60">
 

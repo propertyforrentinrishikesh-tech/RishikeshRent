@@ -123,7 +123,7 @@ const PropertyEnquiry = ({ locationType = [] }) => {
       if (filterStatus !== "all") params.set("status", filterStatus);
       if (filterLocation !== "all") params.set("locationType", filterLocation);
 
-      const res = await fetch(`/api/propertyEnquiry?${params.toString()}`);
+      const res = await fetch(`/api/property/propertyEnquiry?${params.toString()}`);
       const data = await res.json();
       if (data.success) {
         setEnquiries(data.data || []);
@@ -152,7 +152,7 @@ const PropertyEnquiry = ({ locationType = [] }) => {
   const updateStatus = async (enquiry, newStatus) => {
     setUpdatingId(enquiry._id);
     try {
-      const res = await fetch(`/api/propertyEnquiry?id=${enquiry._id}`, {
+      const res = await fetch(`/api/property/propertyEnquiry?id=${enquiry._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
@@ -175,7 +175,7 @@ const PropertyEnquiry = ({ locationType = [] }) => {
     if (!selectedEnquiry) return;
     setSavingNote(true);
     try {
-      const res = await fetch(`/api/propertyEnquiry?id=${selectedEnquiry._id}`, {
+      const res = await fetch(`/api/property/propertyEnquiry?id=${selectedEnquiry._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ adminNote: editingNote }),
@@ -197,7 +197,7 @@ const PropertyEnquiry = ({ locationType = [] }) => {
     if (!enquiryToDelete) return;
     setDeletingId(enquiryToDelete._id);
     try {
-      const res = await fetch(`/api/propertyEnquiry?id=${enquiryToDelete._id}`, { method: "DELETE" });
+      const res = await fetch(`/api/property/propertyEnquiry?id=${enquiryToDelete._id}`, { method: "DELETE" });
       const data = await res.json();
       if (data.success) {
         toast.success("Enquiry deleted");
@@ -281,7 +281,7 @@ const PropertyEnquiry = ({ locationType = [] }) => {
           <div className="relative sm:col-span-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
             <Input
-              placeholder="Name, phone, email, property..."
+              placeholder="phone, email, property..."
               onChange={(e) => handleSearchInput(e.target.value)}
               className="pl-8 h-9 text-sm border-slate-200"
             />
@@ -342,7 +342,6 @@ const PropertyEnquiry = ({ locationType = [] }) => {
               <TableHeader>
                 <TableRow className="bg-slate-50 hover:bg-slate-50">
                   <TableHead className="text-slate-600 font-bold text-xs w-12 text-center">S.No</TableHead>
-                  <TableHead className="text-slate-600 font-bold text-xs">Name</TableHead>
                   <TableHead className="text-slate-600 font-bold text-xs">Contact</TableHead>
                   <TableHead className="text-slate-600 font-bold text-xs">Property</TableHead>
                   <TableHead className="text-slate-600 font-bold text-xs">Location</TableHead>
@@ -367,21 +366,7 @@ const PropertyEnquiry = ({ locationType = [] }) => {
                           {(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}
                         </span>
                       </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
-                            {enquiry.name?.charAt(0)?.toUpperCase() || "?"}
-                          </div>
-                          <div>
-                            <p className="text-sm font-semibold text-slate-800">{enquiry.name}</p>
-                            {enquiry.email && (
-                              <p className="text-[10px] text-slate-400 flex items-center gap-0.5">
-                                <Mail className="w-2.5 h-2.5" />{enquiry.email}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </TableCell>
+                      
                       <TableCell>
                         <a href={`tel:${enquiry.phone}`}
                           className="flex items-center gap-1.5 text-sm font-medium text-blue-700 hover:text-blue-900 transition-colors">
@@ -663,8 +648,8 @@ const InfoRow = ({ label, value }) => {
 const EnquirySkeleton = () => (
   <div>
     <div className="h-10 bg-slate-50 border-b border-slate-200" />
-    {Array.from({ length: 8 }).map((_, i) => (
-      <div key={i} className="flex items-center gap-4 px-4 py-3.5 border-b border-slate-100">
+    {Array.from({ length: 6 }).map((_, i) => (
+      <div key={i} className="flex items-center gap-2 px-4 py-3.5 border-b border-slate-100">
         <div className="w-7 h-7 rounded-full bg-slate-200 animate-pulse" />
         <div className="flex items-center gap-2 flex-1">
           <div className="w-8 h-8 rounded-full bg-slate-200 animate-pulse" />
@@ -678,10 +663,6 @@ const EnquirySkeleton = () => (
         <div className="h-3.5 bg-slate-200 rounded animate-pulse w-20" />
         <div className="h-3.5 bg-slate-200 rounded animate-pulse w-20" />
         <div className="h-7 bg-slate-200 rounded-lg animate-pulse w-28" />
-        <div className="flex gap-1.5">
-          <div className="w-7 h-7 rounded-lg bg-slate-200 animate-pulse" />
-          <div className="w-7 h-7 rounded-lg bg-slate-200 animate-pulse" />
-        </div>
       </div>
     ))}
   </div>

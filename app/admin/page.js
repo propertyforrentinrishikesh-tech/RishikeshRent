@@ -67,61 +67,61 @@ const Page = () => {
       hoverBgColor: "hover:bg-orange-600"
     },
     {
-      title: "Hotel Business",
+      title: "Hostel",
       icon: (
         <div className="h-16 w-16 mb-2 relative">
           <Image
             src="/Hotel.png"
-            alt="Hotel Business"
+            alt="Hostel"
             fill
             className="object-cover rounded-full"
           />
         </div>
       ),
-      description: "Manage hotel listings",
-      link: "/admin/hotel_extranet",
-      count: counts.propertyRegistrations,
+      description: "Manage Hostel listings",
+      link: "/admin/hostel_extranet",
+      count: "0",
       bgColor: "bg-blue-500",
       hoverBgColor: "hover:bg-blue-600"
     },
-    {
-      title: "Pilgrimage",
-      icon: (
-        <div className="h-16 w-16 mb-2 relative">
-          <Image
-            src="/Pilgrimage.jpg"
-            alt="Pilgrimage"
-            fill
-            className="object-cover rounded-full"
-          />
-        </div>
-      ),
-      description: "Manage pilgrimage services",
-      link: "#",
-      // link: "/admin/pilgrimage_dashboard",
-      count: 0,
-      bgColor: "bg-sky-500",
-      hoverBgColor: "hover:bg-sky-600"
-    },
-    {
-      title: "Food Chain",
-      icon: (
-        <div className="h-16 w-16 mb-2 relative">
-          <Image
-            src="/FoodChain.jpg"
-            alt="Food Chain"
-            fill
-            className="object-cover rounded-full"
-          />
-        </div>
-      ),
-      description: "Manage food services",
-      link: "#",
-      // link: "/admin/food_chain_dashboard",
-      count: 0,
-      bgColor: "bg-purple-500",
-      hoverBgColor: "hover:bg-purple-600"
-    }
+    // {
+    //   title: "Pilgrimage",
+    //   icon: (
+    //     <div className="h-16 w-16 mb-2 relative">
+    //       <Image
+    //         src="/Pilgrimage.jpg"
+    //         alt="Pilgrimage"
+    //         fill
+    //         className="object-cover rounded-full"
+    //       />
+    //     </div>
+    //   ),
+    //   description: "Manage pilgrimage services",
+    //   link: "#",
+    //   // link: "/admin/pilgrimage_dashboard",
+    //   count: 0,
+    //   bgColor: "bg-sky-500",
+    //   hoverBgColor: "hover:bg-sky-600"
+    // },
+    // {
+    //   title: "Food Chain",
+    //   icon: (
+    //     <div className="h-16 w-16 mb-2 relative">
+    //       <Image
+    //         src="/FoodChain.jpg"
+    //         alt="Food Chain"
+    //         fill
+    //         className="object-cover rounded-full"
+    //       />
+    //     </div>
+    //   ),
+    //   description: "Manage food services",
+    //   link: "#",
+    //   // link: "/admin/food_chain_dashboard",
+    //   count: 0,
+    //   bgColor: "bg-purple-500",
+    //   hoverBgColor: "hover:bg-purple-600"
+    // }
   ];
 
   return (

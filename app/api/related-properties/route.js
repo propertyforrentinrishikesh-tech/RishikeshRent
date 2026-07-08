@@ -1,6 +1,6 @@
 
 import connectDB from "@/lib/connectDB";
-import PropertyDetailsModel from "@/models/PropertyDetails";
+import PropertyDetailsModel from "@/models/Property/PropertyDetails";
 import { NextResponse } from "next/server";
 
 export async function GET(request) {

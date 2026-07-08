@@ -7,7 +7,7 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Plus, X, Upload } from "lucide-react";
+import { Plus, X, Upload, RefreshCw } from "lucide-react";
 import Image from "next/image";
 import { Trash2, Edit } from 'lucide-react';
 import { Switch } from "@/components/ui/switch";
@@ -15,7 +15,6 @@ import { useRef } from 'react';
 import toast from 'react-hot-toast';
 import { Checkbox } from "@/components/ui/checkbox"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import PhoneOTPVerification from '@/components/PhoneOTPVerification';
 import EmailOTPVerification from '@/components/EmailOTPVerification';
 import DeclarationForm from '@/components/DeclarationForm';
 // import MSG91OTPVerification from '@/components/MSG91OTPVerification'; // Commented out for testing
@@ -56,6 +55,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
     const [isVerificationMethodModalOpen, setIsVerificationMethodModalOpen] = useState(false);
     const [verificationMethod, setVerificationMethod] = useState(''); // 'mobile' or 'email'
     const [showDeclarationForm, setShowDeclarationForm] = useState(false);
+    const [deletingId, setDeletingId] = useState(null);
     const [formData, setFormData] = useState({
         propertyType: "",
         mainImage: { url: "", key: "", loading: false },
@@ -93,6 +93,10 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
         securityDeposit: { required: null, amount: '', months: '' },
         maintenanceCharges: { required: null, amount: '', basis: '' },
         // New detailed property information fields
+        propertyStyle: "",
+        propertyStyleOption: "",
+        bedSize: "",
+        apartmentSize: "",
         tenantType: "",
         sizeInFeet: "",
         sizeInMeter: "",
@@ -222,9 +226,29 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
             />
         </div>
     )
+    const normalizeSelectValue = (value) => (value || '').toString().trim().toLowerCase();
+
+    const getCanonicalSubLocationValue = (value, selectedLocationType = '') => {
+        const normalizedValue = normalizeSelectValue(value);
+        const match = subLocationType.find(item =>
+            normalizeSelectValue(item.locationType) === normalizeSelectValue(selectedLocationType) &&
+            normalizeSelectValue(item.subLocationType) === normalizedValue
+        );
+        return match?.subLocationType || (value || '');
+    };
+
+    const getCanonicalGaliValue = (value, selectedLocationType = '', selectedSubLocationType = '') => {
+        const normalizedValue = normalizeSelectValue(value);
+        const match = galiType.find(item =>
+            normalizeSelectValue(item.locationType) === normalizeSelectValue(selectedLocationType) &&
+            normalizeSelectValue(item.subLocationType) === normalizeSelectValue(selectedSubLocationType) &&
+            normalizeSelectValue(item.galiName) === normalizedValue
+        );
+        return match?.galiName || (value || '');
+    };
     const fetchPropertyDetails = async () => {
         try {
-            const response = await fetch("/api/propertyDetails?limit=10");
+            const response = await fetch("/api/property/propertyDetails?limit=10");
             const data = await response.json();
             setPropertyDetails(data.data);
         } catch (error) {
@@ -266,7 +290,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
     // Update property status
     const updatePropertyStatus = async (id, updates) => {
         try {
-            const response = await fetch(`/api/createPropertyDetails?id=${id}`, {
+            const response = await fetch(`/api/property/propertyDetails?id=${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -891,6 +915,13 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 throw new Error('Location type is required');
             }
 
+            if (
+                (formData.propertyStyle === 'hostel_pg_style_only' || formData.propertyStyle === 'apartment_pg_only') &&
+                !formData.propertyStyleOption
+            ) {
+                throw new Error('Please select a property style option');
+            }
+
             // 4. Main Image Validation
             if (!formData.mainImage?.url) {
                 throw new Error('Main image is required');
@@ -959,6 +990,11 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 maxRentPrice: formData.maxRentPrice ? Number(formData.maxRentPrice) : undefined,
                 numberOfRooms: Number(formData.numberOfRooms) || 0,
                 numberOfBathrooms: Number(formData.numberOfBathrooms) || 0,
+                propertyStyleOption: formData.propertyStyle === 'hostel_pg_style_only' || formData.propertyStyle === 'apartment_pg_only'
+                    ? formData.propertyStyleOption
+                    : '',
+                bedSize: formData.propertyStyle === 'hostel_pg_style_only' ? formData.bedSize : '',
+                apartmentSize: formData.propertyStyle === 'apartment_pg_only' ? formData.apartmentSize : '',
                 // Add signature data if provided from declaration form
                 ...(signatureData && {
                     signatureUrl: signatureData.signatureUrl,
@@ -973,7 +1009,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
             let response;
             if (editingProperty) {
                 // Update existing property
-                response = await fetch(`/api/propertyDetails?id=${editingProperty._id}`, {
+                response = await fetch(`/api/property/propertyDetails?id=${editingProperty._id}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -982,7 +1018,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 });
             } else {
                 // Create new property
-                response = await fetch('/api/propertyDetails', {
+                response = await fetch('/api/property/propertyDetails', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1058,6 +1094,10 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
             securityDeposit: { required: null, amount: '', months: '' },
             maintenanceCharges: { required: null, amount: '', basis: '' },
             // New detailed property information fields
+            propertyStyle: "",
+            propertyStyleOption: "",
+            bedSize: "",
+            apartmentSize: "",
             tenantType: "",
             sizeInFeet: "",
             sizeInMeter: "",
@@ -1191,8 +1231,8 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
             electricityBillImage: property.electricityBillImage || { url: "", key: "", loading: false },
             video: videoData,
             locationType: property.locationType || "",
-            subLocationType: property.subLocationType || "",
-            galiType: property.galiType || "",
+            subLocationType: getCanonicalSubLocationValue(property.subLocationType, property.locationType),
+            galiType: getCanonicalGaliValue(property.galiType, property.locationType, property.subLocationType),
             contactAddress: property.contactAddress || "",
             landMarkDetails: property.landMarkDetails || "",
             googleLocation: property.googleLocation || "",
@@ -1219,6 +1259,10 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
             isActive: property.isActive !== undefined ? property.isActive : true,
             propertyNameSlug: property.propertyNameSlug || "",
             // New detailed property information fields
+            propertyStyle: property.propertyStyle || "",
+            propertyStyleOption: property.propertyStyleOption || "",
+            bedSize: property.bedSize || "",
+            apartmentSize: property.apartmentSize || "",
             tenantType: property.tenantType || "",
             sizeInFeet: property.sizeInFeet || "",
             sizeInMeter: property.sizeInMeter || "",
@@ -1323,9 +1367,10 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
 
     const confirmDelete = async () => {
         if (!propertyToDelete) return;
+        setDeletingId(propertyToDelete._id);
 
         try {
-            const response = await fetch(`/api/propertyDetails?id=${propertyToDelete._id}`, {
+            const response = await fetch(`/api/property/propertyDetails?id=${propertyToDelete._id}`, {
                 method: 'DELETE',
             });
 
@@ -1344,6 +1389,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
         } finally {
             setIsDeleteDialogOpen(false);
             setPropertyToDelete(null);
+            setDeletingId(null);
         }
     };
     return (
@@ -1426,9 +1472,17 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                             <SelectValue placeholder={formData.locationType ? "Select sub location" : "Select location first"} />
                         </SelectTrigger>
                         <SelectContent>
+                            {formData.subLocationType && !subLocationType.some(sub =>
+                                normalizeSelectValue(sub.locationType) === normalizeSelectValue(formData.locationType) &&
+                                normalizeSelectValue(sub.subLocationType) === normalizeSelectValue(formData.subLocationType)
+                            ) && (
+                                    <SelectItem value={formData.subLocationType} className="hidden">
+                                        {formData.subLocationType}
+                                    </SelectItem>
+                                )}
                             {subLocationType
                                 .filter(sub =>
-                                    sub.locationType === formData.locationType &&
+                                    normalizeSelectValue(sub.locationType) === normalizeSelectValue(formData.locationType) &&
                                     sub.subLocationType?.trim() !== ""
                                 )
                                 .map((location, index) => (
@@ -1451,10 +1505,19 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                             <SelectValue placeholder={formData.subLocationType ? "Select gali location" : "Select sub location first"} />
                         </SelectTrigger>
                         <SelectContent>
+                            {formData.galiType && !galiType.some(gali =>
+                                normalizeSelectValue(gali.locationType) === normalizeSelectValue(formData.locationType) &&
+                                normalizeSelectValue(gali.subLocationType) === normalizeSelectValue(formData.subLocationType) &&
+                                normalizeSelectValue(gali.galiName) === normalizeSelectValue(formData.galiType)
+                            ) && (
+                                    <SelectItem value={formData.galiType} className="hidden">
+                                        {formData.galiType}
+                                    </SelectItem>
+                                )}
                             {galiType
                                 .filter(gali =>
-                                    gali.locationType === formData.locationType &&
-                                    gali.subLocationType === formData.subLocationType &&
+                                    normalizeSelectValue(gali.locationType) === normalizeSelectValue(formData.locationType) &&
+                                    normalizeSelectValue(gali.subLocationType) === normalizeSelectValue(formData.subLocationType) &&
                                     gali.galiName?.trim() !== ""
                                 )
                                 .map((location, index) => (
@@ -1857,6 +1920,104 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
 
                     </div>
 
+                    {/* ============= SECTION 8: PROPERTY STYLE ============= */}
+                    <div className="border-t border-b border-gray-400 p-4 space-y-4">
+                        <h3 className="text-lg font-semibold mb-4">Property Style</h3>
+                        <div className="space-y-2">
+                            <Label>Select Property Style</Label>
+                            <Select
+                                value={formData.propertyStyle}
+                                onValueChange={(value) => setFormData(prev => ({
+                                    ...prev,
+                                    propertyStyle: value,
+                                    propertyStyleOption: value === prev.propertyStyle ? prev.propertyStyleOption : '',
+                                    bedSize: value === 'hostel_pg_style_only' ? prev.bedSize : '',
+                                    apartmentSize: value === 'apartment_pg_only' ? prev.apartmentSize : ''
+                                }))}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select here" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="room_style_only">Room Style Only</SelectItem>
+                                    <SelectItem value="home_style_only">Home Style Only</SelectItem>
+                                    <SelectItem value="hostel_pg_style_only">Hostel / PG Style Only</SelectItem>
+                                    <SelectItem value="apartment_pg_only">Apartment / PG Only</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        {formData.propertyStyle === 'hostel_pg_style_only' && (
+                            <div className="space-y-2">
+                                <Label>Select Bed</Label>
+                                <Select
+                                    value={formData.propertyStyleOption}
+                                    onValueChange={(value) => setFormData(prev => ({ ...prev, propertyStyleOption: value }))}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select Bed" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="double_bed_room">Double Bed Room</SelectItem>
+                                        <SelectItem value="single_bed_room">1 Single Bed Room</SelectItem>
+                                        <SelectItem value="2_bed_twin_room">2 Bed Twin Room</SelectItem>
+                                        <SelectItem value="3_bed_twin_room">3 Bed Twin Room</SelectItem>
+                                        <SelectItem value="4_bed_twin_room">4 Bed Twin Room</SelectItem>
+                                        <SelectItem value="5_bed_twin_room">5 Bed Twin Room</SelectItem>
+                                        <SelectItem value="6_bed_twin_room">6 Bed Twin Room</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
+
+                        {formData.propertyStyle === 'apartment_pg_only' && (
+                            <div className="space-y-2">
+                                <Label>Select Apartment</Label>
+                                <Select
+                                    value={formData.propertyStyleOption}
+                                    onValueChange={(value) => setFormData(prev => ({ ...prev, propertyStyleOption: value }))}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select Apartment" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="1_bhk_apartment">1 BHK Apartment</SelectItem>
+                                        <SelectItem value="2_bhk_apartment">2 BHK Apartment</SelectItem>
+                                        <SelectItem value="3_bhk_apartment">3 BHK Apartment</SelectItem>
+                                        <SelectItem value="4_bhk_apartment">4 BHK Apartment</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="flex flex-col md:flex-row items-center gap-5 w-full">
+                        <div className="w-full">
+                            <Label>Minimum Rent Amount</Label>
+                            <Input
+                                className="bg-white border border-black rounded-md p-2"
+                                name="rentPrice"
+                                type="number"
+                                value={formData.rentPrice}
+                                onChange={handleChange}
+                                placeholder="Enter Minimum Rent Price"
+                            />
+                        </div>
+                        <div className="w-full">
+                            <Label>Maximum Rent Amount</Label>
+                            <Input
+                                className="bg-white border border-black rounded-md p-2"
+                                name="maxRentPrice"
+                                type="number"
+                                value={formData.maxRentPrice}
+                                onChange={handleChange}
+                                placeholder="Enter Maximum Rent Price"
+                            />
+                        </div>
+                    </div>
+
+
+
                     <div className="flex flex-col xl:flex-row items-start xl:items-center gap-4">
 
                         <div className="w-full">
@@ -2097,32 +2258,8 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                                 </button>
                             </div>
                         )}
-                        <p className="text-sm text-gray-500"> To Finalize your property listing on www.rishikeshrent.com, providing a copy fo Electiricty Bill is a critical step. While your Sale Deed proves you bougt the house, the Electricity Bill proves you are in active possession of it.</p>
+                        <p className="text-sm text-gray-500"> To Finalize your property listing on www.kagpremiumhomes.com, providing a copy fo Electiricty Bill is a critical step. While your Sale Deed proves you bougt the house, the Electricity Bill proves you are in active possession of it.</p>
 
-                    </div>
-                </div>
-                <div className="flex flex-col md:flex-row items-center gap-5 w-full">
-                    <div className="w-full">
-                        <Label>Minimum Rent Amount</Label>
-                        <Input
-                            className="bg-white border border-black rounded-md p-2"
-                            name="rentPrice"
-                            type="number"
-                            value={formData.rentPrice}
-                            onChange={handleChange}
-                            placeholder="Enter Minimum Rent Price"
-                        />
-                    </div>
-                    <div className="w-full">
-                        <Label>Maximum Rent Amount</Label>
-                        <Input
-                            className="bg-white border border-black rounded-md p-2"
-                            name="maxRentPrice"
-                            type="number"
-                            value={formData.maxRentPrice}
-                            onChange={handleChange}
-                            placeholder="Enter Maximum Rent Price"
-                        />
                     </div>
                 </div>
                 {/* Electricity Charges */}
@@ -2652,6 +2789,8 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                         </div>
                     )}
                 </div>
+
+
 
                 {/* PowerBackUp Facility */}
                 <div className="rounded-xl p-2 space-y-2">
@@ -4081,7 +4220,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                     </div>
                 </div>
 
-                {/* ============= SECTION 8: ROOM STYLE ============= */}
+                {/* ============= SECTION 9: ROOM STYLE ============= */}
                 <div className="border border-gray-300 rounded-lg p-6 space-y-4">
                     <h3 className="text-lg font-semibold mb-4">Room Style</h3>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -4443,17 +4582,21 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                                     onValueChange={(value) => setFormData(prev => ({ ...prev, priorNoticeTime: value }))}
                                 >
                                     <SelectTrigger className="bg-white">
-                                        <SelectValue placeholder="Select time or days" />
+                                        <SelectValue placeholder="Select Months" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="1_hour">1 Hour</SelectItem>
-                                        <SelectItem value="2_hours">2 Hours</SelectItem>
-                                        <SelectItem value="6_hours">6 Hours</SelectItem>
-                                        <SelectItem value="12_hours">12 Hours</SelectItem>
-                                        <SelectItem value="1_day">1 Day</SelectItem>
-                                        <SelectItem value="2_days">2 Days</SelectItem>
-                                        <SelectItem value="3_days">3 Days</SelectItem>
-                                        <SelectItem value="1_week">1 Week</SelectItem>
+                                        <SelectItem value="1_months">1 Month</SelectItem>
+                                        <SelectItem value="2_months">2 Months</SelectItem>
+                                        <SelectItem value="3_months">3 Months</SelectItem>
+                                        <SelectItem value="4_months">4 Months</SelectItem>
+                                        <SelectItem value="5_months">5 Months</SelectItem>
+                                        <SelectItem value="6_months">6 Months</SelectItem>
+                                        <SelectItem value="7_months">7 Months</SelectItem>
+                                        <SelectItem value="8_months">8 Months</SelectItem>
+                                        <SelectItem value="9_months">9 Months</SelectItem>
+                                        <SelectItem value="10_months">10 Months</SelectItem>
+                                        <SelectItem value="11_months">11 Months</SelectItem>
+                                        <SelectItem value="12_months">12 Months</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -4500,9 +4643,9 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
 
                     <div className="flex flex-col md:flex-row gap-4 w-full">
                         <Button
-                            type="button"
+                            type={editingProperty ? 'submit' : 'button'}
                             className="flex-1 text-lg bg-blue-600 hover:bg-blue-700"
-                            onClick={() => {
+                            onClick={!editingProperty ? () => {
                                 // Validate that broker contact number OR email is entered
                                 const hasValidPhone = formData.contactNumbers && formData.contactNumbers[0] && formData.contactNumbers[0].length === 10;
                                 const hasValidEmail = formData.emailAddresses && formData.emailAddresses[0] && formData.emailAddresses[0].includes('@');
@@ -4514,9 +4657,9 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
 
                                 // Open verification method selection modal
                                 setIsVerificationMethodModalOpen(true);
-                            }}
+                            } : undefined}
                         >
-                            {editingProperty ? 'Update Property (Get OTP)' : 'Get OTP For Final Approval'}
+                            {editingProperty ? 'Update Property' : 'Get OTP For Final Approval'}
                         </Button>
 
                         {editingProperty && (
@@ -4593,11 +4736,11 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                                             />
                                         </div>
                                     </TableCell>
-                                    <TableCell className="text-center border border-black">
+                                    <TableCell className="text-center gap-2">
                                         <Button
                                             variant="outline"
                                             size="icon"
-                                            className="text-blue-600 hover:bg-blue-50 px-10 py-2 border"
+                                            className="text-blue-600 hover:bg-blue-50 px-8 py-2 border"
                                             onClick={() => handleEdit(property)}
                                         >
                                             <Edit className="h-4 w-4" />
@@ -4606,11 +4749,14 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                                         <Button
                                             variant="destructive"
                                             size="icon"
-                                            className="text-white hover:bg-red-50 ml-2 px-10 py-2 border"
+                                            className="text-white hover:bg-red-600 ml-2 px-10 py-2 border mt-2"
                                             onClick={() => handleDelete(property._id)}
                                         >
                                             <Trash2 className="h-4 w-4" />
-                                            Delete
+
+                                            {deletingId ? (
+                                                <span className="flex items-center gap-2"><RefreshCw className="w-4 h-4 animate-spin" /> Deleting...</span>
+                                            ) : "Delete"}
                                         </Button>
                                     </TableCell>
                                 </TableRow>
@@ -5153,37 +5299,10 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="grid grid-cols-2 gap-4 py-4">
-                        {/* Mobile OTP Option */}
+                    <div className="flex justify-center py-4">
                         <Button
                             variant="outline"
-                            className="h-32 flex flex-col items-center justify-center gap-3 hover:bg-blue-50 hover:border-blue-500 transition-all"
-                            onClick={() => {
-                                if (!formData.contactNumbers || !formData.contactNumbers[0] || formData.contactNumbers[0].length !== 10) {
-                                    toast.error('Please enter a valid 10-digit contact number first!');
-                                    return;
-                                }
-                                setVerificationMethod('mobile');
-                                setIsVerificationMethodModalOpen(false);
-                                setIsOTPModalOpen(true);
-                            }}
-                            disabled={!formData.contactNumbers || !formData.contactNumbers[0] || formData.contactNumbers[0].length !== 10}
-                        >
-                            <svg className="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                            </svg>
-                            <div className="text-center">
-                                <div className="font-semibold">Mobile OTP</div>
-                                <div className="text-xs text-gray-500">
-                                    {formData.contactNumbers?.[0] ? `+91 ${formData.contactNumbers[0]}` : 'No number entered'}
-                                </div>
-                            </div>
-                        </Button>
-
-                        {/* Email OTP Option */}
-                        <Button
-                            variant="outline"
-                            className="h-32 flex flex-col items-center justify-center gap-3 hover:bg-green-50 hover:border-green-500 transition-all"
+                            className="h-32 w-full max-w-sm flex flex-col items-center justify-center gap-3 hover:bg-green-50 hover:border-green-500 transition-all"
                             onClick={() => {
                                 if (!formData.emailAddresses || !formData.emailAddresses[0] || !formData.emailAddresses[0].includes('@')) {
                                     toast.error('Please enter a valid email address first!');
@@ -5208,7 +5327,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                     </div>
 
                     <div className="text-xs text-center text-gray-500">
-                        OTP will be sent to your selected method for verification
+                        OTP will be sent to your email address for verification
                     </div>
                 </DialogContent>
             </Dialog>
@@ -5218,28 +5337,14 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle>
-                            {verificationMethod === 'mobile' ? 'Verify Phone Number' : 'Verify Email Address'}
+                            Verify Email Address
                         </DialogTitle>
                         <DialogDescription>
-                            {verificationMethod === 'mobile'
-                                ? 'An OTP will be sent to your mobile number for verification.'
-                                : 'An OTP will be sent to your email address for verification.'}
+                            An OTP will be sent to your email address for verification.
                         </DialogDescription>
                     </DialogHeader>
 
-                    {verificationMethod === 'mobile' ? (
-                        <PhoneOTPVerification
-                            phoneNumber={formData.contactNumbers?.[0] || ''}
-                            onVerificationSuccess={(userData) => {
-                                toast.success('Phone number verified successfully!');
-                                setIsOTPModalOpen(false);
-                                setVerificationMethod('');
-
-                                // Show declaration form after verification
-                                setShowDeclarationForm(true);
-                            }}
-                        />
-                    ) : verificationMethod === 'email' ? (
+                    {verificationMethod === 'email' ? (
                         <EmailOTPVerification
                             email={formData.emailAddresses?.[0] || ''}
                             onVerificationSuccess={(userData) => {

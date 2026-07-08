@@ -35,7 +35,7 @@ export default function PartnerRegister() {
                 setCountdown((prev) => prev - 1);
             }, 1000);
         } else if (countdown === 0 && success && success.includes('Registration successful')) {
-            router.push('/partner/property_registration');
+            router.push('/partner/hostel_registration');
         }
         return () => clearInterval(timer);
     }, [countdown, success, router]);
@@ -137,7 +137,7 @@ export default function PartnerRegister() {
         <div className="min-h-[50vh] flex w-[80%] mx-auto">
             {/* Left Side - Illustration */}
             <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-2 ">
-                <div className="relative w-full max-w-2xl">
+                <div className="relative w-full max-w-2xl my-5">
                     {/* Header Text */}
                     <div className="text-center">
                         <h1 className="text-xl font-bold text-gray-900 mb-4">Your Properties With Us</h1>
@@ -331,15 +331,6 @@ export default function PartnerRegister() {
                             </form>
                         )}
 
-                        {/* Already have account */}
-                        <div className="text-center pt-2 border-t border-gray-200">
-                            <p className="text-gray-600">
-                                Already have an account?{' '}
-                                <Link href="/partner/login" className="text-blue-600 hover:text-blue-700 font-bold">
-                                    Sign In
-                                </Link>
-                            </p>
-                        </div>
                     </div>
                 </div>
             </div>

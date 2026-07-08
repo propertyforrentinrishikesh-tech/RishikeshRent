@@ -15,7 +15,7 @@ import { CalendarClock, MapPin, Search, Sparkle, X } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import Link from "next/link";
 
-const HeroSection = () => {
+const HeroSection = ({ section = "frontend" }) => {
   const [banners, setBanners] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [desktopApi, setDesktopApi] = useState();
@@ -23,13 +23,11 @@ const HeroSection = () => {
   const [mobileApi, setMobileApi] = useState(null);
   const [mobileSelectedIndex, setMobileSelectedIndex] = useState(0);
   const plugin = useRef(Autoplay({ delay: 5000, stopOnInteraction: false }));
-
-
-
+// console.log(section,banners)
   useEffect(() => {
     const fetchBanners = async () => {
       try {
-        const response = await fetch("/api/addBanner");
+        const response = await fetch(`/api/addBanner?section=${section}`);
         const data = await response.json();
         setBanners(data);
       } catch (error) {
@@ -39,7 +37,7 @@ const HeroSection = () => {
       }
     };
     fetchBanners();
-  }, []);
+  }, [section]);
 
   // Desktop carousel effect
   useEffect(() => {
@@ -106,6 +104,7 @@ if(banners.length === 0){
     </section>
   );
 }
+
   if (isLoading) {
     return (
       <section className="relative h-[100px] md:h-[430px] w-full overflow-hidden z-[160]">

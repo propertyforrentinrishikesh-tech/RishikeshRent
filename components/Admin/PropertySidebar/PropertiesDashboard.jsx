@@ -14,10 +14,9 @@ import AllProperties from "@/components/Admin/PropertySidebar/AllProperties";
 import TotalPropertyType from "@/components/Admin/PropertySidebar/TotalPropertyType";
 import SearchProperty from "@/components/Admin/PropertySidebar/SearchProperty";
 import PropertyEnquiry from "@/components/Admin/PropertySidebar/PropertyEnquiry";
-
+import PropertyDetailEnquiry from "@/components/Admin/PropertySidebar/PropertyDetailEnquiry";
 const PropertiesDashboard = () => {
   const [loading, setLoading] = useState(true);
-
   const [propertyTypes, setPropertyTypes] = useState([]);
   const [locationType, setLocationType] = useState([]);
   const [subLocationType, setSubLocationType] = useState([]);
@@ -39,10 +38,10 @@ const PropertiesDashboard = () => {
           subLocResponse,
           galiResponse,
         ] = await Promise.all([
-          fetch("/api/hotels/propertyType"),
-          fetch("/api/hotels/createLocation"),
-          fetch("/api/hotels/createSubLocation"),
-          fetch("/api/hotels/createGali"),
+          fetch("/api/property/propertyType"),
+          fetch("/api/property/createLocation"),
+          fetch("/api/property/createSubLocation"),
+          fetch("/api/property/createGali"),
         ]);
 
         const [
@@ -132,7 +131,7 @@ const PropertiesDashboard = () => {
         },
         {
           key: "available",
-          label: "Total Property Type",
+          label: "All Property",
           component: () => <TotalPropertyType {...sharedProps} />,
         },
         {
@@ -144,6 +143,10 @@ const PropertiesDashboard = () => {
           key: "enquiry",
           label: "Property Enquiry",
           component: () => <PropertyEnquiry {...sharedProps} />,
+        }, {
+          key: "detail_enquiry",
+          label: "Property Detail Enquiry",
+          component: () => <PropertyDetailEnquiry {...sharedProps} />,
         },
       ],
     },
@@ -200,8 +203,8 @@ const PropertiesDashboard = () => {
 
       {/* ================= SIDEBAR ================= */}
       <div className={`
-        fixed inset-y-0 left-0 z-50 w-[280px] bg-gray-100 h-full shadow-2xl transform transition-transform duration-300 ease-in-out
-        md:relative md:translate-x-0 md:w-[260px] md:shadow-none md:bg-gray-200 md:h-auto md:min-h-full
+        fixed inset-y-0 left-0 z-50 w-[200px] bg-gray-100 shadow-2xl transform transition-transform duration-300 ease-in-out
+        md:relative md:translate-x-0 md:w-[240px] md:shadow-none md:bg-gray-200 md:h-auto md:min-h-full
         ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
       `}>
 
@@ -216,7 +219,7 @@ const PropertiesDashboard = () => {
           </button>
         </div>
 
-        <div className="p-3 flex flex-col gap-3 overflow-y-auto h-full max-h-[calc(100vh-60px)] md:max-h-none md:h-auto">
+        <div className="p-2 flex flex-col gap-3 overflow-y-auto h-full max-h-[calc(100vh-60px)] md:max-h-none md:h-auto">
           {sectionConfig.map(section => (
             <div key={section.key}>
 
@@ -230,7 +233,7 @@ const PropertiesDashboard = () => {
                 className={`w-full text-left px-4 py-3 rounded-xl font-semibold transition
                 ${activeParent === section.key
                     ? "bg-blue-600 text-white shadow-md shadow-blue-200"
-                    : "bg-white md:bg-blue-100/50 hover:bg-blue-200 text-slate-700"
+                    : "bg-white border border-black md:bg-blue-100/50 hover:bg-blue-200 text-slate-700"
                   }`}
               >
                 {section.label}
@@ -247,10 +250,10 @@ const PropertiesDashboard = () => {
                         setActiveChild(child.key);
                         setIsSidebarOpen(false);
                       }}
-                      className={`text-left px-3 py-2.5 rounded-lg text-sm font-medium transition
+                      className={`text-left px-3 py-2.5 rounded-lg text-sm font-bold transition
                       ${activeChild === child.key
                           ? "bg-green-600 text-white shadow-sm"
-                          : "bg-white md:bg-green-100/50 hover:bg-green-200 text-slate-600 hover:text-slate-900"
+                          : "bg-white border border-black md:bg-green-100/50 hover:bg-green-200 font-bold hover:text-slate-900"
                         }`}
                     >
                       {child.label}

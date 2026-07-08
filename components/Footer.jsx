@@ -1,19 +1,31 @@
-'use client'
-
-import { Handshake, Phone, Send, MapPin } from "lucide-react"
+"use client"
+import {
+    Users,
+    BriefcaseBusiness,
+    Globe2,
+} from "lucide-react";
+import { Facebook, Instagram, MapPin, Youtube } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from "react"
-import { Card, CardContent, CardFooter } from "./ui/card"
 import Image from "next/image"
-import { Input } from "./ui/input"
-import { Button } from "./ui/button"
 import toast from "react-hot-toast"
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "./ui/accordion"
-import CurrentYear from './CurrentYear';
-const Footer = () => {
+import CountUp from "react-countup";
+import { useInView } from "react-intersection-observer";
+const Footer = ({ companyBasicInfo = null }) => {
     const pathName = usePathname()
     const [pages, setPages] = useState([])
+    const companyName = companyBasicInfo?.companyName || 'Kag Premium Homes'
+    const footerLogoSrc = companyBasicInfo?.footerLogo?.url || companyBasicInfo?.mainLogo?.url || '/HeaderLogo.png'
+    const contactNumbers = Array.isArray(companyBasicInfo?.contactNumbers) ? companyBasicInfo.contactNumbers.filter(Boolean) : []
+    const emails = Array.isArray(companyBasicInfo?.emails) ? companyBasicInfo.emails.filter(Boolean) : []
+    const officeAddresses = Array.isArray(companyBasicInfo?.officeAddresses) ? companyBasicInfo.officeAddresses.filter(Boolean) : []
+    const socialLinks = [
+        { label: 'Facebook', href: companyBasicInfo?.facebookLink },
+        { label: 'Instagram', href: companyBasicInfo?.instagramLink },
+        { label: 'YouTube', href: companyBasicInfo?.youtubeLink },
+        { label: 'Google Map', href: companyBasicInfo?.googleMapLink },
+    ].filter((item) => item.href)
 
     useEffect(() => {
         const fetchPages = async () => {
@@ -52,299 +64,325 @@ const Footer = () => {
         }
     };
 
-    return (
-        <footer className={`print:hidden ${pathName.includes('admin') && 'hidden'}
-         ${pathName.includes('artisan') && 'block'} ${pathName.includes('product') && 'block'} ${pathName.includes('customEnquiry') && 'hidden'} ${pathName.includes('checkout') && 'hidden'}  ${pathName.includes('category') && 'block'}
-         ${pathName.includes('partner/login') && 'hidden'}
-         ${pathName.includes('partner/register') && 'hidden'}
-         bg-black py-4 text-white`}>
-            {/* <div className="w-full flex justify-center pb-8">
-                <div className="h-[3px] bg-black w-full mx-auto px-4" />
-            </div> */}
-            <div className="hidden md:flex flex-wrap lg:justify-between px-10 justify-start md:gap-20 lg:gap-0 gap-12 max-w-[22rem] md:max-w-[45rem] lg:max-w-[60rem] xl:max-w-6xl mx-auto">
-                <div className="flex flex-col gap-2 px-5">
-                    <h1 className="font-semibold text-xl my-4">Main Menu</h1>
-                    <Link href={'/'} className="block text-white font-barlow ">Home</Link>
-                    {pages.filter(page => !page?.link?.includes('policy')).map(page => (
-                        <Link key={page._id} href={page.url} className="block text-white font-barlow ">
-                            {page.title}
-                        </Link>
-                    ))}
-                    <Link href={'/contact'} className="block text-white font-barlow ">Contact</Link>
-                </div>
+    function Counter({ end, title }) {
+        const { ref, inView } = useInView({
+            triggerOnce: true,
+            threshold: 0.4,
+        });
 
-                <div className="flex flex-col gap-2 px-6">
-                    <h1 className="font-semibold text-xl my-4">Our Policy</h1>
-                    {pages.filter(page => page?.link?.includes('policy')).map(page => (
-                        <Link key={page._id} href={page.url} className="block text-white font-barlow">
-                            {page.title}
-                        </Link>
-                    ))}
-                    <Link href={'/faq'} className="block text-white font-barlow ">FAQ</Link>
-                </div>
+        return (
+            <div ref={ref} className="text-center">
+                <h3 className="text-5xl font-bold text-white">
+                    {inView && <CountUp end={end} duration={2.5} />}
+                    +
+                </h3>
 
-                <div className="flex flex-col gap-1">
-                    <h1 className="font-semibold text-xl flex items-center gap-2"> More Inquiry</h1>
-                    <div className="flex items-start gap-2">
-                        <Link href={'tel:+9101169266090'} className="my-2 rounded-full py-1 font-barlow text-white flex items-center gap-2">
-                            <Phone size={20} className="text-blue-600" />
-                            +91 01169266090
-                        </Link>
-                        <Link href={'tel:+917060320678'} className="my-2  rounded-full py-1 font-barlow text-white flex items-center gap-2">
-                            +91 7060320678
-                        </Link>
-                        <Link href={'tel:+919557839999'} className="my-2  rounded-full py-1 font-barlow text-white flex items-center gap-2">
-                            +91 9557839999
-                        </Link>
-                    </div>
-                    <div className="flex items-start  gap-2">
-                        <div className="py-2">
-                            <Send className="text-blue-600" size={20} />
-                        </div>
-                        <div className="flex items-start flex-col gap-1 py-2">
-                            <Link href={'mailto:Info@rishikeshrent.com'} className="rounded-full font-barlow text-white flex items-center gap-2">
-                                Info@rishikeshrent.com
-                            </Link>
-                            <Link href={'mailto:Care@rishikeshrent.com'} className="rounded-full font-barlow text-white flex items-center gap-2">
-                                Care@rishikeshrent.com
-                            </Link>
-                        </div>
-                    </div>
-                    <div className="flex items-start flex-row gap-2">
-                        <div className="py-2">
-
-                            <MapPin className="text-blue-600" size={18} />
-                        </div>
-                        <div className="flex items-start flex-col gap-2">
-                            <p className="gap-2 font-barlowtext-white flex items-start">
-                                <span className="text-nowrap font-semibold">Corporate
-                                    <br />
-                                    Address :
-                                </span> Jai Ram Ashram Complex, First Floor
-                                <br />
-                                Rishikesh 249201
-                            </p>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div className="md:hidden flex items-center gap-2 justify-start px-5">
-                <div className="flex flex-col gap-2 px-2">
-                    <h1 className="font-semibold text-xl my-4">Main Menu</h1>
-                    <Link href={'/'} className="block text-white font-barlow ">Home</Link>
-                    {pages.filter(page => !page?.link?.includes('policy')).map(page => (
-                        <Link key={page._id} href={page.url} className="text-sm block text-white font-barlow ">
-                            {page.title}
-                        </Link>
-                    ))}
-                    <Link href={'/contact'} className="text-sm block text-white font-barlow ">Contact</Link>
-                </div>
-
-                <div className="flex flex-col gap-2 px-2">
-                    <h1 className="font-semibold text-xl my-4">Our Policy</h1>
-                    {pages.filter(page => page?.link?.includes('policy')).map(page => (
-                        <Link key={page._id} href={page.url} className="text-sm block text-white font-barlow">
-                            {page.title}
-                        </Link>
-                    ))}
-                    <Link href={'/faq'} className="text-sm block text-white font-barlow ">FAQ</Link>
-                </div>
-            </div>
-            <div className="md:hidden flex flex-col gap-1 p-5">
-                <h1 className="font-semibold text-xl flex items-center gap-2"> More Inquiry</h1>
-                <div className="flex items-start gap-2">
-                    <Link href={'tel:+9101169266090'} className="my-2 text-sm rounded-full py-1 font-barlow text-white flex items-center gap-2">
-                        <Phone size={20} className="text-blue-600" />
-                        +91 01169266090
-                    </Link>
-                    <Link href={'tel:+91917060320678'} className="my-2 text-sm rounded-full py-1 font-barlow text-white flex items-center gap-2">
-                        +91 917060320678
-                    </Link>
-                    <Link href={'tel:+919557839999'} className="my-2 text-sm rounded-full py-1 font-barlow text-white flex items-center gap-2">
-                        +91 9557839999
-                    </Link>
-                </div>
-                <div className="flex items-start  gap-2">
-                    <div className="py-2">
-
-                        <Send className="text-blue-600" size={20} />
-                    </div>
-                    <div className="flex items-start flex-col gap-1 py-2">
-
-                        <Link href={'mailto:info@rishikeshrent.com'} className="text-sm rounded-full font-barlow text-white flex items-center gap-2">
-                            info@rishikeshrent.com
-                        </Link>
-                        <Link href={'mailto:care@rishikeshrent.com'} className=" text-sm rounded-full font-barlow text-white flex items-center gap-2">
-
-                            care@rishikeshrent.com
-                        </Link>
-                    </div>
-                </div>
-                <div className="flex items-start flex-col gap-2">
-                    <p className="gap-2 font-barlowtext-white flex items-start">
-                        <span className="text-nowrap font-semibold">Corporate
-                            <br />
-                            Address :
-                        </span> Jai Ram Ashram Complex, First Floor
-                        <br />
-                        Rishikesh 249201
-                    </p>
-
-                </div>
-            </div>
-
-            {/* Accordance Section */}
-            <div className="w-full flex justify-center my-4">
-                <div className="w-[85%]">
-                    <Accordion type="single" collapsible className="bg-[#fff] rounded-md  mb-8">
-                        <AccordionItem value="item-1">
-                            <AccordionTrigger className="text-black px-6 py-4 text-base ">IMPORTANT NOTICE</AccordionTrigger>
-                            <AccordionContent className="text-gray-900 px-6 pb-6 pt-1 text-sm space-y-3">
-                                <p>
-                                    <strong>Purchasing Policy</strong><br />
-                                    At Rishikesh Rent, we strive to offer a seamless and secure shopping experience. Our purchasing policy outlines everything you need to know when placing an order with us.
-                                </p>
-
-                                <ul className="list-disc list-inside space-y-2">
-                                    <li>
-                                        <strong>1. Product Availability</strong><br />
-                                        We aim to keep our inventory up-to-date. However, due to demand, some items may go out of stock. In such cases:
-                                        <ul className="list-disc list-inside ml-4">
-                                            <li>You will be notified promptly.</li>
-                                            <li>We may offer an alternative or initiate a full refund as per your preference.</li>
-                                        </ul>
-                                    </li>
-
-                                    <li>
-                                        <strong>2. Order Placement</strong>
-                                        <ul className="list-disc list-inside ml-4">
-                                            <li>Select your items and proceed to checkout.</li>
-                                            <li>Provide accurate billing and shipping details.</li>
-                                            <li>Complete payment through our secure gateway.</li>
-                                        </ul>
-                                        <p className="ml-4">Note: Orders with incomplete or incorrect information may be delayed or canceled.</p>
-                                    </li>
-
-                                    <li>
-                                        <strong>3. Payment Methods</strong>
-                                        <ul className="list-disc list-inside ml-4">
-                                            <li>Credit/Debit Cards (Visa, MasterCard, etc.)</li>
-                                            <li>UPI / Wallets / Net Banking (for India)</li>
-                                            <li>PayPal / Razorpay / Stripe (International Orders)</li>
-                                        </ul>
-                                        <p className="ml-4">All transactions are encrypted and 100% secure.</p>
-                                    </li>
-
-                                    <li>
-                                        <strong>4. Order Confirmation</strong>
-                                        <ul className="list-disc list-inside ml-4">
-                                            <li>You will receive an email confirmation with your order number and details.</li>
-                                            <li>A separate email will be sent once the order is dispatched, along with tracking info.</li>
-                                        </ul>
-                                    </li>
-
-                                    <li>
-                                        <strong>5. Pricing & Taxes</strong>
-                                        <ul className="list-disc list-inside ml-4">
-                                            <li>All prices are listed in [INR/USD] and include applicable taxes unless otherwise stated.</li>
-                                            <li>Shipping charges, if any, will be calculated at checkout based on location and package size.</li>
-                                            <li>Promotional discounts cannot be combined unless explicitly stated.</li>
-                                        </ul>
-                                    </li>
-
-                                    <li>
-                                        <strong>6. Cancellations</strong>
-                                        <ul className="list-disc list-inside ml-4">
-                                            <li>You may cancel your order within 12 hours of placing it or before shipment.</li>
-                                            <li>Once dispatched, orders cannot be canceled. Please refer to our Return Policy instead.</li>
-                                        </ul>
-                                    </li>
-
-                                    <li>
-                                        <strong>7. Fraud Prevention</strong>
-                                        <ul className="list-disc list-inside ml-4">
-                                            <li>We may verify orders manually for high-value purchases.</li>
-                                            <li>We reserve the right to cancel orders suspected of fraudulent activity, with or without notice.</li>
-                                        </ul>
-                                    </li>
-
-                                    <li>
-                                        <strong>8. Bulk or Custom Orders</strong><br />
-                                        We welcome bulk purchases or custom requests (e.g., branded adventure kits, expedition gear).<br />
-                                        Contact our team at support@adventureaxis.in for quotations and lead times.
-                                    </li>
-
-                                    <li>
-                                        <strong>9. Customer Support</strong>
-                                        <ul className="list-disc list-inside ml-4">
-                                            <li>📧 Email: support@adventureaxis.in</li>
-                                            <li>☎ Call/WhatsApp: +91 01169266090</li>
-                                            <li>🕒 Hours: Monday to Saturday, 10:00 AM – 6:00 PM IST</li>
-                                        </ul>
-                                    </li>
-
-                                    <li>
-                                        <strong>10. Acceptance of Policy</strong><br />
-                                        By placing an order on our website, you agree to the terms outlined in this Purchasing Policy.
-                                    </li>
-                                </ul>
-                            </AccordionContent>
-
-                        </AccordionItem>
-                    </Accordion>
-                </div>
-            </div>
-
-            <Card className="my-2 px-2 py-8 max-w-[85%] mx-auto">
-                <CardContent className="flex flex-col lg:flex-row items-start justify-between">
-                    <div className="text-justify">
-                        <Image src="/HeaderLogo.png" priority width={250} height={250} alt="footer" />
-                        <p className="text-black text-sm lg:w-[40vw] xl:w-[35vw] font-barlow mt-6">Premium Rental Solutions in Rishikesh
-                            <br />
-                            Welcome to a world where comfort meets class and every address tells a story of elegance. At Find Your Best Choice, we specialize in offering exclusive residential and commercial rental properties across the divine city of Rishikesh. From serene riverside homes to premium business spaces in prime locations, we bring you handpicked properties that reflect quality, value, and distinction. Our deep understanding of the local market allows us to deliver the best deals with complete transparency and trust. Whether you seek a peaceful retreat or a dynamic workplace, our mission is to help you find a space that truly complements your lifestyle and ambition in the heart of the Himalayas.</p>
-                        <p className="text-black text-sm lg:w-[40vw] xl:w-[35vw] font-barlow mt-6">Our website is your gateway to the heart of Rishikesh, offering rich and soulful handmade creations crafted by local artisans.</p>
-                    </div>
-                    <div className="font-barlow mt-10 lg:mt-0">
-                        <h1 className="font-semibold text-xl ">Subscribe to our newsletter</h1>
-                        <form onSubmit={handleSubmit} className="mt-4 flex overflow-hidden rounded-lg bg-gray-200">
-                            <Input
-                                id="email"
-                                name="email"
-                                type="email"
-                                placeholder="Enter your email"
-                                className="border-0 rounded-none focus:ring-0 focus-visible:ring-0 focus:outline-none bg-gray-200"
-                            />
-                            <button
-                                type="submit"
-                                className="bg-red-600 text-white text-sm p-2 h-full"
-                            >
-                                Subscribe
-                            </button>
-                        </form>
-
-
-                        <p className="text-black text-sm lg:w-[30vw] xl:w-[20vw]  mt-6">Stay Informed. Stay Ahead.</p>
-                        <p className="text-black text-sm lg:w-[30vw] xl:w-[23vw]">Subscribe to our newsletter to get the latest updates.</p>
-                    </div>
-                </CardContent>
-                <CardFooter className="mt-8 flex flex-col items-start md:w-fit">
-                    <div className="w-full h-[1px] bg-gray-400" />
-                    <div className="flex items-center justify-between font-barlow">
-                        <div className="flex flex-col md:flex-row items-start  md:items-center gap-2">
-                            <Link href={'/terms-condition'} className="0 !text-sm font-semibold">Terms of Use</Link>
-                            <p className="text-gray-900 md:block hidden">|</p>
-                            <Link href={'/privacy-policy'} className="0 !text-sm font-semibold">Privacy and Cookies Policy</Link>
-                        </div>
-                    </div>
-                </CardFooter>
-            </Card>
-            <div className="flex flex-col lg:flex-row items-center justify-center max-w-[25rem] md:max-w-[60rem] xl:max-w-6xl mx-auto font-barlow">
-                <p className="text-white font-bold text-center my-4">
-                    &copy; <CurrentYear /> <Link href={'/'} className="font-bold text-white">Rishikesh Rent</Link>. All rights reserved
+                <p className="text-sm text-gray-500 mt-2">
+                    {title}
                 </p>
             </div>
-        </footer >
+        );
+    }
+    return (
+        <footer className={`relative print:hidden ${pathName.includes('admin') && 'hidden'}
+          ${pathName.includes('artisan') && 'block'} 
+          ${pathName.includes('product') && 'block'} 
+          ${pathName.includes('sign-in') && 'hidden'}
+          ${pathName.includes('sign-up') && 'hidden'}  
+          ${pathName.includes('customEnquiry') && 'hidden'} 
+          ${pathName.includes('checkout') && 'hidden'}  
+          ${pathName.includes('category') && 'block'}relative overflow-hidden border-t bg-[#f8fafc]`}>
+            {/* Grid Background */}
+            <div
+                className="absolute inset-0 opacity-60"
+                style={{
+                    backgroundImage: `
+        linear-gradient(to right, rgba(148,163,184,.15) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(148,163,184,.15) 1px, transparent 1px)
+      `,
+                    backgroundSize: "40px 40px",
+                }}
+            />
+
+            <div className="relative z-10">
+                {/* Experience Section */}
+
+
+                <section className="relative bg-[#0B1E33] overflow-hidden">
+
+                    <div className="max-w-7xl mx-auto px-6 lg:px-5">
+
+                        <div className="grid lg:grid-cols-[58%,42%] lg:grid-rows-[auto_auto] gap-x-12">
+
+                            {/* ================= LEFT TOP ================= */}
+
+                            <div className="text-white pt-20">
+
+                                <p className="text-sm leading-7 text-gray-300 max-w-2xl mb-8">
+                                    Rishikesh is a place where the soul finds its rhythm, nestled at
+                                    the foothills of the mighty Himalayas where the emerald-green
+                                    Ganga begins her journey onto the plains. Known globally as the
+                                    Yoga Capital of the World, it is a sanctuary where spirituality,
+                                    adventure and nature exist together.
+                                </p>
+
+                                <h2 className="text-4xl md:text-5xl font-bold leading-tight">
+                                    Experience Rishikesh with
+                                </h2>
+
+                                <div className="inline-block mt-3">
+                                    <h3 className="text-4xl md:text-5xl font-bold">
+                                        www.rishikeshrent.com
+                                    </h3>
+
+                                    <div className="w-full h-1 bg-yellow-400 mt-2"></div>
+                                </div>
+
+                                <p className="text-gray-300 mt-8 max-w-2xl leading-8">
+                                    To truly immerse yourself in the magic of this town, you need a
+                                    home that combines comfort with the serenity of the mountains.
+                                    <span className="font-semibold text-white">
+                                        {" "}www.rishikeshrent.com
+                                    </span>{" "}
+                                    serves as your gateway to the perfect stay, simplifying your
+                                    search for your ideal retreat.
+                                </p>
+
+                            </div>
+
+                            {/* ================= RIGHT IMAGE ================= */}
+
+                            <div className="relative lg:row-span-2 flex justify-end lg:-mt-10">
+                                <div className="relative w-full max-w-lg">
+                                    {/* Border */}
+                                    <Image
+                                        src="/footerimage.png"
+                                        width={900}
+                                        height={1000}
+                                        alt="Experience"
+                                        className="w-full h-[700px] object-cover"
+                                    />
+                                </div>
+                            </div>
+                            {/* ================= LEFT BOTTOM ================= */}
+
+                            <div className="pb-16 mt-10">
+
+                                {/* CTA */}
+
+                                <div className="flex h-12 gap-4">
+
+                                    <button
+                                        className="bg-[#324EA7]
+                        hover:bg-[#263d8e]
+                        px-5
+                        py-3
+                        text-white
+                        font-semibold
+                        flex
+                        items-center
+                        gap-3"
+                                    >
+                                        About More ↗
+                                    </button>
+
+                                    <span className="bg-white rounded-full px-4 py-3 text-black font-semibold shadow hover:scale-105 transition-all">
+                                        Verified Listings
+                                    </span>
+
+                                    <span className="bg-white rounded-full px-4 py-3 text-black font-semibold shadow hover:scale-105 transition-all">
+                                        Centric Features
+                                    </span>
+
+                                    <span className="bg-white rounded-full px-4 py-3 text-black font-semibold shadow hover:scale-105 transition-all">
+                                        Diverse Options
+                                    </span>
+
+                                </div>
+
+                                {/* STATS */}
+
+                                <div className="grid grid-cols-3 mt-16 border-t border-white/10 pt-10 text-white">
+
+                                    {/* 1 */}
+
+                                    <div className="flex gap-4">
+
+                                        <Users
+                                            size={34}
+                                            className="text-white/70 mt-1"
+                                        />
+
+                                        <div>
+
+                                            <h3 className="text-white text-5xl font-bold">
+                                                <Counter end={69} />
+                                            </h3>
+
+                                            <p className="text-white/70 text-sm mt-2">
+                                                Professional Experts
+                                            </p>
+
+                                        </div>
+
+                                    </div>
+
+                                    {/* 2 */}
+
+                                    <div className="flex gap-4">
+
+                                        <BriefcaseBusiness
+                                            size={34}
+                                            className="text-white/70 mt-1"
+                                        />
+
+                                        <div>
+
+                                            <h3 className="text-white text-5xl font-bold">
+                                                <Counter end={20} />
+                                            </h3>
+
+                                            <p className="text-white/70 text-sm mt-2">
+                                                Projects Complete
+                                            </p>
+
+                                        </div>
+
+                                    </div>
+
+                                    {/* 3 */}
+
+                                    <div className="flex gap-4">
+
+                                        <Globe2
+                                            size={34}
+                                            className="text-white/70 mt-1"
+                                        />
+
+                                        <div>
+
+                                            <h3 className="text-white text-5xl font-bold">
+                                                <Counter end={6} />
+                                            </h3>
+
+                                            <p className="text-white/70 text-sm mt-2">
+                                                Worldwide Clients
+                                            </p>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+                {/* CTA Section */}
+                <div className="w-[90%] max-w-6xl mx-auto pt-16">
+                    <div className="bg-white border rounded-3xl p-8 shadow-sm flex flex-col lg:flex-row justify-between items-center gap-6">
+                        <div>
+                            <p className="text-sm font-semibold text-slate-500 uppercase">
+                                Get Started
+                            </p>
+                            <h2 className="text-2xl font-semibold mt-2">
+                                Find your dream stay with Kag Premium Homes
+                            </h2>
+                            <p className="text-slate-600 mt-2">
+                                Discover luxury stays, premium experiences and seamless bookings.
+                            </p>
+                        </div>
+
+                        <div className="flex gap-4">
+                            <Link
+                                href="/properties"
+                                className="px-8 py-3 rounded-full bg-[#0f2747] text-white font-medium"
+                            >
+                                Browse Properties
+                            </Link>
+
+                            <Link
+                                href="/contact"
+                                className="px-8 py-3 rounded-full border bg-white"
+                            >
+                                Contact Us
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Main Footer */}
+                <div className="bg-[#0B1521] text-white mt-16 pt-10 pb-4 w-full">
+                    <div className="w-[80%] max-w-7xl mx-auto">
+                        <div className="flex flex-col md:flex-row items-center justify-between gap-5">
+                            {/* Left: Logo */}
+                            <div className="md:w-1/4 flex justify-center md:justify-end md:border-r border-slate-700 pr-0 md:pr-10">
+                                <div className="flex items-center justify-center h-full min-h-[150px]">
+                                    <Image
+                                        src={footerLogoSrc}
+                                        width={240}
+                                        height={80}
+                                        alt={companyName}
+                                        className="object-contain"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Right: Content */}
+                            <div className="md:w-2/3 flex flex-col gap-5">
+                                <p className="text-[13px] text-slate-300 leading-relaxed max-w-3xl font-light">
+                                    <span className="font-medium text-white">"Stay where Serenity meets Comfort."</span> Visit Rishikeshrent.com today to secure your slice of heaven in the Yoga Capital of the World. Beyond just a stay, We offer a smooth rental experience. From flexible cancellation options to dedicated support, they handle the logistics so you can focus entirely on your spiritual or adventurous journey.
+                                </p>
+
+                                <div className="flex flex-wrap items-center gap-3 text-sm font-medium text-white">
+                                    <Link href="/" className="hover:text-emerald-400 transition-colors">Home</Link>
+                                    <span className="text-slate-600">|</span>
+                                    <Link href="/about" className="hover:text-emerald-400 transition-colors">About Us</Link>
+                                    <span className="text-slate-600">|</span>
+                                    <Link href="/privacy-policy" className="hover:text-emerald-400 transition-colors">Legality / Policy</Link>
+                                    <span className="text-slate-600">|</span>
+                                    <Link href="/contact" className="hover:text-emerald-400 transition-colors">Contact Us</Link>
+                                    <span className="text-slate-600">|</span>
+                                    <Link href="#" className="hover:text-emerald-400 transition-colors">Our Support</Link>
+                                </div>
+
+                                <div className="flex flex-col sm:flex-row flex-wrap sm:items-center gap-6 text-[13px] text-slate-300 mt-1">
+                                    <div className="flex items-start gap-2 max-w-[280px]">
+                                        <MapPin size={16} className="text-red-500 shrink-0 mt-0.5" />
+                                        <span>Corporate Address : Jai Ram Ashram Complex, First Floor Rishikesh 249201</span>
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex items-center gap-2">
+                                            <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                                            <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                                            <span>+91 7060320678, +91 9557839999</span>
+                                        </div>
+                                        <Link href="https://wa.me/917060320678" target="_blank" className="flex items-center gap-1.5 bg-black border border-slate-700 px-3 py-1.5 rounded-full hover:bg-slate-800 transition shadow-sm">
+                                            <div className="bg-green-500 rounded-full p-0.5">
+                                                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.099.824z" /></svg>
+                                            </div>
+                                            <span className="font-semibold text-white">Whatsapp</span>
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Bottom Bar */}
+                    <div className="border-t border-slate-700 mt-10 pt-4 pb-2">
+                        <div className="w-[90%] max-w-5xl mx-auto text-center text-[13px] text-white font-medium pl-0 md:pl-[33%] md:ml-10">
+                            <p>© {new Date().getFullYear()} Rishikesh Rent. All rights reserved</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
     )
 }
 

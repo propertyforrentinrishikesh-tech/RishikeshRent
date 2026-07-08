@@ -44,11 +44,10 @@ const PropertyCard = ({
         </div>
         <div className="mt-auto flex items-center justify-between gap-3 text-md">
           <div className="flex flex-col">
-            <span className="font-bold text-gray-900">{cardPrice}</span>
+      </div>
+            <span className="font-bold text-gray-900">₹{cardPrice}</span>
           </div>
         </div>
-      </div>
-
       <div className="flex gap-2 p-4">
         <Link
           href={`/properties/${slugify(cardLocation)}/${slugify(cardSlug)}`}

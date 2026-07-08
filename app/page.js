@@ -8,6 +8,7 @@ import PopUpBanner from "@/components/PopUpBanner";
 import Social from "@/components/Social";
 import SearchSection from "@/components/SearchSection";
 import PropertyShow from "@/components/PropertyShow";
+import ImageBanner from "@/components/ImageBanner";
 
 export default async function Home() {
   return (
@@ -19,6 +20,7 @@ export default async function Home() {
       <Banner />
       {/* <PropertyShow/> */}
       <RandomTourPackageSection />
+      <ImageBanner/>
       <InstaBlog />
       <Social/>
       <ChatBot/>
