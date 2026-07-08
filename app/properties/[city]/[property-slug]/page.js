@@ -1,12 +1,12 @@
-import PropertyDetails from "@/components/Properties/PropertyDetails";
+import PropertyDetail from "@/components/Properties/PropertyDetails";
 import connectDB from "@/lib/connectDB";
-import PropertyDetailsModel from "@/models/PropertyDetails";
+import PropertyDetails from "@/models/Property/PropertyDetails";
 
 // Fetch property data by slug
 async function fetchPropertyBySlug(slug) {
     try {
         await connectDB();
-        const property = await PropertyDetailsModel.findOne({ propertyNameSlug: slug });
+        const property = await PropertyDetails.findOne({ propertyNameSlug: slug });
         // Convert Mongoose document to plain POJO
         return property ? JSON.parse(JSON.stringify(property)) : null;
     } catch (error) {
@@ -20,7 +20,7 @@ async function fetchPropertyBySlug(slug) {
 async function fetchRelatedProperties(locationType, propertyType, currentId) {
     try {
         await connectDB();
-        const related = await PropertyDetailsModel.find({
+        const related = await PropertyDetails.find({
             locationType: locationType,
             _id: { $ne: currentId } // Exclude current property
         })
@@ -47,5 +47,5 @@ export default async function PropertyPage({ params }) {
     // Fetch related properties based on the current property's location and type
     const relatedProperties = await fetchRelatedProperties(property.locationType, property.propertyType, property._id);
 
-    return <PropertyDetails property={property} relatedProperties={relatedProperties} />;
+    return <PropertyDetail property={property} relatedProperties={relatedProperties} />;
 }

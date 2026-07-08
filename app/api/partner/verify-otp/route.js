@@ -65,6 +65,7 @@ export async function POST(request) {
                     token: {
                         email: emailKey,
                         propertyName: tempPartner.propertyName,
+                        contactNumber: tempPartner.contactNumber,
                         isRegistrationTemp: true
                     },
                     secret,

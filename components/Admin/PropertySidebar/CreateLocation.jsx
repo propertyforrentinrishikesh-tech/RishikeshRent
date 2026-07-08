@@ -71,7 +71,7 @@ const CreatePropertyType = ({
         ...formDataLocation,
         id: editLocation,
       };
-      const response = await fetch("/api/hotels/createLocation", {
+      const response = await fetch("/api/property/createLocation", {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -86,7 +86,7 @@ const CreatePropertyType = ({
         setEditLocation(null);
 
         // Refresh list and sync parent state
-        const updatedBanners = await fetch("/api/hotels/createLocation").then((res) =>
+        const updatedBanners = await fetch("/api/property/createLocation").then((res) =>
           res.json(),
         );
         setLocations(updatedBanners);
@@ -114,7 +114,7 @@ const CreatePropertyType = ({
 
   const handleDeleteForLocation = async (id) => {
     try {
-      const response = await fetch("/api/hotels/createLocation", {
+      const response = await fetch("/api/property/createLocation", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
@@ -126,7 +126,7 @@ const CreatePropertyType = ({
         toast.success("Location deleted successfully");
 
         // Update list and sync parent state
-        const updatedBanners = await fetch("/api/hotels/createLocation").then((res) =>
+        const updatedBanners = await fetch("/api/property/createLocation").then((res) =>
           res.json(),
         );
         setLocations(updatedBanners);
@@ -160,7 +160,7 @@ const CreatePropertyType = ({
     );
 
     try {
-      const response = await fetch('/api/hotels/createLocation', {
+      const response = await fetch('/api/property/createLocation', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, isActive }),

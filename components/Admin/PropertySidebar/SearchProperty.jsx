@@ -176,7 +176,7 @@ const SearchProperty = ({ propertyTypes = [], locationType = [], subLocationType
             if (resultStatus !== "all") params.set("isActive", resultStatus === "active" ? "true" : "false");
             if (resultPropertyType !== "all") params.set("propertyType", resultPropertyType);
 
-            const res = await fetch(`/api/propertyDetails?${params.toString()}`);
+            const res = await fetch(`/api/property/propertyDetails?${params.toString()}`);
             const data = await res.json();
             if (data.success) {
                 setResults(data.data || []);
@@ -205,7 +205,7 @@ const SearchProperty = ({ propertyTypes = [], locationType = [], subLocationType
     const toggleActive = async (property) => {
         setTogglingId(property._id + "_active");
         try {
-            const res = await fetch(`/api/propertyDetails?id=${property._id}`, {
+            const res = await fetch(`/api/property/propertyDetails?id=${property._id}`, {
                 method: "PUT", headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ isActive: !property.isActive }),
             });
@@ -223,7 +223,7 @@ const SearchProperty = ({ propertyTypes = [], locationType = [], subLocationType
     const toggleTrending = async (property) => {
         setTogglingId(property._id + "_trending");
         try {
-            const res = await fetch(`/api/propertyDetails?id=${property._id}`, {
+            const res = await fetch(`/api/property/propertyDetails?id=${property._id}`, {
                 method: "PUT", headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ isTrending: !property.isTrending }),
             });

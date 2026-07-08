@@ -1,7 +1,7 @@
 // app/api/createPropertyDetails/route.js
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/connectDB';
-import PropertyDetails from '@/models/PropertyDetails';
+import PropertyDetails from '@/models/Property/PropertyDetails';
 
 export async function POST(request) {
     try {

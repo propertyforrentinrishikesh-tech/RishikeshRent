@@ -78,7 +78,7 @@ const PropertyFilter = ({
         const fetchOptions = async () => {
             // Fetch locations
             try {
-                const locResponse = await fetch("/api/createLocation");
+                const locResponse = await fetch("/api/property/createLocation");
                 if (locResponse.ok) {
                     const locData = await locResponse.json();
                     if (Array.isArray(locData)) {
@@ -271,7 +271,7 @@ const PropertyFilter = ({
                                     value={searchPropertyFor}
                                     onValueChange={(value) => setSearchPropertyFor(value)}
                                 >
-                                    <SelectTrigger className="w-full">
+                                    <SelectTrigger className="w-full h-12">
                                         <SelectValue placeholder="Property For" />
                                     </SelectTrigger>
                                     <SelectContent>

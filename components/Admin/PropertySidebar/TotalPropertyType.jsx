@@ -86,7 +86,7 @@ const TotalPropertyType = ({ propertyTypes = [], locationType = [], subLocationT
             const params = new URLSearchParams({ page: 1, limit: 1000 });
             if (filterMainLocation !== "all") params.set("locationType", filterMainLocation);
             if (filterPropertyType !== "all") params.set("propertyType", filterPropertyType);
-            const res = await fetch(`/api/propertyDetails?${params.toString()}`);
+            const res = await fetch(`/api/property/propertyDetails?${params.toString()}`);
             const data = await res.json();
             if (data.success) setAllProperties(data.data || []);
             else toast.error("Failed to load properties");
@@ -118,7 +118,7 @@ const TotalPropertyType = ({ propertyTypes = [], locationType = [], subLocationT
     const toggleActive = async (property) => {
         setTogglingId(property._id + "_active");
         try {
-            const res = await fetch(`/api/propertyDetails?id=${property._id}`, {
+            const res = await fetch(`/api/property/propertyDetails?id=${property._id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ isActive: !property.isActive }),
@@ -139,7 +139,7 @@ const TotalPropertyType = ({ propertyTypes = [], locationType = [], subLocationT
     const toggleTrending = async (property) => {
         setTogglingId(property._id + "_trending");
         try {
-            const res = await fetch(`/api/propertyDetails?id=${property._id}`, {
+            const res = await fetch(`/api/property/propertyDetails?id=${property._id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ isTrending: !property.isTrending }),

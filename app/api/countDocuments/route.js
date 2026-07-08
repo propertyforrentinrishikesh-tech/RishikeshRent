@@ -1,7 +1,7 @@
 // app/api/dashboard/counts/route.js
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/connectDB';
-import PropertyDetails from '@/models/PropertyDetails';
+import PropertyDetails from '@/models/Property/PropertyDetails';
 import PropertyRegistration from '@/models/PropertyRegistration';
 // Import other models you want to count
 // import PropertyType from '@/models/PropertyType'; // Adjust the import path as needed

@@ -3,10 +3,10 @@ import React, { useState, useCallback, useEffect } from "react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { useCart } from "@/context/CartContext";
 import Autoplay from "embla-carousel-autoplay";
-import { Heart, X } from "lucide-react";
+import { ArrowRight, Heart, X } from "lucide-react";
 import Image from "next/image";
 
-export default function QuickViewProductCard({ product, onClose }) {
+export default function QuickViewProductCard({ product, onClose, onRequestBook }) {
   const [activeImageIdx, setActiveImageIdx] = useState(0);
   const [carouselApi, setCarouselApi] = useState(null);
   const [images, setImages] = useState([]);
@@ -198,8 +198,12 @@ export default function QuickViewProductCard({ product, onClose }) {
                 </a>
               ))} */}
 
-              <button className="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
-                Contact Owner
+              <button
+                className="mt-4 w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+                type="button"
+                onClick={() => onRequestBook?.(product)}
+              >
+                Request Book<ArrowRight className="w-4 h-4 ml-1" />
               </button>
             </div>
           </div>

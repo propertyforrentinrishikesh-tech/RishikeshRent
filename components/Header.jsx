@@ -146,15 +146,15 @@ const Header = ({ menuItems, companyBasicInfo = null }) => {
 
           <TopAdvertisementMarquee />
           {/* Login/Cart section on the right */}
-          <div className="flex items-center justify-center gap-3 bg-orange-500 w-[30%] px-5 py-[10px]">
-            <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center gap-3 bg-orange-500 w-[25%] px-5 py-[10px]">
+            {/* <div className="flex items-center gap-3">
               <Link href="/partner/login"
                 className="text-white text-sm hover:underline hover:scale-105 text-nowrap transition-all duration-300"
               >
                 Property Extranet
               </Link>
-            </div>
-            <div className="w-px h-6 bg-black"></div>
+            </div> */}
+            {/* <div className="w-px h-6 bg-black"></div> */}
             <div className="flex items-center gap-2">
               <Link href="#" className="flex items-center gap-1.5 hover:scale-105 hover:underline text-sm text-white px-2 rounded-md transition-colors">
                 <Headphones size={16} />
@@ -187,7 +187,7 @@ const Header = ({ menuItems, companyBasicInfo = null }) => {
                   {/* Dropdown Menu */}
                   {isProfileOpen && (
                     <div
-                      className="absolute top-14 right-0 mt-2 w-fit text-black bg-white shadow-lg rounded-lg border z-50"
+                      className="absolute top-14 mt-2 w-fit text-black bg-white shadow-lg rounded-lg border z-50"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <p className="px-4 pt-2 text-sm font-bold text-gray-700">

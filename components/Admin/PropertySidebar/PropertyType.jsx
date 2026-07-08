@@ -69,7 +69,7 @@ const PropertyType = ({
         ...formData,
         id: editProperty,
       };
-      const response = await fetch("/api/hotels/propertyType", {
+      const response = await fetch("/api/property/propertyType", {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -83,7 +83,7 @@ const PropertyType = ({
         setEditProperty(null);
 
         // Refresh list and sync parent state
-        const updatedBanners = await fetch("/api/hotels/propertyType").then((res) =>
+        const updatedBanners = await fetch("/api/property/propertyType").then((res) =>
           res.json(),
         );
         setProperties(updatedBanners);
@@ -110,7 +110,7 @@ const PropertyType = ({
 
   const handleDeleteForProperty = async (id) => {
     try {
-      const response = await fetch("/api/hotels/propertyType", {
+      const response = await fetch("/api/property/propertyType", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
@@ -121,7 +121,7 @@ const PropertyType = ({
       if (response.ok) {
         toast.success("Property Type deleted successfully");
         // Re-fetch and sync both local and parent state
-        const updatedBanners = await fetch("/api/hotels/propertyType").then((res) =>
+        const updatedBanners = await fetch("/api/property/propertyType").then((res) =>
           res.json(),
         );
         setProperties(updatedBanners);
@@ -153,7 +153,7 @@ const PropertyType = ({
     );
 
     try {
-      const response = await fetch('/api/hotels/propertyType', {
+      const response = await fetch('/api/property/propertyType', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, isActive }),

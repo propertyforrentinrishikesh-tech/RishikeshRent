@@ -85,7 +85,7 @@ const CreateSubLocation = ({
         ...formDataSubLocation,
         id: editSubLocation,
       };
-      const response = await fetch("/api/hotels/createSubLocation", {
+      const response = await fetch("/api/property/createSubLocation", {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -100,7 +100,7 @@ const CreateSubLocation = ({
         setEditSubLocation(null);
 
         // Refresh list and sync parent state
-        const updatedBanners = await fetch("/api/hotels/createSubLocation").then((res) =>
+        const updatedBanners = await fetch("/api/property/createSubLocation").then((res) =>
           res.json(),
         );
         setSubLocations(updatedBanners);
@@ -128,7 +128,7 @@ const CreateSubLocation = ({
   };
   const handleDeleteForSubLocation = async (id) => {
     try {
-      const response = await fetch("/api/hotels/createSubLocation", {
+      const response = await fetch("/api/property/createSubLocation", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
@@ -140,7 +140,7 @@ const CreateSubLocation = ({
         toast.success("Sub Location deleted successfully");
 
         // Update list and sync parent state
-        const updatedBanners = await fetch("/api/hotels/createSubLocation").then((res) =>
+        const updatedBanners = await fetch("/api/property/createSubLocation").then((res) =>
           res.json(),
         );
         setSubLocations(updatedBanners);
@@ -171,7 +171,7 @@ const CreateSubLocation = ({
     );
 
     try {
-      const response = await fetch('/api/hotels/createSubLocation', {
+      const response = await fetch('/api/property/createSubLocation', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, isActive }),

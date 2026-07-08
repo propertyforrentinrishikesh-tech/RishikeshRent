@@ -24,67 +24,7 @@ const SearchSection = () => {
   const [maxPrice, setMaxPrice] = useState(50000);
   const router = useRouter();
 
-  // Reusable Number Input Component
-  const NumberInput = ({ value, onChange, min = 1, max = 10, className = '' }) => {
-    const increment = () => {
-      if (value < max) onChange(value + 1);
-    };
 
-    const decrement = () => {
-      if (value > min) onChange(value - 1);
-    };
-
-    return (
-      <div className={`flex items-center border rounded-md overflow-hidden ${className}`}>
-        <button
-          type="button"
-          onClick={decrement}
-          className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 focus:outline-none"
-          disabled={value <= min}
-        >
-          -
-        </button>
-        <input
-          type="number"
-          value={value}
-          onChange={(e) => {
-            const val = parseInt(e.target.value) || min;
-            onChange(Math.min(Math.max(val, min), max));
-          }}
-          min={min}
-          max={max}
-          className="w-14 text-center border-0 focus:ring-0"
-        />
-        <button
-          type="button"
-          onClick={increment}
-          className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 focus:outline-none"
-          disabled={value >= max}
-        >
-          +
-        </button>
-      </div>
-    );
-  };
-
-  // console.log(trendingSearches)
-  // Property types for the second dropdown
-  const propertyForOptions = [
-    { value: 'residential', label: 'Residential' },
-    { value: 'commercial', label: 'Commercial' }
-  ];
-  const accommodationType = [
-    { value: 'Hotel', label: 'Hotel' },
-    { value: 'Homestay', label: 'Homestay' }
-  ];
-  const pilgrimType = [
-    { value: 'Badrinath', label: 'Badrinath' },
-    { value: 'Yamunotri', label: 'Yamunotri' }
-  ]
-  const yatraType = [
-    { value: 'Group_Tour', label: 'Group Tour' },
-    { value: 'Solo_Traveller', label: 'Solo Traveller' }
-  ]
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -92,7 +32,7 @@ const SearchSection = () => {
 
         // Fetch property types
         try {
-          const propResponse = await fetch("/api/createProperty");
+          const propResponse = await fetch("/api/property/propertyType");
           if (!propResponse.ok) {
             throw new Error(`HTTP error! status: ${propResponse.status}`);
           }
@@ -112,7 +52,7 @@ const SearchSection = () => {
 
         // Fetch locations
         try {
-          const locResponse = await fetch("/api/createLocation");
+          const locResponse = await fetch("/api/property/createLocation");
           if (!locResponse.ok) {
             throw new Error(`HTTP error! status: ${locResponse.status}`);
           }
@@ -131,7 +71,7 @@ const SearchSection = () => {
         }
         //fetch Treding property
         try {
-          const locResponse = await fetch("/api/createPropertyDetails/getTrending");
+          const locResponse = await fetch("/api/property/getTrending");
           if (!locResponse.ok) {
             throw new Error(`HTTP error! status: ${locResponse.status}`);
           }
@@ -176,9 +116,10 @@ const SearchSection = () => {
       const params = new URLSearchParams();
 
       // Filters (query params)
-      if (propertyFor) params.append('propertyFor', propertyFor);
+      if (propertyFor) params.append('propertyFor', slugify(propertyFor));
       if (propertyType) params.append('propertyType', slugify(propertyType));
-      if (maxPrice) params.append('maxPrice', maxPrice);
+      if (location) params.append('locationType', slugify(location));
+      if (maxPrice) params.append('maxRent', maxPrice);
 
       if (checkInDate) {
         const formattedDate = new Date(checkInDate)
@@ -191,11 +132,8 @@ const SearchSection = () => {
         params.append('guests', guestCount);
       }
 
-      // Route param (city)
-      const citySlug = location ? slugify(location) : 'all';
-
-      // Client-side navigation (BEST)
-      router.push(`/properties/${citySlug}?${params.toString()}`);
+      // Client-side navigation to the unified properties page
+      router.push(`/properties?${params.toString()}`);
 
     } catch (error) {
       console.error('Search error:', error);
@@ -203,20 +141,6 @@ const SearchSection = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-
-  // Handle input changes to update state
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    if (name === 'location') setLocation(value);
-    if (name === 'checkInDate') setCheckInDate(value);
-  };
-
-  // Handle select changes
-  const handleSelectChange = (name, value) => {
-    if (name === 'propertyFor') setPropertyFor(value);
-    if (name === 'propertyType') setPropertyType(value);
   };
 
   // Add useEffect to handle initial load with URL params
@@ -232,9 +156,9 @@ const SearchSection = () => {
   }, []);
 
   return (
-    <section className="w-full max-w-[1200px] mx-auto px-4 md:px-8 py-10">
-      <div className="bg-[#64a8b1] rounded-3xl shadow-xl p-6 md:p-10 flex flex-col gap-5">
-        <div className="text-black">
+      <section className="w-full">
+        <div className="bg-[#64a8b1] p-6 md:p-10 flex flex-col gap-5">
+          <div className="text-black">
           <h2 className="text-2xl md:text-3xl font-bold mb-1 tracking-tight">Best Stays, Better Prices: Book Direct.</h2>
           <p className="text-base md:text-lg font-semibold text-white">
             Authentic Comfort. Exceptional Value. Your Home Away From Home In Rishikesh.

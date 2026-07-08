@@ -2,24 +2,11 @@
 
 import * as React from "react"
 import {
-    BarChart,
     Boxes,
-    ClipboardList,
-    ClockArrowUp,
-    Flame,
-    Image,
-    MapPin,
-    MenuIcon,
-    MessageCircleMore,
     Plus,
-    Rss,
     Send,
-    ShoppingBag,
-    Star,
-    StickyNote,
-    User,
-    Users,
-    ShoppingCart,
+    Image,
+    Rss,
     LayoutDashboard,
 } from "lucide-react"
 import { NavProjects } from "@/components/nav-projects"
@@ -31,308 +18,426 @@ import {
 import { usePathname } from "next/navigation"
 import { useSession } from "next-auth/react"
 
+
 const data = {
     user: {
         name: "Welcome, Admin",
-        email: "info@rishikeshrent.com",
+        email: "care.kagpremiumhomes@gmail.com",
     },
     projects: [
+        // {
+        //     name: "Dashboard",
+        //     url: "/admin",
+        //     icon: LayoutDashboard,
+        // },
         {
-            name: "Dashboard",
-            url: "/admin",
+            name: "Hotel Extranet Dashboard",
+            url: "/admin/hotel_extranet",
             icon: LayoutDashboard,
         },
         { divider: true },
         {
-            name: "Hotel Extranet",
-            url: "/admin/hotel_extranet",
+            name: "Promotional Discount",
+            url: "/admin/hotel_extranet/",
             icon: Plus,
+        },
+        {
+            name: "Hotel Banners",
+            icon: Plus,
+            items: [
+                {
+                    name: "Top Advertisment Banner",
+                    url: "/admin/hotel_extranet/top_advertisment_banner",
+                    icon: Image
+                },
+                {
+                    name: "PopUp Banner",
+                    url: "/admin/hotel_extranet/popup_banner",
+                    icon: Image
+                },
+                {
+                    name: "Hotel Banner",
+                    url: "/admin/hotel_extranet/hotel_banner",
+                    icon: Image
+                },
+                {
+                    name: "Hotel Category Banner",
+                    url: "/admin/hotel_extranet/hotel_category_banner",
+                    icon: Image
+                },
+                {
+                    name: "Banner Section 1st",
+                    url: "/admin/hotel_extranet/banner_section_1st",
+                    icon: Image
+                },
+                {
+                    name: "Banner Section 2nd",
+                    url: "/admin/hotel_extranet/banner_section_2nd",
+                    icon: Image
+                },
+                {
+                    name: "Banner Section 3rd",
+                    url: "/admin/hotel_extranet/banner_section_3rd",
+                    icon: Image
+                },
+            ]
         },
         { divider: true },
         {
-            name: "Create Hotel Partner's",
-            url: "/admin/hotel_extranet",
+            name: "Manage Menu Section",
+            icon: Plus,
+            items: [
+                {
+                    name: "Manage Menu",
+                    url: "/admin/hotel_extranet/manage_menu",
+                    icon: Plus,
+                },
+                {
+                    name: "Manage Sub Menu Section",
+                    url: "/admin/hotel_extranet/manage_sub_menu",
+                    icon: Plus,
+                },
+                {
+                    name: "Manage Products & Category",
+                    url: "/admin/hotel_extranet/manage_packages_category",
+                    icon: Boxes,
+                },
+            ]
+        },
+        { divider: true, },
+
+        {
+            name: "Create Destination (City Name)",
+            url: "/admin/hotel_extranet/create_destination",
+            icon: Image
+        },
+        { divider: true },
+        {
+            name: "Insta or Facebook Post",
+            url: "/admin/hotel_extranet/insta_fb_post",
+            icon: Image
+        },
+        {
+            name: "Manage Blogs",
+            url: "/admin/hotel_extranet/manage_blogs",
+            icon: Rss,
+        },
+        { divider: true },
+        {
+            name: "Create Hotel Partner",
+            url: "/admin/hotel_extranet/create_hotel_partner",
             icon: Plus,
         },
         {
-            name: "Hotel Partner's Log && Login Details",
-            url: "/admin/hotel_partner_log_and_login_details",
+            name: "Hotel Details",
             icon: Plus,
+            items: [
+                {
+                    name: "Hotel Partner's Log && Login Details",
+                    url: "/admin/hotel_extranet/hotel_partner_log_and_login_details",
+                    icon: Plus,
+                },
+                {
+                    name: "Hotel Property Updates & Status",
+                    icon: Plus,
+                    items: [
+                        {
+                            name: "Suspended Hotel Overview",
+                            url: "/admin/hotel_extranet/",
+                            icon: Plus,
+                        }, {
+                            name: "Rejected Hotel Partner Account",
+                            url: "#",
+                            icon: Plus,
+                        },
+                        {
+                            name: "Terminated Hotel Reinstatement",
+                            url: "#",
+                            icon: Plus,
+                        },
+                    ],
+                },
+                {
+                    name: "Review And Chat Management",
+                    url: "#",
+                    icon: Plus,
+                },
+            ]
         },
+
         { divider: true },
         {
             name: "Hotel Property Updates",
-            url: "/admin/hotel_property_updates",
+            url: "/admin/hotel_extranet/hotel_property_updates",
             icon: Plus,
         },
+        { divider: true },
         {
-            name: "Promotional Discount",
+            name: "Hotel Enquiry Section",
+            icon: Plus,
+            items: [{
+                name: "Hotel Enquiry",
+                url: "/admin/hotel_extranet//hotel_enquiry",
+                icon: Plus,
+            },
+            {
+                name: "Hotel Details Enquiry",
+                url: "/admin/hotel_extranet//hotel_details_enquiry",
+                icon: Plus,
+            },
+            {
+                name: "Booking Enquiry",
+                url: "/admin/hotel_extranet//hotel_booking_enquiry",
+                icon: Plus,
+            },]
+        },
+        {
+            name: "Hotel Financial Overview",
+            icon: Plus,
+            items: [
+                {
+                    name: "Hotel Call Details Enquiry",
+                    url: "#",
+                },
+                {
+                    name: "Booking Enquiry",
+                    icon: Plus,
+                    items: [
+                        {
+                            name: "Confirm Booking Full Paid",
+                            icon: Plus,
+                            items: [
+                                {
+                                    name: "Previous",
+                                    url: "#",
+                                },
+                                {
+                                    name: "Upcoming",
+                                    url: "#",
+                                },
+                            ],
+                        },
+                        {
+                            name: "Advance Paid Booking",
+                            url: "#",
+                        },
+                        {
+                            name: "Paid Hotel Booking",
+                            url: "#",
+                        },
+                    ],
+                },
+                {
+                    name: "Cancelled Enquiry",
+                    url: "#",
+                },
+                {
+                    name: "No Show Enquiry",
+                    url: "#",
+                },
+                {
+                    name: "Cancel Booking",
+                    url: "#",
+                },
+            ],
+        },
+        {
+            name: "Hotel Booking Invoices",
             url: "#",
             icon: Plus,
         },
         {
-            name: "Hotel Operational or Admisitrative",
-            url: "#",
+            name: "Hotel Finance Payout Overview",
             icon: Plus,
+            items: [
+                {
+                    name: "Total Payout Transfer Or Settlement Invoice",
+                    url: "#",
+                },
+                {
+                    name: "Total Outstanding Invoice",
+                    icon: Plus,
+                    items: [
+                        {
+                            name: "Paid",
+                            url: "#",
+                        },
+                        {
+                            name: "Outstanding",
+                            url: "#",
+                        },
+                    ],
+                },
+                {
+                    name: "Total Commission Or Tax",
+                    icon: Plus,
+                    items: [
+                        {
+                            name: "By Company",
+                            icon: Plus,
+                            items: [
+                                {
+                                    name: "Paid",
+                                    url: "#",
+                                },
+                                {
+                                    name: "Outstanding",
+                                    url: "#",
+                                },
+                            ],
+                        },
+                        {
+                            name: "By Hotel Partner's",
+                            icon: Plus,
+                            items: [
+                                {
+                                    name: "Paid",
+                                    url: "#",
+                                },
+                                {
+                                    name: "Outstanding",
+                                    url: "#",
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
         },
+
+
+        { divider: true },
+
+
         {
-            name: "Hotel Finanace Payout Overview",
+            name: "Create BDM For City",
             url: "#",
             icon: Plus,
         },
+
+
         {
-            name: "Hotel Status (Block, Suspend, Availble)",
-            url: "#",
+            name: "Create Hotel Advertisment",
             icon: Plus,
+            items: [
+                {
+                    name: "Create Hotel Advertisement",
+                    url: "#",
+                },
+                {
+                    name: "Hotel Apply Advertisement Benefit",
+                    url: "#",
+                },
+            ],
         },
+
+
         {
-            name: "Suspended & Terminate Contract",
-            url: "#",
+            name: "Create Hotel Visibility",
             icon: Plus,
+            items: [
+                {
+                    name: "Need Selection Of Hotel Category",
+                    url: "#",
+                },
+                {
+                    name: "Apply For Landing Page",
+                    icon: Plus,
+                    items: [
+                        {
+                            name: "Selection Of",
+                            icon: Plus,
+                            items: [
+                                {
+                                    name: "Home Guest Love",
+                                    url: "#",
+                                },
+                                {
+                                    name: "Deals For The Weekends",
+                                    url: "#",
+                                },
+                                {
+                                    name: "Deals For The Weekends",
+                                    url: "#",
+                                },
+                                {
+                                    name: "Go To Home Page (A Quiet Escape Section)",
+                                    url: "#",
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
         },
+
+
         {
-            name: "Hotel Payout Overview",
-            url: "#",
+            name: "Sale Package",
             icon: Plus,
+            items: [
+                {
+                    name: "Create Sale Package",
+                    icon: Plus,
+                    items: [
+                        {
+                            name: "Name Package & Amount + Duration",
+                            url: "#",
+                        },
+                    ],
+                },
+                {
+                    name: "Apply Package To The Hotel",
+                    url: "#",
+                },
+            ],
         },
+
+
         {
-            name: "Review And Chat Management",
-            url: "#",
+            name: "Request Sale Package Enquiry",
             icon: Plus,
+            items: [
+                {
+                    name: "Approve",
+                    url: "#",
+                },
+                {
+                    name: "Rejected",
+                    url: "#",
+                },
+                {
+                    name: "Upcoming Renewal",
+                    url: "#",
+                },
+                {
+                    name: "Terminated / Suspended",
+                    url: "#",
+                },
+            ],
         },
-        {
-            name: "Booking Enquiry",
-            url: "#",
-            icon: Plus,
-        },
-        {
-            name: "Cancelled Enquiry",
-            url: "#",
-            icon: Plus,
-        },
-        {
-            name: "No Show Enquiry",
-            url: "#",
-            icon: Plus,
-        },
-        {
-            name: "BDM Contact",
-            url: "#",
-            icon: Plus,
-        },
-        {
-            name: "Use Full Link",
-            url: "#",
-            icon: Plus,
-        },
+
+
+        { divider: true },
         {
             name: "Send Promotional Emails",
             url: "#",
             icon: Send,
         },
-        {
-            name: "Hotel Advertisment",
-            url: "#",
-            icon: Send,
-        },
-        { divider: true },
-        {
-            name: "Banner Section 1st",
-            url: "/admin/banner_section_1st",
-            icon: Image
-        },
-        {
-            name: "Banner Section 2nd",
-            url: "/admin/banner_section_2nd",
-            icon: Image
-        },
-        {
-            name: "Banner Section 3rd",
-            url: "/admin/banner_section_3rd",
-            icon: Image
-        },
-        { divider: true },
-        {
-            name: "PopUp Banner",
-            url: "/admin/popup_banner",
-            icon: Image
-        },
-        {
-            name: "Top Advertisment Banner",
-            url: "/admin/top_advertisment_banner",
-            icon: Image
-        },
-        {
-            name: "Add Direct Package",
-            url: "#",
-            icon: Image
-        },
-        {
-            name: "Consultancy Banner",
-            url: "/admin/consultancy_banner",
-            icon: Image
-        },
         // {
-        //   name: "Featured Offered Banner",
-        //   url: "/admin/featured_offered_banner",
-        //   icon: Image
+        //     name: "User Login Logs/Report",
+        //     url: "#",
+        //     icon: Send,
         // },
-        // {
-        //   name: "Category Advertisment",
-        //   url: "/admin/category_advertisment",
-        //   icon: Image
-        // },
-   
-
-
-
-        // { divider: true },
-        // {
-        //   name: "Insta or Facebook Post",
-        //   url: "/admin/insta_fb_post",
-        //   icon: Image
-        // },
-        // {
-        //   name: "Manage Blogs",
-        //   url: "/admin/manage_blogs",
-        //   icon: Rss,
-        // },
-        // {
-        //   name: "News",
-        //   url: "/admin/news",
-        //   icon: Rss,
-        // },
-
-        // { divider: true },
-
-
-        // {
-        //   name: "Manage Featured Product",
-        //   url: "/admin/manage_featured_packages",
-        //   icon: Image,
-        // },
-        // {
-        //   name: "Manage Menu Section",
-        //   url: "/admin/manage_menu",
-        //   icon: MenuIcon,
-        // },
-        // {
-        //   name: "Manage Sub Menu Section",
-        //   url: "/admin/manage_sub_menu",
-        //   icon: MenuIcon,
-        // },
-        // {
-        //   name: "Manage Products & Category",
-        //   url: "/admin/manage_products_category",
-        //   icon: Boxes,
-        // },
-        // {
-        //   name: "View All Products",
-        //   url: "/admin/all_products",
-        //   icon: Boxes,
-        // },
-        // {
-        //   name: "Approve/Reject Reviews",
-        //   url: "/admin/manage_reviews",
-        //   icon: Star,
-        // },
-        // {
-        //   name: "FAQ",
-        //   url: "/admin/faq",
-        //   icon: Star,
-        // },
-        // { divider: true },
-        // {
-        //   name: "Enquiry Order",
-        //   url: "/admin/enquiry_order",
-        //   icon: ShoppingCart,
-        // },
-        // {
-        //   name: "Booking Enquiry Log",
-        //   url: "/admin/booking_enquiry_log",
-        //   icon: ShoppingCart,
-        // },
-        // {
-        //   name: "Online Order Log",
-        //   url: "/admin/online_order_log",
-        //   icon: ShoppingCart,
-        // },
-        // {
-        //   name: "Cancel Order",
-        //   url: "/admin/cancel_orders",
-        //   icon: ClipboardList,
-        // },
-        // { divider: true },
-        // {
-        //   name: "Stock Management",
-        //   url: "/admin/stock_management",
-        //   icon: ClipboardList,
-        // },
-        // { divider: true },
-
-        // {
-        //   name: "Manage Webpages",
-        //   url: "/admin/manage_webpage",
-        //   icon: StickyNote,
-        // },
-
-        // { divider: true },
-
-        // {
-        //   name: "Contact Page Enquiry",
-        //   url: "/admin/contact_page_enquiry",
-        //   icon: MessageCircleMore,
-        // },
-        // {
-        //   name: "Enquiry Chat Page",
-        //   url: "/admin/chat",
-        //   icon: MessageCircleMore,
-        // },
-
-
-        // { divider: true },
-
-
-
-
-        // {
-        //   name: "User Login Logs/Report",
-        //   url: "/admin/user_login_logs",
-        //   icon: Users,
-        // },
-    ],
+    ]
 }
-
-const dataManager = {
-    user: {
-        name: "Welcome, Manager",
-        email: "info@rishikeshrent.com",
-    },
-    projects: [
-        {
-            name: "Sales Section",
-            url: "/admin/sales_section",
-            icon: BarChart,
-        },
-        {
-            name: "Enquiry Chat Page",
-            url: "/admin/manager_enquiry_chat",
-            icon: MessageCircleMore,
-        },
-        {
-            name: "Send Promotional Emails",
-            url: "/admin/send_promotional_emails",
-            icon: Send,
-        },
-    ],
-}
-
 export function AppSidebar({
     ...props
 }) {
     const { data: session } = useSession();
 
     const pathName = usePathname()
+    const canViewSidebar = session?.user?.isSubAdmin || session?.user?.isAdmin
 
     return (
         (
@@ -340,8 +445,7 @@ export function AppSidebar({
                 <Sidebar variant="inset"  {...props}>
                     <NavUser user={session} />
                     <SidebarContent {...props}>
-                        {session?.user?.isSubAdmin && <NavProjects projects={dataManager.projects} />}
-                        {(!session?.user?.isSubAdmin && session?.user?.isAdmin) && <NavProjects projects={data.projects} />}
+                        {canViewSidebar && <NavProjects projects={data.projects} />}
                     </SidebarContent>
                 </Sidebar>
             ))

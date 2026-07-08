@@ -8,6 +8,7 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import imageCompression from 'browser-image-compression';
 const ManageFeaturedPackages = ({section="frontend"}) => {
     const [packages, setPackages] = useState([]);
     const [editingPackage, setEditingPackage] = useState(null);
@@ -179,8 +180,15 @@ const ManageFeaturedPackages = ({section="frontend"}) => {
                                 if (!file) return;
                                 setUploading(true);
                                 try {
+                                    const options = {
+                                        maxSizeMB: 1,
+                                        maxWidthOrHeight: 1920,
+                                        useWebWorker: true,
+                                    };
+                                    const compressedFile = await imageCompression(file, options);
+                                    
                                     const formDataUpload = new FormData();
-                                    formDataUpload.append('file', file);
+                                    formDataUpload.append('file', compressedFile);
                                     const res = await fetch('/api/cloudinary', {
                                         method: 'POST',
                                         body: formDataUpload
