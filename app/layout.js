@@ -33,7 +33,7 @@ export const metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Rishikesh Rent is a wide range of properties for rent in the beautiful city of Rishikesh, catering to various needs and preferences.",
-    description:"We provide a wide range of properties for rent in the beautiful city of Rishikesh, catering to various needs and preferences. Whether you're looking for cozy apartments, spacious villas, or serene cottages with a view of the Ganges, we have something for everyone. Our rental options are ideal for short-term stays, long-term living, or even for those seeking a peaceful retreat in this spiritual hub. With flexible leasing options and prime locations across Rishikesh, we ensure you find the perfect place that suits your lifestyle and budget.",
+    description: "We provide a wide range of properties for rent in the beautiful city of Rishikesh, catering to various needs and preferences. Whether you're looking for cozy apartments, spacious villas, or serene cottages with a view of the Ganges, we have something for everyone. Our rental options are ideal for short-term stays, long-term living, or even for those seeking a peaceful retreat in this spiritual hub. With flexible leasing options and prime locations across Rishikesh, we ensure you find the perfect place that suits your lifestyle and budget.",
     images: ["/logo.png"],
   },
   other: {
@@ -58,13 +58,32 @@ async function getMenuItems() {
     return [];
   }
 }
+async function getCompanyBasicInfo() {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+
+    if (!baseUrl) return null;
+
+    const res = await fetch(`${baseUrl}/api/company-basic-information`, {
+      next: { revalidate: 3600 },
+    });
+
+    if (!res.ok) return null;
+
+    const result = await res.json();
+    return result?.data || null;
+  } catch (error) {
+    console.error("CompanyBasicInfo Fetch Error:", error);
+    return null;
+  }
+}
 import { CartProvider } from "../context/CartContext";
 // import CartSyncOnLogin from "../context/CartSyncOnLogin";
 
 export default async function RootLayout({ children }) {
   const isPaid = process.env.NEXT_PUBLIC_IS_PAID === "true";
   const menuItems = await getMenuItems();
-  return (
+  const companyBasicInfo = await getCompanyBasicInfo(); return (
     <html lang="en" suppressHydrationWarning>
       <body className={`font-gilda`}>
         {isPaid ? (
@@ -75,13 +94,13 @@ export default async function RootLayout({ children }) {
               {/* <CartSyncOnLogin /> */}
               <SearchProvider>
                 <MenuProvider menuItems={menuItems}>
-                  <Header menuItems={menuItems} />
+                  <Header menuItems={menuItems} companyBasicInfo={companyBasicInfo} />
                   {/* <GoogleTranslate /> */}
                   <main>
                     <OverlayButton />
                     {children}
                   </main>
-                  <Footer />
+                  <Footer companyBasicInfo={companyBasicInfo} />
                 </MenuProvider>
               </SearchProvider>
             </SessionWrapper>

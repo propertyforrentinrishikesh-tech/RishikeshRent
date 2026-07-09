@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Home, Hotel, Navigation, Star } from 'lucide-react';
+import { Search, Home, Hotel, Navigation, Star, MapPin, Banknote, Building2, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import Link from 'next/link';
@@ -156,97 +156,111 @@ const SearchSection = () => {
   }, []);
 
   return (
-      <section className="w-full">
-        <div className="bg-[#64a8b1] p-6 md:p-10 flex flex-col gap-5">
-          <div className="text-black">
-          <h2 className="text-2xl md:text-3xl font-bold mb-1 tracking-tight">Best Stays, Better Prices: Book Direct.</h2>
-          <p className="text-base md:text-lg font-semibold text-white">
-            Authentic Comfort. Exceptional Value. Your Home Away From Home In Rishikesh.
-          </p>
+      <section className="w-full bg-slate-50 py-10">
+        <div className="container mx-auto px-4 flex flex-col items-center">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold mb-2 text-gray-900 tracking-tight">Best Stays, Better Prices: Book Direct.</h2>
+            <p className="text-lg font-medium text-gray-600">
+              Authentic Comfort. Exceptional Value. Your Home Away From Home In Rishikesh.
+            </p>
+          </div>
+
+          <div className="w-full max-w-5xl bg-white p-3 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-gray-100">
+            <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-center gap-3 w-full">
+              {/* Location */}
+              <div className="w-full md:w-1/4 h-12 flex items-center border rounded-xl hover:border-gray-300 transition-colors bg-gray-50/50">
+                <MapPin className="text-gray-400 w-5 h-5 ml-4 shrink-0" />
+                <Select
+                  value={location}
+                  onValueChange={(value) => setLocation(value)}
+                  disabled={isLoading}
+                >
+                  <SelectTrigger className="w-full h-full bg-transparent border-none shadow-none text-sm font-medium focus:ring-0 focus:outline-none focus:ring-offset-0 focus-visible:ring-0 focus-visible:outline-none text-gray-700">
+                    <SelectValue placeholder="Destination" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {locations.map((loc, index) => (
+                      <SelectItem key={`loc-${index}`} value={loc.locationType}>
+                        {loc.locationType || `Location ${index + 1}`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Property Type */}
+              <div className="w-full md:w-1/4 h-12 flex items-center border rounded-xl hover:border-gray-300 transition-colors bg-gray-50/50">
+                <Building2 className="text-gray-400 w-5 h-5 ml-4 shrink-0" />
+                <Select
+                  value={propertyType}
+                  onValueChange={(value) => setPropertyType(value)}
+                  disabled={isLoading}
+                >
+                  <SelectTrigger className="w-full h-full bg-transparent border-none shadow-none text-sm font-medium focus:ring-0 focus:outline-none focus:ring-offset-0 focus-visible:ring-0 focus-visible:outline-none text-gray-700">
+                    <SelectValue placeholder="Property Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {propertyTypes.map((type, index) => (
+                      <SelectItem key={`type-${index}`} value={type.propertyType}>
+                        {type.propertyType || `Type ${index + 1}`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {/* Price Range Slider */}
+              <div className="w-full md:w-1/4 h-12 flex items-center px-4 border rounded-xl hover:border-gray-300 transition-colors bg-gray-50/50 group relative">
+                <Banknote className="text-gray-400 w-5 h-5 mr-3 shrink-0" />
+                <div className="flex-grow flex flex-col justify-center relative w-full h-full pt-1">
+                  <div className="flex justify-between items-center w-full mb-1">
+                    <span className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider">Max Price</span>
+                    <span className="text-xs font-bold text-gray-900">₹{maxPrice}</span>
+                  </div>
+                  <div className="relative w-full flex items-center h-2">
+                    <input
+                      type="range"
+                      min="5000"
+                      max="100000"
+                      step="1000"
+                      value={maxPrice}
+                      onChange={(e) => setMaxPrice(e.target.value)}
+                      className="absolute w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500 z-10"
+                      style={{
+                        background: `linear-gradient(to right, #3b82f6 ${(maxPrice - 5000) / (100000 - 5000) * 100}%, #e5e7eb ${(maxPrice - 5000) / (100000 - 5000) * 100}%)`
+                      }}
+                    />
+                    <div
+                      className="absolute -top-7 left-0 transform -translate-x-1/2 bg-gray-800 text-white text-[10px] font-bold py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-20"
+                      style={{ left: `${(maxPrice - 5000) / (100000 - 5000) * 100}%` }}
+                    >
+                      ₹{maxPrice}
+                      <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* Search Button */}
+              <div className="w-full md:w-1/4 h-12">
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full h-full bg-[#1da1f2] hover:bg-[#1a91da] text-white text-base font-semibold rounded-xl transition-colors shadow-md flex items-center justify-center gap-2"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="animate-spin w-5 h-5 mr-2" /> Searching...
+                    </>
+                  ) : (
+                    <>
+                      Search
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </div>
         </div>
-
-        <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-end gap-4 w-full">
-          {/* Location */}
-          <div className="w-full md:w-1/4">
-            <Select
-              value={location}
-              onValueChange={(value) => setLocation(value)}
-              disabled={isLoading}
-            >
-              <SelectTrigger className="w-full bg-white h-10 rounded-full px-5 text-black border-none text-sm font-semibold focus:ring-0 shadow-md">
-                <SelectValue placeholder="Select Location" />
-              </SelectTrigger>
-              <SelectContent>
-                {locations.map((loc, index) => (
-                  <SelectItem key={`loc-${index}`} value={loc.locationType}>
-                    {loc.locationType || `Location ${index + 1}`}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Property Type */}
-          <div className="w-full md:w-1/4">
-            <Select
-              value={propertyType}
-              onValueChange={(value) => setPropertyType(value)}
-              disabled={isLoading}
-            >
-              <SelectTrigger className="w-full bg-white h-10 rounded-full px-5 text-black border-none text-sm font-semibold focus:ring-0 shadow-md">
-                <SelectValue placeholder="Property Type" />
-              </SelectTrigger>
-              <SelectContent>
-                {propertyTypes.map((type, index) => (
-                  <SelectItem key={`type-${index}`} value={type.propertyType}>
-                    {type.propertyType || `Type ${index + 1}`}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Price Range Slider */}
-          <div className="w-full md:w-1/4 flex flex-col text-black font-bold px-3">
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-xs font-semibold">Low</span>
-              <span className="text-sm font-bold">Price Range</span>
-              <span className="text-xs font-semibold">Max</span>
-            </div>
-            <div className="relative flex items-center w-full mt-1">
-               <input
-                type="range"
-                min="5000"
-                max="100000"
-                step="1000"
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(e.target.value)}
-                className="w-full h-1 bg-black rounded-lg appearance-none cursor-pointer accent-red-600 focus:outline-none"
-              />
-            </div>
-            <div className="flex justify-between items-center mt-1 text-[10px] font-semibold">
-              <span>5000</span>
-              <span>1,00,000</span>
-            </div>
-          </div>
-
-          {/* Search Button */}
-          <div className="w-full md:w-1/4">
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="w-full h-10 bg-[#ff6b00] hover:bg-[#e66000] text-black text-sm font-bold rounded-full transition-colors shadow-md"
-            >
-              {isLoading ? "Searching..." : "Search Now"}
-            </Button>
-          </div>
-        </form>
-
-        <p className="text-white text-xs md:text-sm font-medium max-w-5xl mt-1 leading-relaxed">
-          Discover your next getaway without the compromise. We pride ourselves on offering the best rates for your stay, ensuring that luxury and comfort remain perfectly within your budget. Your perfect home away from home is waiting—at the price you deserve.
-        </p>
-      </div>
-    </section>
+      </section>
   );
 };
 

@@ -23,9 +23,9 @@ export default function TopAdvertisementMarquee() {
   if (banners.length === 0) return null;
 
   return (
-    <div className="bg-green-500 overflow-hidden w-[85%] py-[6px]">
+    <div className="bg-[#0f172a] overflow-hidden w-[85%] py-[6px]">
       <div
-        className="relative flex h-10 md:h-8 items-center"
+        className="relative flex h-4 md:h-5 justify-start items-center"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >

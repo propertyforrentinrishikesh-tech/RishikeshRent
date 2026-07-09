@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import PropertyCardsWithPagination from "@/components/PropertyCardsWithPagination";
 import { toast } from "react-hot-toast";
-import { X } from "lucide-react";
+import { X, MapPin } from "lucide-react";
 
 export default function Properties({ initialProducts = [], banners = [] }) {
   const router = useRouter();
@@ -13,7 +13,6 @@ export default function Properties({ initialProducts = [], banners = [] }) {
   const [contactMethod, setContactMethod] = useState("call");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [agreeToContact, setAgreeToContact] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleBookingSubmit = async (e) => {
@@ -28,12 +27,6 @@ export default function Properties({ initialProducts = [], banners = [] }) {
       toast.error("Please select a property");
       return;
     }
-
-    if (!agreeToContact) {
-      toast.error("Please agree to be contacted");
-      return;
-    }
-
     let contactValue = "";
     if (contactMethod === "call" || contactMethod === "whatsapp") {
       if (!phone.trim()) {
@@ -82,7 +75,6 @@ export default function Properties({ initialProducts = [], banners = [] }) {
       setContactMethod("call");
       setPhone("");
       setEmail("");
-      setAgreeToContact(false);
     } catch (error) {
       console.error("Error submitting enquiry:", error);
       toast.error(error.message || "Failed to submit enquiry");
@@ -105,66 +97,85 @@ export default function Properties({ initialProducts = [], banners = [] }) {
 
       {/* Booking Modal */}
       {showBookingModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowBookingModal(false)}>
-          <div className="bg-[#f5a962] rounded-2xl shadow-xl mx-auto w-full max-w-sm relative overflow-hidden" onClick={e => e.stopPropagation()}>
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" 
+          onClick={() => setShowBookingModal(false)}
+        >
+          <div 
+            className="bg-[#0f172a] rounded-[24px] shadow-2xl mx-auto w-full max-w-md h-auto relative overflow-hidden border border-white/10 animate-in zoom-in-95 slide-in-from-bottom-4 duration-300" 
+            onClick={e => e.stopPropagation()}
+          >
             <button
-              className="absolute top-3 right-3 p-2 text-2xl font-bold z-50 rounded-full bg-black text-white flex items-center justify-center hover:bg-gray-800 focus:outline-none"
+              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-colors focus:outline-none"
               onClick={() => setShowBookingModal(false)}
               aria-label="Close booking form"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <form onSubmit={handleBookingSubmit} className="p-6 pt-8">
-              <h2 className="text-2xl font-bold text-center mb-6 text-black">Enquiry For</h2>
+            <form onSubmit={handleBookingSubmit} className="p-8">
+              <h2 className="text-2xl font-bold text-center mb-6 text-white">Enquiry For</h2>
 
               {selectedBookingProperty && (
-                <div className="mb-4 rounded-xl bg-white/40 p-3 text-black">
-                  <p className="text-sm font-semibold">{selectedBookingProperty.propertyName}</p>
-                  <p className="text-xs">{selectedBookingProperty.locationType || selectedBookingProperty.subLocationType}</p>
+                <div className="mb-6 rounded-xl bg-white/5 border border-white/10 p-4">
+                  <p className="text-sm font-semibold text-white mb-1 line-clamp-1">{selectedBookingProperty.propertyName}</p>
+                  <p className="text-xs text-gray-400 flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-[#1bb9c3]" />
+                    {selectedBookingProperty.locationType || selectedBookingProperty.subLocationType}
+                  </p>
                 </div>
               )}
 
-              <div className="mb-4">
-                <label className="text-sm font-bold text-black mb-2 block">Your Name</label>
+              <div className="mb-5">
+                <label className="text-sm font-semibold text-gray-300 mb-2 block">Your Name</label>
                 <input
                   type="text"
                   placeholder="Enter your name"
                   value={bookingName}
                   onChange={(e) => setBookingName(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg bg-white/90 text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-300"
+                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-[#1bb9c3] focus:ring-1 focus:ring-[#1bb9c3] transition-all"
                 />
               </div>
 
               <div className="flex gap-6 mb-6">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="contact"
-                    value="call"
-                    checked={contactMethod === "call"}
-                    onChange={(e) => setContactMethod(e.target.value)}
-                    className="w-4 h-4"
-                  />
-                  <span className="text-sm font-medium text-black">Call</span>
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <div className="relative flex items-center justify-center">
+                    <input
+                      type="radio"
+                      name="contact"
+                      value="call"
+                      checked={contactMethod === "call"}
+                      onChange={(e) => setContactMethod(e.target.value)}
+                      className="peer sr-only"
+                    />
+                    <div className="w-5 h-5 rounded-full border-2 border-gray-500 peer-checked:border-[#1bb9c3] peer-checked:bg-[#1bb9c3] transition-all flex items-center justify-center">
+                      <div className="w-2 h-2 rounded-full bg-white opacity-0 peer-checked:opacity-100 transition-opacity"></div>
+                    </div>
+                  </div>
+                  <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">Call</span>
                 </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="contact"
-                    value="whatsapp"
-                    checked={contactMethod === "whatsapp"}
-                    onChange={(e) => setContactMethod(e.target.value)}
-                    className="w-4 h-4"
-                  />
-                  <span className="text-sm font-medium text-black">WhatsApp</span>
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <div className="relative flex items-center justify-center">
+                    <input
+                      type="radio"
+                      name="contact"
+                      value="whatsapp"
+                      checked={contactMethod === "whatsapp"}
+                      onChange={(e) => setContactMethod(e.target.value)}
+                      className="peer sr-only"
+                    />
+                    <div className="w-5 h-5 rounded-full border-2 border-gray-500 peer-checked:border-[#25D366] peer-checked:bg-[#25D366] transition-all flex items-center justify-center">
+                      <div className="w-2 h-2 rounded-full bg-white opacity-0 peer-checked:opacity-100 transition-opacity"></div>
+                    </div>
+                  </div>
+                  <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">WhatsApp</span>
                 </label>
               </div>
 
               {(contactMethod === "call" || contactMethod === "whatsapp") && (
-                <div className="mb-4">
+                <div className="mb-5">
                   <div className="flex gap-2">
-                    <div className="bg-red-600 text-white rounded-lg px-3 py-2 font-bold flex items-center">
+                    <div className="bg-white/5 border border-white/10 text-gray-300 rounded-xl px-4 font-semibold flex items-center">
                       +91
                     </div>
                     <input
@@ -173,42 +184,40 @@ export default function Properties({ initialProducts = [], banners = [] }) {
                       value={phone}
                       onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
                       maxLength="10"
-                      className="flex-1 px-4 py-2 rounded-lg bg-white/90 text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-300"
+                      className="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-[#1bb9c3] focus:ring-1 focus:ring-[#1bb9c3] transition-all"
                     />
                   </div>
                 </div>
               )}
 
-              <div className="mb-4">
-                <div className="text-black text-center py-1 rounded text-md font-bold mb-2">Or Email</div>
+              <div className="mb-6 relative flex items-center py-2">
+                 <div className="flex-grow border-t border-white/10"></div>
+                 <span className="flex-shrink-0 mx-4 text-xs font-medium text-gray-500 uppercase tracking-widest">Or Email</span>
+                 <div className="flex-grow border-t border-white/10"></div>
+              </div>
+
+              <div className="mb-6">
                 <input
                   type="email"
                   placeholder="Enter Your Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg bg-blue-100 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-300"
+                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-[#1bb9c3] focus:ring-1 focus:ring-[#1bb9c3] transition-all"
                 />
               </div>
 
-              <div className="mb-6 flex gap-3">
-                <input
-                  type="checkbox"
-                  id="agree"
-                  checked={agreeToContact}
-                  onChange={(e) => setAgreeToContact(e.target.checked)}
-                  className="w-4 h-4 mt-1 accent-black"
-                />
-                <label htmlFor="agree" className="text-xs text-black leading-tight">
-                  We Appreciate Your Interest! A Member of Our Team Will Reach Out to You Soon to Discuss Your Offer
+              <div className="mb-8 flex gap-3 items-start">
+                <label htmlFor="agree" className="text-xs text-gray-400 leading-relaxed cursor-pointer select-none">
+                  We Appreciate Your Interest! A Member of Our Team Will Reach Out to You Soon to Discuss Your Offer.
                 </label>
               </div>
 
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-black text-white font-bold py-3 rounded-full hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-full bg-gradient-to-r from-[#1bb9c3] to-[#15a1ab] text-white font-bold py-3.5 rounded-xl hover:shadow-lg hover:shadow-[#1bb9c3]/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98]"
               >
-                {isSubmitting ? "Submitting..." : "Submit"}
+                {isSubmitting ? "Submitting..." : "Send Enquiry"}
               </button>
             </form>
           </div>

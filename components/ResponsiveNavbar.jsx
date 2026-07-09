@@ -15,7 +15,7 @@ const ResponsiveNavbar = ({ sections = [] }) => {
   }
 
   return (
-    <NavigationMenu.Root className="hidden relative z-[99] isolate lg:flex w-full justify-center">
+    <NavigationMenu.Root className="hidden relative z-[50] isolate lg:flex w-full justify-end">
       <NavigationMenu.List className="relative z-[99] flex items-center justify-center gap-1 rounded-md bg-white px-1 py-1">
         {visibleSections.map((section) => {
           const hasSubSections = Array.isArray(section.subSections) && section.subSections.some((item) => item?.active);
@@ -51,7 +51,7 @@ const ResponsiveNavbar = ({ sections = [] }) => {
                     duration: 0.25,
                     ease: "easeOut",
                   }}
-                  className="absolute left-1/2 top-full mt-3 -mintranslate-x-1/2 min-w-[240px] w-max rounded-xl border border-gray-200 bg-white p-2 shadow-2xl"
+                  className="absolute -right-[50%] top-full mt-3 -translate-y-1/2 min-w-[240px] w-max rounded-xl border border-gray-200 bg-white p-2 shadow-2xl"
                 >
                   <div className="grid gap-1">
                     {sortedSubSections.map((subSection, index) => (

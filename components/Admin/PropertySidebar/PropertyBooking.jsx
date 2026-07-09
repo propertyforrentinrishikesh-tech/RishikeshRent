@@ -473,10 +473,10 @@ const PropertyBooking = ({ locationType = [] }) => {
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center text-2xl font-bold">
-                      {selectedEnquiry.fullName?.charAt(0)?.toUpperCase() || "?"}
+                      {selectedEnquiry.firstName?.charAt(0)?.toUpperCase() || "?"}
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold">{selectedEnquiry.fullName}</h2>
+                      <h2 className="text-xl font-bold">{selectedEnquiry.firstName + " " + selectedEnquiry.lastName}</h2>
                       <p className="text-teal-100 text-sm flex items-center gap-1 mt-0.5">
                         <Phone className="w-3.5 h-3.5" />{selectedEnquiry.phone}
                       </p>
@@ -530,7 +530,7 @@ const PropertyBooking = ({ locationType = [] }) => {
                   </h3>
                   <div className="space-y-2">
                     <InfoRow label="Guest Title" value={selectedEnquiry.guestTitle} />
-                    <InfoRow label="Full Name" value={selectedEnquiry.fullName} />
+                    <InfoRow label="Full Name" value={selectedEnquiry.firstName+ " "+ selectedEnquiry.lastName} />
                     <InfoRow label="Phone" value={selectedEnquiry.phone} />
                     <InfoRow label="Email" value={selectedEnquiry.email} />
                     <InfoRow label="Total Persons" value={selectedEnquiry.totalPersons} />

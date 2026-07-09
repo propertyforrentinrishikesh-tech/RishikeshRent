@@ -23,7 +23,7 @@ const HeroSection = ({ section = "frontend" }) => {
   const [mobileApi, setMobileApi] = useState(null);
   const [mobileSelectedIndex, setMobileSelectedIndex] = useState(0);
   const plugin = useRef(Autoplay({ delay: 5000, stopOnInteraction: false }));
-// console.log(section,banners)
+  // console.log(section,banners)
   useEffect(() => {
     const fetchBanners = async () => {
       try {
@@ -69,8 +69,6 @@ const HeroSection = ({ section = "frontend" }) => {
 
 
   const { isSearchOpen, setIsSearchOpen } = useSearch();
-  const router = useRouter();
-
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.ctrlKey && event.key === "k") {
@@ -82,28 +80,28 @@ const HeroSection = ({ section = "frontend" }) => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-if(banners.length === 0){
-  return (
-    <section className="bg-[#0f172a] text-white py-20 px-6 md:px-16 w-full flex flex-col justify-center items-start min-h-[500px]">
-      <div className="max-w-4xl mx-auto w-full">
-        <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-wider text-gray-300 uppercase bg-white/5 rounded-full mb-8 border border-white/10">
-          The Challenge
-        </span>
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
-          Most Strategic Decisions Are Made With Insufficient Clarity.
-        </h1>
-        <p className="text-gray-400 text-lg md:text-xl mb-12 max-w-3xl leading-relaxed">
-          Executives face compounding complexity — market disruption, organisational inertia, data overload. Without a structured framework, the highest-stakes decisions rely on instinct alone.
-        </p>
-        <Link href="/properties">
-          <Button className="bg-white text-black hover:bg-gray-200 rounded-full px-8 py-6 text-sm font-semibold tracking-widest uppercase">
-            View Properties
-          </Button>
-        </Link>
-      </div>
-    </section>
-  );
-}
+  if (banners.length === 0) {
+    return (
+      <section className="bg-[#0f172a] text-white py-20 px-6 md:px-16 w-full flex flex-col justify-center items-start min-h-[500px]">
+        <div className="max-w-4xl mx-auto w-full">
+          <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-wider text-gray-300 uppercase bg-white/5 rounded-full mb-8 border border-white/10">
+            The Challenge
+          </span>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
+            Most Strategic Decisions Are Made With Insufficient Clarity.
+          </h1>
+          <p className="text-gray-400 text-lg md:text-xl mb-12 max-w-3xl leading-relaxed">
+            Executives face compounding complexity — market disruption, organisational inertia, data overload. Without a structured framework, the highest-stakes decisions rely on instinct alone.
+          </p>
+          <Link href="/properties">
+            <Button className="bg-white text-black hover:bg-gray-200 rounded-full px-8 py-6 text-sm font-semibold tracking-widest uppercase">
+              View Properties
+            </Button>
+          </Link>
+        </div>
+      </section>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -143,7 +141,7 @@ if(banners.length === 0){
               {banners.map((item, index) => (
                 <CarouselItem key={index} className="h-[100vh] md:h-[430px]">
                   <Link href={item?.buttonLink || "#"} className="block h-full w-full">
-                  <div className="relative h-[100vh] md:h-[430px] w-full flex items-center justify-center">
+                    <div className="relative h-[100vh] md:h-[430px] w-full flex items-center justify-center">
                       <Image
                         src={item?.frontImg?.url || "/placeholder.jpeg"}
                         alt={item?.title || "Banner Image"}
@@ -186,14 +184,14 @@ if(banners.length === 0){
             {banners.map((banner, index) => (
               <CarouselItem key={index} className="flex flex-col items-center justify-center relative">
                 <Link href={banner?.buttonLink || "#"} className="block h-full w-full">
-                <div className="relative w-full flex flex-col items-center">
-                  {/* Front Image only for mobile */}
-                  <img
-                    src={banner.mobileImg?.url || "/bg1.jpg"}
-                    alt={banner.title ? `${banner.title} Front` : "Banner Image"}
-                    className="object-contain w-full h-full shadow-lg z-0"
-                  />
-                </div>
+                  <div className="relative w-full flex flex-col items-center">
+                    {/* Front Image only for mobile */}
+                    <img
+                      src={banner.mobileImg?.url || "/bg1.jpg"}
+                      alt={banner.title ? `${banner.title} Front` : "Banner Image"}
+                      className="object-contain w-full h-full shadow-lg z-0"
+                    />
+                  </div>
                 </Link>
               </CarouselItem>
             ))}

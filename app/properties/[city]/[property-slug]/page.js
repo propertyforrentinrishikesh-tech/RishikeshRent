@@ -6,7 +6,7 @@ import PropertyDetails from "@/models/Property/PropertyDetails";
 async function fetchPropertyBySlug(slug) {
     try {
         await connectDB();
-        const property = await PropertyDetails.findOne({ propertyNameSlug: slug });
+        const property = await PropertyDetails.findOne({ propertyNameSlug: slug }).select("-contactNumbers -ownerName -emailAddresses -brokerName");
         // Convert Mongoose document to plain POJO
         return property ? JSON.parse(JSON.stringify(property)) : null;
     } catch (error) {
@@ -15,7 +15,7 @@ async function fetchPropertyBySlug(slug) {
     }
 
 }
-
+ 
 // Fetch related properties
 async function fetchRelatedProperties(locationType, propertyType, currentId) {
     try {
@@ -39,7 +39,7 @@ export default async function PropertyPage({ params }) {
 
     // Fetch directly from DB since we are in a server component with direct DB access 
     const property = await fetchPropertyBySlug(slug);
-
+    // console.log(property)
     if (!property) {
         return <div className="p-10 text-center">Property not found</div>;
     }

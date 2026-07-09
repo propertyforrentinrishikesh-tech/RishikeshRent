@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import connectDB  from '@/lib/connectDB';
-import HostelRegistration from '@/models/HostelRegistration';
+import PropertyDetails from '@/models/Property/PropertyDetails';
 
 export async function POST(req) {
     try {
@@ -8,7 +8,7 @@ export async function POST(req) {
         const data = await req.json();
 
         // Create new hostel registration
-        const registration = new HostelRegistration(data);
+        const registration = new PropertyDetails(data);
         await registration.save();
 
         return NextResponse.json(
@@ -16,9 +16,9 @@ export async function POST(req) {
                 success: true, 
                 message: 'Property registration submitted successfully',
                 data: {
-                    caseIdNumber: registration.caseIdNumber,
+                    caseIdNumber: registration.caseIdNumber || registration._id.toString().slice(-6).toUpperCase(),
                     propertyName: registration.propertyName,
-                    contactNumber: registration.contactNumber
+                    contactNumber: registration.contactNumbers?.[0] || 'N/A'
                 }
             },
             { status: 201 }
@@ -46,7 +46,7 @@ export async function GET(req) {
             query.status = status;
         }
 
-        const registrations = await HostelRegistration.find(query).sort({ createdAt: -1 });
+        const registrations = await PropertyDetails.find(query).sort({ createdAt: -1 });
 
         return NextResponse.json(
             { success: true, data: registrations },
@@ -80,7 +80,7 @@ export async function PUT(req) {
             return NextResponse.json({ success: false, error: 'Status is required' }, { status: 400 });
         }
 
-        const updatedRegistration = await HostelRegistration.findByIdAndUpdate(
+        const updatedRegistration = await PropertyDetails.findByIdAndUpdate(
             id,
             { status },
             { new: true }

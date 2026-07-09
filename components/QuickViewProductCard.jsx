@@ -6,7 +6,7 @@ import Autoplay from "embla-carousel-autoplay";
 import { ArrowRight, Heart, X } from "lucide-react";
 import Image from "next/image";
 
-export default function QuickViewProductCard({ product, onClose, onRequestBook }) {
+export default function QuickViewProductCard({ product, onClose, onBookingClick }) {
   const [activeImageIdx, setActiveImageIdx] = useState(0);
   const [carouselApi, setCarouselApi] = useState(null);
   const [images, setImages] = useState([]);
@@ -54,10 +54,9 @@ export default function QuickViewProductCard({ product, onClose, onRequestBook }
 
   return (
 
-    <div className="relative bg-white rounded-lg md:max-w-5xl w-full max-h-[90vh] overflow-y-auto p-4">
+    <div className="relative bg-white rounded-lg md:max-w-7xl h-[520px] max-h-[95vh] overflow-y-auto p-4">
       {/* Header */}
-      <div className="">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* Image Gallery */}
           <div className="relative">
             <Carousel
@@ -78,9 +77,11 @@ export default function QuickViewProductCard({ product, onClose, onRequestBook }
                     <Image
                       src={img}
                       alt={`Property image ${idx + 1}`}
-                      fill
+                      width={640}
+                      height={480}
+                      loading="lazy"
                       className="object-contain rounded-lg w-full h-full"
-                      priority={idx === 0}
+                      
                     />
                   </CarouselItem>
                 ))}
@@ -111,7 +112,7 @@ export default function QuickViewProductCard({ product, onClose, onRequestBook }
                             carouselApi?.scrollTo(idx);
                             setActiveImageIdx(idx);
                           }}
-                          className={`w-full h-full border-2 rounded-md overflow-hidden transition-all ${
+                          className={`w-full h-full border rounded-md overflow-hidden transition-all ${
                             activeImageIdx === idx 
                               ? 'border-blue-500 scale-105' 
                               : 'border-transparent hover:border-gray-300'
@@ -122,7 +123,8 @@ export default function QuickViewProductCard({ product, onClose, onRequestBook }
                             alt={`Thumbnail ${idx + 1}`}
                             width={64}
                             height={64}
-                            className="w-full h-full object-contain rounded-md"
+                            loading="lazy"
+                            className="w-24 h-24 object-cover rounded-md"
                           />
                         </button>
                       </CarouselItem>
@@ -136,8 +138,8 @@ export default function QuickViewProductCard({ product, onClose, onRequestBook }
           </div>
 
           {/* Property Details */}
-          <div>
-            <h1 className="text-2xl font-bold mb-2 text-wrap pr-7">{product.propertyName}</h1>
+          <div className="flex  p-2 justify-between flex-col">
+            <h1 className="text-2xl font-bold mb-2 text-wrap">{product.propertyName}</h1>
             <div className="flex items-center gap-2 text-gray-600 mb-4">
               <span>{product.locationType}</span>
               {product.propertyType && (
@@ -163,7 +165,7 @@ export default function QuickViewProductCard({ product, onClose, onRequestBook }
                   {product.highlights.map((highlight, idx) => (
                     <li key={idx} className="flex items-center gap-2">
                       <span className="text-green-500">✓</span>
-                      <span>{highlight}</span>
+                      <span className="text-sm">{highlight}</span>
                     </li>
                   ))}
                 </ul>
@@ -186,30 +188,17 @@ export default function QuickViewProductCard({ product, onClose, onRequestBook }
                   <p>{product.contactAddress}</p>
                 </div>
               )}
-
-              {/* {product.contactNumbers?.map((number, idx) => (
-                <a
-                  key={idx}
-                  href={`tel:${number}`}
-                  className="flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-2"
-                >
-                  <span className="text-lg">📞</span>
-                  <span>{number}</span>
-                </a>
-              ))} */}
-
               <button
                 className="mt-4 w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
                 type="button"
-                onClick={() => onRequestBook?.(product)}
+                onClick={() => onBookingClick?.(product)}
               >
                 Request Book<ArrowRight className="w-4 h-4 ml-1" />
               </button>
             </div>
           </div>
-        </div>
       </div>
     </div>
 
-  );
+  );  
 }

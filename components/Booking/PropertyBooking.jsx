@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -18,7 +18,7 @@ export default function PropertyBooking({ property }) {
     property?.contactAddress ||
     [property?.galiType, property?.subLocationType, property?.locationType].filter(Boolean).join(" ") ||
     "Address not available";
-  const propertyPrice = Number(property?.maxRentPrice ||property?.rentPrice|| 0);
+  const propertyPrice = Number(property?.maxRentPrice || property?.rentPrice || 0);
   const fullRentAmount = propertyPrice;
   const advanceAmount = Math.round(propertyPrice * 0.25);
   const customAmountMin = Math.max(Math.ceil(propertyPrice * 0.1), 1);
@@ -33,14 +33,14 @@ export default function PropertyBooking({ property }) {
       .replace(/--+/g, '-');
   const [formData, setFormData] = useState({
     title: "Mr.",
-    fullName: "",
+    firstName: "",
+    lastName: "",
     phone: "",
     email: "",
     totalPersons: 1,
     checkInDate: "",
     lengthOfStay: "",
     idProofType: "Aadhaar Card",
-    idProofType: "",
     idImage: { url: "", key: "", loading: false },
   });
   const [selectedPaymentOption, setSelectedPaymentOption] = useState("");
@@ -48,6 +48,29 @@ export default function PropertyBooking({ property }) {
   const [formErrors, setFormErrors] = useState({});
   const [paymentLoading, setPaymentLoading] = useState(false);
   const idImageRef = useRef(null);
+
+  // Prevent accidental page refresh
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      e.preventDefault();
+      e.returnValue = ''; // Required for Chrome to show dialog
+      return '';
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
+
+  // Email Verification State
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [isOtpSent, setIsOtpSent] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [emailLoading, setEmailLoading] = useState(false);
+  const [emailError, setEmailError] = useState("");
+  const [emailSuccess, setEmailSuccess] = useState("");
 
   const selectedPaymentAmount =
     selectedPaymentOption === "full"
@@ -139,10 +162,91 @@ export default function PropertyBooking({ property }) {
     clearFieldError("idImage");
   };
 
+  const handleSendOTP = async (e) => {
+    e.preventDefault();
+    
+    if (!formData.email) {
+      setEmailError("Please enter your email first.");
+      return;
+    }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setEmailError("Invalid email format.");
+      return;
+    }
+
+    setEmailLoading(true);
+    setEmailError("");
+    setEmailSuccess("");
+
+    try {
+      const response = await fetch('/api/property/booking-otp/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setEmailSuccess("OTP sent successfully to your email!");
+        setIsOtpSent(true);
+      } else {
+        setEmailError(data.message || "Failed to send OTP");
+      }
+    } catch (err) {
+      console.error('Send OTP error:', err);
+      setEmailError("An error occurred. Please try again.");
+    } finally {
+      setEmailLoading(false);
+    }
+  };
+
+  const handleVerifyOTP = async (e) => {
+    e.preventDefault();
+    if (!otp) {
+      setEmailError("Please enter the OTP.");
+      return;
+    }
+
+    setEmailLoading(true);
+    setEmailError("");
+
+    try {
+      const response = await fetch('/api/property/booking-otp/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email, otp }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setEmailSuccess("Email verified successfully!");
+        setIsEmailVerified(true);
+        setIsOtpSent(false);
+        setOtp("");
+      } else {
+        setEmailError(data.message || "Verification failed");
+      }
+    } catch (err) {
+      console.error('Verify OTP error:', err);
+      setEmailError("An error occurred. Please try again.");
+    } finally {
+      setEmailLoading(false);
+    }
+  };
+
   const validateForm = () => {
     const errors = {};
 
-    if (!formData.fullName.trim()) errors.fullName = "Full name is required";
+    if (!formData.firstName.trim()) errors.firstName = "First name is required";
+
+    if (!isEmailVerified) {
+      errors.email = "Please verify your email address before booking.";
+      toast.error("Please verify your email address.");
+    }
 
     const phoneNormalized = (formData.phone || "").replace(/[^0-9]/g, "");
     if (!phoneNormalized) errors.phone = "Phone is required";
@@ -153,7 +257,6 @@ export default function PropertyBooking({ property }) {
 
     if (!formData.totalPersons || Number(formData.totalPersons) < 1) errors.totalPersons = "At least 1 person required";
     if (!formData.checkInDate) errors.checkInDate = "Check-in date is required";
-    if (!formData.lengthOfStay) errors.lengthOfStay = "Length of stay is required";
     if (!formData.idImage.url) errors.idImage = "Please upload ID proof image";
     if (!selectedPaymentOption) errors.paymentOption = "Please select a payment option";
 
@@ -239,12 +342,12 @@ export default function PropertyBooking({ property }) {
         checkInDate: "",
         lengthOfStay: "",
         idProofType: "Aadhaar Card",
-        idProofType: "",
         idImage: { url: "", key: "", loading: false },
       });
       setSelectedPaymentOption("");
       setCustomAmount("");
       setFormErrors({});
+      setIsEmailVerified(false);
       
       setTimeout(() => {
         router.push(`/properties/${slugify(propertyLocation)}/${slugify(propertySlug)}`);
@@ -306,75 +409,149 @@ export default function PropertyBooking({ property }) {
                 </div>
                 <div className="hidden rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 md:block">Step 1 of 3</div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="mb-2 block text-sm font-semibold text-slate-700">Title</label>
-                  <select
-                    name="title"
-                    value={formData.title}
-                    onChange={handleChange}
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-100"
-                  >
-                    <option>Mr.</option>
-                    <option>Ms.</option>
-                    <option>Mrs.</option>
-                    <option>Dr.</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-semibold text-slate-700">Full Name</label>
-                  <input
-                    type="text"
-                    name="fullName"
-                    value={formData.fullName}
-                    onChange={handleChange}
-                    placeholder="Enter full name"
-                    className={`w-full rounded-2xl border px-4 py-3 text-sm text-slate-900 outline-none transition focus:ring-4 ${formErrors.fullName ? "border-red-400 focus:ring-red-100" : "border-slate-200 focus:border-blue-400 focus:ring-blue-100"}`}
-                  />
-                  {formErrors.fullName && <p className="text-xs text-red-600 mt-1">{formErrors.fullName}</p>}
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-semibold text-slate-700">Phone Number</label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handlePhoneChange}
-                    placeholder="+91 XXXXXXXXXX"
-                    className={`w-full rounded-2xl border px-4 py-3 text-sm text-slate-900 outline-none transition focus:ring-4 ${formErrors.phone ? "border-red-400 focus:ring-red-100" : "border-slate-200 focus:border-blue-400 focus:ring-blue-100"}`}
-                  />
-                  {formErrors.phone && <p className="text-xs text-red-600 mt-1">{formErrors.phone}</p>}
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-semibold text-slate-700">Email</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="Enter email address"
-                    className={`w-full rounded-2xl border px-4 py-3 text-sm text-slate-900 outline-none transition focus:ring-4 ${formErrors.email ? "border-red-400 focus:ring-red-100" : "border-slate-200 focus:border-blue-400 focus:ring-blue-100"}`}
-                  />
-                  {formErrors.email && <p className="text-xs text-red-600 mt-1">{formErrors.email}</p>}
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-semibold text-slate-700">Total Number of Persons</label>
-                  <div className="flex items-center overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                    <input
-                      type="number"
-                      name="totalPersons"
-                      value={formData.totalPersons}
+              <div className="flex flex-col gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 items-center justify-between gap-2 w-full">
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-slate-700">Title</label>
+                    <select
+                      name="title"
+                      value={formData.title}
                       onChange={handleChange}
-                      min="1"
-                      className="w-full bg-transparent px-4 py-3 text-sm text-slate-900 outline-none"
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-100"
+                    >
+                      <option>Mr.</option>
+                      <option>Miss.</option>
+                      <option>Mrs.</option>
+                      <option>Dr.</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-slate-700">Full Name</label>
+                    <input
+                      type="text"
+                      name="firstName"
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      placeholder="Enter first name"
+                      className={`w-full rounded-2xl border px-4 py-3 text-sm text-slate-900 outline-none transition focus:ring-4 ${formErrors.firstName ? "border-red-400 focus:ring-red-100" : "border-slate-200 focus:border-blue-400 focus:ring-blue-100"}`}
                     />
-                    {/* <div className="bg-slate-900 px-4 py-3 text-sm font-bold text-white">+</div> */}
+                    {formErrors.firstName && <p className="text-xs text-red-600 mt-1">{formErrors.firstName}</p>}
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-slate-700">Full Name</label>
+                    <input
+                      type="text"
+                      name="lastName"
+                      value={formData.lastName}
+                      onChange={handleChange}
+                      placeholder="Enter last name"
+                      className={`w-full rounded-2xl border px-4 py-3 text-sm text-slate-900 outline-none transition focus:ring-4 ${formErrors.lastName ? "border-red-400 focus:ring-red-100" : "border-slate-200 focus:border-blue-400 focus:ring-blue-100"}`}
+                    />
+                    {formErrors.lastName && <p className="text-xs text-red-600 mt-1">{formErrors.lastName}</p>}
+                  </div>
+                </div>
+                <div className="grid grid-col-1 md:grid-cols-2 gap-2  ">
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-slate-700">Phone Number</label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handlePhoneChange}
+                      placeholder="+91 XXXXXXXXXX"
+                      className={`w-full rounded-2xl border px-4 py-3 text-sm text-slate-900 outline-none transition focus:ring-4 ${formErrors.phone ? "border-red-400 focus:ring-red-100" : "border-slate-200 focus:border-blue-400 focus:ring-blue-100"}`}
+                    />
+                    {formErrors.phone && <p className="text-xs text-red-600 mt-1">{formErrors.phone}</p>}
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-slate-700">Total Number of Persons</label>
+                    <div className="flex items-center overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                      <input
+                        type="number"
+                        name="totalPersons"
+                        value={formData.totalPersons}
+                        onChange={handleChange}
+                        min="1"
+                        className="w-full bg-transparent px-4 py-3 text-sm text-slate-900 outline-none"
+                      />
+                      {/* <div className="bg-slate-900 px-4 py-3 text-sm font-bold text-white">+</div> */}
+                    </div>
                   </div>
                   {formErrors.totalPersons && <p className="text-xs text-red-600 mt-1">{formErrors.totalPersons}</p>}
+                </div>
+                <div className="md:col-span-3">
+                  <label className="mb-2 block text-sm font-semibold text-slate-700">Email</label>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex flex-col md:flex-row items-center gap-3">
+                      <div className="relative flex-1 w-full">
+                        <input
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={(e) => {
+                            handleChange(e);
+                            if (isEmailVerified) setIsEmailVerified(false);
+                            if (isOtpSent) setIsOtpSent(false);
+                          }}
+                          disabled={isEmailVerified || emailLoading}
+                          placeholder="Enter email address"
+                          className={`w-full rounded-2xl border px-4 py-3 text-sm text-slate-900 outline-none transition focus:ring-4 ${
+                            formErrors.email ? "border-red-400 focus:ring-red-100" : "border-slate-200 focus:border-blue-400 focus:ring-blue-100"
+                          } ${isEmailVerified ? "bg-slate-50 opacity-80" : ""}`}
+                        />
+                        {isEmailVerified && (
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-500 bg-emerald-50 p-1 rounded-full">
+                            <Check className="w-4 h-4 stroke-[3]" />
+                          </div>
+                        )}
+                      </div>
+                      
+                      {!isEmailVerified && !isOtpSent && (
+                        <Button
+                          type="button"
+                          onClick={handleSendOTP}
+                          disabled={!formData.email || emailLoading}
+                          className="w-full md:w-auto shrink-0 rounded-2xl bg-slate-900 px-6 py-3 text-white shadow-lg transition-all hover:bg-slate-800 disabled:opacity-50 h-[46px]"
+                        >
+                          {emailLoading ? "Sending..." : "Verify Email"}
+                        </Button>
+                      )}
+                    </div>
+                    
+                    {formErrors.email && <p className="text-xs text-red-600">{formErrors.email}</p>}
+                    {emailError && <p className="text-xs text-red-600">{emailError}</p>}
+                    {emailSuccess && <p className="text-xs text-emerald-600">{emailSuccess}</p>}
+
+                    {/* OTP Input Section */}
+                    {isOtpSent && !isEmailVerified && (
+                      <div className="mt-3 p-4 bg-blue-50/50 border border-blue-100 rounded-2xl flex flex-col md:flex-row items-center gap-3 animate-in fade-in slide-in-from-top-2">
+                        <input
+                          type="text"
+                          value={otp}
+                          onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                          placeholder="Enter 6-digit OTP"
+                          maxLength={6}
+                          className="w-full md:flex-1 rounded-xl border border-blue-200 bg-white px-4 py-3 text-center text-lg tracking-[0.2em] font-medium outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-100"
+                        />
+                        <Button
+                          type="button"
+                          onClick={handleVerifyOTP}
+                          disabled={otp.length !== 6 || emailLoading}
+                          className="w-full md:w-auto shrink-0 rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white shadow-md transition-all hover:bg-blue-700 disabled:opacity-50 h-[48px]"
+                        >
+                          {emailLoading ? "Verifying..." : "Confirm OTP"}
+                        </Button>
+                        <button
+                          type="button"
+                          onClick={handleSendOTP}
+                          disabled={emailLoading}
+                          className="text-sm font-medium text-blue-600 underline hover:text-blue-700 disabled:opacity-50 mt-2 md:mt-0"
+                        >
+                          Resend OTP
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -397,18 +574,6 @@ export default function PropertyBooking({ property }) {
                   className={`w-full rounded-2xl border px-4 py-3 text-sm text-slate-900 outline-none transition focus:ring-4 ${formErrors.checkInDate ? "border-red-400 focus:ring-red-100" : "border-slate-200 focus:border-blue-400 focus:ring-blue-100"}`}
                 />
                 {formErrors.checkInDate && <p className="text-xs text-red-600 mt-1">{formErrors.checkInDate}</p>}
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-semibold text-slate-700">Check Out Date</label>
-                <input
-                  type="date"
-                  name="lengthOfStay"
-                  value={formData.lengthOfStay}
-                  onChange={handleChange}
-                  className={`w-full rounded-2xl border px-4 py-3 text-sm text-slate-900 outline-none transition focus:ring-4 ${formErrors.lengthOfStay ? "border-red-400 focus:ring-red-100" : "border-slate-200 focus:border-blue-400 focus:ring-blue-100"}`}
-                />
-                {formErrors.lengthOfStay && <p className="text-xs text-red-600 mt-1">{formErrors.lengthOfStay}</p>}
               </div>
             </div>
 

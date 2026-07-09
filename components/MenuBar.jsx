@@ -6,8 +6,21 @@ import Link from "next/link";
 import { ArrowDown, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
+import { usePathname } from "next/navigation";
+import { getPublicMenuSection } from "@/lib/menu-section";
 const MenuBar = (props) => {
+    // console.log("MenuBar props:", props);
     const menuRef = React.useRef(null);
+    const pathname = usePathname();
+    const menuSection = props.section || getPublicMenuSection(pathname);
+    const useFrontendOnly = menuSection === "frontend";
+    const buildMenuUrl = (basePath) => {
+        const params = new URLSearchParams({ section: menuSection });
+        if (useFrontendOnly) {
+            params.set("frontendOnly", "1");
+        }
+        return `${basePath}?${params.toString()}`;
+    };
     const [isOpen, setIsOpen] = useState(false);
     // Close menu when clicking outside (mobile)
     useEffect(() => {
@@ -26,47 +39,50 @@ const MenuBar = (props) => {
     }, [isOpen]);
     const [openMenu, setOpenMenu] = useState(null);
     const [openFixedMenu, setOpenFixedMenu] = useState(null);
-    const [menuItems, setMenuItems] = useState(props.menuItems || []);
-    const [fixedMenuItems, setFixedMenuItems] = useState(props.fixedMenuItems || []);
+    const [menuItems, setMenuItems] = useState([]);
+    const [fixedMenuItems, setFixedMenuItems] = useState([]);
+    const [navbarSections, setNavbarSections] = useState(props.navbarSections || []);
     const allMenuItems = [...fixedMenuItems];
     useEffect(() => {
-        // Only fetch if menuItems not provided as prop
-        if (!props.menuItems) {
-            fetch("/api/getAllMenuItems")
-                .then(res => res.json())
-                .then(data => {
-                    // console.log(data)
-                    let arr = Array.isArray(data) ? data : (Array.isArray(data.packages) ? data.packages : []);
-                    setMenuItems(arr.filter(item => item.active));
-                });
-        } else {
-            setMenuItems(props.menuItems.filter(item => item.active));
-        }
-    }, [props.menuItems]);
+        fetch(buildMenuUrl("/api/getAllMenuItems"))
+            .then(res => res.json())
+            .then(data => {
+                let arr = Array.isArray(data) ? data : (Array.isArray(data.packages) ? data.packages : []);
+                setMenuItems(arr.filter(item => item.active));
+            });
+    }, [menuSection, useFrontendOnly]);
 
     useEffect(() => {
-        // Only fetch if fixedMenuItems not provided as prop
-        if (!props.fixedMenuItems) {
-            fetch("/api/subMenuFixed")
+        fetch(buildMenuUrl("/api/subMenuFixed"))
+            .then(res => res.json())
+            .then(data => {
+                let arr = Array.isArray(data) ? data : (Array.isArray(data.packages) ? data.packages : []);
+                setFixedMenuItems(arr.filter(item => item.active));
+            });
+    }, [menuSection, useFrontendOnly]);
+
+    useEffect(() => {
+        if (!props.navbarSections) {
+            fetch("/api/navbar-sections")
                 .then(res => res.json())
                 .then(data => {
-                    let arr = Array.isArray(data) ? data : (Array.isArray(data.packages) ? data.packages : []);
-                    setFixedMenuItems(arr.filter(item => item.active));
+                    const arr = Array.isArray(data) ? data : [];
+                    setNavbarSections(arr.filter(item => item.active));
                 });
         } else {
-            setFixedMenuItems(props.fixedMenuItems.filter(item => item.active));
+            setNavbarSections(props.navbarSections.filter(item => item.active));
         }
-    }, [props.fixedMenuItems]);
+    }, [props.navbarSections]);
 
     useEffect(() => {
         const handleMenuItemsUpdated = () => {
-            fetch("/api/getAllMenuItems")
+            fetch(buildMenuUrl("/api/getAllMenuItems"))
                 .then(res => res.json())
                 .then(data => {
                     let arr = Array.isArray(data) ? data : (Array.isArray(data.packages) ? data.packages : []);
                     setMenuItems(arr.filter(item => item.active));
                 });
-            fetch("/api/subMenuFixed")
+            fetch(buildMenuUrl("/api/subMenuFixed"))
                 .then(res => res.json())
                 .then(data => {
                     let arr = Array.isArray(data) ? data : (Array.isArray(data.packages) ? data.packages : []);
@@ -77,7 +93,7 @@ const MenuBar = (props) => {
         return () => {
             window.removeEventListener('menuItemsUpdated', handleMenuItemsUpdated);
         };
-    }, []);
+    }, [menuSection, useFrontendOnly]);
 
     const toggleMenu = (index) => {
         setOpenMenu(openMenu === index ? null : index);
@@ -92,7 +108,7 @@ const MenuBar = (props) => {
         setOpenMenu(null);
         setOpenFixedMenu(null);
     };
-
+    // console.log(menuItems, fixedMenuItems, allMenuItems);
     return (
         <>
             {/* Mobile Menu */}
@@ -106,13 +122,45 @@ const MenuBar = (props) => {
                 "absolute z-50 top-8 md:top-12 mt-4 rounded-xl left-0 w-[90vw] text-black bg-white shadow-md lg:hidden transition-all duration-300 overflow-hidden",
                 isOpen ? "max-h-[500px] overflow-y-auto" : "max-h-0"
             )} ref={menuRef}>
-                <Link
-                    href="/"
-                    className="w-full block p-3 text-sm font-medium hover:bg-gray-100 border-b"
-                    onClick={closeMobileMenu}
-                >
-                    Home
-                </Link>
+                {/* {navbarSections.length > 0 && (
+                    <div className="border-b bg-gray-50">
+                        {navbarSections.map((section) => {
+                            const activeSubSections = Array.isArray(section.subSections)
+                                ? section.subSections.filter(subSection => subSection.active).sort((a, b) => (a.order || 0) - (b.order || 0))
+                                : [];
+
+                            return (
+                                <div key={section._id || section.title} className="border-t">
+                                    {activeSubSections.length > 0 ? (
+                                        <div className="px-3 py-3">
+                                            <div className="text-sm font-semibold text-gray-900">{section.title}</div>
+                                            <div className="mt-2 flex flex-col gap-1 pl-2">
+                                                {activeSubSections.map((subSection) => (
+                                                    <Link
+                                                        key={subSection._id || subSection.title}
+                                                        href={subSection.url || "#"}
+                                                        className="rounded-lg px-2 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                        onClick={closeMobileMenu}
+                                                    >
+                                                        {subSection.title}
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <Link
+                                            href={section.url || "#"}
+                                            className="block px-3 py-3 text-sm font-medium hover:bg-gray-100"
+                                            onClick={closeMobileMenu}
+                                        >
+                                            {section.title}
+                                        </Link>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                )} */}
                 {allMenuItems.length > 0 && allMenuItems.map((cat, index) => (
                     <div key={index} className="border-b">
                         <>
@@ -128,14 +176,17 @@ const MenuBar = (props) => {
                             )}>
                                 <ul className="pl-4 pb-2">
                                     {cat.subCat
-                                        .filter(subCat => subCat.active)
+                                        .filter(
+                                            subCat =>
+                                                subCat.active && (!useFrontendOnly || subCat.showOnFrontend !== false)
+                                        )
                                         .map((category, idx) => (
                                             <React.Fragment key={idx}>
                                                 <li className="py-1">
                                                     {category.title}
                                                 </li>
                                                 {category.subCatPackage
-                                                    .filter(pkg => pkg.active)
+                                                    .filter(pkg => pkg.active && (!useFrontendOnly || pkg.showOnFrontend !== false))
                                                     .map((pkg, pkgIdx) => (
                                                         <Link key={pkgIdx} href={`${pkg.url}`} className="flex flex-col gap-4 py-2 pl-4 text-sm text-gray-700 hover:text-blue-600" onClick={closeMobileMenu}>
                                                             - {pkg.title}
@@ -153,7 +204,7 @@ const MenuBar = (props) => {
                     <div key={index} className="border-b">
                         <button
                             onClick={() => toggleMenu(index)}
-                            className="w-full text-left p-3 text-sm font-medium  hover:bg-gray-100"
+                            className="w-full text-left p-3 text-sm hover:bg-gray-100"
                         >
                             {item.title}
                         </button>
@@ -163,7 +214,7 @@ const MenuBar = (props) => {
                         )}>
                             <ul className="pl-4 pb-2">
                                 {item.subMenu
-                                    .filter(sub => sub.active)
+                                    .filter(sub => sub.active && sub.showOnFrontend !== false)
                                     .sort((a, b) => a.order - b.order)
                                     .map((subItem, subIndex) => (
                                         <li key={subIndex} className="py-1">
@@ -184,22 +235,22 @@ const MenuBar = (props) => {
 
             {/* Desktop Navigation */}
             <NavigationMenu.Root className="hidden lg:flex relative justify-center" >
-                <NavigationMenu.List className="flex space-x-2">
-                    <Link
-                        href="/"
-                        className="flex items-center px-4 py-2 text-sm font-semibold hover:bg-gray-200 data-[state=open]:bg-gray-200 data-[state=open]:text-black rounded-md">
-                        Home
-                    </Link>
+                <NavigationMenu.List className="flex space-x-4">
                     {allMenuItems.length > 0 && allMenuItems.map((cat, index) => (
                         <NavigationMenu.Item key={index} className="relative flex justify-start">
                             <>
-                                <NavigationMenu.Trigger className="flex items-center px-4 py-2 text-sm font-semibold hover:bg-gray-200 data-[state=open]:bg-gray-200 data-[state=open]:text-black rounded-md">
+                                <NavigationMenu.Trigger className="flex items-center px-4 py-2 text-sm hover:bg-gray-200 data-[state=open]:bg-gray-200 data-[state=open]:text-black rounded-md">
                                     {cat.catTitle} <ArrowDown className="ml-2" size={12} />
                                 </NavigationMenu.Trigger>
                                 <AnimatePresence>
                                     <NavigationMenu.Content asChild>
                                         {(() => {
-                                            const activeSubCats = cat.subCat.filter(subCat => subCat.active);
+                                            const activeSubCats = cat.subCat
+                                                .map(sub => sub._doc || sub)
+                                                .filter(
+                                                    sub =>
+                                                        sub.active && (!useFrontendOnly || sub.showOnFrontend !== false)
+                                                );
                                             const singleCategory = activeSubCats.length === 1;
                                             return (
                                                 <motion.div
@@ -207,31 +258,37 @@ const MenuBar = (props) => {
                                                     animate={{ opacity: 1, y: 0 }}
                                                     exit={{ opacity: 0, y: -10 }}
                                                     transition={{ duration: 0.2, ease: "easeInOut" }}
-                                                    className={`absolute top-full mt-2 -translate-x-1/2 bg-white text-black shadow-lg rounded-md ${singleCategory ? 'w-48' : 'w-[400px] lg:w-[500px]'}`}
+                                                    className={`absolute top-full mt-2 -translate-x-1/2 bg-white text-black shadow-lg rounded-md ${singleCategory ? 'w-48' : 'w-[400px] lg:w-[500px]'} z-[99]`}
                                                 >
                                                     <div className={
                                                         singleCategory
                                                             ? "grid gap-4 px-3 py-3 grid-cols-2 lg:grid-cols-1"
                                                             : "grid gap-4 p-6 grid-cols-2 lg:grid-cols-3"
                                                     }>
-                                                        {activeSubCats.map((category, idx) => (
-                                                            Array.isArray(category.subCatPackage) && category.subCatPackage.length > 0 ? (
+                                                        {activeSubCats.map((category, idx) => {
+
+                                                            const packages = (category.subCatPackage || [])
+                                                                .map(pkg => pkg._doc || pkg)
+                                                                .filter(
+                                                                    pkg =>
+                                                                        pkg.active && (!useFrontendOnly || pkg.showOnFrontend !== false)
+                                                                )
+
+                                                            return (
                                                                 <div key={idx} className={singleCategory ? "flex flex-col items-center w-full" : "flex flex-col"}>
                                                                     <h3 className={singleCategory ? "font-medium text-gray-700 mb-2 text-start w-full px-2" : "font-medium text-gray-700 mb-2"}>{category.title}</h3>
                                                                     <ul className={singleCategory ? "space-y-1 flex flex-col items-start w-full px-2 " : "space-y-2"}>
-                                                                        {category.subCatPackage
-                                                                            .filter(pkg => pkg.active)
-                                                                            .map((pkg, pkgIdx) => (
-                                                                                <li key={pkgIdx} className={singleCategory ? "w-full" : undefined}>
-                                                                                    <Link href={pkg.url} className={singleCategory ? "text-gray-900 hover:text-blue-600 text-sm  text-start w-full block py-1" : "text-gray-600 hover:text-blue-600 text-sm"}>
-                                                                                        {pkg.title}
-                                                                                    </Link>
-                                                                                </li>
-                                                                            ))}
+                                                                        {packages.map((pkg, pkgIdx) => (
+                                                                            <li key={pkgIdx} className={singleCategory ? "w-full" : undefined}>
+                                                                                <Link href={pkg.url} className={singleCategory ? "text-gray-900 hover:text-blue-600 text-sm  text-start w-full block py-1" : "text-gray-600 hover:text-blue-600 text-sm"}>
+                                                                                    {pkg.title}
+                                                                                </Link>
+                                                                            </li>
+                                                                        ))}
                                                                     </ul>
                                                                 </div>
-                                                            ) : null
-                                                        ))}
+                                                            )
+                                                        })}
                                                     </div>
                                                 </motion.div>
                                             );
@@ -243,7 +300,7 @@ const MenuBar = (props) => {
                     ))}
                     {menuItems.map((item, index) => (
                         <NavigationMenu.Item key={index} className="relative flex justify-center">
-                            <NavigationMenu.Trigger className="flex items-center px-4 py-2 text-sm font-semibold hover:bg-gray-200 data-[state=open]:bg-gray-200 data-[state=open]:text-black rounded-md">
+                            <NavigationMenu.Trigger className="flex items-center px-4 py-2 text-sm hover:bg-gray-200 data-[state=open]:bg-gray-200 data-[state=open]:text-black rounded-md">
                                 {item.title} <ArrowDown className="ml-2" size={12} />
                             </NavigationMenu.Trigger>
                             <AnimatePresence>
@@ -254,7 +311,7 @@ const MenuBar = (props) => {
                                             animate={{ opacity: 1, y: 0 }}
                                             exit={{ opacity: 0, y: -10 }}
                                             transition={{ duration: 0.2, ease: "easeInOut" }}
-                                            className="absolute top-full mt-2 -translate-x-1/2 bg-white text-black shadow-lg rounded-md w-52"
+                                            className="absolute top-full mt-2 -translate-x-1/2 bg-white text-black shadow-lg rounded-md w-52 z-[99]"
                                         >
                                             <ul className="grid gap-2 p-2 text-sm">
                                                 {item.subMenu
@@ -279,8 +336,6 @@ const MenuBar = (props) => {
                             </AnimatePresence>
                         </NavigationMenu.Item>
                     ))}
-
-
                 </NavigationMenu.List>
             </NavigationMenu.Root>
         </>

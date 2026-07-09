@@ -495,10 +495,10 @@ const PropertyDetailEnquiry = ({ locationType = [] }) => {
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center text-2xl font-bold">
-                      {selectedEnquiry.name?.charAt(0)?.toUpperCase() || "?"}
+                      {selectedEnquiry.guestName?.charAt(0)?.toUpperCase() || "?"}
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold">{selectedEnquiry.name}</h2>
+                      <h2 className="text-xl font-bold">{selectedEnquiry.guestName}</h2>
                       <p className="text-teal-100 text-sm flex items-center gap-1 mt-0.5">
                         <Phone className="w-3.5 h-3.5" />{selectedEnquiry.phone}
                       </p>

@@ -20,6 +20,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
 import ResponsiveNavbar from "./ResponsiveNavbar";
 const Header = ({ menuItems, companyBasicInfo = null }) => {
+  // console.log("menuItems", menuItems)
   const authDropdownRef = useRef(null);
   const profileMenuRef = useRef(null);
   const pathName = usePathname();
@@ -33,14 +34,10 @@ const Header = ({ menuItems, companyBasicInfo = null }) => {
   const [isMounted, setIsMounted] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isAuthDropdownOpen, setIsAuthDropdownOpen] = useState(false);
-  // const [menuItems, setMenuItems] = useState([]);
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const [initialCartTab, setInitialCartTab] = useState('cart');
   const { data: session, status } = useSession();
-  const { cart = [], wishlist = [] } = useCart();
   const [showHeader, setShowHeader] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
-  const [openFixedMenu, setOpenFixedMenu] = useState(null);
+
   const [navbarSections, setNavbarSections] = useState([]);
   const companyName = companyBasicInfo?.companyName || 'Kag Premium Homes';
   const desktopLogoSrc = companyBasicInfo?.mainLogo?.url || companyBasicInfo?.footerLogo?.url || '/HeaderLogo.png';
@@ -142,11 +139,10 @@ const Header = ({ menuItems, companyBasicInfo = null }) => {
           : "block"
           } border-b font-barlow tracking-wider w-full bg-white text-black`}
       >
-        <div className="hidden md:flex items-center">
-
+        <div className="hidden md:flex items-start">
           <TopAdvertisementMarquee />
           {/* Login/Cart section on the right */}
-          <div className="flex items-center justify-center gap-3 bg-orange-500 w-[25%] px-5 py-[10px]">
+          <div className="flex items-center justify-center gap-3 bg-orange-500 w-[18%] px-5 py-[4px]">
             {/* <div className="flex items-center gap-3">
               <Link href="/partner/login"
                 className="text-white text-sm hover:underline hover:scale-105 text-nowrap transition-all duration-300"
@@ -232,7 +228,7 @@ const Header = ({ menuItems, companyBasicInfo = null }) => {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 10 }}
                         transition={{ duration: 0.2 }}
-                        className="absolute top-10 -left-5 w-[150px] text-black bg-white shadow-lg rounded-lg border z-[9999]"
+                        className="absolute top-8 -right-5 w-[150px] text-black bg-white shadow-lg rounded-lg border z-[9999]"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <Link
@@ -245,7 +241,7 @@ const Header = ({ menuItems, companyBasicInfo = null }) => {
                         <Link
                           href="/sign-up"
                           onClick={() => setIsAuthDropdownOpen(false)}
-                          className="block px-2 py-2 hover:bg-gray-300 text-sm border-t border-gray-100"
+                          className="block px-2 py-2 hover:bg-gray-300 text-sm border-t border-gray-300"
                         >
                           Create Account
                         </Link>
@@ -263,10 +259,10 @@ const Header = ({ menuItems, companyBasicInfo = null }) => {
             <div className="flex item-center gap-2">
               <Link href={"/"}>
                 <Image
-                  className="w-28 h-20 object-contain"
+                  className="w-full h-20 object-contain"
                   src={desktopLogoSrc}
                   alt={companyName}
-                  width={120}
+                  width={240}
                   height={80}
                   priority
                 />
@@ -295,10 +291,14 @@ const Header = ({ menuItems, companyBasicInfo = null }) => {
         </div>
       </header>
       {/* Show only on md and larger screens, and only if not in admin section */}
+      {/* Show only on md and larger screens, and only if not in admin section */}
       {hideNavigation || (
-        <div className="hidden md:block sticky top-0 z-50">
+        <div className="hidden md:block sticky top-0 z-60">
           <div className="w-full print:hidden">
-            <div className={`bg-white py-2 border-b border-gray-200 transition-all duration-300 ${showHeader ? "translate-y-0" : "-translate-y-full"}`}>
+            <div
+              className={`bg-white py-2 border-b border-gray-200 transition-all duration-300 ${showHeader ? "translate-y-0" : "-translate-y-full"
+                }`}
+            >
               <div className="container mx-auto px-4">
                 <MenuBar menuItems={menuItems} navbarSections={navbarSections} />
               </div>

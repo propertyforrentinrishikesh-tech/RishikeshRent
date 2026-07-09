@@ -29,7 +29,8 @@ export async function GET(request) {
 
     if (search) {
       filter.$or = [
-        { fullName: { $regex: search, $options: "i" } },
+        { firstName: { $regex: search, $options: "i" } },
+        { lastName: { $regex: search, $options: "i" } },
         { phone: { $regex: search, $options: "i" } },
         { email: { $regex: search, $options: "i" } },
         { propertyName: { $regex: search, $options: "i" } },
@@ -74,12 +75,12 @@ export async function POST(request) {
       locationType,
       subLocationType,
       guestTitle,
-      fullName,
+      firstName,
+      lastName,
       phone,
       email,
       totalPersons,
       checkInDate,
-      lengthOfStay,
       idProofType,
       idImage,
       totalAmount,
@@ -97,11 +98,10 @@ export async function POST(request) {
 
     const requiredFields = [];
     if (!propertyName) requiredFields.push("propertyName");
-    if (!fullName?.trim()) requiredFields.push("fullName");
+    if (!firstName?.trim()) requiredFields.push("firstName");
     if (!phone?.trim()) requiredFields.push("phone");
     if (!email?.trim()) requiredFields.push("email");
     if (!checkInDate) requiredFields.push("checkInDate");
-    if (!lengthOfStay) requiredFields.push("lengthOfStay");
     if (!idImage?.url) requiredFields.push("idImage");
     if (!amountToPay && !advanceAmount && !totalAmount) requiredFields.push("amountToPay");
 
@@ -163,12 +163,12 @@ export async function POST(request) {
       locationType: locationType || property?.locationType || "",
       subLocationType: subLocationType || property?.subLocationType || "",
       guestTitle,
-      fullName: fullName.trim(),
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
       phone: phone.trim(),
       email: email.trim(),
       totalPersons: Number(totalPersons || 1),
       checkInDate,
-      lengthOfStay,
       idProofType,
       idImage,
       totalAmount: Number(totalAmount || 0),

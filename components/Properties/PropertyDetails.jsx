@@ -20,7 +20,7 @@ import { toast } from "react-hot-toast";
 
 export const PropertyDetail = ({ property: initialProperty, relatedProperties = [] }) => {
     const [activeTab, setActiveTab] = useState("overview");
-    console.log(initialProperty)
+    // console.log(initialProperty)
     // Use passed property data or fallback to mock if null/undefined
     const property = initialProperty ? {
         name: initialProperty.propertyName,
@@ -74,9 +74,7 @@ export const PropertyDetail = ({ property: initialProperty, relatedProperties = 
         { id: "amenities", label: "Amenities", icon: Star },
         { id: "policies", label: "Policies", icon: Shield },
         { id: "location", label: "Location", icon: MapPin },
-        { id: "contact", label: "Contact", icon: PhoneCall },
     ];
-
     const bookingUrl = property.slug ? `/properties/booking/${property.slug}` : "/";
 
     // Gallery state and helpers
@@ -218,8 +216,8 @@ export const PropertyDetail = ({ property: initialProperty, relatedProperties = 
             </div>
 
             {/* HEADER GALLERY - large image left, 4 thumbs right (desktop) */}
-            <div className="bg-gray-100">
-                <div className="max-w-8xl mx-auto px-4 md:px-8 py-6">
+            <div className="bg-gray-100 ">
+                <div className="max-w-8xl mx-auto px-4 md:px-8">
                     <div className="flex items-end justify-between py-6">
                         <div>
                             <span className="inline-block bg-emerald-500 text-black text-xs font-bold px-3 py-1 rounded-md mb-3">
@@ -527,52 +525,6 @@ export const PropertyDetail = ({ property: initialProperty, relatedProperties = 
                                         </div>
                                     </div>
                                 )}
-
-                                {/* CONTACT TAB */}
-                                {activeTab === "contact" && (
-                                    <div className="space-y-6">
-                                        <h3 className="text-lg font-bold text-gray-900">Contact Information</h3>
-
-                                        <div className="space-y-4">
-                                            {initialProperty?.ownerName && (
-                                                <div className="bg-blue-50 p-4 rounded-lg">
-                                                    <div className="text-sm text-gray-600 mb-1">Owner Name</div>
-                                                    <div className="text-lg font-bold text-gray-900">{initialProperty.ownerName}</div>
-                                                </div>
-                                            )}
-                                            {initialProperty?.brokerName && (
-                                                <div className="bg-blue-50 p-4 rounded-lg">
-                                                    <div className="text-sm text-gray-600 mb-1">Broker Name</div>
-                                                    <div className="text-lg font-bold text-gray-900">{initialProperty.brokerName}</div>
-                                                </div>
-                                            )}
-
-                                            <div className="bg-blue-50 p-4 rounded-lg">
-                                                <div className="text-sm text-gray-600 mb-1">Primary Phone</div>
-                                                <div className="text-lg font-bold text-gray-900">{initialProperty?.contactNumbers?.[0] || "+91 98765 43210"}</div>
-                                            </div>
-
-                                            {initialProperty?.contactNumbers?.[1] && (
-                                                <div className="bg-blue-50 p-4 rounded-lg">
-                                                    <div className="text-sm text-gray-600 mb-1">Secondary Phone</div>
-                                                    <div className="text-lg font-bold text-gray-900">{initialProperty.contactNumbers[1]}</div>
-                                                </div>
-                                            )}
-
-                                            <div className="bg-blue-50 p-4 rounded-lg">
-                                                <div className="text-sm text-gray-600 mb-1">Email Address</div>
-                                                <div className="text-lg font-bold text-gray-900">{initialProperty?.emailAddresses?.[0] || "owner@email.com"}</div>
-                                            </div>
-                                        </div>
-
-                                        <a href={`tel:${initialProperty?.contactNumbers?.[0] || "+919876543210"}`} className="block w-full">
-                                            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 rounded-lg text-lg gap-2">
-                                                <PhoneCall className="w-4 h-4" /> Call Now
-                                            </Button>
-                                        </a>
-                                    </div>
-                                )}
-
                             </div>
                         </div>
 

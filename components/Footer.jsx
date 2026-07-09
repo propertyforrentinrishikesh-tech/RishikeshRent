@@ -103,19 +103,12 @@ const Footer = ({ companyBasicInfo = null }) => {
                     backgroundSize: "40px 40px",
                 }}
             />
-
             <div className="relative z-10">
                 {/* Experience Section */}
-
-
                 <section className="relative bg-[#0B1E33] overflow-hidden">
-
                     <div className="max-w-7xl mx-auto px-6 lg:px-5">
-
                         <div className="grid lg:grid-cols-[58%,42%] lg:grid-rows-[auto_auto] gap-x-12">
-
                             {/* ================= LEFT TOP ================= */}
-
                             <div className="text-white pt-20">
 
                                 <p className="text-sm leading-7 text-gray-300 max-w-2xl mb-8">
@@ -149,9 +142,7 @@ const Footer = ({ companyBasicInfo = null }) => {
                                 </p>
 
                             </div>
-
                             {/* ================= RIGHT IMAGE ================= */}
-
                             <div className="relative lg:row-span-2 flex justify-end lg:-mt-10">
                                 <div className="relative w-full max-w-lg">
                                     {/* Border */}

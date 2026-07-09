@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const PropertyEnquirySchema = new mongoose.Schema(
     {
+        name:{type:String,required:true},
         phone: { type: String, required: true },
         email: { type: String },
         contactMethod: { type: String, enum: ["call", "whatsapp", "email"], default: "call" },

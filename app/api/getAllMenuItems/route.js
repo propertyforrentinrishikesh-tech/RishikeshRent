@@ -1,40 +1,30 @@
 import connectDB from "@/lib/connectDB";
 import MenuBar from "@/models/MenuBar";
 import { NextResponse } from "next/server";
-import Artisan from "@/models/Artisan"
-import Product from "@/models/Product"
-import Size from '@/models/Size';
-import Color from '@/models/Color';
-import Gallery from '@/models/Gallery';
-import Video from '@/models/Video';
-import Description from '@/models/Description';
-import Info from '@/models/Info';
-import CategoryTag from '@/models/CategoryTag';
-import ProductReview from '@/models/ProductReview';
-import Quantity from '@/models/Quantity';
-import ProductCoupons from '@/models/ProductCoupons';
-import ProductTax from '@/models/ProductTax';
-import PackagePdf from '@/models/PackagePdf';
+import { getAdminSectionFilter } from "@/lib/admin-section";
+import Package from "@/models/Piligrimage/Package"
 export async function GET(req) {
     await connectDB();
-    const menu = await MenuBar.find({})
-        .populate({
-            path: 'subMenu.products',
-            populate: [
-                { path: 'price' },
-                { path: 'gallery' },
-                { path: 'video' },
-                { path: 'description' },
-                { path: 'info' },
-                { path: 'categoryTag' },
-                { path: 'reviews' },
-                { path: 'quantity' },
-                { path: 'coupons' },
-                { path: 'taxes' },
-                { path: 'pdfs' },
+    const { searchParams } = new URL(req.url)
+    const section = searchParams.get("section")
+    const frontendOnly = searchParams.get("frontendOnly") === "1" || searchParams.get("frontendOnly") === "true"
 
-            ]
+    const menu = await MenuBar.find(getAdminSectionFilter(section))
+        .populate({
+            path: 'subMenu.packages',
         })
         .sort({ order: 1 });
-    return NextResponse.json(menu);
+
+    const output = frontendOnly
+        ? menu
+            .filter((item) => item.active && item.showOnFrontend !== false)
+            .map((item) => ({
+                ...item.toObject(),
+                subMenu: Array.isArray(item.subMenu)
+                    ? item.subMenu.filter((subItem) => subItem.active && subItem.showOnFrontend !== false)
+                    : [],
+            }))
+        : menu
+
+    return NextResponse.json(output);
 }

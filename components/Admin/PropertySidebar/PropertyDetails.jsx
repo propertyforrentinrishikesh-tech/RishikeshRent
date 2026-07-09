@@ -2775,8 +2775,8 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                     {type === "entire" && (
                         <div className="rounded-xl p-4 space-y-3">
                             <Label className="font-semibold">Property Size</Label>
-                            <UnitSelector />
-                            <SizeInputs />
+                            {UnitSelector()}
+                            {SizeInputs()}
                         </div>
                     )}
 
@@ -2784,8 +2784,8 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                     {type === "room" && (
                         <div className="rounded-xl p-4 space-y-3">
                             <Label className="font-semibold">Room Size</Label>
-                            <UnitSelector />
-                            <SizeInputs />
+                            {UnitSelector()}
+                            {SizeInputs()}
                         </div>
                     )}
                 </div>

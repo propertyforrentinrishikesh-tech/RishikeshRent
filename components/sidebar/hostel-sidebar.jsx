@@ -59,11 +59,11 @@ const data = {
         // },
         // { divider: true },
 
-        {
-            name: "Hostel Booking",
-            url: "/admin/hostel_booking",
-            icon: Plus,
-        },
+        // {
+        //     name: "Hostel Booking",
+        //     url: "/admin/hostel_booking",
+        //     icon: Plus,
+        // },
     ],
 }
 

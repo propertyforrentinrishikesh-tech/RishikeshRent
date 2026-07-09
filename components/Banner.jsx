@@ -161,55 +161,42 @@ const Banner = () => {
                 </div>
             )}
             <section className="relative w-full">
-                {loading1 ? (
-                    // Skeleton loader
-                    <div className="w-full">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-4">
-                            {[...Array(2)].map((_, idx) => (
-                                <div
-                                    key={idx}
-                                    className="h-[220px] md:h-[400px] rounded-2xl overflow-hidden bg-gray-200 animate-pulse"
-                                />
-                            ))}
-                        </div>
-                    </div>
-                ) : (
-                    // Actual content
-                    bannerSection2nd.map((item, idx) => (
-                        <div className="w-full" key={item._id}>
-                            <div className="grid grid-cols-1 gap-5 md:gap-4 overflow-hidden">
-                                <div className="hidden md:flex flex-col md:h-[430px] overflow-hidden relative group">
-                                    <Link
-                                        href={item.buttonLink}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="absolute inset-0 flex items-center justify-center group-hover:opacity-100 transition-opacity duration-300"
-                                    >
-                                        <img
-                                            src={item.image?.url}
-                                            alt={item.title}
-                                            className="absolute inset-0 w-full h-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
-                                        />
-                                    </Link>
-                                </div>
-                                <div className="md:hidden flex flex-col h-[450px] overflow-hidden relative group">
-                                    <Link
-                                        href={item.buttonLink}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="absolute inset-0 flex items-center justify-center group-hover:opacity-100 transition-opacity duration-300"
-                                    >
-                                        <img
-                                            src={item.mobileImage?.url}
-                                            alt={item.title}
-                                            className="absolute inset-0 w-full h-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
-                                        />
-                                    </Link>
-                                </div>
+
+                {bannerSection2nd.map((item, idx) => (
+                    <div className="w-full" key={item._id}>
+                        <div className="grid grid-cols-1 gap-5 md:gap-4 overflow-hidden">
+                            <div className="hidden md:flex flex-col md:h-[430px] overflow-hidden relative group">
+                                <Link
+                                    href={item.buttonLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="absolute inset-0 flex items-center justify-center group-hover:opacity-100 transition-opacity duration-300"
+                                >
+                                    <img
+                                        src={item.image?.url}
+                                        alt={item.title}
+                                        className="absolute inset-0 w-full h-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
+                                    />
+                                </Link>
+                            </div>
+                            <div className="md:hidden flex flex-col h-[450px] overflow-hidden relative group">
+                                <Link
+                                    href={item.buttonLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="absolute inset-0 flex items-center justify-center group-hover:opacity-100 transition-opacity duration-300"
+                                >
+                                    <img
+                                        src={item.mobileImage?.url}
+                                        alt={item.title}
+                                        className="absolute inset-0 w-full h-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
+                                    />
+                                </Link>
                             </div>
                         </div>
-                    ))
-                )}
+                    </div>
+                ))}
+
             </section>
         </div>
     )

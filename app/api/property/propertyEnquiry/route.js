@@ -51,6 +51,7 @@ export async function POST(request) {
         await connectDB();
         const body = await request.json();
         const {
+            name,
             phone,
             email,
             contactMethod,
@@ -74,6 +75,7 @@ export async function POST(request) {
         }
 
         const enquiry = await PropertyEnquiry.create({
+            name,
             phone: phone || "",
             email,
             contactMethod: contactMethod || "call",

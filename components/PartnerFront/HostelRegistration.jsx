@@ -82,8 +82,6 @@ const HostelRegistration = ({ initialData }) => {
         totalSecurityDepositAmount: '',
         availability: '',
         specialNote: '',
-        commitment3to6Months: false,
-        commitment11Months: false,
 
         // Step 4
         amenities: {
@@ -93,8 +91,6 @@ const HostelRegistration = ({ initialData }) => {
             lift: false, guestsMax3: false, preFixDoubleBed: false, privateBathroom: false,
             bathroomGeyser: false, kitchenGeyser: false, chair: false, outdoorSeating: false,
         },
-        couplesWelcome: false,
-        petsWelcome: false,
     });
 
     const [uploadingImage, setUploadingImage] = useState(null);
@@ -187,34 +183,54 @@ const HostelRegistration = ({ initialData }) => {
 
     const validateStep3 = () => {
         if (!formData.monthlyRent) { toast.error("Monthly Rent is required"); return false; }
-        if (!formData.commitment3to6Months) { toast.error("Please Select The Checkbox before proceeding to next step."); return false; }
-        if (!formData.commitment11Months) { toast.error("Please Select The Checkbox before proceeding to next step."); return false; }
         return true;
     };
-    const validateStep4 = () => {
-        if (!formData.couplesWelcome) { toast.error("Please Select The Checkbox before proceeding to next step."); return false; }
-        if (!formData.petsWelcome) { toast.error("Please Select The Checkbox before proceeding to next step."); return false; }
-        return true;
-    };
-    
+   
 
     const handleNextStep = (current) => {
         if (current === 1 && !validateStep1()) return;
         if (current === 2 && !validateStep2()) return;
         if (current === 3 && !validateStep3()) return;
-        if (current === 4 && !validateStep4()) return;
         setCurrentStep(current + 1);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!validateStep4()) return;
         setIsSubmitting(true);
         try {
-            const res = await fetch('/api/hostelRegistration', {
+            // Map form data to PropertyDetails schema
+            const mappedData = {
+                propertyName: formData.propertyName,
+                propertyType: formData.propertyType,
+                propertyFor: formData.propertyFor,
+                locationType: formData.locationType,
+                contactAddress: [formData.address1, formData.address2, formData.address3, formData.address4].filter(Boolean).join(', '),
+                landMarkDetails: formData.landmark,
+                contactNumbers: formData.contactNumber ? [formData.contactNumber] : [],
+                emailAddresses: formData.email ? [formData.email] : [],
+                rentPrice: Number(formData.monthlyRent) || 0,
+                securityDeposit: {
+                    required: !!formData.securityDeposit,
+                    months: formData.securityDeposit,
+                    amount: formData.totalSecurityDepositAmount
+                },
+                propertyAvailableFrom: formData.availability,
+                mainImage: formData.primaryImage?.url ? formData.primaryImage : { 
+                    url: "https://placehold.co/600x400/png?text=No+Image", 
+                    key: "placeholder" 
+                },
+                galleryImages: [formData.outsideBuilding, formData.roomImage, formData.bathroomImage, formData.otherImage].filter(img => img && img.url),
+                amenities: Object.keys(formData.amenities || {}).filter(key => formData.amenities[key]),
+                highlights: formData.specialNote ? [formData.specialNote] : [],
+                status: "Pending", // Add default status
+                // Keep raw data just in case the API or frontend component NewArrivalBooking expects them
+                rawFormData: formData 
+            };
+
+            const res = await fetch('/api/property/newarrival', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(mappedData)
             });
             const data = await res.json();
             if (res.ok) {
@@ -439,14 +455,12 @@ const HostelRegistration = ({ initialData }) => {
 
                             <div className="mt-8 space-y-4 pl-0 sm:pl-[33%]">
                                 <div className="flex gap-3">
-                                    <Checkbox checked={formData.commitment3to6Months} onCheckedChange={(checked) => handleInputChange({ target: { name: 'commitment3to6Months', type: 'checkbox', checked } })} className="mt-1 w-5 h-5 border-gray-400" />
                                     <p className="text-xs font-bold text-gray-900 leading-tight">
                                         We are looking for a minimum 03 To 06 -month commitment. <br />
                                         Credit and background checks will be required.*
                                     </p>
                                 </div>
                                 <div className="flex gap-3">
-                                    <Checkbox checked={formData.commitment11Months} onCheckedChange={(checked) => handleInputChange({ target: { name: 'commitment11Months', type: 'checkbox', checked } })} className="mt-1 w-5 h-5 border-gray-400" />
                                     <p className="text-xs font-bold text-gray-900 leading-tight">
                                         We are looking for a minimum 11-month commitment. Credit and <br />
                                         background checks will be required.*
@@ -500,14 +514,12 @@ const HostelRegistration = ({ initialData }) => {
 
                             <div className="pt-6 space-y-5 border-t border-gray-100">
                                 <div className="flex gap-4">
-                                    <Checkbox checked={formData.couplesWelcome} onCheckedChange={(checked) => handleInputChange({ target: { name: 'couplesWelcome', type: 'checkbox', checked } })} className="mt-1 w-5 h-5 flex-shrink-0 border-gray-400" />
                                     <p className="text-[11px] font-bold text-gray-900 leading-snug max-w-md">
                                         We offer a welcoming and private stay for couples. Enjoy a
                                         hassle-free check-in experience with valid identification.
                                     </p>
                                 </div>
                                 <div className="flex gap-4">
-                                    <Checkbox checked={formData.petsWelcome} onCheckedChange={(checked) => handleInputChange({ target: { name: 'petsWelcome', type: 'checkbox', checked } })} className="mt-1 w-5 h-5 flex-shrink-0 border-gray-400" />
                                     <p className="text-[11px] font-bold text-gray-900 leading-snug max-w-md">
                                         We love pets as much as you do! Our property is proudly pet-friendly,
                                         so you don't have to leave your furry family members behind. Please

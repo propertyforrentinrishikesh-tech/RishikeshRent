@@ -120,7 +120,9 @@ export async function GET(request) {
         const skip = (page - 1) * limit;
 
         // Build dynamic filter
-        const filter = {};
+        const filter = {
+            status: { $ne: 'Pending' } // Exclude Pending properties by default
+        };
 
         const search = searchParams.get('search');
         if (search) {

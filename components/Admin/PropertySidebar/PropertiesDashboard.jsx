@@ -15,13 +15,13 @@ import TotalPropertyType from "@/components/Admin/PropertySidebar/TotalPropertyT
 import SearchProperty from "@/components/Admin/PropertySidebar/SearchProperty";
 import PropertyEnquiry from "@/components/Admin/PropertySidebar/PropertyEnquiry";
 import PropertyDetailEnquiry from "@/components/Admin/PropertySidebar/PropertyDetailEnquiry";
+import NewArrivalBooking from "./NewArrivalBooking";
 const PropertiesDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [propertyTypes, setPropertyTypes] = useState([]);
   const [locationType, setLocationType] = useState([]);
   const [subLocationType, setSubLocationType] = useState([]);
   const [galiType, setGaliType] = useState([]);
-
   const [activeParent, setActiveParent] = useState("property_type");
   const [activeChild, setActiveChild] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -143,10 +143,15 @@ const PropertiesDashboard = () => {
           key: "enquiry",
           label: "Property Enquiry",
           component: () => <PropertyEnquiry {...sharedProps} />,
-        }, {
+        },
+         {
           key: "detail_enquiry",
           label: "Property Detail Enquiry",
           component: () => <PropertyDetailEnquiry {...sharedProps} />,
+        },{
+          key: "new_booking_arrival",
+          label: "New Arrival Bookings",
+          component: () => <NewArrivalBooking {...sharedProps} />,
         },
       ],
     },

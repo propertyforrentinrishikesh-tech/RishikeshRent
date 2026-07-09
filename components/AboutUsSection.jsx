@@ -109,7 +109,7 @@ const AboutUsSection = ({ section = "frontend" }) => {
                     </div>
                 </section>
             )}
-            <section className="w-full md:w-[95%] mx-auto space-y-3 px-3 sm:px-4 md:px-0">
+            <section className="w-full md:w-[95%] mx-auto space-y-3 px-3 sm:px-4 md:px-0 my-5">
                 {/* Banner 1 */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gradient-to-r from-[#fde8e2] via-[#fdf0ec] to-[#fef6f4] rounded-xl px-4 sm:px-5 py-4 shadow-sm border border-orange-100/60">
 
@@ -154,22 +154,9 @@ const AboutUsSection = ({ section = "frontend" }) => {
                 </div>
 
             </section>
-            <section className="bg-[#ededed] relative w-full">
-                {loading1 ? (
-                    // Skeleton loader
-                    <div className="w-full">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-4">
-                            {[...Array(2)].map((_, idx) => (
-                                <div
-                                    key={idx}
-                                    className="h-[220px] md:h-[400px] rounded-2xl overflow-hidden bg-gray-200 animate-pulse"
-                                />
-                            ))}
-                        </div>
-                    </div>
-                ) : (
-                    // Actual content
-                    bannerSection1st.map((item, idx) => (
+            {bannerSection1st.length > 0 && (
+                <section className="bg-[#ededed] relative w-full">
+                    {bannerSection1st.map((item, idx) => (
                         <div className="w-full" key={item._id}>
                             <div className="grid grid-cols-1 gap-4 md:gap-5 overflow-hidden">
                                 <div className="hidden md:flex flex-col h-[430px] overflow-hidden relative group">
@@ -202,9 +189,9 @@ const AboutUsSection = ({ section = "frontend" }) => {
                                 </div>
                             </div>
                         </div>
-                    ))
-                )}
-            </section>
+                    ))}
+                </section>
+            )}
 
         </>
     );

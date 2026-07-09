@@ -2,7 +2,7 @@ import Properties from "@/components/Properties/Properties";
 
 async function fetchProperties(searchParams) {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
     const params = new URLSearchParams();
     params.append('limit', '12');
     
@@ -31,7 +31,7 @@ async function fetchProperties(searchParams) {
 
 async function fetchBanners() {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
     const response = await fetch(`${baseUrl}/api/propertyBanner`, {
       next: { revalidate: 60 }, // Revalidate every 60 seconds
     });

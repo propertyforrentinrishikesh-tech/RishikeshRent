@@ -182,6 +182,7 @@ const PropertyDetailsSchema = new mongoose.Schema({
     powerBackupType: { type: String },
 
     // Status Fields
+    status: { type: String, default: "Pending" },
     isAvailable: { type: Boolean, default: true },
     isTrending: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
