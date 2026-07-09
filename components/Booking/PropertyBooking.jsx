@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, Check, PhoneCall, Trash2, Upload } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, PhoneCall, Trash2, Upload, X } from "lucide-react";
 import { toast } from "react-hot-toast";
 
 export default function PropertyBooking({ property }) {
@@ -45,6 +45,7 @@ export default function PropertyBooking({ property }) {
   });
   const [selectedPaymentOption, setSelectedPaymentOption] = useState("");
   const [customAmount, setCustomAmount] = useState("");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [formErrors, setFormErrors] = useState({});
   const [paymentLoading, setPaymentLoading] = useState(false);
   const idImageRef = useRef(null);
@@ -71,29 +72,6 @@ export default function PropertyBooking({ property }) {
   const [emailLoading, setEmailLoading] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [emailSuccess, setEmailSuccess] = useState("");
-
-  const selectedPaymentAmount =
-    selectedPaymentOption === "full"
-      ? fullRentAmount
-      : selectedPaymentOption === "advance"
-        ? advanceAmount
-        : Number(customAmount || 0);
-
-  const selectedPaymentLabel =
-    selectedPaymentOption === "full"
-      ? "Full max rent"
-      : selectedPaymentOption === "advance"
-        ? "25% of max rent"
-        : selectedPaymentOption === "custom"
-          ? "Custom amount"
-          : "No payment option selected";
-
-  const setPaymentOption = (option) => {
-    setSelectedPaymentOption(option);
-    clearFieldError("paymentAmount");
-    clearFieldError("customAmount");
-  };
-
 
   const clearFieldError = (field) => {
     setFormErrors((prev) => {
@@ -164,12 +142,12 @@ export default function PropertyBooking({ property }) {
 
   const handleSendOTP = async (e) => {
     e.preventDefault();
-    
+
     if (!formData.email) {
       setEmailError("Please enter your email first.");
       return;
     }
-    
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
       setEmailError("Invalid email format.");
@@ -258,23 +236,10 @@ export default function PropertyBooking({ property }) {
     if (!formData.totalPersons || Number(formData.totalPersons) < 1) errors.totalPersons = "At least 1 person required";
     if (!formData.checkInDate) errors.checkInDate = "Check-in date is required";
     if (!formData.idImage.url) errors.idImage = "Please upload ID proof image";
-    if (!selectedPaymentOption) errors.paymentOption = "Please select a payment option";
 
     if (!propertyPrice || propertyPrice <= 0) {
       errors.paymentAmount = "Property rent amount is not available";
     }
-
-    if (selectedPaymentOption === "custom") {
-      const parsedCustomAmount = Number(customAmount);
-      if (!customAmount.trim()) {
-        errors.customAmount = "Enter a custom amount";
-      } else if (!Number.isFinite(parsedCustomAmount)) {
-        errors.customAmount = "Enter a valid amount";
-      } else if (parsedCustomAmount < customAmountMin || parsedCustomAmount > customAmountMax) {
-        errors.customAmount = `Amount must be between ₹${customAmountMin.toLocaleString("en-IN")} and ₹${customAmountMax.toLocaleString("en-IN")}`;
-      }
-    }
-
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -289,20 +254,6 @@ export default function PropertyBooking({ property }) {
 
     setPaymentLoading(true);
     try {
-      const amountToPay = selectedPaymentAmount;
-      if (!amountToPay || amountToPay <= 0) {
-        throw new Error("Invalid payment amount");
-      }
-
-      const expectedTotalAmount = Number(fullRentAmount || amountToPay || 0);
-      const remainingAmount = Math.max(expectedTotalAmount - amountToPay, 0);
-
-      const bookingAmountFields = {
-        totalAmount: selectedPaymentOption === "full" ? amountToPay : 0,
-        advanceAmount: selectedPaymentOption === "advance" ? amountToPay : 0,
-        otherAmount: selectedPaymentOption === "custom" ? amountToPay : 0,
-      };
-
       const bookingPayload = {
         propertyId: property?._id || property?.id,
         propertyName: property?.propertyName || property?.name,
@@ -311,12 +262,7 @@ export default function PropertyBooking({ property }) {
         propertyAddress,
         locationType: property?.locationType || "",
         subLocationType: property?.subLocationType || "",
-        amountToPay,
-        expectedTotalAmount,
-        remainingAmount,
-        selectedPaymentOption,
-        selectedPaymentLabel,
-        ...bookingAmountFields,
+        propertyPrice,
         ...formData,
       };
 
@@ -331,27 +277,7 @@ export default function PropertyBooking({ property }) {
         throw new Error(bookingData.message || "Failed to create booking");
       }
 
-      toast.success("Booking confirmed successfully!");
-      toast("Redirecting to property details page in 5 seconds...", { icon: '⏳', duration: 5000 });
-      setFormData({
-        title: "Mr.",
-        fullName: "",
-        phone: "",
-        email: "",
-        totalPersons: 1,
-        checkInDate: "",
-        lengthOfStay: "",
-        idProofType: "Aadhaar Card",
-        idImage: { url: "", key: "", loading: false },
-      });
-      setSelectedPaymentOption("");
-      setCustomAmount("");
-      setFormErrors({});
-      setIsEmailVerified(false);
-      
-      setTimeout(() => {
-        router.push(`/properties/${slugify(propertyLocation)}/${slugify(propertySlug)}`);
-      }, 5000);
+      setShowSuccessModal(true);
     } catch (err) {
       console.error(err);
       toast.error(err.message || "Error submitting booking");
@@ -391,9 +317,8 @@ export default function PropertyBooking({ property }) {
                 <p className="mt-1 text-sm text-slate-500 line-clamp-2">{propertyAddress}</p>
               </div>
               <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 shadow-sm">
-                <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600">Selected payment</p>
-                <p className="mt-1 text-2xl font-black text-slate-900">₹{selectedPaymentAmount.toLocaleString("en-IN")}</p>
-                <p className="mt-1 text-sm text-slate-600">{selectedPaymentLabel}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600">Property Rent</p>
+                <p className="mt-1 text-2xl font-black text-slate-900">₹{propertyPrice.toLocaleString("en-IN")}</p>
               </div>
             </div>
           </div>
@@ -426,7 +351,7 @@ export default function PropertyBooking({ property }) {
                     </select>
                   </div>
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">Full Name</label>
+                    <label className="mb-2 block text-sm font-semibold text-slate-700">First Name</label>
                     <input
                       type="text"
                       name="firstName"
@@ -438,7 +363,7 @@ export default function PropertyBooking({ property }) {
                     {formErrors.firstName && <p className="text-xs text-red-600 mt-1">{formErrors.firstName}</p>}
                   </div>
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">Full Name</label>
+                    <label className="mb-2 block text-sm font-semibold text-slate-700">Last Name</label>
                     <input
                       type="text"
                       name="lastName"
@@ -495,9 +420,8 @@ export default function PropertyBooking({ property }) {
                           }}
                           disabled={isEmailVerified || emailLoading}
                           placeholder="Enter email address"
-                          className={`w-full rounded-2xl border px-4 py-3 text-sm text-slate-900 outline-none transition focus:ring-4 ${
-                            formErrors.email ? "border-red-400 focus:ring-red-100" : "border-slate-200 focus:border-blue-400 focus:ring-blue-100"
-                          } ${isEmailVerified ? "bg-slate-50 opacity-80" : ""}`}
+                          className={`w-full rounded-2xl border px-4 py-3 text-sm text-slate-900 outline-none transition focus:ring-4 ${formErrors.email ? "border-red-400 focus:ring-red-100" : "border-slate-200 focus:border-blue-400 focus:ring-blue-100"
+                            } ${isEmailVerified ? "bg-slate-50 opacity-80" : ""}`}
                         />
                         {isEmailVerified && (
                           <div className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-500 bg-emerald-50 p-1 rounded-full">
@@ -505,7 +429,7 @@ export default function PropertyBooking({ property }) {
                           </div>
                         )}
                       </div>
-                      
+
                       {!isEmailVerified && !isOtpSent && (
                         <Button
                           type="button"
@@ -517,7 +441,7 @@ export default function PropertyBooking({ property }) {
                         </Button>
                       )}
                     </div>
-                    
+
                     {formErrors.email && <p className="text-xs text-red-600">{formErrors.email}</p>}
                     {emailError && <p className="text-xs text-red-600">{emailError}</p>}
                     {emailSuccess && <p className="text-xs text-emerald-600">{emailSuccess}</p>}
@@ -561,7 +485,7 @@ export default function PropertyBooking({ property }) {
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <div>
                     <h3 className="text-lg font-black text-slate-900">Stay Schedule</h3>
-                    <p className="mt-1 text-sm text-slate-500">Pick your arrival and stay duration.</p>
+                    <p className="mt-1 text-sm text-slate-500">Pick your arrival duration.</p>
                   </div>
                   <div className="hidden rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 md:block">Step 2 of 3</div>
                 </div>
@@ -578,10 +502,14 @@ export default function PropertyBooking({ property }) {
             </div>
 
             <div className="overflow-hidden rounded-[1.75rem] border border-white/70 bg-white/80 p-6 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur-xl md:p-7">
+              <div className="flex justify-between items-center">
               <div className="mb-5">
                 <h3 className="text-lg font-black text-slate-900">ID Proof</h3>
                 <p className="mt-1 text-sm text-slate-500">Choose an ID type and upload a clear image.</p>
               </div>
+              <div className="hidden rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 md:block">Step 3 of 3</div>
+              </div>
+
               <div className="space-y-4 w-full">
                 <div className="flex items-end mt-2 gap-3 w-full">
                   <div className="w-full">
@@ -638,118 +566,7 @@ export default function PropertyBooking({ property }) {
               </div>
             </div>
 
-            <div className="overflow-hidden rounded-[1.75rem] border border-white/70 bg-white/80 p-6 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur-xl md:p-7 space-y-4">
-              <div>
-                <div className="mb-4 flex items-center justify-between gap-3">
-                  <div>
-                    <h3 className="text-lg font-black text-slate-900">Choose Payment Amount</h3>
-                    <p className="mt-1 text-sm text-slate-500">Select one option. The amount shown here will be the final payment during checkout.</p>
-                  </div>
-                  <div className="hidden rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 md:block">Step 3 of 3</div>
-                </div>
-              </div>
 
-              <label className={`flex items-start gap-3 rounded-[1.25rem] border p-4 transition ${selectedPaymentOption === "full" ? "border-blue-500 bg-gradient-to-r from-blue-50 to-white shadow-sm" : "border-slate-200 bg-white"}`}>
-                <input
-                  type="radio"
-                  name="paymentOption"
-                  checked={selectedPaymentOption === "full"}
-                  onChange={() => setPaymentOption("full")}
-                  className="mt-1 h-4 w-4 text-blue-600"
-                />
-                <div className="flex-1 space-y-2">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold text-slate-900">Pay full max rent</p>
-                      <p className="text-xs text-slate-500">100% of the max rent price</p>
-                    </div>
-                    <input
-                      type="text"
-                      readOnly
-                      value={`₹${fullRentAmount.toLocaleString("en-IN")}`}
-                      className="w-40 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 text-right text-sm font-bold text-slate-900 outline-none"
-                    />
-                  </div>
-                </div>
-              </label>
-
-              <label className={`flex items-start gap-3 rounded-[1.25rem] border p-4 transition ${selectedPaymentOption === "advance" ? "border-blue-500 bg-gradient-to-r from-blue-50 to-white shadow-sm" : "border-slate-200 bg-white"}`}>
-                <input
-                  type="radio"
-                  name="paymentOption"
-                  checked={selectedPaymentOption === "advance"}
-                  onChange={() => setPaymentOption("advance")}
-                  className="mt-1 h-4 w-4 text-blue-600"
-                />
-                <div className="flex-1 space-y-2">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold text-slate-900">Pay 25% of max rent</p>
-                      <p className="text-xs text-slate-500">Quarter of the max rent price</p>
-                    </div>
-                    <input
-                      type="text"
-                      readOnly
-                      value={`₹${advanceAmount.toLocaleString("en-IN")}`}
-                      className="w-40 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 text-right text-sm font-bold text-slate-900 outline-none"
-                    />
-                  </div>
-                </div>
-              </label>
-
-              <label className={`flex items-start gap-3 rounded-[1.25rem] border p-4 transition ${selectedPaymentOption === "custom" ? "border-blue-500 bg-gradient-to-r from-blue-50 to-white shadow-sm" : "border-slate-200 bg-white"}`}>
-                <input
-                  type="radio"
-                  name="paymentOption"
-                  checked={selectedPaymentOption === "custom"}
-                  onChange={() => setPaymentOption("custom")}
-                  className="mt-1 h-4 w-4 text-blue-600"
-                />
-                <div className="flex-1 space-y-2">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold text-slate-900">Enter a custom amount</p>
-                      <p className="text-xs text-slate-500">
-                        Must be between ₹{customAmountMin.toLocaleString("en-IN")} and ₹{customAmountMax.toLocaleString("en-IN")}
-                      </p>
-                    </div>
-                    <input
-                      type="number"
-                      name="customAmount"
-                      value={customAmount}
-                      onChange={(e) => {
-                        setPaymentOption("custom");
-                        const nextValue = e.target.value;
-                        setCustomAmount(nextValue);
-                        clearFieldError("customAmount");
-                      }}
-                      onBlur={(e) => {
-                        const nextValue = e.target.value;
-                        if (!nextValue) return;
-
-                        const parsedValue = Number(nextValue);
-                        if (!Number.isFinite(parsedValue)) return;
-
-                        if (parsedValue > customAmountMax) {
-                          toast.error(`Custom amount cannot be more than ₹${customAmountMax.toLocaleString("en-IN")}`);
-                        } else if (parsedValue < customAmountMin) {
-                          toast.error(`Custom amount must be at least ₹${customAmountMin.toLocaleString("en-IN")}`);
-                        }
-                      }}
-                      min={customAmountMin}
-                      max={customAmountMax}
-                      placeholder="Enter amount"
-                      disabled={selectedPaymentOption !== "custom"}
-                      className={`w-40 rounded-2xl border px-4 py-2 text-right text-sm font-bold outline-none ${formErrors.customAmount ? "border-red-400 focus:ring-red-100" : "border-slate-200 focus:border-blue-400 focus:ring-blue-100"}`}
-                    />
-                  </div>
-                  {formErrors.customAmount && <p className="text-xs text-red-600">{formErrors.customAmount}</p>}
-                </div>
-              </label>
-
-              {formErrors.paymentAmount && <p className="text-xs text-red-600">{formErrors.paymentAmount}</p>}
-              {formErrors.paymentOption && <p className="text-xs text-red-600">{formErrors.paymentOption}</p>}
-            </div>
 
             <div className="rounded-[1.75rem] border border-white/70 bg-white/80 p-6 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur-xl md:p-7">
               <p className="text-sm font-semibold leading-6 text-slate-600 text-justify">
@@ -791,11 +608,11 @@ export default function PropertyBooking({ property }) {
                 </div>
 
                 <div className="mt-5 rounded-3xl border border-emerald-100 bg-emerald-50/70 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600">Final payment during checkout</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600">Property Rent</p>
                   <div className="mt-2 text-3xl font-black text-slate-900">
-                    {selectedPaymentOption ? `₹${selectedPaymentAmount.toLocaleString("en-IN")}` : "Select a payment option"}
+                    ₹{propertyPrice.toLocaleString("en-IN")}
                   </div>
-                  <p className="mt-1 text-sm text-slate-600">{selectedPaymentLabel}</p>
+                  <p className="mt-1 text-sm text-slate-600">Rent Price</p>
                 </div>
               </div>
 
@@ -821,6 +638,68 @@ export default function PropertyBooking({ property }) {
           </div>
         </form>
       </div>
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
+          <div className="relative w-full max-w-3xl overflow-hidden rounded-[2rem] bg-white shadow-2xl flex flex-col md:flex-row">
+            
+            {/* Close Button */}
+            <button 
+              onClick={() => router.push("/")}
+              className="absolute right-4 top-4 z-10 rounded-full p-2 text-black bg-slate-200 hover:bg-slate-300 hover:text-black transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            {/* Left Side - Message */}
+            <div className="flex flex-col justify-center bg-emerald-50/50 p-8 md:w-1/2 md:p-12 relative">
+              <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+                <Check className="h-8 w-8" />
+              </div>
+              <h2 className="mb-2 text-3xl font-black text-slate-900">Thank You!</h2>
+              <p className="text-base text-slate-600">
+                Your booking request has been successfully received.
+              </p>
+              <div className="mt-8 rounded-2xl bg-white p-5 shadow-sm border border-emerald-100/50">
+                <p className="text-sm font-medium leading-relaxed text-slate-700">
+                  Our <span className="font-bold text-emerald-600">Rishikesh Rent</span> team will message you shortly to confirm your booking and provide further details.
+                </p>
+              </div>
+              <div className="mt-8">
+                <Button 
+                  onClick={() => router.push("/")}
+                  className="w-full md:w-auto rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-5"
+                >
+                  Return to Home
+                </Button>
+              </div>
+            </div>
+            
+            {/* Right Side - Property Info */}
+            <div className="bg-slate-50 p-8 md:w-1/2">
+              <div className="h-48 w-full overflow-hidden rounded-2xl bg-slate-200">
+                <img
+                  src={heroImage}
+                  alt={propertyName}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <div className="mt-6">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Booked Property</p>
+                <h3 className="mt-1 text-xl font-bold text-slate-900 line-clamp-2">{propertyName}</h3>
+                <p className="mt-2 text-sm text-slate-500 line-clamp-2">{propertyAddress}</p>
+              </div>
+              <div className="mt-6 flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4">
+                <span className="text-sm font-medium text-slate-600">Rent Price</span>
+                <span className="text-lg font-black text-slate-900">₹{propertyPrice.toLocaleString("en-IN")}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

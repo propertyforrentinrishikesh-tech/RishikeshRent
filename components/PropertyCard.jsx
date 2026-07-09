@@ -4,11 +4,11 @@ import Link from "next/link";
 import { Button } from "./ui/button";
 import Image from "next/image";
 
-const PropertyCard = ({ 
-  item, 
-  onBookingClick, 
+const PropertyCard = ({
+  item,
+  onBookingClick,
   onQuickViewClick,
-  slugify 
+  slugify
 }) => {
   const cardTitle = item?.propertyName || item?.title || "";
   const cardLocation = item?.locationType || item?.subLocationType || "Location";
@@ -19,7 +19,7 @@ const PropertyCard = ({
   return (
     <div
       key={item?._id || item?.id || cardSlug}
-      className="group bg-white rounded-[24px] overflow-hidden shadow-[0_4px_20px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 flex flex-col h-full p-3"
+      className="group relative bg-white rounded-[24px] overflow-hidden shadow-[0_4px_20px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 flex flex-col h-full p-3"
     >
       <div className="relative h-[240px] w-full overflow-hidden rounded-[20px]">
         <Image
@@ -41,7 +41,12 @@ const PropertyCard = ({
           </Button>
         </div>
       </div>
-
+      {/* Badges */}
+      <div className="absolute top-5 left-5 flex flex-wrap gap-2">
+        <span className="bg-emerald-500 text-white text-[12px] font-bold px-2 py-1 rounded">
+          ✓ Verified
+        </span>
+      </div>
       <div className="flex flex-col flex-grow pt-4 px-2 pb-1">
         {/* Middle Row: Location and Price (replacing Duration) */}
         <div className="flex justify-between items-center gap-2">
@@ -83,13 +88,13 @@ const PropertyCard = ({
             </Button>
           </Link>
 
-            {/* Request Book in place of price */}
-            <Button
-              className="group bg-[#1bb9c3] hover:bg-[#15a1ab] text-white rounded-full px-4 h-10 font-semibold text-sm shadow-md transition-all duration-300"
-              onClick={(e) => { e.preventDefault(); onBookingClick?.(item); }}
-            >
-              Request Book <ArrowRight className="w-0 h-4 opacity-0 transition-all duration-300 group-hover:w-4 group-hover:opacity-100 group-hover:ml-1.5 group-hover:translate-x-1" />
-            </Button>
+          {/* Request Book in place of price */}
+          <Button
+            className="group bg-[#1bb9c3] hover:bg-[#15a1ab] text-white rounded-full px-4 h-10 font-semibold text-sm shadow-md transition-all duration-300"
+            onClick={(e) => { e.preventDefault(); onBookingClick?.(item); }}
+          >
+            Request Book <ArrowRight className="w-0 h-4 opacity-0 transition-all duration-300 group-hover:w-4 group-hover:opacity-100 group-hover:ml-1.5 group-hover:translate-x-1" />
+          </Button>
         </div>
       </div>
     </div>

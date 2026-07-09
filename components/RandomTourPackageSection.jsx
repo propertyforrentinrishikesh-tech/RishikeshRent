@@ -123,12 +123,29 @@ const RandomTourPackageSection = () => {
         throw new Error("Failed to submit enquiry");
       }
 
-      toast.success("Enquiry submitted successfully!");
+      const message = `Hi,
+
+I am interested in this property.
+
+Property: ${selectedBookingProperty.propertyName}
+Location: ${selectedBookingProperty.locationType}
+Price: ₹${selectedBookingProperty.price || selectedBookingProperty.rentPrice}
+
+My Name: ${bookingName}
+Contact: ${contactMethod === 'email' ? email : phone}`;
+
+      const whatsappUrl = `https://wa.me/917060320678?text=${encodeURIComponent(message)}`;
+
+      toast.success("Enquiry submitted successfully! Redirecting to WhatsApp...");
       setShowBookingModal(false);
       setBookingName("");
       setContactMethod("call");
       setPhone("");
       setEmail("");
+
+      setTimeout(() => {
+        window.open(whatsappUrl, "_blank");
+      }, 1500);
     } catch (error) {
       console.error("Error submitting enquiry:", error);
       toast.error(error.message || "Failed to submit enquiry");
@@ -138,9 +155,6 @@ const RandomTourPackageSection = () => {
   };
 
   const sectionProducts = Array.isArray(products) ? products.slice(0, 7) : [];
-
-
-
   // console.log(products)
   // Fetch Artisan 
   const fetchArtisan = async () => {

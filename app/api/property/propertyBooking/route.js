@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/connectDB";
 import PropertyBooking from "@/models/Property/PropertyBooking";
 import PropertyDetails from "@/models/Property/PropertyDetails";
+import { sendOTP } from "@/lib/brevo";
+import { wrapEmailTemplate } from "@/lib/emailTemplate";
 function generateBookingRef() {
   return `BG-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
 }
@@ -83,14 +85,7 @@ export async function POST(request) {
       checkInDate,
       idProofType,
       idImage,
-      totalAmount,
-      advanceAmount,
-      otherAmount,
-      amountToPay,
-      expectedTotalAmount,
-      remainingAmount,
-      selectedPaymentOption,
-      selectedPaymentLabel,
+      propertyPrice,
       currency = "INR",
       message,
       sourcePage,
@@ -103,7 +98,7 @@ export async function POST(request) {
     if (!email?.trim()) requiredFields.push("email");
     if (!checkInDate) requiredFields.push("checkInDate");
     if (!idImage?.url) requiredFields.push("idImage");
-    if (!amountToPay && !advanceAmount && !totalAmount) requiredFields.push("amountToPay");
+    if (!propertyPrice) requiredFields.push("propertyPrice");
 
     if (requiredFields.length > 0) {
       return NextResponse.json(
@@ -124,34 +119,10 @@ export async function POST(request) {
       ? await PropertyDetails.findById(propertyId).select("propertyName propertyNameSlug locationType subLocationType contactAddress mainImage rentPrice maxRentPrice").lean()
       : null;
 
-    const bookingAmount = Number(amountToPay || advanceAmount || totalAmount || property?.rentPrice || 0);
+    const bookingAmount = Number(propertyPrice || property?.rentPrice || 0);
     if (!Number.isFinite(bookingAmount) || bookingAmount <= 0) {
-      return NextResponse.json({ success: false, message: "Invalid payment amount" }, { status: 400 });
+      return NextResponse.json({ success: false, message: "Invalid property price" }, { status: 400 });
     }
-
-    const expectedAmount = Number(
-      expectedTotalAmount || property?.maxRentPrice || totalAmount || bookingAmount
-    );
-    const normalizedExpectedAmount = Number.isFinite(expectedAmount) && expectedAmount > 0
-      ? expectedAmount
-      : bookingAmount;
-    const normalizedRemainingAmount = Math.max(
-      Number.isFinite(Number(remainingAmount)) ? Number(remainingAmount) : normalizedExpectedAmount - bookingAmount,
-      0
-    );
-
-    const resolvedPaymentOption = selectedPaymentOption || (
-      Number(totalAmount) > 0 ? "full" : Number(advanceAmount) > 0 ? "advance" : Number(otherAmount) > 0 ? "custom" : ""
-    );
-    const resolvedPaymentLabel = selectedPaymentLabel || (
-      resolvedPaymentOption === "full"
-        ? "Full max rent"
-        : resolvedPaymentOption === "advance"
-          ? "Minimum amount"
-          : resolvedPaymentOption === "custom"
-            ? "Custom amount"
-            : ""
-    );
 
     const booking = await PropertyBooking.create({
       bookingRef: generateBookingRef(),
@@ -171,19 +142,47 @@ export async function POST(request) {
       checkInDate,
       idProofType,
       idImage,
-      totalAmount: Number(totalAmount || 0),
-      advanceAmount: Number(advanceAmount || 0),
-      otherAmount: Number(otherAmount || 0),
-      amountToPay: bookingAmount,
-      expectedTotalAmount: normalizedExpectedAmount,
-      remainingAmount: normalizedRemainingAmount,
-      selectedPaymentOption: resolvedPaymentOption,
-      selectedPaymentLabel: resolvedPaymentLabel,
+      totalAmount: bookingAmount,
+      propertyPrice: bookingAmount,
       currency,
       message,
       sourcePage,
       status: "Pending",
     });
+
+    try {
+      const resolvedPropertyName = propertyName || property?.propertyName || "Property";
+      const resolvedLocation = locationType || property?.locationType || "";
+      const emailContent = `
+        <div style="font-family: sans-serif; line-height: 1.5; color: #333;">
+          <h2 style="color: #0EA5E9;">Thank You for Your Booking Request!</h2>
+          <p>Dear ${firstName.trim()} ${lastName.trim()},</p>
+          <p>Your booking request for <strong>${resolvedPropertyName}</strong> has been successfully received.</p>
+          <p>Our team will review it and message you shortly with further details.</p>
+          
+          <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #1f2937;">Booking Details</h3>
+            <p style="margin: 4px 0;"><strong>Property Name:</strong> ${resolvedPropertyName}</p>
+            <p style="margin: 4px 0;"><strong>Location:</strong> ${resolvedLocation}</p>
+            <p style="margin: 4px 0;"><strong>Check-in Date:</strong> ${new Date(checkInDate).toLocaleDateString("en-IN")}</p>
+            <p style="margin: 4px 0;"><strong>Total Persons:</strong> ${Number(totalPersons || 1)}</p>
+            <p style="margin: 4px 0;"><strong>Rent Price:</strong> ₹${bookingAmount.toLocaleString("en-IN")}</p>
+          </div>
+          
+          <p>If you have any urgent questions, please feel free to contact our team.</p>
+          <p>Best regards,<br/><strong>Rishikesh Rent Team</strong></p>
+        </div>
+      `;
+
+      const formattedEmail = wrapEmailTemplate({
+        bodyContent: emailContent,
+        title: "Booking Request Received - Rishikesh Rent",
+      });
+
+      await sendOTP(email.trim(), null, formattedEmail, "Booking Request Received - Rishikesh Rent");
+    } catch (emailErr) {
+      console.error("Failed to send booking confirmation email:", emailErr);
+    }
 
     return NextResponse.json({
       success: true,

@@ -40,7 +40,7 @@ const Header = ({ menuItems, companyBasicInfo = null }) => {
 
   const [navbarSections, setNavbarSections] = useState([]);
   const companyName = companyBasicInfo?.companyName || 'Kag Premium Homes';
-  const desktopLogoSrc = companyBasicInfo?.mainLogo?.url || companyBasicInfo?.footerLogo?.url || '/HeaderLogo.png';
+  const desktopLogoSrc = companyBasicInfo?.mainLogo?.url || companyBasicInfo?.footerLogo?.url || '/image.png';
   const mobileLogoSrc = companyBasicInfo?.mobileUiLogo?.url || companyBasicInfo?.mainLogo?.url || '/HeaderLogo.png';
 
   const loadNavbarSections = async () => {
@@ -253,13 +253,13 @@ const Header = ({ menuItems, companyBasicInfo = null }) => {
             </div>
           </div>
         </div>
-        <div className="md:flex hidden items-center justify-between gap-4 border-b border-gray-400 md:px-2 ">
-          <div className="flex flex-row justify-between w-full items-center px-2">
+        <div className="md:flex hidden items-center justify-between gap-4 border-b border-gray-400 ">
+          <div className="flex flex-row justify-between w-full items-center">
             {/* Logo on the left */}
-            <div className="flex item-center gap-2">
+            <div className="flex item-start gap-2">
               <Link href={"/"}>
                 <Image
-                  className="w-full h-20 object-contain"
+                  className="h-20 w-full object-contain"
                   src={desktopLogoSrc}
                   alt={companyName}
                   width={240}
@@ -268,7 +268,7 @@ const Header = ({ menuItems, companyBasicInfo = null }) => {
                 />
               </Link>
 
-              <div className="w-[1px] bg-black h-18"></div>
+              {/* <div className="w-[1px] bg-black h-18"></div> */}
               <div className="flex item-center gap-2 justify-center">
                 <Link href="/partner/register"
                   className="flex items-center gap-2"
@@ -278,7 +278,7 @@ const Header = ({ menuItems, companyBasicInfo = null }) => {
                   </div>
                   <div className="flex flex-col items-center">
                     <p className="text-yellow-700 text-sm">List Your Property</p>
-                    <p className="text-black text-sm">Hotels & Hostels</p>
+                    <p className="text-black text-sm">Hostels & Rental</p>
                   </div>
                 </Link>
               </div>

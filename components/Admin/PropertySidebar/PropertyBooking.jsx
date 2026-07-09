@@ -184,31 +184,7 @@ const PropertyBooking = ({ locationType = [] }) => {
   const formatCurrency = (value) =>
     value === 0 || value ? `₹${Number(value).toLocaleString("en-IN")}` : "—";
 
-  const getPaymentTypeLabel = (enquiry) => {
-    if (enquiry?.selectedPaymentLabel) return enquiry.selectedPaymentLabel;
-    if (enquiry?.selectedPaymentOption === "full") return "Full amount";
-    if (enquiry?.selectedPaymentOption === "advance") return "Minimum amount";
-    if (enquiry?.selectedPaymentOption === "custom") return "Custom amount";
-    if (Number(enquiry?.totalAmount) > 0) return "Full amount";
-    if (Number(enquiry?.advanceAmount) > 0) return "Minimum amount";
-    if (Number(enquiry?.otherAmount) > 0) return "Custom amount";
-    return "—";
-  };
 
-  const getExpectedAmount = (enquiry) => {
-    const expected = Number(enquiry?.expectedTotalAmount || 0);
-    if (expected > 0) return expected;
-    const fallback = Number(enquiry?.totalAmount || enquiry?.amountToPay || enquiry?.amount || 0);
-    return fallback > 0 ? fallback : 0;
-  };
-
-  const getRemainingAmount = (enquiry) => {
-    const storedRemaining = Number(enquiry?.remainingAmount || 0);
-    if (storedRemaining > 0) return storedRemaining;
-    const expected = getExpectedAmount(enquiry);
-    const paid = Number(enquiry?.amountToPay || enquiry?.amount || 0);
-    return Math.max(expected - paid, 0);
-  };
 
   const clearFilters = () => { setSearch(""); setFilterStatus("all"); setFilterLocation("all"); };
   const hasFilters = search || filterStatus !== "all" || filterLocation !== "all";
@@ -390,9 +366,7 @@ const PropertyBooking = ({ locationType = [] }) => {
                       </TableCell>
 
                       <TableCell>
-                        <p className="text-sm font-semibold text-slate-800">{formatCurrency(enquiry.amountToPay || enquiry.amount || 0)}</p>
-                        <p className="text-[11px] text-slate-500">{getPaymentTypeLabel(enquiry)}</p>
-                        <p className="text-[11px] text-amber-600 font-medium">Remaining: {formatCurrency(getRemainingAmount(enquiry))}</p>
+                        <p className="text-sm font-semibold text-slate-800">{formatCurrency(enquiry.propertyPrice || enquiry.amountToPay || enquiry.totalAmount || 0)}</p>
                       </TableCell>
 
                       <TableCell>
@@ -588,13 +562,7 @@ const PropertyBooking = ({ locationType = [] }) => {
                     <Star className="w-4 h-4 text-amber-500" /> Payment Info
                   </h3>
                   <div className="space-y-2">
-                    <InfoRow label="Payment Type" value={getPaymentTypeLabel(selectedEnquiry)} />
-                    <InfoRow label="Total Amount" value={formatCurrency(selectedEnquiry.totalAmount)} />
-                    <InfoRow label="Advance Amount" value={formatCurrency(selectedEnquiry.advanceAmount)} />
-                    <InfoRow label="Other Amount" value={formatCurrency(selectedEnquiry.otherAmount)} />
-                    <InfoRow label="Amount To Pay" value={formatCurrency(selectedEnquiry.amountToPay)} />
-                    <InfoRow label="Expected Total" value={formatCurrency(getExpectedAmount(selectedEnquiry))} />
-                    <InfoRow label="Remaining Amount" value={formatCurrency(getRemainingAmount(selectedEnquiry))} />
+                    <InfoRow label="Property Rent" value={formatCurrency(selectedEnquiry.propertyPrice || selectedEnquiry.totalAmount || selectedEnquiry.amountToPay)} />
                     <InfoRow label="Currency" value={selectedEnquiry.currency} />
                   </div>
                 </div>

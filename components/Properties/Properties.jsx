@@ -68,13 +68,29 @@ export default function Properties({ initialProducts = [], banners = [] }) {
       if (!response.ok) {
         throw new Error("Failed to submit enquiry");
       }
+      const message = `Hi,
 
-      toast.success("Enquiry submitted successfully!");
+I am interested in this property.
+
+Property: ${selectedBookingProperty.propertyName}
+Location: ${selectedBookingProperty.locationType}
+Price: ₹${selectedBookingProperty.price || selectedBookingProperty.rentPrice}
+
+My Name: ${bookingName}
+Contact: ${contactMethod === 'email' ? email : phone}`;
+
+      const whatsappUrl = `https://wa.me/917060320678?text=${encodeURIComponent(message)}`;
+
+      toast.success("Enquiry submitted successfully! Redirecting to WhatsApp...");
       setShowBookingModal(false);
       setBookingName("");
       setContactMethod("call");
       setPhone("");
       setEmail("");
+
+      setTimeout(() => {
+        window.open(whatsappUrl, "_blank");
+      }, 1500);
     } catch (error) {
       console.error("Error submitting enquiry:", error);
       toast.error(error.message || "Failed to submit enquiry");
@@ -97,12 +113,12 @@ export default function Properties({ initialProducts = [], banners = [] }) {
 
       {/* Booking Modal */}
       {showBookingModal && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" 
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
           onClick={() => setShowBookingModal(false)}
         >
-          <div 
-            className="bg-[#0f172a] rounded-[24px] shadow-2xl mx-auto w-full max-w-md h-auto relative overflow-hidden border border-white/10 animate-in zoom-in-95 slide-in-from-bottom-4 duration-300" 
+          <div
+            className="bg-[#0f172a] rounded-[24px] shadow-2xl mx-auto w-full max-w-md h-auto relative overflow-hidden border border-white/10 animate-in zoom-in-95 slide-in-from-bottom-4 duration-300"
             onClick={e => e.stopPropagation()}
           >
             <button
@@ -191,9 +207,9 @@ export default function Properties({ initialProducts = [], banners = [] }) {
               )}
 
               <div className="mb-6 relative flex items-center py-2">
-                 <div className="flex-grow border-t border-white/10"></div>
-                 <span className="flex-shrink-0 mx-4 text-xs font-medium text-gray-500 uppercase tracking-widest">Or Email</span>
-                 <div className="flex-grow border-t border-white/10"></div>
+                <div className="flex-grow border-t border-white/10"></div>
+                <span className="flex-shrink-0 mx-4 text-xs font-medium text-gray-500 uppercase tracking-widest">Or Email</span>
+                <div className="flex-grow border-t border-white/10"></div>
               </div>
 
               <div className="mb-6">

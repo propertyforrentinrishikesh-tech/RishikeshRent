@@ -644,15 +644,9 @@ export const PropertyDetail = ({ property: initialProperty, relatedProperties = 
 
                             <Link href={bookingUrl} className="block">
                                 <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 rounded-lg gap-2 text-base">
-                                    Proceed to Pay <ArrowRight className="w-4 h-4" />
+                                    Confirm Your Pay <ArrowRight className="w-4 h-4" />
                                 </Button>
-                            </Link>
-                            {/* VERIFICATION BADGE */}
-                            {/* <div className="bg-emerald-50 rounded-lg p-3 border border-emerald-200 text-center">
-                                <div className="flex items-center justify-center gap-1 text-emerald-700 text-xs font-semibold">
-                                    <Check className="w-4 h-4" /> Verified Property
-                                </div>
-                            </div> */}
+                            </Link>                          
                         </div>
                     </div>
                 </div>
@@ -688,14 +682,9 @@ export const PropertyDetail = ({ property: initialProperty, relatedProperties = 
                                                 />
                                                 {/* Badges */}
                                                 <div className="absolute top-3 left-3 flex flex-wrap gap-2">
-                                                    <span className="bg-emerald-500 text-white text-[10px] font-bold px-2 py-1 rounded">
+                                                    <span className="bg-emerald-500 text-white text-[12px] font-bold px-2 py-1 rounded">
                                                         ✓ Verified
                                                     </span>
-                                                </div>
-                                                {/* Rating */}
-                                                <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur px-2.5 py-1 rounded-full flex items-center gap-1 text-xs font-semibold">
-                                                    <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
-                                                    <span>4.8</span>
                                                 </div>
                                             </div>
 
