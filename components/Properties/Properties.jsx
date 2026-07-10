@@ -114,26 +114,26 @@ Contact: ${contactMethod === 'email' ? email : phone}`;
       {/* Booking Modal */}
       {showBookingModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+          className="fixed inset-0 z-[999] flex items-center justify-center bg-black/70 backdrop-blur-md p-4 sm:p-6 overflow-y-auto animate-in fade-in duration-300"
           onClick={() => setShowBookingModal(false)}
-        >
+        > 
           <div
-            className="bg-[#0f172a] rounded-[24px] shadow-2xl mx-auto w-full max-w-md h-auto relative overflow-hidden border border-white/10 animate-in zoom-in-95 slide-in-from-bottom-4 duration-300"
+            className="relative w-full max-w-md bg-[#0f172a] rounded-3xl border border-white/10 shadow-2xl overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 max-h-[100vh] overflow-y-auto"
             onClick={e => e.stopPropagation()}
           >
             <button
-              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-colors focus:outline-none"
+              className="absolute top-4 right-4 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-gray-400 transition hover:bg-white/10 hover:text-white"
               onClick={() => setShowBookingModal(false)}
               aria-label="Close booking form"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <form onSubmit={handleBookingSubmit} className="p-8">
-              <h2 className="text-2xl font-bold text-center mb-6 text-white">Enquiry For</h2>
+            <form onSubmit={handleBookingSubmit} className="p-5 sm:p-6 lg:p-6">
+              <h2 className="text-2xl sm:text-3xl font-bold text-center text-white mb-4">Enquiry For</h2>
 
               {selectedBookingProperty && (
-                <div className="mb-6 rounded-xl bg-white/5 border border-white/10 p-4">
+                <div className="mb-6 rounded-2xl bg-white/5 border border-white/10 p-4">
                   <p className="text-sm font-semibold text-white mb-1 line-clamp-1">{selectedBookingProperty.propertyName}</p>
                   <p className="text-xs text-gray-400 flex items-center gap-1.5">
                     <MapPin className="w-3.5 h-3.5 text-[#1bb9c3]" />
@@ -143,17 +143,17 @@ Contact: ${contactMethod === 'email' ? email : phone}`;
               )}
 
               <div className="mb-5">
-                <label className="text-sm font-semibold text-gray-300 mb-2 block">Your Name</label>
+                <label className="text-sm sm:text-base font-medium text-gray-300 mb-2 block">Your Name</label>
                 <input
                   type="text"
                   placeholder="Enter your name"
                   value={bookingName}
                   onChange={(e) => setBookingName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-[#1bb9c3] focus:ring-1 focus:ring-[#1bb9c3] transition-all"
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3.5 text-sm sm:text-base text-white placeholder:text-gray-500 focus:border-[#1bb9c3] focus:ring-2 focus:ring-[#1bb9c3]/30 outline-none transition"
                 />
               </div>
 
-              <div className="flex gap-6 mb-6">
+             <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 mb-6">
                 <label className="flex items-center gap-3 cursor-pointer group">
                   <div className="relative flex items-center justify-center">
                     <input
@@ -191,7 +191,7 @@ Contact: ${contactMethod === 'email' ? email : phone}`;
               {(contactMethod === "call" || contactMethod === "whatsapp") && (
                 <div className="mb-5">
                   <div className="flex gap-2">
-                    <div className="bg-white/5 border border-white/10 text-gray-300 rounded-xl px-4 font-semibold flex items-center">
+                   <div className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white font-semibold flex items-center justify-center sm:justify-start sm:w-[90px]">
                       +91
                     </div>
                     <input
@@ -200,13 +200,13 @@ Contact: ${contactMethod === 'email' ? email : phone}`;
                       value={phone}
                       onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
                       maxLength="10"
-                      className="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-[#1bb9c3] focus:ring-1 focus:ring-[#1bb9c3] transition-all"
+                      className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3.5 text-sm sm:text-base text-white placeholder:text-gray-500 focus:border-[#1bb9c3] focus:ring-2 focus:ring-[#1bb9c3]/30 outline-none transition"
                     />
                   </div>
                 </div>
               )}
 
-              <div className="mb-6 relative flex items-center py-2">
+              <div className="relative flex items-center my-7">
                 <div className="flex-grow border-t border-white/10"></div>
                 <span className="flex-shrink-0 mx-4 text-xs font-medium text-gray-500 uppercase tracking-widest">Or Email</span>
                 <div className="flex-grow border-t border-white/10"></div>
@@ -218,12 +218,12 @@ Contact: ${contactMethod === 'email' ? email : phone}`;
                   placeholder="Enter Your Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-[#1bb9c3] focus:ring-1 focus:ring-[#1bb9c3] transition-all"
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3.5 text-sm sm:text-base text-white placeholder:text-gray-500 focus:border-[#1bb9c3] focus:ring-2 focus:ring-[#1bb9c3]/30 outline-none transition"
                 />
               </div>
 
-              <div className="mb-8 flex gap-3 items-start">
-                <label htmlFor="agree" className="text-xs text-gray-400 leading-relaxed cursor-pointer select-none">
+              <div className="mb-7">
+                <label htmlFor="agree" className="text-xs md:text-sm leading-6 text-gray-400">
                   We Appreciate Your Interest! A Member of Our Team Will Reach Out to You Soon to Discuss Your Offer.
                 </label>
               </div>
@@ -231,7 +231,7 @@ Contact: ${contactMethod === 'email' ? email : phone}`;
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-gradient-to-r from-[#1bb9c3] to-[#15a1ab] text-white font-bold py-3.5 rounded-xl hover:shadow-lg hover:shadow-[#1bb9c3]/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98]"
+                className="w-full rounded-xl bg-gradient-to-r from-[#1bb9c3] to-[#15a1ab] py-4 text-base font-semibold text-white transition hover:scale-[1.02] hover:shadow-xl hover:shadow-[#1bb9c3]/20 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isSubmitting ? "Submitting..." : "Send Enquiry"}
               </button>

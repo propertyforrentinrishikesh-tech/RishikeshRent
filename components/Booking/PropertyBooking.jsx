@@ -43,8 +43,6 @@ export default function PropertyBooking({ property }) {
     idProofType: "Aadhaar Card",
     idImage: { url: "", key: "", loading: false },
   });
-  const [selectedPaymentOption, setSelectedPaymentOption] = useState("");
-  const [customAmount, setCustomAmount] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [formErrors, setFormErrors] = useState({});
   const [paymentLoading, setPaymentLoading] = useState(false);
@@ -503,15 +501,15 @@ export default function PropertyBooking({ property }) {
 
             <div className="overflow-hidden rounded-[1.75rem] border border-white/70 bg-white/80 p-6 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur-xl md:p-7">
               <div className="flex justify-between items-center">
-              <div className="mb-5">
-                <h3 className="text-lg font-black text-slate-900">ID Proof</h3>
-                <p className="mt-1 text-sm text-slate-500">Choose an ID type and upload a clear image.</p>
-              </div>
-              <div className="hidden rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 md:block">Step 3 of 3</div>
+                <div className="mb-5">
+                  <h3 className="text-lg font-black text-slate-900">ID Proof</h3>
+                  <p className="mt-1 text-sm text-slate-500">Choose an ID type and upload a clear image.</p>
+                </div>
+                <div className="hidden rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 md:block">Step 3 of 3</div>
               </div>
 
               <div className="space-y-4 w-full">
-                <div className="flex items-end mt-2 gap-3 w-full">
+                <div className="flex flex-col md:flex-row items-center w-full md:items-end mt-2 gap-3 ">
                   <div className="w-full">
                     <label className="mb-2 block text-sm font-semibold text-slate-700">Select ID Type</label>
                     <select
@@ -539,7 +537,7 @@ export default function PropertyBooking({ property }) {
                     />
                     <Button
                       type="button"
-                      className="flex items-center gap-2 rounded-2xl bg-slate-900 px-5 py-5 text-white shadow-lg shadow-slate-900/15 transition hover:bg-slate-800 hover:text-white w-48"
+                      className="flex items-center gap-2 rounded-2xl bg-slate-900 md:px-5 py-5 text-white shadow-lg shadow-slate-900/15 transition hover:bg-slate-800 hover:text-white w-64 md:w-48"
                       onClick={() => idImageRef.current?.click()}
                       disabled={formData.idImage.loading}
                     >
@@ -641,61 +639,106 @@ export default function PropertyBooking({ property }) {
 
       {/* Success Modal */}
       {showSuccessModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
-          <div className="relative w-full max-w-3xl overflow-hidden rounded-[2rem] bg-white shadow-2xl flex flex-col md:flex-row">
-            
+        <div className="fixed inset-0 z-[999] flex items-start justify-center lg:items-center bg-black/60 backdrop-blur-md p-4 overflow-y-auto">
+
+          <div className="relative w-full max-w-4xl overflow-hidden rounded-3xl bg-white shadow-2xl flex flex-col lg:flex-row my-8 lg:my-0 animate-in zoom-in-95 fade-in duration-300">
+
             {/* Close Button */}
-            <button 
+            <button
               onClick={() => router.push("/")}
-              className="absolute right-4 top-4 z-10 rounded-full p-2 text-black bg-slate-200 hover:bg-slate-300 hover:text-black transition-colors"
+              className="absolute top-4 right-4 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md hover:bg-slate-100 transition"
             >
-              <X className="h-5 w-5" />
+              <X className="h-5 w-5 text-slate-700" />
             </button>
 
-            {/* Left Side - Message */}
-            <div className="flex flex-col justify-center bg-emerald-50/50 p-8 md:w-1/2 md:p-12 relative">
-              <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+            {/* ================= LEFT ================= */}
+            <div className="order-2 lg:order-1 w-full lg:w-1/2 bg-gradient-to-br from-emerald-50 to-white p-6 sm:p-4 lg:p-12 flex flex-col justify-center">
+
+              <div className="hidden md:flex flex-col">
+
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 shadow-sm">
                 <Check className="h-8 w-8" />
               </div>
-              <h2 className="mb-2 text-3xl font-black text-slate-900">Thank You!</h2>
-              <p className="text-base text-slate-600">
-                Your booking request has been successfully received.
-              </p>
-              <div className="mt-8 rounded-2xl bg-white p-5 shadow-sm border border-emerald-100/50">
-                <p className="text-sm font-medium leading-relaxed text-slate-700">
-                  Our <span className="font-bold text-emerald-600">Rishikesh Rent</span> team will message you shortly to confirm your booking and provide further details.
+
+                <h2 className="mt-6 text-3xl sm:text-4xl font-black text-slate-900">
+                  Thank You!
+                </h2>
+
+                <p className="mt-3 text-sm sm:text-base leading-7 text-slate-600">
+                  Your booking request has been successfully received.
                 </p>
               </div>
-              <div className="mt-8">
-                <Button 
-                  onClick={() => router.push("/")}
-                  className="w-full md:w-auto rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-5"
-                >
-                  Return to Home
-                </Button>
+
+              <div className="md:mt-8 rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm">
+                <p className="text-sm leading-7 text-slate-600">
+                  Our{" "}
+                  <span className="font-bold text-emerald-600">
+                    Rishikesh Rent
+                  </span>
+                  {" "}team will contact you shortly to confirm your booking
+                  and provide all the necessary details.
+                </p>
               </div>
+
+              <Button
+                onClick={() => router.push("/")}
+                className="mt-8 w-full sm:w-fit rounded-xl bg-emerald-600 hover:bg-emerald-700 px-8 py-6 text-white font-semibold shadow-lg transition-all hover:scale-[1.02]"
+              >
+                Return to Home
+              </Button>
             </div>
-            
-            {/* Right Side - Property Info */}
-            <div className="bg-slate-50 p-8 md:w-1/2">
-              <div className="h-48 w-full overflow-hidden rounded-2xl bg-slate-200">
+
+            {/* ================= RIGHT ================= */}
+            <div className="order-1 lg:order-2 w-full lg:w-1/2 bg-slate-50 p-6 sm:p-8">
+       
+              <div className="flex flex-col items-center gap-2 pb-5">
+
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 shadow-sm">
+                <Check className="h-8 w-8" />
+              </div>
+
+                <h2 className="mt-6 text-3xl sm:text-4xl font-black text-slate-900">
+                  Thank You!
+                </h2>
+
+                <p className="mt-3 text-sm sm:text-base leading-7 text-slate-600 text-center">
+                  Your booking request has been successfully received.
+                </p>
+              </div>
+              <div className="overflow-hidden rounded-2xl shadow">
                 <img
                   src={heroImage}
                   alt={propertyName}
-                  className="h-full w-full object-cover"
+                  className="w-full h-60 sm:h-72 lg:h-80 object-cover"
                 />
               </div>
+
               <div className="mt-6">
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Booked Property</p>
-                <h3 className="mt-1 text-xl font-bold text-slate-900 line-clamp-2">{propertyName}</h3>
-                <p className="mt-2 text-sm text-slate-500 line-clamp-2">{propertyAddress}</p>
+                <p className="text-xs font-bold uppercase tracking-[0.25em] text-slate-400">
+                  Booked Property
+                </p>
+
+                <h3 className="mt-2 text-xl sm:text-2xl font-bold text-slate-900 line-clamp-2">
+                  {propertyName}
+                </h3>
+
+                <p className="mt-3 text-sm leading-6 text-slate-500 line-clamp-2">
+                  {propertyAddress}
+                </p>
               </div>
-              <div className="mt-6 flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4">
-                <span className="text-sm font-medium text-slate-600">Rent Price</span>
-                <span className="text-lg font-black text-slate-900">₹{propertyPrice.toLocaleString("en-IN")}</span>
+
+              <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm md:text-xl text-gray-900">
+                    Rent Price
+                  </span>
+                  <span className="text-2xl font-black text-slate-900">
+                    ₹{propertyPrice.toLocaleString("en-IN")}
+                  </span>
+                </div>
               </div>
             </div>
+
           </div>
         </div>
       )}

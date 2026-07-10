@@ -37,6 +37,7 @@ const Header = ({ menuItems, companyBasicInfo = null }) => {
   const { data: session, status } = useSession();
   const [showHeader, setShowHeader] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [hasMenuData, setHasMenuData] = useState(false);
 
   const [navbarSections, setNavbarSections] = useState([]);
   const companyName = companyBasicInfo?.companyName || 'Kag Premium Homes';
@@ -293,14 +294,14 @@ const Header = ({ menuItems, companyBasicInfo = null }) => {
       {/* Show only on md and larger screens, and only if not in admin section */}
       {/* Show only on md and larger screens, and only if not in admin section */}
       {hideNavigation || (
-        <div className="hidden md:block sticky top-0 z-60">
+        <div className="hidden md:block sticky top-0 z-60" style={{ display: hasMenuData ? undefined : 'none' }}>
           <div className="w-full print:hidden">
             <div
               className={`bg-white py-2 border-b border-gray-200 transition-all duration-300 ${showHeader ? "translate-y-0" : "-translate-y-full"
                 }`}
             >
               <div className="container mx-auto px-4">
-                <MenuBar menuItems={menuItems} navbarSections={navbarSections} />
+                <MenuBar menuItems={menuItems} navbarSections={navbarSections} onDataChange={setHasMenuData} />
               </div>
             </div>
           </div>

@@ -105,13 +105,15 @@ const Footer = ({ companyBasicInfo = null }) => {
             />
             <div className="relative z-10">
                 {/* Experience Section */}
-                <section className="relative bg-[#0B1E33] overflow-hidden">
-                    <div className="max-w-7xl mx-auto px-6 lg:px-5">
-                        <div className="grid lg:grid-cols-[58%,42%] lg:grid-rows-[auto_auto] gap-x-12">
-                            {/* ================= LEFT TOP ================= */}
-                            <div className="text-white pt-20">
+                <section className="relative bg-[#0B1E33] overflow-hidden py-16 md:py-20">
+                    <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
 
-                                <p className="text-sm leading-7 text-gray-300 max-w-2xl mb-8">
+                        <div className="grid lg:grid-cols-[58%,42%] gap-12 items-center">
+
+                            {/* ================= LEFT CONTENT ================= */}
+                            <div className="order-2 lg:order-1 text-white">
+
+                                <p className="text-sm sm:text-base text-justify leading-7 text-gray-300 max-w-2xl mb-6">
                                     Rishikesh is a place where the soul finds its rhythm, nestled at
                                     the foothills of the mighty Himalayas where the emerald-green
                                     Ganga begins her journey onto the plains. Known globally as the
@@ -119,19 +121,19 @@ const Footer = ({ companyBasicInfo = null }) => {
                                     adventure and nature exist together.
                                 </p>
 
-                                <h2 className="text-4xl md:text-5xl font-bold leading-tight">
+                                <h2 className="text-xl sm:text-4xl lg:text-5xl font-bold leading-tight">
                                     Experience Rishikesh with
                                 </h2>
 
                                 <div className="inline-block mt-3">
-                                    <h3 className="text-4xl md:text-5xl font-bold">
+                                    <h3 className="text-xl sm:text-4xl lg:text-5xl font-bold break-all">
                                         www.rishikeshrent.com
                                     </h3>
 
-                                    <div className="w-full h-1 bg-yellow-400 mt-2"></div>
+                                    <div className="w-full h-1 bg-yellow-400 mt-2 rounded-full"></div>
                                 </div>
 
-                                <p className="text-gray-300 mt-8 max-w-2xl leading-8">
+                                <p className="text-gray-300 text-justify mt-6 sm:mt-8 max-w-2xl leading-7 sm:leading-8 text-sm sm:text-base">
                                     To truly immerse yourself in the magic of this town, you need a
                                     home that combines comfort with the serenity of the mountains.
                                     <span className="font-semibold text-white">
@@ -141,72 +143,44 @@ const Footer = ({ companyBasicInfo = null }) => {
                                     search for your ideal retreat.
                                 </p>
 
-                            </div>
-                            {/* ================= RIGHT IMAGE ================= */}
-                            <div className="relative lg:row-span-2 flex justify-end lg:-mt-10">
-                                <div className="relative w-full max-w-lg">
-                                    {/* Border */}
-                                    <Image
-                                        src="/footerimage.png"
-                                        width={900}
-                                        height={1000}
-                                        alt="Experience"
-                                        className="w-full h-[700px] object-cover"
-                                    />
-                                </div>
-                            </div>
-                            {/* ================= LEFT BOTTOM ================= */}
+                                {/* ================= CTA ================= */}
 
-                            <div className="pb-16 mt-10">
-
-                                {/* CTA */}
-
-                                <div className="flex h-12 gap-4">
+                                <div className="flex flex-wrap gap-3 mt-10">
 
                                     <button
-                                        className="bg-[#324EA7]
-                        hover:bg-[#263d8e]
-                        px-5
-                        py-3
-                        text-white
-                        font-semibold
-                        flex
-                        items-center
-                        gap-3"
+                                        className="bg-[#324EA7] hover:bg-[#263d8e] transition px-6 py-3 rounded-lg text-white font-semibold"
                                     >
                                         About More ↗
                                     </button>
 
-                                    <span className="bg-white rounded-full px-4 py-3 text-black font-semibold shadow hover:scale-105 transition-all">
+                                    <span className="bg-white rounded-full px-4 py-2 text-sm font-medium text-black shadow">
                                         Verified Listings
                                     </span>
 
-                                    <span className="bg-white rounded-full px-4 py-3 text-black font-semibold shadow hover:scale-105 transition-all">
+                                    <span className="bg-white rounded-full px-4 py-2 text-sm font-medium text-black shadow">
                                         Centric Features
                                     </span>
 
-                                    <span className="bg-white rounded-full px-4 py-3 text-black font-semibold shadow hover:scale-105 transition-all">
+                                    <span className="bg-white rounded-full px-4 py-2 text-sm font-medium text-black shadow">
                                         Diverse Options
                                     </span>
 
                                 </div>
 
-                                {/* STATS */}
+                                {/* ================= STATS ================= */}
 
-                                <div className="grid grid-cols-3 mt-16 border-t border-white/10 pt-10 text-white">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-10 border-t border-white/10 pt-10 px-6 sm:px-10 lg:px-0">
+                                    {/* Stat 1 */}
 
-                                    {/* 1 */}
-
-                                    <div className="flex gap-4">
-
+                                    <div className="flex flex-col sm:flex-row items-center sm:items-start justify-center text-center sm:text-left gap-4">
                                         <Users
                                             size={34}
-                                            className="text-white/70 mt-1"
+                                            className="text-white/70 flex-shrink-0 mt-1"
                                         />
 
                                         <div>
 
-                                            <h3 className="text-white text-5xl font-bold">
+                                            <h3 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">
                                                 <Counter end={69} />
                                             </h3>
 
@@ -218,18 +192,18 @@ const Footer = ({ companyBasicInfo = null }) => {
 
                                     </div>
 
-                                    {/* 2 */}
+                                    {/* Stat 2 */}
 
-                                    <div className="flex gap-4">
+                                    <div className="flex flex-col sm:flex-row items-center sm:items-start justify-center text-center sm:text-left gap-4">
 
                                         <BriefcaseBusiness
                                             size={34}
-                                            className="text-white/70 mt-1"
+                                            className="text-white/70 flex-shrink-0 mt-1"
                                         />
 
                                         <div>
 
-                                            <h3 className="text-white text-5xl font-bold">
+                                            <h3 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">
                                                 <Counter end={20} />
                                             </h3>
 
@@ -241,18 +215,18 @@ const Footer = ({ companyBasicInfo = null }) => {
 
                                     </div>
 
-                                    {/* 3 */}
+                                    {/* Stat 3 */}
 
-                                    <div className="flex gap-4">
+                                    <div className="flex flex-col sm:flex-row items-center sm:items-start justify-center text-center sm:text-left gap-4">
 
                                         <Globe2
                                             size={34}
-                                            className="text-white/70 mt-1"
+                                            className="text-white/70 flex-shrink-0 mt-1"
                                         />
 
                                         <div>
 
-                                            <h3 className="text-white text-5xl font-bold">
+                                            <h3 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">
                                                 <Counter end={6} />
                                             </h3>
 
@@ -268,43 +242,85 @@ const Footer = ({ companyBasicInfo = null }) => {
 
                             </div>
 
+                            {/* ================= RIGHT IMAGE ================= */}
+
+                            <div className="order-1 lg:order-2 flex justify-center lg:justify-end">
+
+                                <div className="w-full max-w-sm sm:max-w-md lg:max-w-lg">
+
+                                    <Image
+                                        src="/footerimage.png"
+                                        width={900}
+                                        height={1000}
+                                        alt="Experience"
+                                        className="w-full h-auto object-contain max-h-[420px] sm:max-h-[550px] lg:max-h-[700px]"
+                                        priority
+                                    />
+
+                                </div>
+
+                            </div>
+
                         </div>
 
                     </div>
-
                 </section>
 
                 {/* CTA Section */}
-                <div className="w-[90%] max-w-6xl mx-auto pt-16">
-                    <div className="bg-white border rounded-3xl p-8 shadow-sm flex flex-col lg:flex-row justify-between items-center gap-6">
-                        <div>
-                            <p className="text-sm font-semibold text-slate-500 uppercase">
-                                Get Started
-                            </p>
-                            <h2 className="text-2xl font-semibold mt-2">
-                                Find your dream stay with Kag Premium Homes
-                            </h2>
-                            <p className="text-slate-600 mt-2">
-                                Discover luxury stays, premium experiences and seamless bookings.
-                            </p>
+                <div className="w-[92%] max-w-6xl mx-auto md:py-14">
+
+                    <div className="bg-white border border-slate-200 rounded-3xl shadow-lg p-6 sm:p-8 lg:p-10">
+
+                        <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
+
+                            {/* Left Content */}
+
+                            <div className="text-center lg:text-left max-w-2xl">
+
+                                <p className="text-sm font-semibold tracking-widest uppercase text-blue-700">
+                                    Get Started
+                                </p>
+
+                                <h2 className="mt-3 text-3xl sm:text-4xl font-bold text-slate-900 leading-tight">
+                                    Find Your Dream Stay with
+                                    <span className="block text-[#0f2747]">
+                                        Rishikesh Rent
+                                    </span>
+                                </h2>
+
+                                <p className="mt-4 text-slate-600 leading-7 text-sm sm:text-base">
+                                    Discover verified properties, premium experiences,
+                                    and seamless bookings across Rishikesh. Whether
+                                    you're searching for a hostel, apartment, PG,
+                                    or luxury stay, we've got you covered.
+                                </p>
+
+                            </div>
+
+                            {/* Right Buttons */}
+
+                            <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
+
+                                <Link
+                                    href="/properties"
+                                    className="px-8 py-3 rounded-full bg-[#0f2747] hover:bg-[#183b69] transition-all duration-300 text-white font-semibold text-center shadow-md hover:shadow-xl w-full sm:w-auto"
+                                >
+                                    Browse Properties
+                                </Link>
+
+                                <Link
+                                    href="/contact"
+                                    className="px-8 py-3 rounded-full border-2 border-[#0f2747] text-[#0f2747] hover:bg-[#0f2747] hover:text-white transition-all duration-300 font-semibold text-center w-full sm:w-auto"
+                                >
+                                    Contact Us
+                                </Link>
+
+                            </div>
+
                         </div>
 
-                        <div className="flex gap-4">
-                            <Link
-                                href="/properties"
-                                className="px-8 py-3 rounded-full bg-[#0f2747] text-white font-medium"
-                            >
-                                Browse Properties
-                            </Link>
-
-                            <Link
-                                href="/contact"
-                                className="px-8 py-3 rounded-full border bg-white"
-                            >
-                                Contact Us
-                            </Link>
-                        </div>
                     </div>
+
                 </div>
 
                 {/* Main Footer */}

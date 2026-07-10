@@ -108,6 +108,15 @@ const MenuBar = (props) => {
         setOpenMenu(null);
         setOpenFixedMenu(null);
     };
+
+    useEffect(() => {
+        if (props.onDataChange) {
+            // Desktop navigation only renders allMenuItems and menuItems
+            const hasData = allMenuItems.length > 0 || menuItems.length > 0;
+            props.onDataChange(hasData);
+        }
+    }, [allMenuItems.length, menuItems.length, props]);
+
     // console.log(menuItems, fixedMenuItems, allMenuItems);
     return (
         <>
@@ -122,7 +131,7 @@ const MenuBar = (props) => {
                 "absolute z-50 top-8 md:top-12 mt-4 rounded-xl left-0 w-[90vw] text-black bg-white shadow-md lg:hidden transition-all duration-300 overflow-hidden",
                 isOpen ? "max-h-[500px] overflow-y-auto" : "max-h-0"
             )} ref={menuRef}>
-                {/* {navbarSections.length > 0 && (
+                 {navbarSections.length > 0 && (
                     <div className="border-b bg-gray-50">
                         {navbarSections.map((section) => {
                             const activeSubSections = Array.isArray(section.subSections)
@@ -160,7 +169,7 @@ const MenuBar = (props) => {
                             );
                         })}
                     </div>
-                )} */}
+                )} 
                 {allMenuItems.length > 0 && allMenuItems.map((cat, index) => (
                     <div key={index} className="border-b">
                         <>

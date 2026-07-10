@@ -159,8 +159,8 @@ const SearchSection = () => {
       <section className="w-full bg-slate-50 py-10">
         <div className="container mx-auto px-4 flex flex-col items-center">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-2 text-gray-900 tracking-tight">Best Stays, Better Prices: Book Direct.</h2>
-            <p className="text-lg font-medium text-gray-600">
+            <h2 className="text-2xl md:text-3xl font-bold mb-2 text-gray-900 tracking-tight">Best Stays, Better Prices: Book Direct.</h2>
+            <p className="text-sm md:text-lg font-medium text-gray-600">
               Authentic Comfort. Exceptional Value. Your Home Away From Home In Rishikesh.
             </p>
           </div>

@@ -211,7 +211,7 @@ export const PropertyDetail = ({ property: initialProperty, relatedProperties = 
     return (
         <div className="bg-gray-50 min-h-screen">
             {/* Breadcrumb */}
-            <div className="px-10 py-4 text-sm text-gray-500">
+            <div className=" px-5 md:px-10 py-2 md:py-4 text-sm text-gray-500">
                 <Link className="hover:underline hover:text-black" href="/">Home</Link> / <Link className="hover:underline hover:text-black" href="/properties">Properties</Link> / <span className="text-gray-900 font-medium">{property.name}</span>
             </div>
 
@@ -224,7 +224,7 @@ export const PropertyDetail = ({ property: initialProperty, relatedProperties = 
                                 {property.type}
                             </span>
                             <h1 className="text-3xl md:text-4xl font-bold text-black mb-2">{property.name}</h1>
-                            <div className="flex items-center text-black text-sm gap-2">
+                            <div className="flex items-center text-black text-sm gap-2 w-60 text-wrap">
                                 <MapPin className="w-4 h-4" />
                                 <span>{property.address}</span>
                             </div>
@@ -313,7 +313,7 @@ export const PropertyDetail = ({ property: initialProperty, relatedProperties = 
                             </div>
 
                             {/* TAB CONTENT */}
-                            <div className="p-8">
+                            <div className="p-4 md:p-8">
 
                                 {/* OVERVIEW TAB */}
                                 {activeTab === "overview" && (
@@ -328,19 +328,19 @@ export const PropertyDetail = ({ property: initialProperty, relatedProperties = 
                                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pt-4">
                                             <div className="bg-blue-50 p-4 rounded-lg">
                                                 <div className="text-sm text-gray-600 mb-1">Bedrooms</div>
-                                                <div className="text-2xl font-bold text-gray-900">{initialProperty?.numberOfBedrooms || initialProperty?.numberOfRooms || "N/A"}</div>
+                                                <div className="text-md md:text-2xl font-bold text-gray-900">{initialProperty?.numberOfBedrooms || initialProperty?.numberOfRooms || "N/A"}</div>
                                             </div>
                                             <div className="bg-blue-50 p-4 rounded-lg">
                                                 <div className="text-sm text-gray-600 mb-1">Bathrooms</div>
-                                                <div className="text-2xl font-bold text-gray-900">{initialProperty?.numberOfBathrooms || "N/A"}</div>
+                                                <div className="text-md md:text-2xl font-bold text-gray-900">{initialProperty?.numberOfBathrooms || "N/A"}</div>
                                             </div>
                                             <div className="bg-blue-50 p-4 rounded-lg">
                                                 <div className="text-sm text-gray-600 mb-1">Area</div>
-                                                <div className="text-2xl font-bold text-gray-900">{initialProperty?.sizeLength && initialProperty?.sizeWidth ? `${initialProperty.sizeLength}x${initialProperty.sizeWidth} ${initialProperty.sizeUnit || 'SqFt'}` : property.area || "N/A"}</div>
+                                                <div className="text-md md:text-2xl font-bold text-gray-900">{initialProperty?.sizeLength && initialProperty?.sizeWidth ? `${initialProperty.sizeLength}x${initialProperty.sizeWidth} ${initialProperty.sizeUnit || 'SqFt'}` : property.area || "N/A"}</div>
                                             </div>
                                             <div className="bg-blue-50 p-4 rounded-lg">
                                                 <div className="text-sm text-gray-600 mb-1">Floor</div>
-                                                <div className="text-2xl font-bold text-gray-900">{initialProperty?.floor || "N/A"}</div>
+                                                <div className="text-md md:text-2xl font-bold text-gray-900">{initialProperty?.floor || "N/A"}</div>
                                             </div>
                                             <div className="bg-blue-50 p-4 rounded-lg">
                                                 <div className="text-sm text-gray-600 mb-1">Available From</div>
@@ -348,7 +348,7 @@ export const PropertyDetail = ({ property: initialProperty, relatedProperties = 
                                             </div>
                                             <div className="bg-blue-50 p-4 rounded-lg">
                                                 <div className="text-sm text-gray-600 mb-1">Type</div>
-                                                <div className="text-2xl font-bold text-gray-900">{initialProperty?.propertyType || property.type || "N/A"}</div>
+                                                <div className="text-md md:text-2xl font-bold text-gray-900">{initialProperty?.propertyType || property.type || "N/A"}</div>
                                             </div>
                                         </div>
 
@@ -529,7 +529,7 @@ export const PropertyDetail = ({ property: initialProperty, relatedProperties = 
                         </div>
 
                         {/* BOOKING / ENQUIRY FORM */}
-                        <form onSubmit={handleEnquirySubmit} className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+                        <form onSubmit={handleEnquirySubmit} className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 md:p-8">
                             <div className="flex items-center justify-between mb-6">
                                 <div>
                                     <h3 className="text-2xl font-bold text-gray-900">Guest Information</h3>
@@ -576,7 +576,7 @@ export const PropertyDetail = ({ property: initialProperty, relatedProperties = 
                             )}
 
                             <div className="mt-6 flex flex-col sm:flex-row gap-3">
-                                <button type="submit" disabled={enquiryLoading} className="flex-1 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 rounded-lg gap-2 text-base flex items-center justify-center">
+                                <button type="submit" disabled={enquiryLoading} className="flex-1 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 rounded-lg gap-2 text-base flex items-center justify-center py-2">
                                     {enquiryLoading ? 'Sending...' : 'Send Request For booking'}
                                     <ArrowRight className="w-4 h-4 ml-2" />
                                 </button>
@@ -644,7 +644,7 @@ export const PropertyDetail = ({ property: initialProperty, relatedProperties = 
 
                             <Link href={bookingUrl} className="block">
                                 <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 rounded-lg gap-2 text-base">
-                                    Confirm Your Pay <ArrowRight className="w-4 h-4" />
+                                    Confirm Your Booking <ArrowRight className="w-4 h-4" />
                                 </Button>
                             </Link>                          
                         </div>
@@ -654,11 +654,11 @@ export const PropertyDetail = ({ property: initialProperty, relatedProperties = 
 
             {/* YOU MIGHT ALSO LIKE SECTION */}
             {relatedProperties.length > 0 && (
-                <div className="bg-white border-t py-12">
-                    <div className="container mx-auto px-4 max-w-7xl">
-                        <div className="mb-8">
-                            <h3 className="text-3xl font-bold text-gray-900 mb-2">You Might Also Like</h3>
-                            <p className="text-gray-600 text-base">
+                <div className="bg-white border-t py-5 md:py-12">
+                    <div className="container mx-auto px-5 max-w-7xl">
+                        <div className="mb-4 md:mb-8">
+                            <h3 className="text-xl md:text-3xl font-bold text-gray-900 mb-2">You Might Also Like</h3>
+                            <p className="text-gray-600 text-sm md:text-base">
                                 We don't just suggest—we select. Based on your current interests, we've gathered a collection of insights and products designed to complement your style. Whether you're looking to dive deeper into this topic or find the perfect finishing touch, we've got something for you.
                             </p>
                         </div>
@@ -738,9 +738,10 @@ export const PropertyDetail = ({ property: initialProperty, relatedProperties = 
                                     </CarouselItem>
                                 ))}
                             </CarouselContent>
-                            <CarouselPrevious className="left-0 -translate-x-12 bg-white text-gray-800 border-gray-200 shadow-sm hover:bg-gray-50" />
-                            <CarouselNext className="right-0 translate-x-12 bg-white text-gray-800 border-gray-200 shadow-sm hover:bg-gray-50" />
-                        </Carousel>
+                         <div className="flex items-center gap-3 mt-4 justify-center">
+                    <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 p-5" />
+                    <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 p-5" />
+                  </div>     </Carousel>
                     </div>
                 </div>
             )}

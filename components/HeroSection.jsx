@@ -82,19 +82,19 @@ const HeroSection = ({ section = "frontend" }) => {
 
   if (banners.length === 0) {
     return (
-      <section className="bg-[#0f172a] text-white py-20 px-6 md:px-16 w-full flex flex-col justify-center items-start min-h-[500px]">
+      <section className="bg-[#0f172a] text-white py-10 md:py-20 px-6 md:px-16 w-full flex flex-col justify-center items-start min-h-[500px]">
         <div className="max-w-4xl mx-auto w-full">
-          <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-wider text-gray-300 uppercase bg-white/5 rounded-full mb-8 border border-white/10">
-            The Challenge
+          <span className="inline-block px-2 md:px-4 md:py-1.5 md:text-md text-xs font-semibold tracking-wider text-gray-300 uppercase bg-white/5 rounded-full mb-8 border border-white/10">
+            Property In Rishikesh
           </span>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
-            Most Strategic Decisions Are Made With Insufficient Clarity.
+          <h1 className="text-2xl md:text-4xl font-bold leading-tight mb-6">
+            "Wake Up to the Ganges. Your Perfect Rishikesh Home Awaits."
           </h1>
-          <p className="text-gray-400 text-lg md:text-xl mb-12 max-w-3xl leading-relaxed">
-            Executives face compounding complexity — market disruption, organisational inertia, data overload. Without a structured framework, the highest-stakes decisions rely on instinct alone.
+          <p className="text-gray-400 text-sm md:text-xl mb-12 max-w-3xl leading-relaxed">
+            Finding the perfect rental in the spiritual heart of the world shouldn't be a struggle. At www.rishikeshrent.com, we bridge the gap between your dream of living in Rishikesh and the reality of finding a verified, comfortable space. Whether you are seeking a serene retreat near the banks of the Ganges, a convenient modern apartment, or a cozy homestay tucked away in the hills, our platform offers a seamless, trusted search experience designed to save you time and provide peace of mind.  Start your journey with us today and discover the address that feels like home.
           </p>
           <Link href="/properties">
-            <Button className="bg-white text-black hover:bg-gray-200 rounded-full px-8 py-6 text-sm font-semibold tracking-widest uppercase">
+            <Button className="bg-white text-black hover:bg-gray-200 rounded-full px-4 py-3 md:px-8 md:py-6 text-xs md:text-sm font-semibold tracking-widest uppercase">
               View Properties
             </Button>
           </Link>
