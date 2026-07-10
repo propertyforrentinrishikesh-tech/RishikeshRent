@@ -90,21 +90,21 @@ const data = {
           url: "/admin/navbar_section",
           icon: MenuIcon,
         },
-        {
-          name: "Manage Menu Section",
-          url: "/admin/manage_menu",
-          icon: MenuIcon,
-        },
-        {
-          name: "Manage Sub Menu Section",
-          url: "/admin/manage_sub_menu",
-          icon: MenuIcon,
-        },
-        {
-          name: "Manage Products & Category",
-          url: "/admin/manage_packages_category",
-          icon: Boxes,
-        },
+        // {
+        //   name: "Manage Menu Section",
+        //   url: "/admin/manage_menu",
+        //   icon: MenuIcon,
+        // },
+        // {
+        //   name: "Manage Sub Menu Section",
+        //   url: "/admin/manage_sub_menu",
+        //   icon: MenuIcon,
+        // },
+        // {
+        //   name: "Manage Products & Category",
+        //   url: "/admin/manage_packages_category",
+        //   icon: Boxes,
+        // },
       ]
     },
     { divider: true, },

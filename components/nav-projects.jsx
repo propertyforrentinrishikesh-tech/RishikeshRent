@@ -44,10 +44,10 @@ export function NavProjects({
               >
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
-                    <SidebarMenuButton tooltip={item.name} className="font-semibold !my-1">
+                    <SidebarMenuButton tooltip={item.name} className="font-semibold text-slate-700 hover:bg-orange-100 hover:text-orange-700 transition-all duration-200 rounded-lg !my-1">
                       {item.icon && <item.icon className="!size-4" />}
                       <span>{item.name}</span>
-                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                      <ChevronRight className="ml-auto transition-transform duration-300 group-data-[state=open]/collapsible:rotate-90" />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
@@ -63,7 +63,7 @@ export function NavProjects({
                             >
                               <SidebarMenuSubItem>
                                 <CollapsibleTrigger asChild>
-                                  <SidebarMenuSubButton className="flex items-center justify-between w-full cursor-pointer hover:!bg-orange-500 hover:!text-white !my-1">
+                                  <SidebarMenuSubButton className="flex items-center justify-between w-full cursor-pointer text-slate-600 hover:bg-orange-100 hover:text-orange-700 transition-all duration-200 rounded-md !my-1">
                                     <div className="flex items-center gap-2 text-nowrap">
                                       {subItem.icon && <subItem.icon className="!size-4" />}
                                       <span>{subItem.name}</span>
@@ -76,11 +76,11 @@ export function NavProjects({
                                     {subItem.items.map((subSubItem) => (
                                       <SidebarMenuSubItem key={subSubItem.name}>
                                         <SidebarMenuSubButton asChild>
-                                          <Link
-                                            href={subSubItem.url || "#"}
-                                            className={`${pathName === subSubItem.url ? 'bg-orange-500 text-white font-semibold' : ''} hover:!bg-orange-500 hover:!text-white !my-1`}
-                                          >
-                                            <div className="flex items-center my-2 text-nowrap  gap-2">
+                                            <Link
+                                              href={subSubItem.url || "#"}
+                                              className={`${pathName === subSubItem.url ? 'bg-orange-500 text-white shadow-sm' : 'text-slate-600 hover:bg-orange-50 hover:text-orange-600'} transition-all duration-200 rounded-md !my-1`}
+                                            >
+                                              <div className="flex items-center my-2 text-nowrap gap-2">
                                               {subSubItem.icon && <subSubItem.icon className="!size-4" />}
                                               <span>{subSubItem.name}</span>
                                             </div>
@@ -98,10 +98,10 @@ export function NavProjects({
                         return (
                           <SidebarMenuSubItem key={subItem.name}>
                             <SidebarMenuSubButton asChild>
-                              <Link
-                                href={subItem.url || "#"}
-                                className={`${pathName === subItem.url ? 'bg-orange-500 text-white font-semibold' : ''} hover:!bg-orange-500 hover:!text-white !my-1 flex items-center gap-2`}
-                              >
+                                <Link
+                                  href={subItem.url || "#"}
+                                  className={`${pathName === subItem.url ? 'bg-orange-500 text-white shadow-sm' : 'text-slate-600 hover:bg-orange-50 hover:text-orange-600'} transition-all duration-200 rounded-md !my-1 flex items-center gap-2`}
+                                >
                                 {subItem.icon && <subItem.icon className="!size-4" />}
                                 <span>{subItem.name}</span>
                               </Link>
@@ -121,7 +121,7 @@ export function NavProjects({
               <SidebarMenuButton asChild>
                 <Link
                   href={item.url}
-                  className={`${(pathName === item.url) ? 'bg-orange-500 text-white' : ''} font-semibold hover:!bg-orange-500 hover:!text-white !my-1`}
+                  className={`${(pathName === item.url) ? 'bg-orange-500 text-white shadow-sm' : 'text-slate-700 hover:bg-orange-100 hover:text-orange-700'} font-semibold transition-all duration-200 rounded-lg !my-1`}
                 >
                   {item.icon !== null && <item.icon className={`${pathName === item.url ? '!size-5' : '!size-4'}`} />}
                   <span>{item.name}</span>

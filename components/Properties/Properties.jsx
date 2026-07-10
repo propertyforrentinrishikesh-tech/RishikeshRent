@@ -114,47 +114,47 @@ Contact: ${contactMethod === 'email' ? email : phone}`;
       {/* Booking Modal */}
       {showBookingModal && (
         <div
-          className="fixed inset-0 z-[999] flex items-center justify-center bg-black/70 backdrop-blur-md p-4 sm:p-6 overflow-y-auto animate-in fade-in duration-300"
+          className="fixed inset-0 z-[999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 sm:p-6 overflow-y-auto animate-in fade-in duration-300"
           onClick={() => setShowBookingModal(false)}
-        > 
+        >
           <div
-            className="relative w-full max-w-md bg-[#0f172a] rounded-3xl border border-white/10 shadow-2xl overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 max-h-[100vh] overflow-y-auto"
+            className="relative w-full max-w-md bg-[#eff6ff] rounded-[2rem] shadow-2xl overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 max-h-[100vh] overflow-y-auto"
             onClick={e => e.stopPropagation()}
           >
             <button
-              className="absolute top-4 right-4 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-gray-400 transition hover:bg-white/10 hover:text-white"
+              className="absolute top-5 right-5 z-20 flex h-8 w-8 items-center justify-center rounded-full text-gray-600 transition hover:bg-black/5 hover:text-black"
               onClick={() => setShowBookingModal(false)}
               aria-label="Close booking form"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <form onSubmit={handleBookingSubmit} className="p-5 sm:p-6 lg:p-6">
-              <h2 className="text-2xl sm:text-3xl font-bold text-center text-white mb-4">Enquiry For</h2>
+            <form onSubmit={handleBookingSubmit} className="p-6 sm:p-8">
+              <h2 className="text-xl sm:text-2xl font-bold text-center text-gray-900 mb-6">Enquiry For</h2>
 
               {selectedBookingProperty && (
-                <div className="mb-6 rounded-2xl bg-white/5 border border-white/10 p-4">
-                  <p className="text-sm font-semibold text-white mb-1 line-clamp-1">{selectedBookingProperty.propertyName}</p>
-                  <p className="text-xs text-gray-400 flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-[#1bb9c3]" />
+                <div className="mb-6 rounded-2xl border border-gray-300 bg-transparent p-4">
+                  <p className="text-base font-bold text-gray-900 mb-1 line-clamp-1">{selectedBookingProperty.propertyName}</p>
+                  <p className="text-sm text-gray-600 flex items-center gap-1.5">
+                    <MapPin className="w-4 h-4 text-gray-500" />
                     {selectedBookingProperty.locationType || selectedBookingProperty.subLocationType}
                   </p>
                 </div>
               )}
 
               <div className="mb-5">
-                <label className="text-sm sm:text-base font-medium text-gray-300 mb-2 block">Your Name</label>
+                <label className="text-sm font-bold text-gray-900 mb-2 block">Your Name</label>
                 <input
                   type="text"
                   placeholder="Enter your name"
                   value={bookingName}
                   onChange={(e) => setBookingName(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3.5 text-sm sm:text-base text-white placeholder:text-gray-500 focus:border-[#1bb9c3] focus:ring-2 focus:ring-[#1bb9c3]/30 outline-none transition"
+                  className="w-full rounded-xl border border-gray-300 bg-transparent px-4 py-3 text-sm text-gray-900 placeholder:text-gray-500 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 outline-none transition"
                 />
               </div>
 
-             <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 mb-6">
-                <label className="flex items-center gap-3 cursor-pointer group">
+              <div className="flex flex-row gap-6 mb-6">
+                <label className="flex items-center gap-2 cursor-pointer group">
                   <div className="relative flex items-center justify-center">
                     <input
                       type="radio"
@@ -164,13 +164,12 @@ Contact: ${contactMethod === 'email' ? email : phone}`;
                       onChange={(e) => setContactMethod(e.target.value)}
                       className="peer sr-only"
                     />
-                    <div className="w-5 h-5 rounded-full border-2 border-gray-500 peer-checked:border-[#1bb9c3] peer-checked:bg-[#1bb9c3] transition-all flex items-center justify-center">
-                      <div className="w-2 h-2 rounded-full bg-white opacity-0 peer-checked:opacity-100 transition-opacity"></div>
+                    <div className="w-4 h-4 rounded-full border border-gray-400 peer-checked:border-[#387478] peer-checked:bg-[#387478] transition-all flex items-center justify-center">
                     </div>
                   </div>
-                  <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">Call</span>
+                  <span className="text-sm font-bold text-gray-900 transition-colors">Call</span>
                 </label>
-                <label className="flex items-center gap-3 cursor-pointer group">
+                <label className="flex items-center gap-2 cursor-pointer group">
                   <div className="relative flex items-center justify-center">
                     <input
                       type="radio"
@@ -180,18 +179,18 @@ Contact: ${contactMethod === 'email' ? email : phone}`;
                       onChange={(e) => setContactMethod(e.target.value)}
                       className="peer sr-only"
                     />
-                    <div className="w-5 h-5 rounded-full border-2 border-gray-500 peer-checked:border-[#25D366] peer-checked:bg-[#25D366] transition-all flex items-center justify-center">
-                      <div className="w-2 h-2 rounded-full bg-white opacity-0 peer-checked:opacity-100 transition-opacity"></div>
+                    <div className="w-4 h-4 rounded-full border border-gray-400 peer-checked:border-[#387478] peer-checked:bg-transparent transition-all flex items-center justify-center">
+                      <div className="w-2 h-2 rounded-full bg-[#387478] opacity-0 peer-checked:opacity-100 transition-opacity"></div>
                     </div>
                   </div>
-                  <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">WhatsApp</span>
+                  <span className="text-sm font-bold text-gray-900 transition-colors">WhatsApp</span>
                 </label>
               </div>
 
               {(contactMethod === "call" || contactMethod === "whatsapp") && (
                 <div className="mb-5">
                   <div className="flex gap-2">
-                   <div className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white font-semibold flex items-center justify-center sm:justify-start sm:w-[90px]">
+                    <div className="border border-gray-300 bg-transparent rounded-xl px-4 py-3 text-gray-900 font-bold flex items-center justify-center sm:justify-start w-16 sm:w-20">
                       +91
                     </div>
                     <input
@@ -200,16 +199,16 @@ Contact: ${contactMethod === 'email' ? email : phone}`;
                       value={phone}
                       onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
                       maxLength="10"
-                      className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3.5 text-sm sm:text-base text-white placeholder:text-gray-500 focus:border-[#1bb9c3] focus:ring-2 focus:ring-[#1bb9c3]/30 outline-none transition"
+                      className="flex-1 rounded-xl border border-gray-300 bg-transparent px-4 py-3 text-sm text-gray-900 placeholder:text-gray-500 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 outline-none transition"
                     />
                   </div>
                 </div>
               )}
 
-              <div className="relative flex items-center my-7">
-                <div className="flex-grow border-t border-white/10"></div>
-                <span className="flex-shrink-0 mx-4 text-xs font-medium text-gray-500 uppercase tracking-widest">Or Email</span>
-                <div className="flex-grow border-t border-white/10"></div>
+              <div className="relative flex items-center my-6">
+                <div className="flex-grow border-t border-gray-300"></div>
+                <span className="flex-shrink-0 mx-4 text-xs font-bold text-gray-900 uppercase tracking-widest">OR EMAIL</span>
+                <div className="flex-grow border-t border-gray-300"></div>
               </div>
 
               <div className="mb-6">
@@ -218,20 +217,20 @@ Contact: ${contactMethod === 'email' ? email : phone}`;
                   placeholder="Enter Your Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3.5 text-sm sm:text-base text-white placeholder:text-gray-500 focus:border-[#1bb9c3] focus:ring-2 focus:ring-[#1bb9c3]/30 outline-none transition"
+                  className="w-full rounded-xl border border-gray-300 bg-transparent px-4 py-3 text-sm text-gray-900 placeholder:text-gray-500 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 outline-none transition"
                 />
               </div>
 
-              <div className="mb-7">
-                <label htmlFor="agree" className="text-xs md:text-sm leading-6 text-gray-400">
+              <div className="mb-8">
+                <p className="text-[10px] sm:text-xs leading-relaxed text-gray-900 font-medium">
                   We Appreciate Your Interest! A Member of Our Team Will Reach Out to You Soon to Discuss Your Offer.
-                </label>
+                </p>
               </div>
 
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full rounded-xl bg-gradient-to-r from-[#1bb9c3] to-[#15a1ab] py-4 text-base font-semibold text-white transition hover:scale-[1.02] hover:shadow-xl hover:shadow-[#1bb9c3]/20 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                className="w-full rounded-xl bg-[#df7152] py-4 text-base font-bold text-white transition hover:bg-[#e08a74] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isSubmitting ? "Submitting..." : "Send Enquiry"}
               </button>
