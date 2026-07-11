@@ -49,7 +49,7 @@ export async function POST(request) {
         if (existingPartner) {
             return NextResponse.json(
                 {
-                    message: 'A partner account with this email and contact number already exists. Please login instead.',
+                    message: 'A partner account with this email and contact number already exists. Please Contact the Admin / Support Team instead.',
                     alreadyExists: true
                 },
                 { status: 409 }

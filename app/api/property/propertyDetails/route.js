@@ -120,9 +120,19 @@ export async function GET(request) {
         const skip = (page - 1) * limit;
 
         // Build dynamic filter
-        const filter = {
-            status: { $ne: 'Pending' } // Exclude Pending properties by default
-        };
+        const filter = {};
+        
+        const status = searchParams.get('status');
+        if (status) {
+            filter.status = status;
+        } else {
+            filter.status = { $ne: 'Pending' }; // Exclude Pending properties by default
+        }
+
+        const propertyCategory = searchParams.get('propertyCategory');
+        if (propertyCategory) {
+            filter.propertyCategory = propertyCategory;
+        }
 
         const search = searchParams.get('search');
         if (search) {

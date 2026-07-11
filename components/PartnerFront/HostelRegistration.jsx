@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
-import { Trash2Icon, UploadIcon } from 'lucide-react';
+import { Trash2Icon, UploadIcon, Building2, Wallet, ListChecks } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -15,6 +15,7 @@ const HostelRegistration = ({ initialData }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showThankYou, setShowThankYou] = useState(false);
     const [responseData, setResponseData] = useState(null);
+    const [selectedPropertyCategory, setSelectedPropertyCategory] = useState(null);
 
     const [propertyTypes, setPropertyTypes] = useState([]);
     const [locations, setLocations] = useState([]);
@@ -75,13 +76,23 @@ const HostelRegistration = ({ initialData }) => {
         roomImage: { url: '', key: '' },
         bathroomImage: { url: '', key: '' },
         otherImage: { url: '', key: '' },
+        completeRoomImages: { url: '', key: '' },
+        bedImages: { url: '', key: '' },
 
         // Step 3
         monthlyRent: '',
+        rentBasis: 'Monthly', // Added for PG Room
         securityDeposit: '',
         totalSecurityDepositAmount: '',
         availability: '',
         specialNote: '',
+        agreements: {
+            monthBasisAlso: false,
+            commitment03To06: false,
+            commitment11: false,
+            couplesWelcome: false,
+            petFriendly: false,
+        },
 
         // Step 4
         amenities: {
@@ -100,6 +111,8 @@ const HostelRegistration = ({ initialData }) => {
         roomImage: useRef(null),
         bathroomImage: useRef(null),
         otherImage: useRef(null),
+        completeRoomImages: useRef(null),
+        bedImages: useRef(null),
     };
 
     const handleInputChange = (e) => {
@@ -109,14 +122,14 @@ const HostelRegistration = ({ initialData }) => {
                 ...prev,
                 [name]: type === 'checkbox' ? checked : value,
             };
-            
+
             // Auto calculate total security deposit if rent or deposit months change
             if (name === 'monthlyRent' || name === 'securityDeposit') {
                 const rent = parseFloat(name === 'monthlyRent' ? value : prev.monthlyRent) || 0;
                 const months = parseFloat(name === 'securityDeposit' ? value : prev.securityDeposit) || 0;
                 updated.totalSecurityDepositAmount = (rent * months).toString();
             }
-            
+
             return updated;
         });
     };
@@ -127,8 +140,19 @@ const HostelRegistration = ({ initialData }) => {
             ...prev,
             amenities: {
                 ...prev.amenities,
-                [name]: checked
-            }
+                [name]: checked,
+            },
+        }));
+    };
+
+    const handleAgreementChange = (e) => {
+        const { name, checked } = e.target;
+        setFormData((prev) => ({
+            ...prev,
+            agreements: {
+                ...prev.agreements,
+                [name]: checked,
+            },
         }));
     };
 
@@ -185,7 +209,7 @@ const HostelRegistration = ({ initialData }) => {
         if (!formData.monthlyRent) { toast.error("Monthly Rent is required"); return false; }
         return true;
     };
-   
+
 
     const handleNextStep = (current) => {
         if (current === 1 && !validateStep1()) return;
@@ -200,6 +224,7 @@ const HostelRegistration = ({ initialData }) => {
         try {
             // Map form data to PropertyDetails schema
             const mappedData = {
+                propertyCategory: selectedPropertyCategory,
                 propertyName: formData.propertyName,
                 propertyType: formData.propertyType,
                 propertyFor: formData.propertyFor,
@@ -209,22 +234,38 @@ const HostelRegistration = ({ initialData }) => {
                 contactNumbers: formData.contactNumber ? [formData.contactNumber] : [],
                 emailAddresses: formData.email ? [formData.email] : [],
                 rentPrice: Number(formData.monthlyRent) || 0,
+                rentBasis: formData.rentBasis,
                 securityDeposit: {
                     required: !!formData.securityDeposit,
                     months: formData.securityDeposit,
-                    amount: formData.totalSecurityDepositAmount
+                    amount: formData.rentBasis === 'Per Day' ? null : formData.totalSecurityDepositAmount
                 },
                 propertyAvailableFrom: formData.availability,
-                mainImage: formData.primaryImage?.url ? formData.primaryImage : { 
-                    url: "https://placehold.co/600x400/png?text=No+Image", 
-                    key: "placeholder" 
+                petAllowed: formData.agreements.petFriendly ? "allowed" : "not_allowed",
+                couplesAllowed: formData.agreements.couplesWelcome,
+                monthBasisAlso: formData.agreements.monthBasisAlso,
+                commitment03To06: formData.agreements.commitment03To06,
+                commitment11: formData.agreements.commitment11,
+                mainImage: formData.primaryImage?.url ? formData.primaryImage : {
+                    url: "https://placehold.co/600x400/png?text=No+Image",
+                    key: "placeholder"
                 },
-                galleryImages: [formData.outsideBuilding, formData.roomImage, formData.bathroomImage, formData.otherImage].filter(img => img && img.url),
+                galleryImages: [
+                    formData.outsideBuilding, 
+                    formData.roomImage, 
+                    formData.bathroomImage, 
+                    formData.otherImage,
+                    ...(selectedPropertyCategory === 'pg-hostel' ? [formData.completeRoomImages, formData.bedImages] : [])
+                ].filter(img => img && img.url),
                 amenities: Object.keys(formData.amenities || {}).filter(key => formData.amenities[key]),
                 highlights: formData.specialNote ? [formData.specialNote] : [],
                 status: "Pending", // Add default status
+                propertyStyle: selectedPropertyCategory === 'pg-hostel' ? 'hostel_pg_style_only' : 'home_style_only',
                 // Keep raw data just in case the API or frontend component NewArrivalBooking expects them
-                rawFormData: formData 
+                rawFormData: {
+                    ...formData,
+                    selectedPropertyCategory
+                }
             };
 
             const res = await fetch('/api/property/newarrival', {
@@ -247,10 +288,10 @@ const HostelRegistration = ({ initialData }) => {
 
     // UI Helper for sidebar tabs
     const tabs = [
-        { id: 1, label: 'Basic Detail' },
-        { id: 2, label: 'Gallery' },
-        { id: 3, label: 'Monthly Rent' },
-        { id: 4, label: 'Essential Amenities' },
+        { id: 1, label: 'Basic Detail', icon: <Building2 className="w-4 h-4" /> },
+        { id: 2, label: 'Gallery', icon: <Image as="svg" className="w-4 h-4" /> },
+        { id: 3, label: 'Monthly Rent', icon: <Wallet className="w-4 h-4" /> },
+        { id: 4, label: 'Essential Amenities', icon: <ListChecks className="w-4 h-4" /> },
     ];
 
     const renderImageUploader = (fieldName, label) => (
@@ -269,11 +310,13 @@ const HostelRegistration = ({ initialData }) => {
                         <button
                             type="button"
                             onClick={() => fileInputRefs[fieldName].current?.click()}
-                            className="w-full text-left px-4 py-2 border border-gray-300 rounded-full text-gray-400 bg-white hover:bg-gray-50 flex justify-between items-center"
+                            className="w-full text-left px-5 py-4 border-2 border-dashed border-slate-300 rounded-xl text-slate-500 bg-slate-50 hover:bg-slate-100 hover:border-blue-400 flex justify-between items-center transition-all group"
                             disabled={uploadingImage === fieldName}
                         >
-                            {uploadingImage === fieldName ? 'Uploading...' : 'Upload Here'}
-                            <UploadIcon className="w-4 h-4" />
+                            <span className="font-medium group-hover:text-blue-600 transition-colors">
+                                {uploadingImage === fieldName ? 'Uploading...' : 'Click to Upload Image'}
+                            </span>
+                            <UploadIcon className="w-5 h-5 group-hover:text-blue-600 transition-colors" />
                         </button>
                     </div>
                 ) : (
@@ -294,282 +337,407 @@ const HostelRegistration = ({ initialData }) => {
         </div>
     );
     return (
-        <div className="max-w-7xl mx-auto p-4 md:p-8">
-            <div className="mb-8 border-b-2 border-gray-200 pb-2 inline-block">
-                <h1 className="text-xl md:text-2xl font-bold text-gray-900">Property Information</h1>
-            </div>
+        <div className="min-h-screen bg-slate-50/50 py-12 px-4 sm:px-6 lg:px-8">
+            {!selectedPropertyCategory ? (
+                <div className="max-w-4xl mx-auto flex flex-col items-center justify-center min-h-[60vh] space-y-12 animate-in fade-in zoom-in-95 duration-500">
+                    <div className="text-center space-y-4">
+                        <h1 className="text-xl md:text-xl font-extrabold text-slate-900 tracking-tight">Rental Income Submission</h1>
+                        <h2 className="text-lg md:text-xl font-bold text-slate-800">Select Your Property</h2>
+                    </div>
 
-            <div className="flex flex-col md:flex-row gap-8">
-                {/* Sidebar */}
-                <div className="w-full md:w-64 flex-shrink-0">
-                    <div className="flex flex-col border-2 border-black rounded-lg overflow-hidden">
-                        {tabs.map((tab) => (
-                            <button
-                                key={tab.id}
-                                className={`px-4 py-3 text-left font-semibold text-sm border-b border-gray-700 last:border-b-0
-                                    ${currentStep === tab.id ? 'bg-black text-white' : 'bg-black text-white/70 hover:bg-gray-900'}`}
-                                onClick={() => {
-                                    // Let users navigate back easily, but strict navigation forward
-                                    if (tab.id < currentStep) setCurrentStep(tab.id);
-                                }}
+                    <div className="flex flex-col md:flex-row items-stretch justify-center gap-8 md:gap-16 w-full max-w-3xl relative">
+                        {/* Center Divider Line */}
+                        <div className="hidden md:block absolute left-1/2 top-4 bottom-4 w-1 bg-slate-800 transform -translate-x-1/2"></div>
+
+                        {/* Home Rental Card */}
+                        <div className="flex-1 flex flex-col items-center p-8 bg-white rounded-3xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-2 border-2 border-transparent hover:border-orange-500 group">
+                            <div className="flex items-center justify-center w-40 h-40 mb-6 text-7xl bg-orange-50 rounded-full group-hover:scale-110 transition-transform">
+                                🏠
+                            </div>
+                            <h3 className="text-2xl font-bold text-slate-900 mb-8 text-center group-hover:text-orange-500 transition-colors">Home Rental</h3>
+                            <Button
+                                onClick={() => setSelectedPropertyCategory('home-rental')}
+                                className="w-full max-w-[200px] h-14 bg-[#ff5e00] hover:bg-[#e65500] text-white text-xl font-bold rounded-full shadow-lg transition-transform active:scale-95"
                             >
-                                {tab.label}
-                            </button>
-                        ))}
+                                Select
+                            </Button>
+                        </div>
+
+                        {/* PG / Hostel Card */}
+                        <div className="flex-1 flex flex-col items-center p-8 bg-white rounded-3xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-2 border-2 border-transparent hover:border-orange-500 group">
+                            <div className="flex items-center justify-center w-40 h-40 mb-6 text-7xl bg-orange-50 rounded-full group-hover:scale-110 transition-transform">
+                                🛏️
+                            </div>
+                            <h3 className="text-2xl font-bold text-slate-900 mb-8 text-center group-hover:text-orange-500 transition-colors">PG / Hostel</h3>
+                            <Button
+                                onClick={() => setSelectedPropertyCategory('pg-hostel')}
+                                className="w-full max-w-[200px] h-14 bg-[#ff5e00] hover:bg-[#e65500] text-white text-xl font-bold rounded-full shadow-lg transition-transform active:scale-95"
+                            >
+                                Select
+                            </Button>
+                        </div>
                     </div>
                 </div>
-
-                {/* Main Content Area */}
-                <div className="flex-1 bg-white">
-                    {currentStep === 1 && (
-                        <div className="space-y-4 max-w-2xl">
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                                <label className="font-semibold text-gray-800 sm:w-1/3">Property Name</label>
-                                <Input name="propertyName" value={formData.propertyName} onChange={handleInputChange} placeholder="Name of your property" className="flex-1 rounded-full border-gray-300 focus-visible:ring-orange-500" />
-                            </div>
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                                <label className="font-semibold text-gray-800 sm:w-1/3">Contact Number</label>
-                                <Input name="contactNumber" value={formData.contactNumber} onChange={handleInputChange} placeholder="+91 XXXXXXXXXX" className="flex-1 rounded-full border-gray-300 focus-visible:ring-orange-500" />
-                            </div>
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                                <label className="font-semibold text-gray-800 sm:w-1/3">Email Address</label>
-                                <Input name="email" value={formData.email} onChange={handleInputChange} disabled className="flex-1 rounded-full border-gray-300 bg-gray-100 text-gray-600" />
-                            </div>
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                                <label className="font-semibold text-gray-800 sm:w-1/3">Select Location</label>
-                                <Select value={formData.locationType} onValueChange={(value) => handleInputChange({ target: { name: 'locationType', value } })}>
-                                    <SelectTrigger className="flex-1 rounded-full border-gray-300 focus:ring-orange-500 h-10 px-4">
-                                        <SelectValue placeholder="Select Location" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {locations?.map((loc) => (
-                                            <SelectItem key={loc._id || loc.id} value={loc.locationType}>{loc.locationType || " "}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                                <label className="font-semibold text-gray-800 sm:w-1/3">Property For</label>
-                                <Select value={formData.propertyFor} onValueChange={(value) => handleInputChange({ target: { name: 'propertyFor', value } })}>
-                                    <SelectTrigger className="flex-1 rounded-full border-gray-300 focus:ring-orange-500 h-10 px-4">
-                                        <SelectValue placeholder="Select Property For" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="residential">Residential</SelectItem>
-                                        <SelectItem value="commercial">Commercial</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                                <label className="font-semibold text-gray-800 sm:w-1/3">Property Type</label>
-                                <Select value={formData.propertyType} onValueChange={(value) => handleInputChange({ target: { name: 'propertyType', value } })}>
-                                    <SelectTrigger className="flex-1 rounded-full border-gray-300 focus:ring-orange-500 h-10 px-4">
-                                        <SelectValue placeholder="Select Property Type" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {propertyTypes?.map((prop) => (
-                                            <SelectItem key={prop._id || prop.id} value={prop.propertyType || prop.name}>{prop.propertyType || prop.name}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="flex flex-col sm:flex-row gap-4 pt-2">
-                                <label className="font-semibold text-gray-800 sm:w-1/3 mt-2">Type Address</label>
-                                <div className="flex-1 space-y-3">
-                                    <Input name="address1" value={formData.address1} onChange={handleInputChange} placeholder="Address Line 1" className="w-full rounded-full border-gray-300 focus-visible:ring-orange-500 text-sm" />
-                                    <Input name="address2" value={formData.address2} onChange={handleInputChange} placeholder="Address Line 2" className="w-full rounded-full border-gray-300 focus-visible:ring-orange-500 text-sm" />
-                                    <Input name="address3" value={formData.address3} onChange={handleInputChange} placeholder="Address Line 3" className="w-full rounded-full border-gray-300 focus-visible:ring-orange-500 text-sm" />
-                                    <Input name="address4" value={formData.address4} onChange={handleInputChange} placeholder="City, State, Zip" className="w-full rounded-full border-gray-300 focus-visible:ring-orange-500 text-sm" />
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-4 pt-2">
-                                <label className="font-semibold text-gray-800 sm:w-1/3">Any Landmark</label>
-                                <Input name="landmark" value={formData.landmark} onChange={handleInputChange} placeholder="Landmark" className="flex-1 rounded-full border-gray-300 focus-visible:ring-orange-500 text-sm" />
-                            </div>
-
-                            <div className="pt-8">
-                                <Button onClick={() => handleNextStep(1)} className="w-full sm:w-auto px-10 py-6 bg-[#ff6b00] hover:bg-[#e66000] text-white font-bold rounded-lg shadow-md transition-colors uppercase text-sm tracking-wide">
-                                    proceed for next step
-                                </Button>
-                            </div>
+            ) : (
+                <div className="max-w-7xl mx-auto animate-in slide-in-from-bottom-8 duration-700">
+                    <div className="mb-8 flex items-center justify-between">
+                        <div>
+                            <h1 className="text-lg md:text-2xl font-bold text-slate-900">Property Information</h1>
+                            <p className="text-slate-500 mt-2">Registering as <span className="font-semibold text-orange-600">{selectedPropertyCategory}</span></p>
                         </div>
-                    )}
+                        <Button
+                            variant="outline"
+                            onClick={() => setSelectedPropertyCategory(null)}
+                            className="rounded-full font-medium"
+                        >
+                            Change Property Type
+                        </Button>
+                    </div>
 
-                    {currentStep === 2 && (
-                        <div className="space-y-4 max-w-2xl">
-                            {renderImageUploader('primaryImage', 'Primary image')}
-                            {renderImageUploader('outsideBuilding', 'Outside building')}
-                            {renderImageUploader('roomImage', 'Room / Other Image')}
-                            {renderImageUploader('bathroomImage', 'Bathroom Image')}
-                            {renderImageUploader('otherImage', 'Any Others Image')}
-
-                            <p className="text-xs font-semibold text-gray-800 mt-6 max-w-md">
-                                immediate priority, To ensure your property is well-understood, your images should tell a story. Use this checklist to capture the best angles
-                            </p>
-
-                            <div className="pt-8">
-                                <Button onClick={() => handleNextStep(2)} className="w-full sm:w-auto px-10 py-6 bg-[#ff6b00] hover:bg-[#e66000] text-white font-bold rounded-lg shadow-md transition-colors uppercase text-sm tracking-wide">
-                                    proceed for next step
-                                </Button>
-                            </div>
-                        </div>
-                    )}
-
-                    {currentStep === 3 && (
-                        <div className="space-y-4 max-w-2xl">
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                                <label className="font-semibold text-gray-800 sm:w-1/3">Monthly Rent</label>
-                                <Input name="monthlyRent" value={formData.monthlyRent} onChange={handleInputChange} placeholder="₹ Amount" className="flex-1 rounded-full border-gray-300 focus-visible:ring-orange-500 text-sm" />
-                            </div>
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                                <label className="font-semibold text-gray-800 sm:w-1/3">Any Security Deposit</label>
-                                <div className="flex-1 flex gap-2">
-                                    <Select value={formData.securityDeposit} onValueChange={(value) => handleInputChange({ target: { name: 'securityDeposit', value } })}>
-                                        <SelectTrigger className="flex-1 rounded-full border-gray-300 focus:ring-orange-500 h-10 px-4 text-sm text-gray-500">
-                                            <SelectValue placeholder="No Of Month" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {[...Array(12)].map((_, i) => (
-                                                <SelectItem key={i+1} value={(i+1).toString()}>{i+1} Month{i > 0 ? 's' : ''}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </div>
-                            {formData.totalSecurityDepositAmount && (
-                                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                                    <label className="font-semibold text-gray-800 sm:w-1/3">Total Deposit Amount</label>
-                                    <Input name="totalSecurityDepositAmount" value={formData.totalSecurityDepositAmount} readOnly className="flex-1 rounded-full border-gray-300 bg-gray-50 text-sm text-gray-700 font-bold" />
-                                </div>
-                            )}
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                                <label className="font-semibold text-gray-800 sm:w-1/3">Availability</label>
-                                <Input type="date" name="availability" value={formData.availability} onChange={handleInputChange} className="flex-1 rounded-full border-gray-300 focus-visible:ring-orange-500 text-sm text-gray-500" />
-                            </div>
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                                <label className="font-semibold text-gray-800 sm:w-1/3">Any Special Note</label>
-                                <Input name="specialNote" value={formData.specialNote} onChange={handleInputChange} placeholder="Type Here" className="flex-1 rounded-full border-gray-300 focus-visible:ring-orange-500 text-sm" />
-                            </div>
-
-                            <div className="mt-8 space-y-4 pl-0 sm:pl-[33%]">
-                                <div className="flex gap-3">
-                                    <p className="text-xs font-bold text-gray-900 leading-tight">
-                                        We are looking for a minimum 03 To 06 -month commitment. <br />
-                                        Credit and background checks will be required.*
-                                    </p>
-                                </div>
-                                <div className="flex gap-3">
-                                    <p className="text-xs font-bold text-gray-900 leading-tight">
-                                        We are looking for a minimum 11-month commitment. Credit and <br />
-                                        background checks will be required.*
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="pt-8">
-                                <Button onClick={() => handleNextStep(3)} className="w-full sm:w-auto px-10 py-6 bg-[#ff6b00] hover:bg-[#e66000] text-white font-bold rounded-lg shadow-md transition-colors uppercase text-sm tracking-wide">
-                                    proceed for next step
-                                </Button>
-                            </div>
-                        </div>
-                    )}
-
-                    {currentStep === 4 && (
-                        <div className="space-y-6 max-w-2xl">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 text-sm font-semibold text-gray-900">
-                                {[
-                                    { id: 'water', label: 'Water' },
-                                    { id: 'parking', label: 'Parking' },
-                                    { id: 'electricity', label: 'Electricity' },
-                                    { id: 'balcony', label: 'Balcony' },
-                                    { id: 'internet', label: 'Internet' },
-                                    { id: 'lift', label: 'Lift' },
-                                    { id: 'stairs', label: 'Stairs' },
-                                    { id: 'guestsMax3', label: '2 guests | Max - 3' },
-                                    { id: 'roomOnly', label: 'Room Only' },
-                                    { id: 'preFixDoubleBed', label: 'Pre Fix Double Bed' },
-                                    { id: 'preFixSingleBed', label: 'Pre Fix Single Bed' },
-                                    { id: 'privateBathroom', label: 'Private Bathroom' },
-                                    { id: 'sharingBathroom', label: 'Sharing Bathroom' },
-                                    { id: 'bathroomGeyser', label: 'Bathroom geyser' },
-                                    { id: 'kitchen', label: 'Kitchen' },
-                                    { id: 'kitchenGeyser', label: 'Kitchen geyser' },
-                                    { id: 'roomAlmirah', label: 'Room Almirah' },
-                                    { id: 'chair', label: 'Chair' },
-                                    { id: 'rooftopTerraceAccess', label: 'Rooftop Terrace Access' },
-                                    { id: 'outdoorSeating', label: 'Outdoor Seating' },
-                                ].map((item) => (
-                                    <label key={item.id} className="flex justify-between items-center cursor-pointer">
-                                        <span>{item.label}</span>
-                                        <Checkbox
-                                            checked={formData.amenities[item.id]}
-                                            onCheckedChange={(checked) => handleAmenityChange({ target: { name: item.id, checked } })}
-                                            className="w-5 h-5 border-gray-400"
-                                        />
-                                    </label>
+                    <div className="flex flex-col md:flex-row gap-8">
+                        {/* Sidebar */}
+                        <div className="w-full md:w-64 flex-shrink-0">
+                            <div className="flex flex-col gap-2">
+                                {tabs.map((tab) => (
+                                    <button
+                                        key={tab.id}
+                                        className={`px-5 py-4 text-left font-semibold text-sm rounded-xl transition-all border-2
+                                    ${currentStep === tab.id ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-white text-slate-600 border-slate-100 hover:border-blue-200 hover:bg-blue-50'}`}
+                                        onClick={() => {
+                                            // Let users navigate back easily, but strict navigation forward
+                                            if (tab.id < currentStep) setCurrentStep(tab.id);
+                                        }}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <span className={`flex items-center justify-center w-6 h-6 rounded-full text-xs ${currentStep === tab.id ? 'bg-white/20' : 'bg-slate-100 text-slate-500'}`}>
+                                                {tab.id}
+                                            </span>
+                                            {tab.label}
+                                        </div>
+                                    </button>
                                 ))}
                             </div>
+                        </div>
 
-                            <div className="pt-6 space-y-5 border-t border-gray-100">
-                                <div className="flex gap-4">
-                                    <p className="text-[11px] font-bold text-gray-900 leading-snug max-w-md">
-                                        We offer a welcoming and private stay for couples. Enjoy a
-                                        hassle-free check-in experience with valid identification.
-                                    </p>
-                                </div>
-                                <div className="flex gap-4">
-                                    <p className="text-[11px] font-bold text-gray-900 leading-snug max-w-md">
-                                        We love pets as much as you do! Our property is proudly pet-friendly,
-                                        so you don't have to leave your furry family members behind. Please
-                                        let us know at the time of booking if you plan to bring your pet so we
-                                        can ensure the space is ready for both of you.
-                                    </p>
-                                </div>
-                            </div>
+                        {/* Main Content Area */}
+                        <div className="flex-1 bg-white p-4">
+                            {currentStep === 1 && (
+                                <div className="space-y-6 max-w-2xl">
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                                        <label className="font-semibold text-slate-700 sm:w-1/3">Property Name</label>
+                                        <Input name="propertyName" value={formData.propertyName} onChange={handleInputChange} placeholder="Name of your property" className="flex-1 h-12 rounded-xl border-slate-200 focus-visible:ring-blue-500 bg-slate-50/50 hover:bg-white transition-all" />
+                                    </div>
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                                        <label className="font-semibold text-slate-700 sm:w-1/3">Contact Number</label>
+                                        <Input name="contactNumber" value={formData.contactNumber} onChange={handleInputChange} placeholder="+91 XXXXXXXXXX" className="flex-1 h-12 rounded-xl border-slate-200 focus-visible:ring-blue-500 bg-slate-50/50 hover:bg-white transition-all" />
+                                    </div>
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                                        <label className="font-semibold text-slate-700 sm:w-1/3">Email Address</label>
+                                        <Input name="email" value={formData.email} onChange={handleInputChange} disabled className="flex-1 h-12 rounded-xl border-slate-200 bg-slate-100 text-slate-500 cursor-not-allowed" />
+                                    </div>
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                                        <label className="font-semibold text-slate-700 sm:w-1/3">Select Location</label>
+                                        <Select value={formData.locationType} onValueChange={(value) => handleInputChange({ target: { name: 'locationType', value } })}>
+                                            <SelectTrigger className="flex-1 h-12 rounded-xl border-slate-200 focus:ring-blue-500 bg-slate-50/50 hover:bg-white transition-all px-4">
+                                                <SelectValue placeholder="Select Location" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {locations?.map((loc) => (
+                                                    <SelectItem key={loc._id || loc.id} value={loc.locationType}>{loc.locationType || " "}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                                        <label className="font-semibold text-slate-700 sm:w-1/3">Property For</label>
+                                        <Select value={formData.propertyFor} onValueChange={(value) => handleInputChange({ target: { name: 'propertyFor', value } })}>
+                                            <SelectTrigger className="flex-1 h-12 rounded-xl border-slate-200 focus:ring-blue-500 bg-slate-50/50 hover:bg-white transition-all px-4">
+                                                <SelectValue placeholder="Select Property For" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="residential">Residential</SelectItem>
+                                                <SelectItem value="commercial">Commercial</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                                        <label className="font-semibold text-slate-700 sm:w-1/3">Property Type</label>
+                                        <Select value={formData.propertyType} onValueChange={(value) => handleInputChange({ target: { name: 'propertyType', value } })}>
+                                            <SelectTrigger className="flex-1 h-12 rounded-xl border-slate-200 focus:ring-blue-500 bg-slate-50/50 hover:bg-white transition-all px-4">
+                                                <SelectValue placeholder="Select Property Type" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {propertyTypes?.map((prop) => (
+                                                    <SelectItem key={prop._id || prop.id} value={prop.propertyType || prop.name}>{prop.propertyType || prop.name}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
 
-                            <div className="pt-6">
-                                <Button
-                                    onClick={handleSubmit}
-                                    disabled={isSubmitting}
-                                    className="w-full sm:w-auto px-10 py-6 bg-[#ff6b00] hover:bg-[#e66000] disabled:bg-gray-400 text-white font-bold rounded-lg shadow-md transition-colors uppercase text-sm tracking-wide"
-                                >
-                                    {isSubmitting ? 'Submitting...' : 'proceed for final step'}
-                                </Button>
+                                    <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-slate-100">
+                                        <label className="font-semibold text-slate-700 sm:w-1/3 mt-3">Property Address</label>
+                                        <div className="flex-1 space-y-3">
+                                            <Input name="address1" value={formData.address1} onChange={handleInputChange} placeholder="Address Line 1" className="w-full h-12 rounded-xl border-slate-200 focus-visible:ring-blue-500 bg-slate-50/50 hover:bg-white transition-all" />
+                                            <Input name="address2" value={formData.address2} onChange={handleInputChange} placeholder="Address Line 2" className="w-full h-12 rounded-xl border-slate-200 focus-visible:ring-blue-500 bg-slate-50/50 hover:bg-white transition-all" />
+                                            <Input name="address3" value={formData.address3} onChange={handleInputChange} placeholder="Address Line 3" className="w-full h-12 rounded-xl border-slate-200 focus-visible:ring-blue-500 bg-slate-50/50 hover:bg-white transition-all" />
+                                            <Input name="address4" value={formData.address4} onChange={handleInputChange} placeholder="City, State, Zip" className="w-full h-12 rounded-xl border-slate-200 focus-visible:ring-blue-500 bg-slate-50/50 hover:bg-white transition-all" />
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                                        <label className="font-semibold text-slate-700 sm:w-1/3">Any Landmark</label>
+                                        <Input name="landmark" value={formData.landmark} onChange={handleInputChange} placeholder="Landmark" className="flex-1 h-12 rounded-xl border-slate-200 focus-visible:ring-blue-500 bg-slate-50/50 hover:bg-white transition-all" />
+                                    </div>
+
+                                    <div className="pt-8">
+                                        <Button onClick={() => handleNextStep(1)} className="w-full sm:w-auto px-10 h-14 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all uppercase tracking-wide active:scale-95">
+                                            proceed for next step
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {currentStep === 2 && (
+                                <div className="space-y-4 max-w-2xl">
+                                    {renderImageUploader('primaryImage', 'Primary image')}
+                                    {renderImageUploader('outsideBuilding', 'Outside building')}
+                                    {renderImageUploader('roomImage', 'Room / Other Image')}
+                                    {renderImageUploader('bathroomImage', 'Bathroom Image')}
+                                    
+                                    {selectedPropertyCategory === 'pg-hostel' && (
+                                        <>
+                                            {renderImageUploader('completeRoomImages', 'Complete room images')}
+                                            {renderImageUploader('bedImages', 'Bed images')}
+                                        </>
+                                    )}
+                                    
+                                    {renderImageUploader('otherImage', 'Any Others Image')}
+
+                                    <p className="text-xs font-semibold text-gray-800 mt-6 max-w-md">
+                                        immediate priority, To ensure your property is well-understood, your images should tell a story. Use this checklist to capture the best angles
+                                    </p>
+
+                                    <div className="pt-8">
+                                        <Button onClick={() => handleNextStep(2)} className="w-full sm:w-auto px-10 h-14 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all uppercase tracking-wide active:scale-95">
+                                            proceed for next step
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {currentStep === 3 && (
+                                <div className="space-y-6 max-w-2xl">
+                                    {selectedPropertyCategory === 'pg-hostel' && (
+                                        <h3 className="text-xl font-bold text-slate-800 pb-2 border-b border-slate-200">Bed Or Per Person Rent / Fee Detail</h3>
+                                    )}
+                                    
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                                        <label className="font-semibold text-slate-700 sm:w-1/3">
+                                            {selectedPropertyCategory === 'pg-hostel' ? 'Monthly Rent Per Bed' : 'Monthly Rent'}
+                                        </label>
+                                        <div className="flex-1 flex gap-2">
+                                            <Input name="monthlyRent" value={formData.monthlyRent} onChange={handleInputChange} placeholder="Type Here" className="w-full h-12 rounded-xl border-slate-200 focus-visible:ring-blue-500 bg-slate-50/50 hover:bg-white transition-all" />
+                                            {selectedPropertyCategory === 'pg-hostel' && (
+                                                <Select value={formData.rentBasis} onValueChange={(value) => handleInputChange({ target: { name: 'rentBasis', value } })}>
+                                                    <SelectTrigger className="w-40 h-12 rounded-xl border-slate-200 focus:ring-blue-500 bg-slate-50/50 hover:bg-white transition-all px-4">
+                                                        <SelectValue placeholder="Basis" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="Monthly">Monthly Basis</SelectItem>
+                                                        <SelectItem value="Per Day">Per Day Basis</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            )}
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex flex-col sm:flex-row gap-4">
+                                        <label className="font-semibold text-slate-700 sm:w-1/3 pt-3">Any Security Deposit</label>
+                                        <div className="flex-1 space-y-4">
+                                            <Select value={formData.securityDeposit} onValueChange={(value) => handleInputChange({ target: { name: 'securityDeposit', value } })}>
+                                                <SelectTrigger className="w-full h-12 rounded-xl border-slate-200 focus:ring-blue-500 bg-slate-50/50 hover:bg-white transition-all px-4">
+                                                    <SelectValue placeholder="No Of Month" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {[...Array(12)].map((_, i) => (
+                                                        <SelectItem key={i + 1} value={(i + 1).toString()}>{i + 1} Month{i > 0 ? 's' : ''}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            
+                                            {formData.rentBasis !== 'Per Day' && formData.securityDeposit && (
+                                                <div className="flex flex-col gap-2">
+                                                    <span className="text-sm text-slate-500 font-medium">Total Deposit Amount (Auto Calculated)</span>
+                                                    <Input name="totalSecurityDepositAmount" value={formData.totalSecurityDepositAmount} readOnly className="w-full h-12 rounded-xl border-orange-200 focus-visible:ring-orange-500 bg-orange-50/50 text-orange-800 font-bold" />
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                                        <label className="font-semibold text-slate-700 sm:w-1/3">Availability</label>
+                                        <Input type="date" name="availability" value={formData.availability} onChange={handleInputChange} className="flex-1 h-12 rounded-xl border-slate-200 focus-visible:ring-blue-500 bg-slate-50/50 hover:bg-white transition-all" />
+                                    </div>
+                                    
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                                        <label className="font-semibold text-slate-700 sm:w-1/3">Any Special Note</label>
+                                        <Input name="specialNote" value={formData.specialNote} onChange={handleInputChange} placeholder="Type Here" className="flex-1 h-12 rounded-xl border-slate-200 focus-visible:ring-blue-500 bg-slate-50/50 hover:bg-white transition-all" />
+                                    </div>
+
+                                    <div className="pt-6 space-y-4">
+                                        <label className="flex items-start gap-4 p-4 border-b border-slate-100 cursor-pointer group">
+                                            <Checkbox checked={formData.agreements.monthBasisAlso} onCheckedChange={(checked) => handleAgreementChange({ target: { name: 'monthBasisAlso', checked } })} className="w-6 h-6 mt-1 border-slate-300 data-[state=checked]:bg-slate-700 data-[state=checked]:border-slate-700" />
+                                            <span className="text-sm font-bold text-slate-800 leading-tight">Available for Month Basis Also .<br/><span className="font-normal text-slate-600">Credit and background checks will be required."</span></span>
+                                        </label>
+                                        <label className="flex items-start gap-4 p-4 border-b border-slate-100 cursor-pointer group">
+                                            <Checkbox checked={formData.agreements.commitment03To06} onCheckedChange={(checked) => handleAgreementChange({ target: { name: 'commitment03To06', checked } })} className="w-6 h-6 mt-1 border-slate-300 data-[state=checked]:bg-slate-700 data-[state=checked]:border-slate-700" />
+                                            <span className="text-sm font-bold text-slate-800 leading-tight">We are looking for a minimum 03 To 06 -month commitment.<br/><span className="font-normal text-slate-600">Credit and background checks will be required."</span></span>
+                                        </label>
+                                        <label className="flex items-start gap-4 p-4 border-b border-slate-100 cursor-pointer group">
+                                            <Checkbox checked={formData.agreements.commitment11} onCheckedChange={(checked) => handleAgreementChange({ target: { name: 'commitment11', checked } })} className="w-6 h-6 mt-1 border-slate-300 data-[state=checked]:bg-slate-700 data-[state=checked]:border-slate-700" />
+                                            <span className="text-sm font-bold text-slate-800 leading-tight">We are looking for a minimum 11-month commitment. Credit and<br/><span className="font-normal text-slate-600">background checks will be required."</span></span>
+                                        </label>
+                                    </div>
+
+                                    <div className="pt-8">
+                                        <Button onClick={() => handleNextStep(3)} className="w-full sm:w-auto px-10 h-14 bg-[#ff6b00] hover:bg-[#e66000] text-white font-bold rounded-xl shadow-lg transition-all uppercase tracking-wide active:scale-95 text-lg">
+                                            proceed for next step
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {currentStep === 4 && (
+                                <div className="space-y-6 max-w-2xl">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                        {[
+                                            { id: 'water', label: '24/7 Water' },
+                                            { id: 'electricity', label: '24/7 Electricity' },
+                                            { id: 'internet', label: 'High Speed Internet' },
+                                            { id: 'stairs', label: 'Stairs' },
+                                            { id: 'roomOnly', label: 'Room Only' },
+                                            { id: 'preFixSingleBed', label: 'Pre-Fix Single Bed' },
+                                            { id: 'sharingBathroom', label: 'Sharing Bathroom' },
+                                            { id: 'kitchen', label: 'Kitchen' },
+                                            { id: 'roomAlmirah', label: 'Room Almirah' },
+                                            { id: 'parking', label: 'Parking Available' },
+                                            { id: 'balcony', label: 'Balcony' },
+                                            { id: 'lift', label: 'Lift/Elevator' },
+                                            { id: 'guestsMax3', label: 'Max 3 Guests Allowed' },
+                                            { id: 'preFixDoubleBed', label: 'Pre-Fix Double Bed' },
+                                            { id: 'privateBathroom', label: 'Private Bathroom' },
+                                            { id: 'bathroomGeyser', label: 'Bathroom Geyser' },
+                                            { id: 'kitchenGeyser', label: 'Kitchen Geyser' },
+                                            { id: 'chair', label: 'Working Desk/Chair' },
+                                            { id: 'rooftopTerraceAccess', label: 'Rooftop Access' },
+                                            { id: 'outdoorSeating', label: 'Outdoor Seating' },
+                                        ].map((item) => (
+                                            <label key={item.id} className={`flex justify-between items-center cursor-pointer p-4 rounded-xl border-2 transition-all ${formData.amenities[item.id] ? 'border-blue-500 bg-blue-50/50' : 'border-slate-100 hover:border-slate-200 bg-white'}`}>
+                                                <span className={`text-sm font-medium ${formData.amenities[item.id] ? 'text-blue-700' : 'text-slate-600'}`}>{item.label}</span>
+                                                <Checkbox
+                                                    checked={formData.amenities[item.id]}
+                                                    onCheckedChange={(checked) => handleAmenityChange({ target: { name: item.id, checked } })}
+                                                    className="w-5 h-5 border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 rounded"
+                                                />
+                                            </label>
+                                        ))}
+                                    </div>
+
+                                    <div className="pt-8 space-y-4">
+                                        <label className={`flex items-start gap-4 p-5 rounded-xl border-2 transition-all cursor-pointer ${formData.agreements.couplesWelcome ? 'border-orange-500 bg-orange-50' : 'border-orange-100 bg-white hover:border-orange-200'}`}>
+                                            <Checkbox
+                                                checked={formData.agreements.couplesWelcome}
+                                                onCheckedChange={(checked) => handleAgreementChange({ target: { name: 'couplesWelcome', checked } })}
+                                                className="w-6 h-6 mt-1 border-orange-300 data-[state=checked]:bg-orange-600 data-[state=checked]:border-orange-600 rounded"
+                                            />
+                                            <p className={`text-sm font-medium leading-relaxed ${formData.agreements.couplesWelcome ? 'text-orange-900' : 'text-slate-600'}`}>
+                                                We offer a welcoming and private stay for couples. Enjoy a
+                                                hassle-free check-in experience with valid identification.
+                                            </p>
+                                        </label>
+                                        
+                                        <label className={`flex items-start gap-4 p-5 rounded-xl border-2 transition-all cursor-pointer ${formData.agreements.petFriendly ? 'border-emerald-500 bg-emerald-50' : 'border-emerald-100 bg-white hover:border-emerald-200'}`}>
+                                            <Checkbox
+                                                checked={formData.agreements.petFriendly}
+                                                onCheckedChange={(checked) => handleAgreementChange({ target: { name: 'petFriendly', checked } })}
+                                                className="w-6 h-6 mt-1 border-emerald-300 data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600 rounded"
+                                            />
+                                            <p className={`text-sm font-medium leading-relaxed ${formData.agreements.petFriendly ? 'text-emerald-900' : 'text-slate-600'}`}>
+                                                We love pets as much as you do! Our property is proudly pet-friendly,
+                                                so you don't have to leave your furry family members behind. Please
+                                                let us know at the time of booking if you plan to bring your pet.
+                                            </p>
+                                        </label>
+                                    </div>
+
+                                    <div className="pt-8 flex justify-end">
+                                        <Button
+                                            onClick={handleSubmit}
+                                            disabled={isSubmitting}
+                                            className="w-full sm:w-auto px-12 h-14 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:from-slate-400 disabled:to-slate-400 text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-xl transition-all active:scale-95 tracking-wide"
+                                        >
+                                            {isSubmitting ? 'Submitting...' : 'Submit Registration'}
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Thank You Modal */}
+                    {showThankYou && (
+                        <div className="fixed inset-0 bg-slate-900/40 z-[999] flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-300">
+                            <div className="bg-white rounded-3xl max-w-xl w-full border border-slate-100 shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-500">
+                                {/* Decorative Top Banner */}
+                                <div className="h-2 w-full bg-gradient-to-r from-blue-500 to-indigo-500"></div>
+
+                                <div className="p-8 md:p-10 flex flex-col items-center text-center">
+                                    {/* Success Icon */}
+                                    <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-6">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </div>
+
+                                    <h2 className="text-3xl font-extrabold text-slate-900 mb-2">Registration Submitted!</h2>
+                                    <p className="text-slate-500 mb-8 max-w-md">
+                                        Thank you for submitting your {selectedPropertyCategory === 'pg-hostel' ? 'pg-hostel' : 'home-rental'}. Our team is reviewing the details and will be in touch shortly.
+                                    </p>
+
+                                    {/* Property Details Card */}
+                                    <div className="w-full bg-slate-50 rounded-2xl p-6 text-left space-y-3 mb-8 border border-slate-100">
+                                        <div className="flex justify-between items-center border-b border-slate-200 pb-3">
+                                            <span className="text-slate-500 font-medium text-sm">Property Type</span>
+                                            <span className=" font-bold text-orange-600">{selectedPropertyCategory}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center border-b border-slate-200 pb-3">
+                                            <span className="text-slate-500 font-medium text-sm">Property Name</span>
+                                            <span className="text-slate-900 font-bold">{responseData?.propertyName}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center border-b border-slate-200 pb-3">
+                                            <span className="text-slate-500 font-medium text-sm">Case ID Number</span>
+                                            <span className="text-slate-900 font-bold font-mono">{responseData?.caseIdNumber}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-slate-500 font-medium text-sm">Contact Number</span>
+                                            <span className="text-slate-900 font-bold">{responseData?.contactNumber}</span>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        onClick={() => router.push('/')}
+                                        className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold h-14 rounded-xl shadow-lg transition-all active:scale-95"
+                                    >
+                                        Go Back To Website
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     )}
                 </div>
-            </div>
-
-            {/* Thank You Modal */}
-            {showThankYou && (
-                <div className="fixed inset-0 bg-black/60 z-[999] flex items-center justify-center p-4 backdrop-blur-sm">
-                    <div className="bg-[#ff6b00] text-white p-8 md:p-5 rounded-xl max-w-xl w-full border-2 border-white/20 shadow-2xl relative">
-                        <h2 className="text-2xl font-mono mb-8">Thank you for submitting your property!</h2>
-
-                        <div className="space-y-2 mb-8 text-md font-bold text-black">
-                            <p>Name Of Property: <span className="font-normal text-white">{responseData?.propertyName}</span></p>
-                            <p>Case ID Number : <span className="font-normal text-white">{responseData?.caseIdNumber}</span></p>
-                            <p>Property Contact Number : <span className="font-normal text-white">{responseData?.contactNumber}</span></p>
-                        </div>
-
-                        <div className="space-y-6 text-md font-bold mb-10 max-w-lg leading-snug">
-                            <p>We have received your details and our team is currently reviewing them. We will be in touch with you shortly with an update.</p>
-                            <p>Thank you for your patience while we get everything ready for you.</p>
-                        </div>
-
-                        <button
-                            onClick={() => router.push('/')}
-                            className="bg-white text-black font-bold text-sm py-2 px-8 rounded-md shadow-md hover:bg-gray-100 transition-colors"
-                        >
-                            Go Back To Website
-                        </button>
-                    </div>
-                </div>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 };
 

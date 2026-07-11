@@ -59,12 +59,6 @@ const Page = () => {
               <span className="text-xl font-bold text-slate-900">CommandCenter</span>
             </div>
             <div className="flex items-center gap-4">
-              <button className="p-2 hover:bg-slate-100 rounded-full transition-all active:scale-95">
-                <Bell className="w-5 h-5 text-slate-500" />
-              </button>
-              <button className="p-2 hover:bg-slate-100 rounded-full transition-all active:scale-95">
-                <Settings className="w-5 h-5 text-slate-500" />
-              </button>
               <div className="h-8 w-8 rounded-full bg-slate-200 overflow-hidden border border-slate-300">
                 <Image
                   src={session?.user?.image || "/user.png"}
@@ -160,7 +154,7 @@ const Page = () => {
             </div>
 
             {/* Secondary Stats Row */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-6 pt-2">
+            {/* <div className="grid grid-cols-2 md:grid-cols-5 gap-6 pt-2">
               <div className="bg-white border border-slate-200 rounded-xl p-6 group shadow-sm">
                 <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">Blogs</div>
                 <div className="text-3xl font-bold text-slate-900 mt-2">...</div>
@@ -181,7 +175,7 @@ const Page = () => {
                 <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">Admins</div>
                 <div className="text-3xl font-bold text-slate-900 mt-2">...</div>
               </div>
-            </div>
+            </div> */}
           </section>
 
           {/* Module Sections */}

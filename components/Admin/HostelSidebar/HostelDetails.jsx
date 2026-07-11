@@ -18,7 +18,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import EmailOTPVerification from '@/components/EmailOTPVerification';
 import DeclarationForm from '@/components/DeclarationForm';
 // import MSG91OTPVerification from '@/components/MSG91OTPVerification'; // Commented out for testing
-const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationType = [], galiType = [] }) => {
+const HostelDetails = () => {
+    const [propertyTypes, setPropertyTypes] = useState([]);
+    const [locationType, setLocationType] = useState([]);
+    const [subLocationType, setSubLocationType] = useState([]);
+    const [galiType, setGaliType] = useState([]);
     const [loading, setLoading] = useState(false);
     const [propertyDetails, setPropertyDetails] = useState([]);
     const [videoUploading, setVideoUploading] = useState(false);
@@ -248,13 +252,59 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
     };
     const fetchPropertyDetails = async () => {
         try {
-            const response = await fetch("/api/property/propertyDetails?limit=10");
+            const response = await fetch("/api/property/propertyDetails?limit=10&status=Approved&propertyCategory=pg-hostel");
             const data = await response.json();
             setPropertyDetails(data.data);
         } catch (error) {
-            toast.error("Failed to fetch property type");
+            toast.error("Failed to fetch hostel details");
         }
     };
+    
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+
+                const [
+                    propResponse,
+                    locResponse,
+                    subLocResponse,
+                    galiResponse,
+                ] = await Promise.all([
+                    fetch("/api/property/propertyType"),
+                    fetch("/api/property/createLocation"),
+                    fetch("/api/property/createSubLocation"),
+                    fetch("/api/property/createGali"),
+                ]);
+
+                const [
+                    propData,
+                    locData,
+                    subLocData,
+                    galiData,
+                ] = await Promise.all([
+                    propResponse.json(),
+                    locResponse.json(),
+                    subLocResponse.json(),
+                    galiResponse.json(),
+                ]);
+
+                setPropertyTypes(propData);
+                setLocationType(locData);
+                setSubLocationType(subLocData);
+                setGaliType(galiData);
+
+            } catch (error) {
+                console.error(error);
+                toast.error("Failed to load data");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
+
     useEffect(() => {
         fetchPropertyDetails();
     }, []);
@@ -301,19 +351,19 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
             const responseData = await response.json();
 
             if (!response.ok) {
-                throw new Error(responseData.error || 'Failed to update property');
+                throw new Error(responseData.error || 'Failed to update Hostels');
             }
 
             if (responseData.success) {
-                toast.success('Property updated successfully');
+                toast.success('Hostels updated successfully');
                 fetchPropertyDetails(); // Refresh the list
-                return responseData.data; // Return the updated property
+                return responseData.data; // Return the updated Hostels
             } else {
-                throw new Error(responseData.error || 'Failed to update property');
+                throw new Error(responseData.error || 'Failed to update Hostels');
             }
         } catch (error) {
-            console.error('Error updating property:', { error, message: error.message });
-            toast.error(error.message || 'Failed to update property');
+            console.error('Error updating Hostels:', { error, message: error.message });
+            toast.error(error.message || 'Failed to update Hostels');
             throw error; // Re-throw to be caught by the calling function
         }
     };
@@ -337,7 +387,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
             });
             // Refresh the property details after update
             fetchPropertyDetails();
-            toast.success(`Property ${!property.isTrending ? 'added to' : 'removed from'} trending`);
+            toast.success(`Hostels ${!property.isTrending ? 'added to' : 'removed from'} trending`);
         } catch (error) {
             console.error('Error toggling trending status:', error);
             toast.error('Failed to update trending status');
@@ -373,7 +423,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                         loading: false
                     }
                 }));
-                toast.success('Main image uploaded successfully!');
+                toast.success('Hostel image uploaded successfully!');
             } else {
                 console.error('Cloudinary upload failed:', data.error || 'Unknown error');
                 setFormData(prev => ({
@@ -897,17 +947,17 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
 
             // 1. Property Type Validation
             if (!formData.propertyType) {
-                throw new Error('Please select a property type');
+                throw new Error('Please select a Hostels type');
             }
 
             const selectedPropertyType = propertyTypes.find(type => type.propertyType === formData.propertyType);
             if (!selectedPropertyType) {
-                throw new Error('Please select a valid property type');
+                throw new Error('Please select a valid Hostels type');
             }
 
             // 2. Property Name Validation
             if (!formData.propertyName || formData.propertyName.trim() === '') {
-                throw new Error('Property name is required');
+                throw new Error('Hostels name is required');
             }
 
             // 3. Location Validation
@@ -919,7 +969,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 (formData.propertyStyle === 'hostel_pg_style_only' || formData.propertyStyle === 'apartment_pg_only') &&
                 !formData.propertyStyleOption
             ) {
-                throw new Error('Please select a property style option');
+                throw new Error('Please select a hostels style option');
             }
 
             // 4. Main Image Validation
@@ -1037,11 +1087,11 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                         .join(', ');
                     throw new Error(errorMessages);
                 }
-                throw new Error(data.error || 'Failed to save property details');
+                throw new Error(data.error || 'Failed to save hostel details');
             }
 
             // Show success message
-            toast.success(editingProperty ? 'Property updated successfully!' : 'Property created successfully!');
+            toast.success(editingProperty ? 'Hostel updated successfully!' : 'Hostel created successfully!');
 
 
             // Reset form and refresh data
@@ -1377,15 +1427,15 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.error || 'Failed to delete property');
+                throw new Error(data.error || 'Failed to delete Hostels');
             }
 
             // Refresh the properties list
             setPropertyDetails(propertyDetails.filter(property => property._id !== propertyToDelete._id));
-            toast.success('Property deleted successfully');
+            toast.success('Hostels deleted successfully');
         } catch (error) {
-            console.error('Error deleting property:', error);
-            toast.error(error.message || 'Failed to delete property');
+            console.error('Error deleting Hostels:', error);
+            toast.error(error.message || 'Failed to delete Hostels');
         } finally {
             setIsDeleteDialogOpen(false);
             setPropertyToDelete(null);
@@ -1396,20 +1446,20 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
         <div className="max-w-7xl mx-auto w-full p-4 space-y-6">
             <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                 <div className="p-6 md:p-8 bg-slate-50/50 border-b border-slate-100">
-                    <h1 className="text-2xl font-bold text-slate-800">Add New Property</h1>
-                    <p className="text-sm text-slate-500 mt-1">Enter the details below to list a new property.</p>
+                    <h1 className="text-2xl font-bold text-slate-800">Add New Hostel</h1>
+                    <p className="text-sm text-slate-500 mt-1">Enter the details below to list a new hostel.</p>
                 </div>
 
             <form onSubmit={handleSubmit} id="property-form" className="p-6 md:p-8 space-y-8 bg-white">
                 {/* Property Be Like Select */}
                 <div className="space-y-2">
-                    <Label>Property Be Like</Label>
+                    <Label>Hostels Be Like</Label>
                     <Select
                         value={formData.propertyFor}
                         onValueChange={(value) => setFormData(prev => ({ ...prev, propertyFor: value }))}
                     >
                         <SelectTrigger>
-                            <SelectValue placeholder="Select Property Be Like" />
+                            <SelectValue placeholder="Select Hostels Be Like" />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="residential">Residential</SelectItem>
@@ -1425,7 +1475,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                         onValueChange={(value) => setFormData(prev => ({ ...prev, propertyType: value }))}
                     >
                         <SelectTrigger>
-                            <SelectValue placeholder="Select property type" />
+                            <SelectValue placeholder="Select Hostels type" />
                         </SelectTrigger>
                         <SelectContent>
                             {propertyTypes.map((type, index) => (
@@ -1543,7 +1593,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                                 value={formData.contactAddress || ''}
                                 onChange={handleChange}
                                 rows={3}
-                                placeholder="Enter property address"
+                                placeholder="Enter Hostels address"
                             />
                         </div>
                         <div className="w-full">
@@ -1554,7 +1604,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                                 value={formData.landMarkDetails || ''}
                                 onChange={handleChange}
                                 rows={3}
-                                placeholder="Enter property address"
+                                placeholder="Enter Hostels address"
                             />
                         </div>
                     </div>
@@ -1573,7 +1623,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 <hr className="my-4 border border-gray-300" />
                 {/* Property Video Section */}
                 <div className="space-y-2">
-                    <Label>Property Video</Label>
+                    <Label>Hostels Video</Label>
                     <Tabs
                         value={activeTab}
                         onValueChange={(value) => {
@@ -1701,28 +1751,28 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 <hr className="my-4 border border-gray-300" />
                 {/* Broker Info */}
                 <div className="space-y-4">
-                    <h3 className="text-xl font-medium underline"> Broker / Owner / Property Information</h3>
+                    <h3 className="text-xl font-medium underline"> Broker / Owner / Hostels Information</h3>
                     <div className="flex flex-col md:flex-row gap-5 items-start md:items-center">
 
                         {/* Property Name */}
                         <div className="w-full md:w-[50%]">
-                            <Label>Property Name</Label>
+                            <Label>Hostel Name</Label>
                             <Input
                                 className="bg-white border border-black rounded-md p-2"
                                 name="propertyName"
                                 value={formData.propertyName}
                                 onChange={handleChange}
-                                placeholder="Enter Property Name"
+                                placeholder="Enter Hostel Name"
                             />
                         </div>
                         <div className="w-full md:w-[25%]">
-                            <Label>Property For Rent Located On</Label>
+                            <Label>Hostels For Rent Located On</Label>
                             <Select
                                 value={formData.propertyForRentLocatedOn}
                                 onValueChange={(value) => setFormData(prev => ({ ...prev, propertyForRentLocatedOn: value }))}
                             >
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select Property" />
+                                    <SelectValue placeholder="Select Hostels" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="ground">Ground Floor</SelectItem>
@@ -1735,7 +1785,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                             </Select>
                         </div>
                         <div className="w-full md:w-[25%]">
-                            <Label>Property Facing Direction</Label>
+                            <Label>Hostels Facing Direction</Label>
                             <Select
                                 value={formData.propertyFacingDirection}
                                 onValueChange={(value) => setFormData(prev => ({ ...prev, propertyFacingDirection: value }))}
@@ -1755,7 +1805,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                     </div>
                     {/* Main Property Image */}
                     <div className="space-y-3">
-                        <Label className="text-sm font-medium text-slate-600 ml-1">Main Property Image</Label>
+                        <Label className="text-sm font-medium text-slate-600 ml-1">Main Hostels Image</Label>
                         <input
                             type="file"
                             accept="image/*"
@@ -1792,7 +1842,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                             <div className="relative w-full max-w-[320px] h-[240px] border border-slate-100 rounded-2xl overflow-hidden bg-slate-50 group">
                                 <Image
                                     src={formData.mainImage.url}
-                                    alt="Main property preview"
+                                    alt="Main Hostels preview"
                                     fill
                                     className="object-cover"
                                 />
@@ -1937,9 +1987,9 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
 
                     {/* ============= SECTION 8: PROPERTY STYLE ============= */}
                     <div className="border-t border-b border-gray-400 p-4 space-y-4">
-                        <h3 className="text-lg font-semibold mb-4">Property Style</h3>
+                        <h3 className="text-lg font-semibold mb-4">Hostels Style</h3>
                         <div className="space-y-2">
-                            <Label>Select Property Style</Label>
+                            <Label>Select Hostels Style</Label>
                             <Select
                                 value={formData.propertyStyle}
                                 onValueChange={(value) => setFormData(prev => ({
@@ -2307,7 +2357,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                                 </div>
                             )}
                         </div>
-                        <p className="text-sm text-gray-500"> To Finalize your property listing on www.kagpremiumhomes.com, providing a copy fo Electiricty Bill is a critical step. While your Sale Deed proves you bougt the house, the Electricity Bill proves you are in active possession of it.</p>
+                        <p className="text-sm text-gray-500"> To Finalize your Hostels listing on www.kagpremiumhomes.com, providing a copy fo Electiricty Bill is a critical step. While your Sale Deed proves you bougt the house, the Electricity Bill proves you are in active possession of it.</p>
 
                     </div>
                 </div>
@@ -2546,7 +2596,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 {/* Property Maintenance Charges */}
                 <div className="space-y-3">
                     <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-                        <Label className="font-semibold">Property Maintenance Charges</Label>
+                        <Label className="font-semibold">Hostels Maintenance Charges</Label>
                         <div className="flex items-center gap-2">
                             <input
                                 type="checkbox"
@@ -2635,7 +2685,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 {/* Property Info */}
                 <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                        <Label>Property Highlights</Label>
+                        <Label>Hostels Highlights</Label>
                         <Button
                             type="button"
                             variant="outline"
@@ -4488,7 +4538,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 </div>
 
                 {/* ============= SECTION 15: OUTSIDE VISITOR ALLOWED ============= */}
-                <div className="border border-gray-300 rounded-lg p-6 space-y-4">
+            <div className="border border-gray-300 rounded-lg p-6 space-y-4">
                     <h3 className="text-lg font-semibold mb-4">Outside Visitor Allowed</h3>
                     <div className="flex md:flex-row gap-4 md:gap-6">
                         <label className="flex items-center gap-2 cursor-pointer">
@@ -4725,11 +4775,11 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                 </div>
             </form>
             </div>
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-white">
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div className="p-6 border-b border-slate-200 flex justify-between items-center bg-slate-50/50">
                     <div>
-                        <h2 className="text-xl font-bold text-slate-800">Existing Properties Details</h2>
-                        <p className="text-sm text-slate-500 mt-1">Manage and view all properties details.</p>
+                        <h2 className="text-xl font-semibold text-slate-800">Registered Hostels</h2>
+                        <p className="text-sm text-slate-500 mt-1">Manage and view all your registered hostels</p>
                     </div>
                 </div>
                 
@@ -4835,7 +4885,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                     <DialogHeader>
                         <DialogTitle>Confirm Delete</DialogTitle>
                         <DialogDescription>
-                            Are you sure you want to delete the property "{propertyToDelete?.propertyName}"? This action cannot be undone.
+                            Are you sure you want to delete the hostel "{propertyToDelete?.propertyName}"? This action cannot be undone.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="flex justify-end gap-3 mt-6">
@@ -4852,7 +4902,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                             variant="destructive"
                             onClick={confirmDelete}
                         >
-                            Delete Property
+                            Delete Hostels
                         </Button>
                     </div>
                 </DialogContent>
@@ -5443,7 +5493,7 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
                             setShowDeclarationForm(false);
 
                             // Show submitting message
-                            toast.success('Declaration accepted! Submitting property...');
+                            toast.success('Declaration accepted! Submitting Hostels...');
 
                             // Submit the form with signature data
                             const syntheticEvent = {
@@ -5465,4 +5515,4 @@ const PropertyDetails = ({ propertyTypes = [], locationType = [], subLocationTyp
     );
 };
 
-export default PropertyDetails;
+export default HostelDetails;

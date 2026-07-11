@@ -228,16 +228,16 @@ const PropertyEnquiry = ({ locationType = [] }) => {
 
   // ─── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="p-4 space-y-4">
+    <div className="max-w-7xl mx-auto w-full p-4 md:p-6 space-y-6">
 
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-            <MessageSquare className="w-6 h-6 text-teal-600" />
+          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+            <MessageSquare className="w-7 h-7 text-teal-600" />
             Property Enquiries
           </h1>
-          <p className="text-slate-500 text-xs mt-0.5">Manage all property enquiries from potential tenants</p>
+          <p className="text-slate-500 text-sm mt-1">Manage all property enquiries from potential tenants.</p>
         </div>
         <Button variant="outline" size="sm" onClick={fetchEnquiries}
           className="flex items-center gap-1.5 text-xs">
@@ -254,19 +254,19 @@ const PropertyEnquiry = ({ locationType = [] }) => {
           { label: "Interested", value: interestedCount, color: "bg-emerald-600", icon: <Star className="w-4 h-4" /> },
           { label: "This Page", value: enquiries.length, color: "bg-violet-600", icon: <Hash className="w-4 h-4" /> },
         ].map((s) => (
-          <div key={s.label} className="bg-white rounded-xl border border-slate-100 shadow-sm p-3 flex items-center gap-3">
-            <div className={`${s.color} text-white rounded-lg p-2 flex-shrink-0`}>{s.icon}</div>
+          <div key={s.label} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex items-center gap-4 transition-all hover:shadow-md">
+            <div className={`${s.color} text-white rounded-xl p-3 flex-shrink-0 shadow-sm`}>{s.icon}</div>
             <div>
-              <p className="text-xl font-bold text-slate-800">{s.value}</p>
-              <p className="text-xs text-slate-500">{s.label}</p>
+              <p className="text-2xl font-bold text-slate-800">{s.value}</p>
+              <p className="text-sm font-medium text-slate-500">{s.label}</p>
             </div>
           </div>
         ))}
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-3">
-        <div className="flex items-center gap-2 mb-2.5">
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+        <div className="flex items-center gap-2 mb-4">
           <Filter className="w-3.5 h-3.5 text-slate-500" />
           <span className="text-sm font-semibold text-slate-700">Filter Enquiries</span>
           {hasFilters && (
@@ -314,12 +314,12 @@ const PropertyEnquiry = ({ locationType = [] }) => {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-gradient-to-r from-teal-50 to-cyan-50">
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-teal-50 to-cyan-50">
           <h2 className="text-sm font-bold text-teal-800 flex items-center gap-2">
             <MessageSquare className="w-4 h-4" /> Enquiry List
           </h2>
-          <span className="text-xs text-teal-600 font-semibold bg-teal-100 px-2.5 py-1 rounded-full">
+          <span className="text-xs text-teal-600 font-bold bg-teal-100 px-3 py-1 rounded-full">
             {totalEnquiries} total
           </span>
         </div>

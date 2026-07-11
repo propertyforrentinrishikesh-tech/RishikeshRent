@@ -152,19 +152,6 @@ const Footer = ({ companyBasicInfo = null }) => {
                                     >
                                         About More ↗
                                     </button>
-
-                                    <span className="bg-white rounded-full px-4 py-2 text-sm font-medium text-black shadow">
-                                        Verified Listings
-                                    </span>
-
-                                    <span className="bg-white rounded-full px-4 py-2 text-sm font-medium text-black shadow">
-                                        Centric Features
-                                    </span>
-
-                                    <span className="bg-white rounded-full px-4 py-2 text-sm font-medium text-black shadow">
-                                        Diverse Options
-                                    </span>
-
                                 </div>
 
                                 {/* ================= STATS ================= */}
@@ -249,7 +236,7 @@ const Footer = ({ companyBasicInfo = null }) => {
                                 <div className="w-full max-w-sm sm:max-w-md lg:max-w-lg">
 
                                     <Image
-                                        src="/footerimage.png"
+                                        src="/imagebanner.jpg"
                                         width={900}
                                         height={1000}
                                         alt="Experience"
@@ -303,7 +290,7 @@ const Footer = ({ companyBasicInfo = null }) => {
 
                                 <Link
                                     href="/properties"
-                                    className="px-8 py-3 rounded-full bg-[#0f2747] hover:bg-[#183b69] transition-all duration-300 text-white font-semibold text-center shadow-md hover:shadow-xl w-full sm:w-auto"
+                                    className="px-6 py-3 rounded-full bg-[#0f2747] hover:bg-[#183b69] transition-all duration-300 text-white font-semibold text-center shadow-md hover:shadow-xl w-full sm:w-auto"
                                 >
                                     Browse Properties
                                 </Link>

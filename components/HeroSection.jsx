@@ -88,13 +88,16 @@ const HeroSection = ({ section = "frontend" }) => {
             Property In Rishikesh
           </span>
           <h1 className="text-2xl md:text-4xl font-bold leading-tight mb-6">
-            "Wake Up to the Ganges. Your Perfect Rishikesh Home Awaits."
+            "Your Perfect Rishikesh Home Awaits."
           </h1>
-          <p className="text-gray-400 text-sm md:text-xl mb-12 max-w-3xl leading-relaxed">
-            Finding the perfect rental in the spiritual heart of the world shouldn't be a struggle. At www.rishikeshrent.com, we bridge the gap between your dream of living in Rishikesh and the reality of finding a verified, comfortable space. Whether you are seeking a serene retreat near the banks of the Ganges, a convenient modern apartment, or a cozy homestay tucked away in the hills, our platform offers a seamless, trusted search experience designed to save you time and provide peace of mind.  Start your journey with us today and discover the address that feels like home.
+          <p className="text-gray-400 mb-12 max-w-3xl leading-relaxed">
+            Find your perfect home in the spiritual heart of Rishikesh with www.rishikeshrent.com.
+            <br />
+
+            We make finding verified, comfortable spaces—from serene Ganges-side retreats to cozy hill homestays—simple, fast, and trusted. Start your journey today and find the address that feels like home.
           </p>
           <Link href="/properties">
-            <Button className="bg-white text-black hover:bg-gray-200 rounded-full px-4 py-3 md:px-8 md:py-6 text-xs md:text-sm font-semibold tracking-widest uppercase">
+            <Button className="bg-white text-black hover:bg-gray-200 rounded px-4 py-3 md:px-8 md:py-6 text-xs md:text-sm font-semibold tracking-widest uppercase">
               View Properties
             </Button>
           </Link>

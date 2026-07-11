@@ -243,16 +243,16 @@ const SearchProperty = ({ propertyTypes = [], locationType = [], subLocationType
 
     // ─── Render ─────────────────────────────────────────────────────────────────
     return (
-        <div className="p-4 space-y-4">
+        <div className="max-w-7xl mx-auto w-full p-4 md:p-6 space-y-6">
 
             {/* Header */}
             <div className="flex items-center justify-between flex-wrap gap-3">
                 <div>
-                    <h1 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                        <Search className="w-6 h-6 text-orange-500" />
+                    <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                        <Search className="w-7 h-7 text-orange-500" />
                         Search Property
                     </h1>
-                    <p className="text-slate-500 text-xs mt-0.5">Advanced property search with multiple filters</p>
+                    <p className="text-slate-500 text-sm mt-1">Advanced property search with multiple filters.</p>
                 </div>
                 <Button variant="outline" size="sm" onClick={clearAll} className="flex items-center gap-1.5 text-xs">
                     <X className="w-3.5 h-3.5" /> Clear All
@@ -260,7 +260,7 @@ const SearchProperty = ({ propertyTypes = [], locationType = [], subLocationType
             </div>
 
             {/* ── Filter Panel ── */}
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
                 {/* Filter Header */}
                 <div className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-orange-50 to-amber-50 border-b border-orange-100">
                     <SlidersHorizontal className="w-4 h-4 text-orange-600" />
@@ -515,9 +515,9 @@ const SearchProperty = ({ propertyTypes = [], locationType = [], subLocationType
 
             {/* ── Results ── */}
             {searched && (
-                <div className="space-y-3">
+                <div className="space-y-4">
                     {/* Results Header */}
-                    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-3">
+                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
                         <div className="flex items-center justify-between flex-wrap gap-3">
                             <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
                                 <Hash className="w-4 h-4 text-orange-500" />
@@ -561,7 +561,7 @@ const SearchProperty = ({ propertyTypes = [], locationType = [], subLocationType
                     </div>
 
                     {/* Results Table */}
-                    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
                         {loading ? (
                             <ResultsSkeleton />
                         ) : results.length === 0 ? (
