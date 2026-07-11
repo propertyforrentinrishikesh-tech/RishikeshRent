@@ -15,6 +15,7 @@ export async function GET() {
         // Fetch all counts in parallel
         const [properties, hostels, propertyRegistrations, locations, users] = await Promise.all([
             PropertyDetails.countDocuments({}),
+            PropertyDetails.countDocuments({ status: "Approved", propertyCategory: "pg-hostel" }),
             PropertyRegistration.countDocuments({}),
             // Location.countDocuments({}),         // Adjust model name as needed
             // User.countDocuments({})              // Example of another model count

@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import toast from "react-hot-toast";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -61,91 +63,40 @@ const SectionTitle = ({ icon, title, subtitle }) => (
 );
 
 const HostelExtranet = () => {
-  // Static Data
-  const summary = {
-    totalProperties: 120,
-    activeProperties: 85,
-    trendingProperties: 12,
-    totalEnquiries: 340,
-    newEnquiries: 45,
-    totalBookings: 210,
-    paidBookings: 150,
-    pendingBookings: 60,
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchSummary = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/hostel/extranet-summary");
+      const json = await res.json();
+
+      if (!res.ok || !json.success) {
+        throw new Error(json.message || "Failed to load hostel dashboard");
+      }
+
+      setData(json.data);
+    } catch (error) {
+      console.error("Hostel extranet summary error:", error);
+      toast.error(error.message || "Failed to load hostel dashboard");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const totalPortfolioValue = 450000;
+  useEffect(() => {
+    fetchSummary();
+  }, []);
 
-  const recentHostels = [
-    {
-      _id: "1",
-      propertyName: "Sunrise Backpackers",
-      locationType: "Rishikesh",
-      subLocationType: "Tapovan",
-      isActive: true,
-      isTrending: true,
-      rentPrice: 1500,
-    },
-    {
-      _id: "2",
-      propertyName: "Ganges View Hostel",
-      locationType: "Rishikesh",
-      subLocationType: "Laxman Jhula",
-      isActive: true,
-      isTrending: false,
-      rentPrice: 1200,
-    },
-    {
-      _id: "3",
-      propertyName: "Yoga Ashram Hostel",
-      locationType: "Rishikesh",
-      subLocationType: "Swarg Ashram",
-      isActive: false,
-      isTrending: false,
-      rentPrice: 800,
-    },
-  ];
-
-  const recentEnquiries = [
-    {
-      _id: "1",
-      propertyName: "Sunrise Backpackers",
-      phone: "+91 9876543210",
-      email: "john@example.com",
-      status: "Interested",
-      contactMethod: "call",
-      createdAt: new Date().toISOString(),
-    },
-    {
-      _id: "2",
-      propertyName: "Ganges View Hostel",
-      phone: "+91 8765432109",
-      email: "",
-      status: "New",
-      contactMethod: "whatsapp",
-      createdAt: new Date(Date.now() - 86400000).toISOString(),
-    },
-  ];
-
-  const recentBookings = [
-    {
-      _id: "1",
-      propertyName: "Sunrise Backpackers",
-      fullName: "Alice Smith",
-      phone: "+91 7654321098",
-      paymentStatus: "Paid",
-      checkInDate: new Date(Date.now() + 86400000).toISOString(),
-      amountToPay: 3000,
-    },
-    {
-      _id: "2",
-      propertyName: "Ganges View Hostel",
-      fullName: "Bob Jones",
-      phone: "+91 6543210987",
-      paymentStatus: "Pending",
-      checkInDate: new Date(Date.now() + 172800000).toISOString(),
-      amountToPay: 2400,
-    },
-  ];
+  const summary = data?.summary || {};
+  const totalPortfolioValue = (data?.recentProperties || []).reduce(
+    (acc, property) => acc + Number(property.rentPrice || 0),
+    0
+  );
+  
+  const recentHostels = data?.recentProperties || [];
+  const recentBookings = data?.recentBookings || [];
 
   return (
     <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.12),_transparent_34%),radial-gradient(circle_at_top_right,_rgba(16,185,129,0.12),_transparent_24%),linear-gradient(180deg,_#f8fafc_0%,_#ffffff_52%,_#f8fafc_100%)] p-4 md:p-6 lg:p-8 shadow-[0_20px_80px_rgba(15,23,42,0.08)]">
@@ -190,32 +141,24 @@ const HostelExtranet = () => {
             <p className="text-sm uppercase tracking-[0.2em] text-slate-500">Portfolio snapshot</p>
             <p className="mt-1 text-lg font-semibold text-slate-900">Current counts and recent activity</p>
           </div>
-          <Button variant="outline" className="rounded-full gap-2">
-            <RefreshCw className="h-4 w-4" />
+          <Button variant="outline" onClick={fetchSummary} className="rounded-full gap-2">
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
             Refresh
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <StatCard
             title="Total Hostels"
-            value={formatNumber(summary.totalProperties)}
+            value={loading ? "..." : formatNumber(summary.totalProperties)}
             description="All hostel records in the system"
             icon={<Building2 className="h-6 w-6" />}
             tone="bg-gradient-to-br from-slate-900 to-slate-700"
             accent="from-blue-500/40 to-cyan-400/10"
           />
           <StatCard
-            title="Total Enquiries"
-            value={formatNumber(summary.totalEnquiries)}
-            description={`${formatNumber(summary.newEnquiries)} new enquiries awaiting follow-up`}
-            icon={<MessageSquare className="h-6 w-6" />}
-            tone="bg-gradient-to-br from-blue-600 to-sky-500"
-            accent="from-white/20 to-white/5"
-          />
-          <StatCard
             title="Total Bookings"
-            value={formatNumber(summary.totalBookings)}
+            value={loading ? "..." : formatNumber(summary.totalBookings)}
             description={`${formatNumber(summary.paidBookings)} paid and ${formatNumber(summary.pendingBookings)} pending`}
             icon={<CalendarCheck2 className="h-6 w-6" />}
             tone="bg-gradient-to-br from-emerald-600 to-teal-500"
@@ -223,7 +166,7 @@ const HostelExtranet = () => {
           />
           <StatCard
             title="Active Portfolio"
-            value={`${formatNumber(summary.activeProperties)} / ${formatNumber(summary.totalProperties)}`}
+            value={loading ? "..." : `${formatNumber(summary.activeProperties)} / ${formatNumber(summary.totalProperties)}`}
             description={`${formatNumber(summary.trendingProperties)} trending listings live right now`}
             icon={<BadgeCheck className="h-6 w-6" />}
             tone="bg-gradient-to-br from-amber-500 to-orange-500"
@@ -255,8 +198,8 @@ const HostelExtranet = () => {
                   <p className="text-sm text-slate-500">Operational focus</p>
                   <Clock3 className="h-4 w-4 text-blue-600" />
                 </div>
-                <p className="mt-2 text-2xl font-semibold text-slate-900">{formatNumber(summary.newEnquiries)} new leads</p>
-                <p className="mt-1 text-sm text-slate-500">Prioritize outreach and follow up to convert fresh interest</p>
+                <p className="mt-2 text-2xl font-semibold text-slate-900">{formatNumber(summary.pendingBookings)} pending bookings</p>
+                <p className="mt-1 text-sm text-slate-500">Prioritize outreach to process pending bookings</p>
               </div>
 
               <div className="sm:col-span-2 rounded-2xl border border-slate-200 bg-slate-50 p-4">
@@ -292,7 +235,6 @@ const HostelExtranet = () => {
             <CardContent className="space-y-4 pt-0">
               {[
                 { label: "Hostels active", value: summary.activeProperties, total: summary.totalProperties, color: "bg-emerald-500" },
-                { label: "New enquiries", value: summary.newEnquiries, total: summary.totalEnquiries, color: "bg-blue-500" },
                 { label: "Paid bookings", value: summary.paidBookings, total: summary.totalBookings, color: "bg-violet-500" },
               ].map((item) => {
                 const pct = item.total ? Math.min((Number(item.value) / Number(item.total)) * 100, 100) : 0;
@@ -314,14 +256,14 @@ const HostelExtranet = () => {
                   <Users className="h-4 w-4" />
                   Portfolio workload
                 </div>
-                <p className="mt-2 text-2xl font-semibold">{formatNumber(summary.totalEnquiries + summary.totalBookings)}</p>
-                <p className="mt-1 text-sm text-white/70">Open operational records to process across enquiries and bookings.</p>
+                <p className="mt-2 text-2xl font-semibold">{formatNumber(summary.totalBookings)}</p>
+                <p className="mt-1 text-sm text-white/70">Open operational records to process bookings.</p>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
           <Card className="border-slate-200 shadow-lg bg-white/90 backdrop-blur xl:col-span-1">
             <CardHeader>
               <SectionTitle
@@ -335,13 +277,17 @@ const HostelExtranet = () => {
                 <div key={property._id} className="rounded-2xl border border-slate-200 p-3 hover:border-slate-300 transition">
                   <div className="flex items-start gap-3">
                     <div className="h-14 w-14 rounded-xl bg-slate-100 overflow-hidden flex-shrink-0">
-                      <div className="h-full w-full flex items-center justify-center text-slate-400">
-                        <Building2 className="h-5 w-5" />
-                      </div>
+                      {property.mainImage?.url ? (
+                        <Image src={property.mainImage.url} alt={property.propertyName || "Hostel"} width={56} height={56} className="h-full w-full object-cover" />
+                      ) : (
+                        <div className="h-full w-full flex items-center justify-center text-slate-400">
+                          <Building2 className="h-5 w-5" />
+                        </div>
+                      )}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
-                        <p className="font-semibold text-slate-900 truncate">{property.propertyName}</p>
+                        <p className="font-semibold text-slate-900 truncate">{property.propertyName || "Untitled property"}</p>
                         <span className="text-xs text-slate-400">{property.isTrending ? "Trending" : "Live"}</span>
                       </div>
                       <p className="mt-1 text-sm text-slate-500 truncate">
@@ -355,35 +301,13 @@ const HostelExtranet = () => {
                   </div>
                 </div>
               ))}
+              {!loading && recentHostels.length === 0 && (
+                <p className="text-sm text-slate-500">No hostels found.</p>
+              )}
             </CardContent>
           </Card>
 
-          <Card className="border-slate-200 shadow-lg bg-white/90 backdrop-blur xl:col-span-1">
-            <CardHeader>
-              <SectionTitle
-                icon={<MessageSquare className="h-5 w-5" />}
-                title="Recent Enquiries"
-                subtitle="Latest lead activity from the enquiry funnel."
-              />
-            </CardHeader>
-            <CardContent className="space-y-3 pt-0">
-              {recentEnquiries.map((enquiry) => (
-                <div key={enquiry._id} className="rounded-2xl border border-slate-200 p-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="font-semibold text-slate-900 truncate">{enquiry.propertyName}</p>
-                      <p className="mt-1 text-sm text-slate-500 truncate">{enquiry.phone || enquiry.email}</p>
-                    </div>
-                    <StatusBadge label={enquiry.status} active={enquiry.status === "Interested"} />
-                  </div>
-                  <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
-                    <span>{enquiry.contactMethod}</span>
-                    <span>{new Date(enquiry.createdAt).toLocaleDateString("en-IN")}</span>
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+
 
           <Card className="border-slate-200 shadow-lg bg-white/90 backdrop-blur xl:col-span-1">
             <CardHeader>
@@ -409,6 +333,9 @@ const HostelExtranet = () => {
                   </div>
                 </div>
               ))}
+              {!loading && recentBookings.length === 0 && (
+                <p className="text-sm text-slate-500">No bookings found.</p>
+              )}
             </CardContent>
           </Card>
         </div>

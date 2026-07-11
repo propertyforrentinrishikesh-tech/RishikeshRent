@@ -10,8 +10,7 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useState } from "react"
 import Image from "next/image"
 import toast from "react-hot-toast"
-import CountUp from "react-countup";
-import { useInView } from "react-intersection-observer";
+
 const Footer = ({ companyBasicInfo = null }) => {
     const pathName = usePathname()
     const [pages, setPages] = useState([])
@@ -64,25 +63,7 @@ const Footer = ({ companyBasicInfo = null }) => {
         }
     };
 
-    function Counter({ end, title }) {
-        const { ref, inView } = useInView({
-            triggerOnce: true,
-            threshold: 0.4,
-        });
 
-        return (
-            <div ref={ref} className="text-center">
-                <h3 className="text-5xl font-bold text-white">
-                    {inView && <CountUp end={end} duration={2.5} />}
-                    +
-                </h3>
-
-                <p className="text-sm text-gray-500 mt-2">
-                    {title}
-                </p>
-            </div>
-        );
-    }
     return (
         <footer className={`relative print:hidden ${pathName.includes('admin') && 'hidden'}
           ${pathName.includes('artisan') && 'block'} 
@@ -104,154 +85,7 @@ const Footer = ({ companyBasicInfo = null }) => {
                 }}
             />
             <div className="relative z-10">
-                {/* Experience Section */}
-                <section className="relative bg-[#0B1E33] overflow-hidden py-16 md:py-20">
-                    <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
 
-                        <div className="grid lg:grid-cols-[58%,42%] gap-12 items-center">
-
-                            {/* ================= LEFT CONTENT ================= */}
-                            <div className="order-2 lg:order-1 text-white">
-
-                                <p className="text-sm sm:text-base text-justify leading-7 text-gray-300 max-w-2xl mb-6">
-                                    Rishikesh is a place where the soul finds its rhythm, nestled at
-                                    the foothills of the mighty Himalayas where the emerald-green
-                                    Ganga begins her journey onto the plains. Known globally as the
-                                    Yoga Capital of the World, it is a sanctuary where spirituality,
-                                    adventure and nature exist together.
-                                </p>
-
-                                <h2 className="text-xl sm:text-4xl lg:text-5xl font-bold leading-tight">
-                                    Experience Rishikesh with
-                                </h2>
-
-                                <div className="inline-block mt-3">
-                                    <h3 className="text-xl sm:text-4xl lg:text-5xl font-bold break-all">
-                                        www.rishikeshrent.com
-                                    </h3>
-
-                                    <div className="w-full h-1 bg-yellow-400 mt-2 rounded-full"></div>
-                                </div>
-
-                                <p className="text-gray-300 text-justify mt-6 sm:mt-8 max-w-2xl leading-7 sm:leading-8 text-sm sm:text-base">
-                                    To truly immerse yourself in the magic of this town, you need a
-                                    home that combines comfort with the serenity of the mountains.
-                                    <span className="font-semibold text-white">
-                                        {" "}www.rishikeshrent.com
-                                    </span>{" "}
-                                    serves as your gateway to the perfect stay, simplifying your
-                                    search for your ideal retreat.
-                                </p>
-
-                                {/* ================= CTA ================= */}
-
-                                <div className="flex flex-wrap gap-3 mt-10">
-
-                                    <button
-                                        className="bg-[#324EA7] hover:bg-[#263d8e] transition px-6 py-3 rounded-lg text-white font-semibold"
-                                    >
-                                        About More ↗
-                                    </button>
-                                </div>
-
-                                {/* ================= STATS ================= */}
-
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-10 border-t border-white/10 pt-10 px-6 sm:px-10 lg:px-0">
-                                    {/* Stat 1 */}
-
-                                    <div className="flex flex-col sm:flex-row items-center sm:items-start justify-center text-center sm:text-left gap-4">
-                                        <Users
-                                            size={34}
-                                            className="text-white/70 flex-shrink-0 mt-1"
-                                        />
-
-                                        <div>
-
-                                            <h3 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">
-                                                <Counter end={69} />
-                                            </h3>
-
-                                            <p className="text-white/70 text-sm mt-2">
-                                                Professional Experts
-                                            </p>
-
-                                        </div>
-
-                                    </div>
-
-                                    {/* Stat 2 */}
-
-                                    <div className="flex flex-col sm:flex-row items-center sm:items-start justify-center text-center sm:text-left gap-4">
-
-                                        <BriefcaseBusiness
-                                            size={34}
-                                            className="text-white/70 flex-shrink-0 mt-1"
-                                        />
-
-                                        <div>
-
-                                            <h3 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">
-                                                <Counter end={20} />
-                                            </h3>
-
-                                            <p className="text-white/70 text-sm mt-2">
-                                                Projects Complete
-                                            </p>
-
-                                        </div>
-
-                                    </div>
-
-                                    {/* Stat 3 */}
-
-                                    <div className="flex flex-col sm:flex-row items-center sm:items-start justify-center text-center sm:text-left gap-4">
-
-                                        <Globe2
-                                            size={34}
-                                            className="text-white/70 flex-shrink-0 mt-1"
-                                        />
-
-                                        <div>
-
-                                            <h3 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">
-                                                <Counter end={6} />
-                                            </h3>
-
-                                            <p className="text-white/70 text-sm mt-2">
-                                                Worldwide Clients
-                                            </p>
-
-                                        </div>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                            {/* ================= RIGHT IMAGE ================= */}
-
-                            <div className="order-1 lg:order-2 flex justify-center lg:justify-end">
-
-                                <div className="w-full max-w-sm sm:max-w-md lg:max-w-lg">
-
-                                    <Image
-                                        src="/imagebanner.jpg"
-                                        width={900}
-                                        height={1000}
-                                        alt="Experience"
-                                        className="w-full h-auto object-contain max-h-[420px] sm:max-h-[550px] lg:max-h-[700px]"
-                                        priority
-                                    />
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-                </section>
 
                 {/* CTA Section */}
                 <div className="w-[92%] max-w-6xl mx-auto md:py-14">

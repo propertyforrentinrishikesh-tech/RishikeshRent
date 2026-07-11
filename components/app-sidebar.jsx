@@ -131,6 +131,10 @@ const data = {
           name: "Featured Offered Banner",
           url: "/admin/featured_offered_banner",
           icon: Image
+        }, {
+          name: "Offer Details",
+          url: "/admin/offer_details",
+          icon: Image
         },
         {
           name: "Manage Featured Product",

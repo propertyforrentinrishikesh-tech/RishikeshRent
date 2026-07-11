@@ -13,9 +13,6 @@ import LanguageSelector from "./LanguageSelector"
 import SearchBar from "./SearchBar"
 import Cart from "./Cart";
 import { ShoppingCart, Heart, User } from "lucide-react"
-import { useCart } from "../context/CartContext";
-import { ArrowDown, Menu, X } from "lucide-react";
-import * as NavigationMenu from "@radix-ui/react-navigation-menu";
 import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
 import ResponsiveNavbar from "./ResponsiveNavbar";
@@ -308,25 +305,25 @@ const Header = ({ menuItems, companyBasicInfo = null }) => {
         </div>
       )}
       {!hideNavigation &&
-        <div className="lg:hidden flex items-center justify-between md:justify-between py-1 px-2">
+        <div className="lg:hidden flex items-center justify-between md:justify-between py-1 px-2 h-16 bg-[#0f172a]">
           <div className="relative flex items-center">
             {/* <MenuBar menuItems={menuItems.filter(item => item.active)} /> */}
             <MenuBar menuItems={menuItems} navbarSections={navbarSections} />
           </div>
           <Link href={"/"}>
             <Image
-              className="w-[100px] object-contain"
+              className="w-[150px] object-contain"
               src={mobileLogoSrc}
               alt={companyName}
-              width={100}
-              height={56}
+              width={150}
+              height={75}
               priority
             />
           </Link>
           <div className="flex items-center gap-3">
             <div className="relative">
               {status === "loading" ? (
-                <Loader2 className="animate-spin text-blue-600" size={36} />
+                <Loader2 className="animate-spin text-white" size={36} />
               ) : isUser ? (
                 <>
                   {/* Profile Picture Button */}
@@ -382,7 +379,7 @@ const Header = ({ menuItems, companyBasicInfo = null }) => {
                     }}
                     className="flex items-center px-4 py-2"
                   >
-                    <User className="ml-2" size={20} />
+                    <User className="ml-2 text-white" size={20} />
                   </button>
                   {isAuthDropdownOpen && (
                     <div

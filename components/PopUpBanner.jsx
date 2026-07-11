@@ -1,7 +1,7 @@
 "use client"
 import { X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-
+import Image from "next/image"
 const PopUpBanner = ({ section = "frontend" }) => {
   const [banner, setBanner] = useState(null);
   const [open, setOpen] = useState(false); // Initially closed
@@ -53,16 +53,18 @@ const PopUpBanner = ({ section = "frontend" }) => {
         </button>
 
         {/* Left Side Banner */}
-        <div className="w-full md:w-1/2 h-[220px] md:h-[380px]">
-          <img
+        <div className="w-full md:w-1/2 h-[210px] md:h-[380px]">
+          <Image
+          height={150}
+          width={150}
             src={banner.image?.url || "/placeholder.jpeg"}
             alt="Popup Banner"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-fill md:object-cover"
           />
         </div>
 
         {/* Right Side Content */}
-        <div className="w-full md:w-1/2 md:h-[380px] flex items-center justify-center p-5 md:p-8">
+        <div className="w-full md:w-1/2 md:h-[380px] flex items-center justify-center p-4 md:p-8">
           <div className="w-full max-w-sm text-center">
             <p className="text-gray-500 font-semibold text-sm mb-2">
               Crafted with Heart
