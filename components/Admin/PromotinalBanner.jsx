@@ -1,18 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '../ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
 import toast from "react-hot-toast";
 
-import { PencilIcon, Trash2Icon } from "lucide-react";
+import { PencilIcon, Trash2Icon, LayoutTemplate, ImageIcon, Link as LinkIcon, UploadCloud, X } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { useRef } from "react";
-import { UploadIcon } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 const PromotinalBanner = ({section="frontend"}) => {
@@ -33,7 +31,7 @@ const PromotinalBanner = ({section="frontend"}) => {
                 const data = await response.json();
                 setBanners(data);
             } catch (error) {
-                toast.error("Failed to fetch banners");
+                toast.error("Failed to fetch banners", { style: { borderRadius: "10px", border: "1px solid #fee2e2", background: "#fef2f2", color: "#991b1b" } });
             }
         };
         fetchBanners();
@@ -59,20 +57,23 @@ const PromotinalBanner = ({section="frontend"}) => {
             const data = await res.json();
             if (res.ok && data.url) {
                 setFormData(prev => ({ ...prev, image: { url: data.url, key: data.key || '' } }));
-                toast.success('Image uploaded!');
+                toast.success('Image uploaded!', { style: { borderRadius: "10px", border: "1px solid #dcfce7", background: "#f0fdf4", color: "#166534" } });
             } else {
-                toast.error('Cloudinary upload failed: ' + (data.error || 'Unknown error'));
+                toast.error('Cloudinary upload failed: ' + (data.error || 'Unknown error'), { style: { borderRadius: "10px", border: "1px solid #fee2e2", background: "#fef2f2", color: "#991b1b" } });
             }
         } catch (err) {
-            toast.error('Cloudinary upload error: ' + err.message);
+            toast.error('Cloudinary upload error: ' + err.message, { style: { borderRadius: "10px", border: "1px solid #fee2e2", background: "#fef2f2", color: "#991b1b" } });
         }
         setUploading(false);
     };
 
+    const [submitting, setSubmitting] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!formData.image.url || !formData.image.key) return toast.error("Please upload an image");
+        if (!formData.image.url || !formData.image.key) return toast.error("Please upload an image", { style: { borderRadius: "10px", border: "1px solid #fee2e2", background: "#fef2f2", color: "#991b1b" } });
+        
+        setSubmitting(true);
         try {
             const method = editBanner ? "PATCH" : "POST";          
             // Compose payload with coupon details
@@ -90,7 +91,7 @@ const PromotinalBanner = ({section="frontend"}) => {
             const data = await response.json();
 
             if (response.ok) {
-                toast.success(`Banner ${editBanner ? "updated" : "added"} successfully`);
+                toast.success(`Banner ${editBanner ? "updated" : "added"} successfully`, { style: { borderRadius: "10px", border: "1px solid #dcfce7", background: "#f0fdf4", color: "#166534" } });
                 setEditBanner(null);
 
                 // Refresh banner list
@@ -104,20 +105,22 @@ const PromotinalBanner = ({section="frontend"}) => {
                 });
 
             } else {
-                toast.error(data.error);
+                toast.error(data.error, { style: { borderRadius: "10px", border: "1px solid #fee2e2", background: "#fef2f2", color: "#991b1b" } });
             }
         } catch (error) {
-            toast.error("Something went wrong");
+            toast.error("Something went wrong", { style: { borderRadius: "10px", border: "1px solid #fee2e2", background: "#fef2f2", color: "#991b1b" } });
+        } finally {
+            setSubmitting(false);
         }
     };
 
     const handleEdit = (banner) => {
         setEditBanner(banner._id);
-        // console.log(banner)
         setFormData({
             buttonLink: banner.buttonLink,
             image: banner.image,
         });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const handleDelete = async (id) => {
@@ -131,7 +134,7 @@ const PromotinalBanner = ({section="frontend"}) => {
             const data = await response.json();
 
             if (response.ok) {
-                toast.success("Banner deleted successfully");
+                toast.success("Banner deleted successfully", { style: { borderRadius: "10px", border: "1px solid #dcfce7", background: "#f0fdf4", color: "#166534" } });
 
                 setBanners((prev) => prev.filter((banner) => banner._id !== id));
 
@@ -139,10 +142,10 @@ const PromotinalBanner = ({section="frontend"}) => {
                 const updatedBanners = await fetch(`/api/addPromotinalBanner?section=${section}`).then((res) => res.json());
                 setBanners(updatedBanners);
             } else {
-                toast.error(data.error);
+                toast.error(data.error, { style: { borderRadius: "10px", border: "1px solid #fee2e2", background: "#fef2f2", color: "#991b1b" } });
             }
         } catch (error) {
-            toast.error("Something went wrong");
+            toast.error("Something went wrong", { style: { borderRadius: "10px", border: "1px solid #fee2e2", background: "#fef2f2", color: "#991b1b" } });
         }
     };
 
@@ -164,136 +167,202 @@ const PromotinalBanner = ({section="frontend"}) => {
         setFormData(prev => ({ ...prev, image: { url: '', key: '' } }));
     };
 
-
     // Ref for file input
     const fileInputRef = useRef(null);
 
     return (
-        <div className="max-w-5xl mx-auto py-10 w-full">
-            <h2 className="text-2xl font-bold mb-6">{editBanner ? "Edit Promotinal Banner" : "Add New Promotional Banner"}</h2>
-            <form onSubmit={handleSubmit} className="bg-white shadow-lg rounded-lg p-6 space-y-4">
-                {/* Banner Image Upload */}
-                <div className="mb-4">
-                    <Label className="block mb-2 font-bold">Promotional Image</Label>
-                    <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        ref={fileInputRef}
-                        className="hidden"
-                        id="banner-image-input"
-                    />
-                    <Button
-                        type="button"
-                        variant="outline"
-                        className="mb-2 flex items-center gap-2 bg-blue-500 text-white"
-                        onClick={() => fileInputRef.current && fileInputRef.current.click()}
-                    >
-                        <span>Select Promotinal Image</span>
-                        <UploadIcon className="w-4 h-4" />
-                    </Button>
-                    {uploading && <div className="text-blue-600 font-semibold">Uploading...</div>}
-                    {formData.image.url && (
-                        <div className="relative w-48 h-28 border rounded overflow-hidden mb-2">
-                            <Image
-                                src={formData.image.url}
-                                alt="Promotinal Image Preview"
-                                fill
-                                className="object-cover"
-                            />
-                            <button
-                                type="button"
-                                onClick={handleDeleteImage}
-                                className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 hover:bg-red-200"
-                                title="Remove image"
-                            >
-                                <Trash2Icon className="w-5 h-5 text-red-600" />
-                            </button>
-                        </div>
-                    )}
-                </div>
+        <div className="w-full max-w-[1400px] mx-auto space-y-8 p-6 font-sans pb-24">
+            {/* Header Section */}
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-2">
                 <div>
-                    <Label>Button Link</Label>
-                    <Input name="buttonLink" placeholder="Enter button link" type="url" value={formData.buttonLink} onChange={handleInputChange} />
+                    <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Promotional Banners</h1>
+                    <p className="text-sm text-slate-500 mt-1">Manage image-based promotional banners displayed across the site.</p>
                 </div>
-                <div className="flex gap-3">
-                    <Button type="submit" className="bg-blue-600 hover:bg-blue-500">
-                        {editBanner ? "Update Promotinal Banner" : "Add Promotinal Banner"}
+                {editBanner && (
+                    <Button type="button" variant="outline" onClick={() => {
+                        setEditBanner(null);
+                        setFormData({ buttonLink: "", image: { url: "", key: "" } });
+                    }} className="h-10 px-4 rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
+                        Cancel Editing
                     </Button>
-                    {editBanner && (
-                        <Button
-                            type="button"
-                            variant="outline"
-                            className="bg-gray-300 hover:bg-gray-200 text-black"
-                            onClick={() => {
-                                setEditBanner(null);
-                                setFormData({
-                                    title: "",
-                                    coupon: "",
-                                    buttonLink: "",
-                                    image: { url: "", key: "" },
-                                });
-                            }}
-                        >
-                            Cancel Edit
-                        </Button>
-                    )}
-                </div>
-            </form>
+                )}
+            </div>
 
-            <h2 className="text-2xl font-bold mt-10 mb-4">Existing Promotional Image</h2>
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>S.No</TableHead>
-                        <TableHead>Button Link</TableHead>
-                        <TableHead>Image</TableHead>
-                        <TableHead>Actions</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {banners.length > 0 ? (
-                        banners.map((banner, index) => (
-                            <TableRow key={banner._id}>
-                                <TableCell>{index+1}</TableCell>
-                                <TableCell>
-                                    <TooltipProvider>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <span className="cursor-pointer">Hover to view</span>
-                                            </TooltipTrigger>
-                                            <TooltipContent className="bg-white text-blue-600 font-medium text-base font-barlow shadow-2xl">
-                                                <p>{banner.buttonLink}</p>
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    </TooltipProvider>
-                                </TableCell>
-                                <TableCell>
-                                    <Image src={banner.image.url} alt="Promotinal Image" width={100} height={50} className="rounded-xl" />
-                                </TableCell>
-                                <TableCell>
-                                    <Button variant="outline" size="icon" onClick={() => handleEdit(banner)} className="mr-2 "><PencilIcon /></Button>
-                                    <Button size="icon" onClick={() => { setShowDeleteModal(true); setBannerToDelete(banner._id); }} variant="destructive"><Trash2Icon /></Button>
-                                </TableCell>
-                            </TableRow>
-                        ))
-                    ) : (
-                        <TableRow>
-                            <TableCell colSpan="5" className="text-center py-4">No banners found</TableCell>
-                        </TableRow>
-                    )}
-                </TableBody>
-            </Table>
+            <div className="space-y-8">
+                {/* Form Column */}
+                <div className="w-full">
+                    <Card className="rounded-[20px] border-slate-100 shadow-sm bg-white overflow-hidden">
+                        <CardHeader className="border-b border-slate-50 bg-white/50 pb-6">
+                            <div className="flex items-center gap-2">
+                                <LayoutTemplate className="w-5 h-5 text-slate-400" />
+                                <CardTitle className="text-lg font-semibold text-slate-800">
+                                    {editBanner ? "Edit Promotional Banner" : "Add New Promotional Banner"}
+                                </CardTitle>
+                            </div>
+                            <CardDescription className="text-slate-500">Upload a promotional image and set its target URL.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="p-6">
+                            <form onSubmit={handleSubmit} className="space-y-6">
+                                {/* Banner Image Upload */}
+                                <div className="space-y-3">
+                                    <Label className="text-sm font-medium text-slate-600 ml-1">Promotional Image <span className="text-red-500">*</span></Label>
+                                    
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleImageChange}
+                                        ref={fileInputRef}
+                                        className="hidden"
+                                        id="banner-image-input"
+                                    />
+
+                                    {!formData.image.url ? (
+                                        <div 
+                                            onClick={() => fileInputRef.current && fileInputRef.current.click()}
+                                            className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center gap-3 cursor-pointer transition-colors
+                                                ${uploading ? 'bg-slate-50 border-slate-200' : 'border-slate-200 hover:bg-slate-50 hover:border-slate-300 bg-slate-50/50'}`}
+                                        >
+                                            {uploading ? (
+                                                <>
+                                                    <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                                                    <p className="text-sm font-medium text-slate-600">Uploading...</p>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <div className="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center">
+                                                        <UploadCloud className="w-5 h-5 text-blue-600" />
+                                                    </div>
+                                                    <div className="text-center">
+                                                        <p className="text-sm font-medium text-slate-700">Click to upload image</p>
+                                                        <p className="text-xs text-slate-500 mt-1">PNG, JPG, WEBP up to 5MB</p>
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <div className="relative w-full aspect-[21/9] border border-slate-100 rounded-2xl overflow-hidden bg-slate-50 group">
+                                            <Image
+                                                src={formData.image.url}
+                                                alt="Promotional Image Preview"
+                                                fill
+                                                className="object-cover"
+                                            />
+                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                <Button
+                                                    type="button"
+                                                    variant="destructive"
+                                                    size="icon"
+                                                    onClick={handleDeleteImage}
+                                                    className="w-10 h-10 rounded-full shadow-lg"
+                                                >
+                                                    <Trash2Icon className="w-4 h-4" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                
+                                <div className="grid gap-2">
+                                    <Label className="text-sm font-medium text-slate-600 ml-1">Target URL</Label>
+                                    <Input 
+                                        name="buttonLink" 
+                                        placeholder="https://example.com/promo" 
+                                        type="url" 
+                                        value={formData.buttonLink} 
+                                        onChange={handleInputChange} 
+                                        className="h-11 rounded-xl border-slate-200 focus-visible:ring-slate-200 focus-visible:border-slate-400 bg-slate-50/50 transition-colors hover:bg-slate-50"
+                                    />
+                                </div>
+
+                                <div className="pt-4 border-t border-slate-50 flex items-center gap-3">
+                                    <Button type="submit" className="h-11 flex-1 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-medium transition-all hover:shadow-md" disabled={submitting || uploading}>
+                                        {submitting ? "Saving..." : editBanner ? "Update Banner" : "Add Banner"}
+                                    </Button>
+                                </div>
+                            </form>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Table Column */}
+                <div className="w-full">
+                    <Card className="rounded-[20px] border-slate-100 shadow-sm bg-white overflow-hidden h-full">
+                        <CardHeader className="border-b border-slate-50 bg-white/50 pb-6">
+                            <div className="flex items-center gap-2">
+                                <ImageIcon className="w-5 h-5 text-slate-400" />
+                                <CardTitle className="text-lg font-semibold text-slate-800">Saved Banners</CardTitle>
+                            </div>
+                            <CardDescription className="text-slate-500 mt-1">All uploaded promotional banners.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="p-0">
+                            <Table>
+                                <TableHeader className="bg-slate-50/80 border-b border-slate-100">
+                                    <TableRow className="hover:bg-transparent border-0">
+                                        <TableHead className="text-slate-500 font-medium h-12 text-center w-16">#</TableHead>
+                                        <TableHead className="text-slate-500 font-medium h-12">Preview & Details</TableHead>
+                                        <TableHead className="text-slate-500 font-medium text-right pr-6 h-12">Actions</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {banners.length > 0 ? (
+                                        banners.map((banner, index) => (
+                                            <TableRow key={banner._id} className="border-b border-slate-50 hover:bg-slate-50/80 transition-colors group">
+                                                <TableCell className="text-slate-400 text-center py-4">{index + 1}</TableCell>
+                                                <TableCell className="py-4">
+                                                    <div className="flex items-start gap-4">
+                                                        <div className="relative w-32 h-16 rounded-lg overflow-hidden border border-slate-100 shrink-0 bg-slate-50">
+                                                            <Image src={banner.image.url} alt="Promotional Image" fill className="object-cover" />
+                                                        </div>
+                                                        <div className="flex flex-col justify-center min-w-0">
+                                                            {banner.buttonLink ? (
+                                                                <div className="flex items-center gap-1.5 text-sm">
+                                                                    <LinkIcon className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                                                    <a href={banner.buttonLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline truncate">
+                                                                        {banner.buttonLink}
+                                                                    </a>
+                                                                </div>
+                                                            ) : (
+                                                                <span className="text-sm text-slate-400 italic">No link assigned</span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="text-right pr-6 py-4">
+                                                    <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <Button variant="ghost" size="icon" onClick={() => handleEdit(banner)} className="h-9 w-9 text-slate-400 hover:text-slate-900 hover:bg-slate-200/50 rounded-xl transition-colors">
+                                                            <PencilIcon className="w-4 h-4" />
+                                                        </Button>
+                                                        <Button variant="ghost" size="icon" onClick={() => { setShowDeleteModal(true); setBannerToDelete(banner._id); }} className="h-9 w-9 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors">
+                                                            <Trash2Icon className="w-4 h-4" />
+                                                        </Button>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    ) : (
+                                        <TableRow>
+                                            <TableCell colSpan="3" className="text-center py-12 text-slate-400">
+                                                No banners found. Create one to get started.
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+
             {/* Delete Confirmation Dialog */}
             <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Delete Banner</DialogTitle>
+                <DialogContent className="rounded-[24px] p-6 border-slate-100 shadow-xl bg-white max-w-md font-sans gap-0">
+                    <DialogHeader className="mb-4">
+                        <DialogTitle className="text-xl font-semibold text-slate-800">Delete Banner</DialogTitle>
                     </DialogHeader>
-                    <p>Are you sure you want to delete this banner?</p>
-                    <DialogFooter>
-                        <Button variant="secondary" onClick={cancelDelete}>Cancel</Button>
-                        <Button variant="destructive" onClick={confirmDelete}>Delete</Button>
+                    <p className="text-slate-600 mb-6">Are you sure you want to delete this promotional banner? This action cannot be undone.</p>
+                    <DialogFooter className="gap-2 sm:gap-0">
+                        <Button variant="ghost" onClick={cancelDelete} className="h-11 rounded-xl text-slate-600 hover:bg-slate-100 font-medium">Cancel</Button>
+                        <Button variant="destructive" onClick={confirmDelete} className="h-11 rounded-xl px-6 font-medium">Delete</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -301,4 +370,4 @@ const PromotinalBanner = ({section="frontend"}) => {
     );
 };
 
-export default PromotinalBanner
+export default PromotinalBanner;
