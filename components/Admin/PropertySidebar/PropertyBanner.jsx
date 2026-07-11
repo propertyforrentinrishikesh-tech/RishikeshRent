@@ -7,9 +7,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import Image from "next/image";
 import toast from "react-hot-toast";
 
-import { PencilIcon, Trash2Icon } from "lucide-react";
+import { PencilIcon, Trash2Icon, UploadCloud } from "lucide-react";
 import { useRef } from "react";
-import { UploadIcon } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 const PropertyBanner = () => {
@@ -156,12 +155,21 @@ const PropertyBanner = () => {
     const fileInputRef = useRef(null);
 
     return (
-        <div className="max-w-5xl mx-auto py-10 w-full">
-            <h2 className="text-2xl font-bold mb-6">{editBanner ? "Edit Property Banner" : "Add New Property Banner"}</h2>
-            <form onSubmit={handleSubmit} className="bg-white shadow-lg rounded-lg p-6 space-y-4">
+        <div className="max-w-5xl mx-auto w-full p-4 md:p-6 space-y-8">
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <div className="p-6 md:p-8 bg-slate-50/50 border-b border-slate-100">
+                    <h2 className="text-xl font-bold text-slate-800">
+                        {editBanner ? "Edit Property Banner" : "Add New Property Banner"}
+                    </h2>
+                    <p className="text-sm text-slate-500 mt-1">
+                        {editBanner ? "Update the selected banner image." : "Upload a new promotional banner for properties."}
+                    </p>
+                </div>
+                
+                <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-6">
                 {/* Banner Image Upload */}
-                <div className="mb-4">
-                    <Label className="block mb-2 font-bold">Property Image</Label>
+                <div className="space-y-3 max-w-xl">
+                    <Label className="text-slate-700 font-medium">Property Image</Label>
                     <input
                         type="file"
                         accept="image/*"
@@ -170,44 +178,61 @@ const PropertyBanner = () => {
                         className="hidden"
                         id="banner-image-input"
                     />
-                    <Button
-                        type="button"
-                        variant="outline"
-                        className="mb-2 flex items-center gap-2 bg-blue-500 text-white"
-                        onClick={() => fileInputRef.current && fileInputRef.current.click()}
-                    >
-                        <span>Select Property Image</span>
-                        <UploadIcon className="w-4 h-4" />
-                    </Button>
-                    {uploading && <div className="text-blue-600 font-semibold">Uploading...</div>}
-                    {formData.image.url && (
-                        <div className="relative w-full h-52 border rounded overflow-hidden mb-2">
+                    {!formData.image.url ? (
+                        <div 
+                            onClick={() => !uploading && fileInputRef.current && fileInputRef.current.click()}
+                            className={`border-2 border-dashed rounded-2xl h-[240px] flex flex-col items-center justify-center gap-3 cursor-pointer transition-colors w-full max-w-[320px]
+                                ${uploading ? 'bg-slate-50 border-slate-200' : 'border-slate-200 hover:bg-slate-50 hover:border-slate-300 bg-slate-50/50'}`}
+                        >
+                            {uploading ? (
+                                <>
+                                    <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                                    <p className="text-sm font-medium text-slate-600">Uploading...</p>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center">
+                                        <UploadCloud className="w-5 h-5 text-blue-600" />
+                                    </div>
+                                    <div className="text-center px-4">
+                                        <p className="text-sm font-medium text-slate-700">Upload Image</p>
+                                        <p className="text-xs text-slate-500 mt-1">Recommended: Horizontal format</p>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="relative w-full max-w-[320px] h-[240px] border border-slate-100 rounded-2xl overflow-hidden bg-slate-50 group">
                             <Image
                                 src={formData.image.url}
                                 alt="Property Image Preview"
                                 fill
-                                className="object-contain"
+                                className="object-cover"
                             />
-                            <button
-                                type="button"
-                                onClick={handleDeleteImage}
-                                className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 hover:bg-red-200"
-                                title="Remove image"
-                            >
-                                <Trash2Icon className="w-5 h-5 text-red-600" />
-                            </button>
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <Button
+                                    type="button"
+                                    variant="destructive"
+                                    size="icon"
+                                    onClick={handleDeleteImage}
+                                    className="w-12 h-12 rounded-full shadow-lg"
+                                >
+                                    <Trash2Icon className="w-5 h-5" />
+                                </Button>
+                            </div>
                         </div>
                     )}
                 </div>
-                <div className="flex gap-3 border-t border-black">
-                    <Button type="submit" className="bg-blue-600 hover:bg-blue-500 mt-5">
-                        {editBanner ? "Update Property Banner" : "Add Property Banner"}
+                
+                <div className="flex flex-wrap gap-3 pt-6 border-t border-slate-100">
+                    <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-11 px-8 shadow-sm transition-all font-medium">
+                        {editBanner ? "Update Banner" : "Add Banner"}
                     </Button>
                     {editBanner && (
                         <Button
                             type="button"
                             variant="outline"
-                            className="bg-gray-300 hover:bg-gray-200 text-black mt-5"
+                            className="bg-white hover:bg-slate-50 text-slate-700 border-slate-200 rounded-xl h-11 px-6 shadow-sm transition-all"
                             onClick={() => {
                                 setEditBanner(null);
                                 setFormData({
@@ -220,37 +245,78 @@ const PropertyBanner = () => {
                     )}
                 </div>
             </form>
+            </div>
 
-            <h2 className="text-2xl font-bold mt-10 mb-4">Existing Property Image</h2>
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>S.No</TableHead>
-                        <TableHead>Image</TableHead>
-                        <TableHead>Actions</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {banners.length > 0 ? (
-                        banners.map((banner,index) => (
-                            <TableRow key={banner._id}>
-                                <TableCell>{index + 1}</TableCell>
-                                <TableCell>
-                                    <Image src={banner.image.url} alt="Property Image" width={100} height={50} className="rounded-xl" />
-                                </TableCell>
-                                <TableCell>
-                                    <Button variant="outline" size="icon" onClick={() => handleEdit(banner)} className="mr-2 "><PencilIcon /></Button>
-                                    <Button size="icon" onClick={() => { setShowDeleteModal(true); setBannerToDelete(banner._id); }} variant="destructive"><Trash2Icon /></Button>
-                                </TableCell>
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-white">
+                    <div>
+                        <h2 className="text-xl font-bold text-slate-800">Existing Banners</h2>
+                        <p className="text-sm text-slate-500 mt-1">Manage and view all uploaded property banners.</p>
+                    </div>
+                    <div className="bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full">
+                        {banners.length} Banners
+                    </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                    <Table>
+                        <TableHeader className="bg-slate-50 border-b border-slate-100">
+                            <TableRow className="hover:bg-transparent">
+                                <TableHead className="text-center w-24 text-slate-600 font-semibold">S.No</TableHead>
+                                <TableHead className="text-slate-600 font-semibold">Image</TableHead>
+                                <TableHead className="text-center text-slate-600 font-semibold">Actions</TableHead>
                             </TableRow>
-                        ))
-                    ) : (
-                        <TableRow>
-                            <TableCell colSpan="5" className="text-center py-4">No banners found</TableCell>
-                        </TableRow>
-                    )}
-                </TableBody>
-            </Table>
+                        </TableHeader>
+                        <TableBody>
+                            {banners.length > 0 ? (
+                                banners.map((banner, index) => (
+                                    <TableRow key={banner._id} className="group border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+                                        <TableCell className="text-center text-slate-500 font-medium">#{index + 1}</TableCell>
+                                        <TableCell>
+                                            <div className="relative w-32 h-16 rounded-lg overflow-hidden border border-slate-200 shadow-sm">
+                                                <Image src={banner.image.url} alt="Property Image" fill className="object-cover" />
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="text-center">
+                                            <div className="flex items-center justify-center gap-2">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => handleEdit(banner)}
+                                                    className="h-9 w-9 text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors rounded-lg"
+                                                    title="Edit"
+                                                >
+                                                    <PencilIcon className="w-4 h-4" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => { setShowDeleteModal(true); setBannerToDelete(banner._id); }}
+                                                    className="h-9 w-9 text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors rounded-lg"
+                                                    title="Delete"
+                                                >
+                                                    <Trash2Icon className="w-4 h-4" />
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan="3" className="text-center py-12 text-slate-500">
+                                        <div className="flex flex-col items-center justify-center space-y-2">
+                                            <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center">
+                                                <Image src="/placeholder-image.svg" width={24} height={24} alt="No banners" className="opacity-50" />
+                                            </div>
+                                            <p>No banners found</p>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
+            </div>
             {/* Delete Confirmation Dialog */}
             <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
                 <DialogContent>

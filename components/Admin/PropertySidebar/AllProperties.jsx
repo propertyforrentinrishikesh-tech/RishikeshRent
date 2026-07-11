@@ -315,16 +315,16 @@ const AllProperties = ({ propertyTypes = [], locationType = [], subLocationType 
 
     // ─── Render ─────────────────────────────────────────────────────────────────
     return (
-        <div className="p-4 space-y-4">
+        <div className="max-w-7xl mx-auto w-full p-4 md:p-6 space-y-6">
 
             {/* ── Header ── */}
             <div className="flex items-center justify-between flex-wrap gap-3">
                 <div>
-                    <h1 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                        <Building2 className="w-6 h-6 text-blue-600" />
+                    <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                        <Building2 className="w-7 h-7 text-blue-600" />
                         All Properties
                     </h1>
-                    <p className="text-slate-500 text-xs mt-0.5">Manage and monitor all listed properties</p>
+                    <p className="text-slate-500 text-sm mt-1">Manage and monitor all listed properties.</p>
                 </div>
                 <Button variant="outline" size="sm" onClick={fetchProperties}
                     className="flex items-center gap-1.5 text-xs">
@@ -341,18 +341,18 @@ const AllProperties = ({ propertyTypes = [], locationType = [], subLocationType 
                     { label: "Inactive", value: properties.length - activeCount, color: "bg-slate-500", icon: <EyeOff className="w-4 h-4" /> },
                     { label: "Trending", value: trendingCount, color: "bg-amber-500", icon: <TrendingUp className="w-4 h-4" /> },
                 ].map((s) => (
-                    <div key={s.label} className="bg-white rounded-xl border border-slate-100 shadow-sm p-3 flex items-center gap-3">
-                        <div className={`${s.color} text-white rounded-lg p-2`}>{s.icon}</div>
+                    <div key={s.label} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex items-center gap-4 transition-all hover:shadow-md">
+                        <div className={`${s.color} text-white rounded-xl p-3 flex-shrink-0 shadow-sm`}>{s.icon}</div>
                         <div>
-                            <p className="text-xl font-bold text-slate-800">{s.value}</p>
-                            <p className="text-xs text-slate-500">{s.label}</p>
+                            <p className="text-2xl font-bold text-slate-800">{s.value}</p>
+                            <p className="text-sm font-medium text-slate-500">{s.label}</p>
                         </div>
                     </div>
                 ))}
             </div>
 
             {/* ── Filters ── */}
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
                 {/* Header row */}
                 <div className="flex items-center gap-2 mb-3">
                     <Filter className="w-3.5 h-3.5 text-slate-500" />
@@ -520,7 +520,7 @@ const AllProperties = ({ propertyTypes = [], locationType = [], subLocationType 
             </div>
 
             {/* ── Table ── */}
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
                 {loading ? (
                     <TableSkeleton />
                 ) : properties.length === 0 ? (
@@ -644,7 +644,7 @@ const AllProperties = ({ propertyTypes = [], locationType = [], subLocationType 
 
             {/* ── Pagination ── */}
             {!loading && totalPages > 1 && (
-                <div className="flex items-center justify-between bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-2.5">
+                <div className="flex items-center justify-between bg-white rounded-2xl border border-slate-100 shadow-sm px-5 py-3">
                     <p className="text-xs text-slate-500">
                         Showing{" "}
                         <span className="font-semibold text-slate-700">
@@ -702,7 +702,7 @@ const AllProperties = ({ propertyTypes = [], locationType = [], subLocationType 
 
             {/* ── Delete Dialog ── */}
             <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-                <DialogContent className="max-w-md">
+                <DialogContent className="max-w-md rounded-2xl">
                     <DialogHeader>
                         <DialogTitle className="text-red-600 flex items-center gap-2">
                             <Trash2 className="w-5 h-5" /> Delete Property

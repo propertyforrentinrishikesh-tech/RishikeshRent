@@ -20,6 +20,9 @@ export async function GET() {
       recentProperties,
       recentEnquiries,
       recentBookings,
+      propertiesByType,
+      propertiesByLocation,
+      enquiriesByStatus,
     ] = await Promise.all([
       PropertyDetails.countDocuments({}),
       PropertyDetails.countDocuments({ isActive: true }),
@@ -44,6 +47,22 @@ export async function GET() {
         .limit(5)
         .select("propertyName fullName phone email status paymentStatus amountToPay advanceAmount totalAmount createdAt propertyImage checkInDate lengthOfStay")
         .lean(),
+      PropertyDetails.aggregate([
+        { $group: { _id: "$propertyType", count: { $sum: 1 } } },
+        { $project: { name: "$_id", value: "$count", _id: 0 } },
+        { $sort: { value: -1 } }
+      ]),
+      PropertyDetails.aggregate([
+        { $group: { _id: "$locationType", count: { $sum: 1 } } },
+        { $project: { name: "$_id", value: "$count", _id: 0 } },
+        { $sort: { value: -1 } },
+        { $limit: 10 }
+      ]),
+      PropertyEnquiry.aggregate([
+        { $group: { _id: "$status", count: { $sum: 1 } } },
+        { $project: { name: "$_id", value: "$count", _id: 0 } },
+        { $sort: { value: -1 } }
+      ]),
     ]);
 
     return NextResponse.json({
@@ -62,6 +81,11 @@ export async function GET() {
         recentProperties,
         recentEnquiries,
         recentBookings,
+        charts: {
+          propertiesByType,
+          propertiesByLocation,
+          enquiriesByStatus,
+        }
       },
     });
   } catch (error) {

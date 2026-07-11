@@ -1,13 +1,16 @@
-'use client'
+"use client"
 
 import { useEffect, useState } from "react";
-import { Button } from "../ui/button"
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import toast from "react-hot-toast";
-import { Calendar, Mail, MessageSquare, ScanSearch, Trash2, ChevronLeft, ChevronRight, PhoneCall } from "lucide-react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table"
-import { Badge } from "../ui/badge";
-import { Separator } from "../ui/separator";
+import { Calendar, Mail, MessageSquare, ScanSearch, Trash2, ChevronLeft, ChevronRight, PhoneCall, Filter, Inbox } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const ContactPageEnquiry = () => {
     const [allEnquiry, setAllEnquiry] = useState([])
@@ -16,13 +19,16 @@ const ContactPageEnquiry = () => {
     const [isOpen, setIsOpen] = useState(false)
     const [currentPage, setCurrentPage] = useState(1)
     const [selectedMonth, setSelectedMonth] = useState('all')
+    const [loading, setLoading] = useState(true)
     const itemsPerPage = 10
 
     const [typeFilter, setTypeFilter] = useState('all');
+    
     useEffect(() => {
         const fetchEnquiries = async () => {
+            setLoading(true)
             try {
-                const url = typeFilter === 'all' ? '/api/askExpertsEnquiry' : `/api/askExpertsEnquiry?type=${typeFilter}`;
+                const url = typeFilter === 'all' ? '/api/contactPageEnquiry' : `/api/contactPageEnquiry?type=${typeFilter}`;
                 const response = await fetch(url);
                 let data = await response.json();
                 
@@ -44,14 +50,11 @@ const ContactPageEnquiry = () => {
                 }
             } catch (error) {
                 console.error('Error fetching enquiries:', error);
-                toast.error("Failed to load enquiries", { 
-                    style: { 
-                        borderRadius: "10px", 
-                        border: "2px solid red" 
-                    } 
-                });
+                toast.error("Failed to load enquiries", { style: { borderRadius: "10px", border: "1px solid #fee2e2", background: "#fef2f2", color: "#991b1b" } });
                 setAllEnquiry([]);
                 setFilteredEnquiry([]);
+            } finally {
+                setLoading(false)
             }
         }
         fetchEnquiries();
@@ -61,7 +64,6 @@ const ContactPageEnquiry = () => {
     const groupByMonth = (enquiries) => {
         const months = {}
         if (!Array.isArray(enquiries)) {
-            console.error('Expected an array of enquiries but got:', enquiries)
             return months
         }
         enquiries.forEach(enquiry => {
@@ -104,181 +106,268 @@ const ContactPageEnquiry = () => {
     }
 
     return (
-        <div className="my-20 font-barlow w-full max-w-7xl mx-auto flex flex-col gap-8 items-center justify-center bg-blue-100 p-4 rounded-lg">
-            {/* Type & Month Filter */}
-            <div className="w-full flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          
-                <div className="flex items-center gap-4">
-                    <span className="text-sm">Filter by type:</span>
-                    <select
-                        value={typeFilter}
-                        onChange={e => setTypeFilter(e.target.value)}
-                        className="border rounded-md px-3 py-1 text-sm"
-                    >
-                        <option value="all">All</option>
-                        <option value="artisan">Artisan</option>
-                        <option value="product">Product</option>
-                    </select>
-                    <span className="text-sm">Filter by month:</span>
-                    <select
-                        value={selectedMonth}
-                        onChange={(e) => setSelectedMonth(e.target.value)}
-                        className="border rounded-md px-3 py-1 text-sm"
-                    >
-                        <option value="all">All Months</option>
-                        {Object.keys(monthGroups).map((month) => (
-                            <option key={month} value={month}>{month}</option>
-                        ))}
-                    </select>
+        <div className="w-full max-w-[1400px] mx-auto space-y-8 p-6 font-sans pb-24 mt-8">
+            {/* Header Section */}
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-2">
+                <div>
+                    <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Enquiries & Contacts</h1>
+                    <p className="text-sm text-slate-500 mt-1">Manage and view all incoming enquiries from the contact page and product queries.</p>
                 </div>
             </div>
 
-            <Table className="w-full mx-auto">
-                <TableHeader>
-                    <TableRow className={"border-blue-600"}>
-                        <TableHead className="w-[150px]">Date</TableHead>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Contact</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Query Name</TableHead>
-                        <TableHead>Question</TableHead>
-                        <TableHead className="w-[200px]">Action</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {currentItems.length > 0 ? currentItems.map((enquiry) => (
-                        <TableRow key={enquiry._id} className="border-blue-400">
-                            <TableCell>{new Date(enquiry.createdAt).toLocaleDateString('en-In', { day: 'numeric', month: 'long', year: 'numeric', })}</TableCell>
-                            <TableCell>{enquiry.name}</TableCell>
-                            <TableCell>+91 {enquiry.phone}</TableCell>
-                            <TableCell>{enquiry.email}</TableCell>
-                            <TableCell className="capitalize">{enquiry.type}</TableCell>
-                            <TableCell>{enquiry.queryName || '-'}</TableCell>
-                            <TableCell>{enquiry.question}</TableCell>
-                            <TableCell>
-                                <div className="flex gap-2">
-                                    <Button onClick={() => handleView(enquiry)} variant="outline" size="sm" className="h-8 flex-1">
-                                        <ScanSearch className="w-3 h-3 mr-1" /> View
-                                    </Button>
-                                    {/* Optionally keep delete if needed */}
+            <div className="space-y-8">
+                <div className="w-full">
+                    <Card className="rounded-[20px] border-slate-100 shadow-sm bg-white overflow-hidden h-full">
+                        <CardHeader className="border-b border-slate-50 bg-white/50 pb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div>
+                                <div className="flex items-center gap-2">
+                                    <Inbox className="w-5 h-5 text-slate-400" />
+                                    <CardTitle className="text-lg font-semibold text-slate-800">All Enquiries</CardTitle>
+                                    <Badge variant="secondary" className="ml-2 bg-blue-50 text-blue-700 hover:bg-blue-100 border-none">
+                                        {filteredEnquiry.length} Total
+                                    </Badge>
                                 </div>
-                            </TableCell>
-                        </TableRow>
-                    )) : (
-                        <TableRow>
-                            <TableCell colSpan={8} className="h-24 text-center">
-                                No enquiries found
-                            </TableCell>
-                        </TableRow>
-                    )}
-                </TableBody>
-            </Table>
-
-            {/* Pagination */}
-            {filteredEnquiry.length > itemsPerPage && (
-                <div className="flex items-center justify-center gap-4 font-barlow">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handlePageChange(currentPage - 1)}
-                        disabled={currentPage === 1}
-                    >
-                        <ChevronLeft className="w-4 h-4 mr-1" /> Previous
-                    </Button>
-                    <div className="flex items-center gap-1">
-                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                            <Button
-                                key={`page-${page}`}
-                                variant={currentPage === page ? "default" : "outline"}
-                                size="sm"
-                                onClick={() => handlePageChange(page)}
-                                className={`w-10 h-10 p-0 ${currentPage === page ? "bg-blue-600 text-white" : "text-blue-600"}`}
-                            >
-                                {page}
-                            </Button>
-                        ))}
-                    </div>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handlePageChange(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                    >
-                        Next <ChevronRight className="w-4 h-4 ml-1" />
-                    </Button>
+                                <CardDescription className="text-slate-500 mt-1">Review and manage user submissions.</CardDescription>
+                            </div>
+                            
+                            {/* Type & Month Filter */}
+                            <div className="flex flex-col sm:flex-row items-center gap-3">
+                                <div className="flex items-center gap-2 w-full sm:w-auto">
+                                    <Filter className="w-4 h-4 text-slate-400" />
+                                    <Select value={typeFilter} onValueChange={setTypeFilter}>
+                                        <SelectTrigger className="w-[140px] h-9 border-slate-200 bg-white rounded-xl text-sm">
+                                            <SelectValue placeholder="All Plans" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">All Plans</SelectItem>
+                                            <SelectItem value="Yoga Retreat">Yoga Retreat</SelectItem>
+                                            <SelectItem value="Meditation">Meditation</SelectItem>
+                                            <SelectItem value="Wellness">Wellness</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="flex items-center gap-2 w-full sm:w-auto">
+                                    <Calendar className="w-4 h-4 text-slate-400" />
+                                    <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                                        <SelectTrigger className="w-[160px] h-9 border-slate-200 bg-white rounded-xl text-sm">
+                                            <SelectValue placeholder="All Months" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">All Months</SelectItem>
+                                            {Object.keys(monthGroups).map((month) => (
+                                                <SelectItem key={month} value={month}>{month}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        
+                        <CardContent className="p-0">
+                            <div className="overflow-x-auto">
+                                <Table>
+                                    <TableHeader className="bg-slate-50/80 border-b border-slate-100">
+                                        <TableRow className="hover:bg-transparent border-0">
+                                            <TableHead className="text-slate-500 font-medium h-12 pl-6 w-[140px]">Date</TableHead>
+                                            <TableHead className="text-slate-500 font-medium h-12">User Details</TableHead>
+                                            <TableHead className="text-slate-500 font-medium h-12">Plan & Guests</TableHead>
+                                            <TableHead className="text-slate-500 font-medium h-12 max-w-[300px]">Message Snippet</TableHead>
+                                            <TableHead className="text-slate-500 font-medium text-right pr-6 h-12 w-28">Action</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {loading ? (
+                                            Array.from({ length: 5 }).map((_, i) => (
+                                                <TableRow key={i} className="border-b border-slate-50">
+                                                    <TableCell className="pl-6 py-4">
+                                                        <Skeleton className="h-4 w-[100px] rounded-md" />
+                                                    </TableCell>
+                                                    <TableCell className="py-4">
+                                                        <div className="flex flex-col gap-2">
+                                                            <Skeleton className="h-5 w-[140px] rounded-md" />
+                                                            <Skeleton className="h-4 w-[180px] rounded-md" />
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell className="py-4">
+                                                        <div className="flex flex-col gap-2">
+                                                            <Skeleton className="h-5 w-[80px] rounded-full" />
+                                                            <Skeleton className="h-4 w-[120px] rounded-md" />
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell className="py-4">
+                                                        <Skeleton className="h-8 w-full rounded-md" />
+                                                    </TableCell>
+                                                    <TableCell className="text-right pr-6 py-4">
+                                                        <Skeleton className="h-9 w-20 rounded-xl ml-auto" />
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))
+                                        ) : currentItems.length > 0 ? currentItems.map((enquiry) => (
+                                            <TableRow key={enquiry._id} className="border-b border-slate-50 hover:bg-slate-50/80 transition-colors">
+                                                <TableCell className="pl-6 py-4 align-top text-sm text-slate-600 whitespace-nowrap">
+                                                    {new Date(enquiry.createdAt).toLocaleDateString('en-In', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                                </TableCell>
+                                                <TableCell className="py-4 align-top">
+                                                    <div className="flex flex-col gap-1">
+                                                        <span className="font-semibold text-slate-800">{enquiry.name}</span>
+                                                        <div className="flex items-center gap-3 text-xs text-slate-500">
+                                                            <span className="flex items-center gap-1"><Mail className="w-3 h-3" /> {enquiry.email}</span>
+                                                            <span className="flex items-center gap-1"><PhoneCall className="w-3 h-3" /> +91 {enquiry.phone}</span>
+                                                        </div>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="py-4 align-top">
+                                                    <div className="flex flex-col gap-2 items-start">
+                                                        <Badge variant="outline" className="capitalize bg-slate-50 text-slate-700 border-slate-200">
+                                                            {enquiry.plan || 'General'}
+                                                        </Badge>
+                                                        <span className="text-xs text-slate-500 truncate max-w-[150px]" title={enquiry.guests}>
+                                                            {enquiry.guests || '1 guest'}
+                                                        </span>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="py-4 align-top max-w-[300px]">
+                                                    <p className="text-sm text-slate-600 line-clamp-2 italic">
+                                                        "{enquiry.message}"
+                                                    </p>
+                                                </TableCell>
+                                                <TableCell className="text-right pr-6 py-4 align-top">
+                                                    <Button 
+                                                        onClick={() => handleView(enquiry)} 
+                                                        variant="outline" 
+                                                        size="sm" 
+                                                        className="h-9 rounded-xl border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-blue-600"
+                                                    >
+                                                        <ScanSearch className="w-4 h-4 mr-2" /> View
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        )) : (
+                                            <TableRow>
+                                                <TableCell colSpan={5} className="h-32 text-center">
+                                                    <div className="flex flex-col items-center justify-center text-slate-500">
+                                                        <Inbox className="w-8 h-8 mb-2 text-slate-300" />
+                                                        <p>No enquiries found</p>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                            
+                            {/* Pagination */}
+                            {filteredEnquiry.length > itemsPerPage && (
+                                <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100 bg-slate-50/30">
+                                    <div className="text-sm text-slate-500">
+                                        Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredEnquiry.length)} of {filteredEnquiry.length} entries
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => handlePageChange(currentPage - 1)}
+                                            disabled={currentPage === 1}
+                                            className="h-9 border-slate-200 text-slate-600 rounded-xl"
+                                        >
+                                            <ChevronLeft className="w-4 h-4 mr-1" /> Prev
+                                        </Button>
+                                        <div className="flex items-center px-2 text-sm font-medium text-slate-700">
+                                            Page {currentPage} of {totalPages}
+                                        </div>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => handlePageChange(currentPage + 1)}
+                                            disabled={currentPage === totalPages}
+                                            className="h-9 border-slate-200 text-slate-600 rounded-xl"
+                                        >
+                                            Next <ChevronRight className="w-4 h-4 ml-1" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
                 </div>
-            )}
+            </div>
 
             {/* Enquiry Details Dialog */}
-            {isOpen && (
+            {isOpen && selectedEnquiry && (
                 <Dialog open={isOpen} onOpenChange={() => setIsOpen(false)}>
-                    <DialogContent className="max-w-[95vw]  font-barlow text-justify sm:max-w-lg md:max-w-2xl p-0 overflow-hidden">
-                        <DialogHeader>
-                            <DialogTitle className="hidden" />
+                    <DialogContent className="max-w-[95vw] sm:max-w-xl md:max-w-2xl p-0 overflow-hidden border-0 shadow-2xl rounded-2xl">
+                        <DialogHeader className="px-6 py-5 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
+                            <DialogTitle className="text-xl font-semibold text-slate-800 flex items-center gap-2">
+                                <Inbox className="w-5 h-5 text-blue-600" />
+                                Enquiry Details
+                            </DialogTitle>
                         </DialogHeader>
-                        <div className="pt-4 sm:pt-4 px-4 sm:px-6 pb-4 sm:pb-6">
-                            <div className="flex flex-col gap-6">
+                        
+                        <div className="px-6 py-6 max-h-[70vh] overflow-y-auto">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 {/* Left: Personal and Contact Info */}
-                                <div className="flex flex-col gap-2">
-                                    <h2 className="text-2xl font-bold mb-2">{selectedEnquiry.name}</h2>
-                                    <div className="flex items-center gap-2 text-gray-700">
-                                        <span className="font-semibold">Type:</span>
-                                        <Badge className="capitalize" variant="outline">{selectedEnquiry.type}</Badge>
+                                <div className="space-y-6">
+                                    <div>
+                                        <h2 className="text-2xl font-bold text-slate-900 mb-1">{selectedEnquiry.name}</h2>
+                                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                                            <Calendar className="w-4 h-4" />
+                                            <span>{new Date(selectedEnquiry.createdAt).toLocaleDateString('en-In', { day: 'numeric', month: 'long', year: 'numeric' })} at {new Date(selectedEnquiry.createdAt).toLocaleTimeString('en-In', { hour: '2-digit', minute: '2-digit' })}</span>
+                                        </div>
                                     </div>
-                                    <div className="flex items-center gap-2 text-gray-700">
-                                        <span className="font-semibold">Enquiry Come from:</span>
-                                        <span>{selectedEnquiry.queryName || '-'}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-gray-700">
-                                        <span className="font-semibold">Asked For:</span>
-                                        <span>{selectedEnquiry.need}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-gray-700">
-                                        <span className="font-semibold">Can Contact Via:</span>
-                                        {selectedEnquiry.contactMethod === 'Both' ? (
-                                            <span className="flex items-center gap-2">
-                                                <Mail className="w-4 h-4 inline-block" />
-                                                <span>{selectedEnquiry.email}</span>
-                                                <span className="mx-1">&amp;</span>
-                                                <PhoneCall className="w-4 h-4 inline-block" />
-                                                <span>{selectedEnquiry.phone}</span>
-                                            </span>
-                                        ) : selectedEnquiry.contactMethod === 'Email' ? (
-                                            <span className="flex items-center gap-2">
-                                                <Mail className="w-4 h-4 inline-block" />
-                                                <span>{selectedEnquiry.email}</span>
-                                            </span>
-                                        ) : (
-                                            <span className="flex items-center gap-2">
-                                                <PhoneCall className="w-4 h-4 inline-block" />
-                                                <span>{selectedEnquiry.phone}</span>
-                                            </span>
-                                        )}
-                                    </div>
-                                    <div className="flex items-center gap-2 text-gray-700">
-                                        <span className="font-semibold">Date:</span>
-                                        <Calendar className="w-4 h-4" />
-                                        <span>{new Date(selectedEnquiry.createdAt).toLocaleDateString('en-In', { day: 'numeric', month: 'long', year: 'numeric', })}</span>
+                                    
+                                    <div className="space-y-4">
+                                        <div className="flex flex-col gap-1">
+                                            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Plan of Interest</span>
+                                            <Badge className="w-fit capitalize bg-slate-100 text-slate-700 hover:bg-slate-200 border-none px-3 py-1">{selectedEnquiry.plan || 'Not Specified'}</Badge>
+                                        </div>
+                                        
+                                        <div className="flex flex-col gap-1">
+                                            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Guests</span>
+                                            <span className="text-slate-800 font-medium bg-slate-50 px-3 py-2 rounded-lg border border-slate-100">{selectedEnquiry.guests || '1 guest'}</span>
+                                        </div>
+                                        
+                                        <div className="flex flex-col gap-1">
+                                            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Preferred Start Date</span>
+                                            <span className="text-slate-700">{selectedEnquiry.date ? new Date(selectedEnquiry.date).toLocaleDateString() : 'Flexible / Not specified'}</span>
+                                        </div>
+                                        
+                                        <div className="flex flex-col gap-2 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Contact Information</span>
+                                            
+                                            <div className="flex items-center gap-3 text-slate-700">
+                                                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center border border-slate-200 shadow-sm">
+                                                    <Mail className="w-4 h-4 text-slate-500" />
+                                                </div>
+                                                <a href={`mailto:${selectedEnquiry.email}`} className="hover:text-blue-600 transition-colors font-medium">{selectedEnquiry.email}</a>
+                                            </div>
+                                            
+                                            <div className="flex items-center gap-3 text-slate-700 mt-2">
+                                                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center border border-slate-200 shadow-sm">
+                                                    <PhoneCall className="w-4 h-4 text-slate-500" />
+                                                </div>
+                                                <a href={`tel:${selectedEnquiry.phone}`} className="hover:text-blue-600 transition-colors font-medium">+91 {selectedEnquiry.phone}</a>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
+                                
                                 {/* Right: Question/Message */}
-                                <div className="flex flex-col gap-3">
-                                    <div>
-                                        <h3 className="text-lg font-semibold flex items-center gap-2 mb-1">
-                                            <MessageSquare className="w-5 h-5 text-blue-600" />
-                                            Message
-                                        </h3>
-                                        <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                                            <p className="italic text-base text-gray-700 max-h-96 overflow-y-auto">{selectedEnquiry.question}</p>
-                                        </div>
+                                <div className="flex flex-col">
+                                    <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                        <MessageSquare className="w-4 h-4" />
+                                        User Message
+                                    </h3>
+                                    <div className="flex-1 bg-blue-50/50 rounded-2xl border border-blue-100 p-5 shadow-inner">
+                                        <p className="text-slate-700 whitespace-pre-wrap leading-relaxed text-[15px] italic">
+                                            "{selectedEnquiry.message}"
+                                        </p>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <DialogFooter className="px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 border-t flex-col sm:flex-row gap-2 sm:gap-3">
-                            <Button variant="outline" onClick={() => setIsOpen(false)} className="sm:order-1 w-full sm:w-auto">
+                        <DialogFooter className="px-6 py-4 bg-slate-50 border-t border-slate-100">
+                            <Button variant="outline" onClick={() => setIsOpen(false)} className="rounded-xl border-slate-200 text-slate-700 hover:bg-white w-full sm:w-auto h-11 px-8">
                                 Close
                             </Button>
                         </DialogFooter>

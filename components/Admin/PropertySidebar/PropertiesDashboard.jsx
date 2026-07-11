@@ -144,16 +144,17 @@ const PropertiesDashboard = () => {
           label: "Property Enquiry",
           component: () => <PropertyEnquiry {...sharedProps} />,
         },
-         {
+        {
           key: "detail_enquiry",
           label: "Property Detail Enquiry",
           component: () => <PropertyDetailEnquiry {...sharedProps} />,
-        },{
-          key: "new_booking_arrival",
-          label: "New Arrival Bookings",
-          component: () => <NewArrivalBooking {...sharedProps} />,
         },
       ],
+    },
+    {
+      key: "new_booking_arrival",
+      label: "New Arrival Bookings",
+      component: () => <NewArrivalBooking {...sharedProps} />,
     },
   ];
 
@@ -185,15 +186,15 @@ const PropertiesDashboard = () => {
 
   // ================= UI =================
   return (
-    <div className="flex flex-col md:flex-row min-h-[85vh] relative">
+    <div className="flex flex-col md:flex-row min-h-[85vh] relative bg-slate-50/50">
 
       {/* ================= MOBILE HEADER ================= */}
-      <div className="md:hidden p-4 bg-white border-b border-gray-200 flex items-center justify-between sticky top-0 z-30">
+      <div className="md:hidden p-4 bg-white border-b border-slate-200 flex items-center justify-between sticky top-0 z-30 shadow-sm">
         <button
           onClick={() => setIsSidebarOpen(true)}
-          className="p-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 transition"
+          className="p-2 bg-slate-50 hover:bg-slate-100 rounded-lg text-slate-700 transition-colors border border-slate-200"
         >
-          <Menu className="w-6 h-6" />
+          <Menu className="w-5 h-5" />
         </button>
         <h2 className="font-bold text-lg text-slate-800">Dashboard Menu</h2>
       </div>
@@ -201,32 +202,32 @@ const PropertiesDashboard = () => {
       {/* ================= SIDEBAR OVERLAY (Mobile) ================= */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm"
+          className="fixed inset-0 bg-slate-900/40 z-40 md:hidden backdrop-blur-sm transition-opacity"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
       {/* ================= SIDEBAR ================= */}
       <div className={`
-        fixed inset-y-0 left-0 z-50 w-[200px] bg-gray-100 shadow-2xl transform transition-transform duration-300 ease-in-out
-        md:relative md:translate-x-0 md:w-[240px] md:shadow-none md:bg-gray-200 md:h-auto md:min-h-full
+        fixed inset-y-0 left-0 z-50 w-[260px] bg-white shadow-2xl transform transition-transform duration-300 ease-in-out border-r border-slate-200
+        md:relative md:translate-x-0 md:w-[280px] md:shadow-none md:h-auto md:min-h-full
         ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
       `}>
 
         {/* Mobile Sidebar Header */}
-        <div className="flex items-center justify-between p-4 md:hidden border-b border-gray-200 mb-2">
+        <div className="flex items-center justify-between p-5 md:hidden border-b border-slate-100 mb-2">
           <span className="font-bold text-lg text-slate-800">Navigation</span>
           <button
             onClick={() => setIsSidebarOpen(false)}
-            className="p-2 text-slate-500 hover:bg-slate-200 rounded-full transition"
+            className="p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 rounded-full transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="p-2 flex flex-col gap-3 overflow-y-auto h-full max-h-[calc(100vh-60px)] md:max-h-none md:h-auto">
+        <div className="p-4 flex flex-col overflow-y-auto h-full max-h-[calc(100vh-70px)] md:max-h-[calc(100vh-40px)] custom-scrollbar gap-2">
           {sectionConfig.map(section => (
-            <div key={section.key}>
+            <div key={section.key} className="flex flex-col gap-1">
 
               {/* Parent Button */}
               <button
@@ -235,10 +236,10 @@ const PropertiesDashboard = () => {
                   setActiveChild(null);
                   if (!section.children) setIsSidebarOpen(false);
                 }}
-                className={`w-full text-left px-4 py-3 rounded-xl font-semibold transition
+                className={`w-full text-left px-4 py-3 rounded-xl text-[15px] font-semibold border-2 border-slate-300 transition-all duration-200
                 ${activeParent === section.key
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-200"
-                    : "bg-white border border-black md:bg-blue-100/50 hover:bg-blue-200 text-slate-700"
+                    ? "bg-slate-900 text-white shadow-md shadow-slate-200/50"
+                    : "bg-transparent hover:bg-slate-100 text-slate-600 hover:text-slate-900"
                   }`}
               >
                 {section.label}
@@ -246,7 +247,7 @@ const PropertiesDashboard = () => {
 
               {/* Children */}
               {section.children && activeParent === section.key && (
-                <div className="ml-3 mt-2 flex flex-col gap-2 border-l-2 border-slate-200 pl-3">
+                <div className="mt-1 mb-2 flex flex-col gap-1.5 border-l-2 border-slate-100 py-1 relative">
 
                   {section.children.map(child => (
                     <button
@@ -255,12 +256,16 @@ const PropertiesDashboard = () => {
                         setActiveChild(child.key);
                         setIsSidebarOpen(false);
                       }}
-                      className={`text-left px-3 py-2.5 rounded-lg text-sm font-bold transition
+                      className={`text-left px-4 py-2.5 rounded-lg text-[14px] font-medium transition-all duration-200 relative group gap-2
                       ${activeChild === child.key
-                          ? "bg-green-600 text-white shadow-sm"
-                          : "bg-white border border-black md:bg-green-100/50 hover:bg-green-200 font-bold hover:text-slate-900"
+                          ? "bg-orange-400 text-white shadow-sm border border-blue-100/50"
+                          : "bg-transparent text-slate-500 hover:bg-slate-200 hover:text-slate-800 border border-transparent"
                         }`}
                     >
+                      {/* Active indicator dot */}
+                      {activeChild === child.key && (
+                        <div className="absolute -left-[21px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-blue-500 ring-4 ring-white" />
+                      )}
                       {child.label}
                     </button>
                   ))}
@@ -275,8 +280,8 @@ const PropertiesDashboard = () => {
       </div>
 
       {/* ================= CONTENT AREA ================= */}
-      <div className="flex-1 p-1 md:p-6 w-full overflow-hidden">
-        <div className="bg-white rounded-2xl md:rounded-l-3xl md:rounded-r-none min-h-full">
+      <div className="flex-1 p-1 w-full overflow-hidden max-w-[calc(100vw-280px)] md:max-w-none">
+        <div className="bg-white rounded-2xl shadow-[0_2px_20px_rgb(0,0,0,0.04)] border border-slate-100 min-h-[80vh] overflow-hidden">
           {renderContent()}
         </div>
       </div>

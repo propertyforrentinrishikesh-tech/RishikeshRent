@@ -190,16 +190,16 @@ const PropertyBooking = ({ locationType = [] }) => {
   const hasFilters = search || filterStatus !== "all" || filterLocation !== "all";
   // ─── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="p-4 space-y-4">
+    <div className="max-w-7xl mx-auto w-full p-4 md:p-6 space-y-6">
 
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-            <MessageSquare className="w-6 h-6 text-teal-600" />
+          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+            <MessageSquare className="w-7 h-7 text-blue-600" />
             Property Bookings
           </h1>
-          <p className="text-slate-500 text-xs mt-0.5">Manage all property bookings and payments</p>
+          <p className="text-slate-500 text-sm mt-1">Manage all property bookings and payments.</p>
         </div>
         <Button variant="outline" size="sm" onClick={fetchEnquiries}
           className="flex items-center gap-1.5 text-xs">
@@ -214,19 +214,19 @@ const PropertyBooking = ({ locationType = [] }) => {
           const confirmedCount = enquiries.filter((b) => b.status === "Confirmed").length;
           const pendingCount = enquiries.filter((b) => b.status === "Pending").length;
           return [
-            { label: "Total Bookings", value: totalEnquiries, color: "bg-teal-600", icon: <MessageSquare className="w-4 h-4" /> },
+            { label: "Total Bookings", value: totalEnquiries, color: "bg-blue-600", icon: <MessageSquare className="w-4 h-4" /> },
             { label: "Confirmed", value: confirmedCount, color: "bg-emerald-600", icon: <Star className="w-4 h-4" /> },
             { label: "Pending", value: pendingCount, color: "bg-amber-600", icon: <AlertCircle className="w-4 h-4" /> },
-            { label: "This Page", value: enquiries.length, color: "bg-violet-600", icon: <Hash className="w-4 h-4" /> },
+            { label: "This Page", value: enquiries.length, color: "bg-indigo-600", icon: <Hash className="w-4 h-4" /> },
           ].map((s) => (
             s
           ));
         })().map((s) => (
-          <div key={s.label} className="bg-white rounded-xl border border-slate-100 shadow-sm p-3 flex items-center gap-3">
-            <div className={`${s.color} text-white rounded-lg p-2 flex-shrink-0`}>{s.icon}</div>
+          <div key={s.label} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex items-center gap-4 transition-all hover:shadow-md">
+            <div className={`${s.color} text-white rounded-xl p-3 flex-shrink-0 shadow-sm`}>{s.icon}</div>
             <div>
-              <p className="text-xl font-bold text-slate-800">{s.value}</p>
-              <p className="text-xs text-slate-500">{s.label}</p>
+              <p className="text-2xl font-bold text-slate-800">{s.value}</p>
+              <p className="text-sm font-medium text-slate-500">{s.label}</p>
             </div>
           </div>
         ))}
@@ -282,12 +282,12 @@ const PropertyBooking = ({ locationType = [] }) => {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-gradient-to-r from-teal-50 to-cyan-50">
-            <h2 className="text-sm font-bold text-teal-800 flex items-center gap-2">
-              <MessageSquare className="w-4 h-4" /> Booking List
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+        <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-white">
+            <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+              Booking List
             </h2>
-          <span className="text-xs text-teal-600 font-semibold bg-teal-100 px-2.5 py-1 rounded-full">
+          <span className="text-xs text-blue-700 font-semibold bg-blue-50 px-3 py-1.5 rounded-full">
             {totalEnquiries} total
           </span>
         </div>
@@ -296,8 +296,8 @@ const PropertyBooking = ({ locationType = [] }) => {
           <EnquirySkeleton />
         ) : enquiries.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16">
-            <div className="w-16 h-16 rounded-full bg-teal-50 flex items-center justify-center mb-3">
-              <MessageSquare className="w-8 h-8 text-teal-200" />
+            <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center mb-3">
+              <MessageSquare className="w-8 h-8 text-blue-200" />
             </div>
             <h3 className="text-base font-semibold text-slate-700 mb-1">No bookings found</h3>
             <p className="text-xs text-slate-400 text-center max-w-xs">
@@ -322,16 +322,14 @@ const PropertyBooking = ({ locationType = [] }) => {
               <TableBody>
                 {enquiries.map((enquiry, idx) => {
                   const rowColors = [
-                    "bg-teal-50/40 hover:bg-teal-50",
-                    "bg-cyan-50/40 hover:bg-cyan-50",
-                    "bg-sky-50/40 hover:bg-sky-50",
+                    "bg-transparent hover:bg-slate-50",
                   ];
-                  const rowBg = rowColors[idx % rowColors.length];
+                  const rowBg = rowColors[0];
                   return (
-                    <TableRow key={enquiry._id} className={`transition-colors ${rowBg}`}>
+                    <TableRow key={enquiry._id} className={`transition-colors border-b border-slate-50 ${rowBg}`}>
                       <TableCell className="text-center">
-                        <span className="w-7 h-7 rounded-full bg-teal-100 text-teal-700 font-bold text-xs flex items-center justify-center mx-auto">
-                          {(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}
+                        <span className="text-slate-500 font-medium">
+                          #{(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}
                         </span>
                       </TableCell>
 
@@ -351,8 +349,8 @@ const PropertyBooking = ({ locationType = [] }) => {
 
                       <TableCell>
                         {(enquiry.locationType || enquiry.propertySnapshot?.locationType || enquiry.propertyId?.locationType) ? (
-                          <div className="flex items-center gap-1 text-xs text-slate-600">
-                            <MapPin className="w-3 h-3 text-teal-500 flex-shrink-0" />
+                          <div className="flex items-center gap-1.5 text-xs text-slate-600">
+                            <MapPin className="w-3 h-3 text-blue-500 flex-shrink-0" />
                             {enquiry.locationType || enquiry.propertySnapshot?.locationType || enquiry.propertyId?.locationType}
                           </div>
                         ) : <span className="text-slate-400 text-xs">—</span>}
@@ -383,9 +381,9 @@ const PropertyBooking = ({ locationType = [] }) => {
                               setEditingNote(enquiry.adminNote || "");
                               setIsViewOpen(true);
                             }}
-                            className="p-1.5 rounded-lg bg-teal-500 hover:bg-teal-600 text-white transition-all shadow-sm"
+                            className="p-2 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 transition-all"
                             title="View Details">
-                            <Eye className="w-3.5 h-3.5" />
+                            <Eye className="w-4 h-4" />
                           </button>
                         </div>
                       </TableCell>
@@ -443,7 +441,7 @@ const PropertyBooking = ({ locationType = [] }) => {
           {selectedEnquiry && (
             <div className="flex flex-col">
               {/* Hero */}
-              <div className="bg-gradient-to-br from-teal-600 to-cyan-700 p-5 text-white">
+              <div className="bg-gradient-to-br from-blue-600 to-indigo-700 p-6 text-white rounded-t-lg">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center text-2xl font-bold">

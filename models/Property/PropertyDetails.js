@@ -3,8 +3,10 @@ import mongoose from 'mongoose';
 
 const PropertyDetailsSchema = new mongoose.Schema({
     // Basic Property Information
+    propertyCategory: { type: String, enum: ['home-rental', 'pg-hostel'] }, // Added for category
     propertyType: { type: String, required: true },
     propertyFor: { type: String, enum: ['residential', 'commercial'] },
+    status: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' },
     propertyName: { type: String, required: true },
     propertyNameSlug: { type: String, unique: true, sparse: true },
     locationType: { type: String, required: true },
@@ -55,6 +57,7 @@ const PropertyDetailsSchema = new mongoose.Schema({
 
     // Pricing & Charges
     rentPrice: { type: Number, required: true },
+    rentBasis: { type: String, enum: ['Monthly', 'Per Day'], default: 'Monthly' },
     maxRentPrice: { type: Number },
     electricityCharges: {
         include: { type: Boolean },
@@ -144,6 +147,12 @@ const PropertyDetailsSchema = new mongoose.Schema({
     photographsVideos: { type: String },
     priorNotice: { type: String },
     priorNoticeTime: { type: String },
+    couplesAllowed: { type: Boolean, default: false },
+
+    // Agreements
+    monthBasisAlso: { type: Boolean, default: false },
+    commitment03To06: { type: Boolean, default: false },
+    commitment11: { type: Boolean, default: false },
 
     // Availability & Stay
     propertyAvailableFrom: { type: String },

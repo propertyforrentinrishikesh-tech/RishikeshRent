@@ -179,75 +179,94 @@ const PropertyType = ({
     }
   };
   return (
-    <div className="max-w-5xl mx-auto w-full">
-      <h2 className="text-2xl font-bold mb-6">
-        {editProperty ? "Edit Property Type" : "Add New Property Type"}
-      </h2>
-      <form
-        onSubmit={handleSubmitForProperty}
-        className="bg-white shadow-lg rounded-lg p-6 space-y-4 border border-black"
-      >
-        <div>
-          <Label>Property Type</Label>
-          <Input
-            name="propertyType"
-            className="border border-black"
-            placeholder="Enter property type"
-            type="text"
-            value={formData.propertyType}
-            onChange={handleInputChangeForProperty}
-          />
+    <div className="max-w-5xl mx-auto w-full p-4 md:p-6 space-y-8">
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="p-6 md:p-8 bg-slate-50/50 border-b border-slate-100">
+          <h2 className="text-xl font-bold text-slate-800">
+            {editProperty ? "Edit Property Type" : "Add New Property Type"}
+          </h2>
+          <p className="text-sm text-slate-500 mt-1">
+            {editProperty ? "Update the details of the selected property type." : "Create a new property type classification."}
+          </p>
         </div>
-        <div className="flex gap-3">
-          <Button type="submit" className="bg-blue-600 hover:bg-blue-500">
-            {editProperty ? "Update Property Type" : "Add Property Type"}
-          </Button>
-          {editProperty && (
-            <Button
-              type="button"
-              variant="outline"
-              className="bg-gray-300 hover:bg-gray-200 text-black"
-              onClick={() => {
-                setEditProperty(null);
-                setFormData({
-                  propertyType: "",
-                });
-              }}
-            >
-              Cancel Edit
-            </Button>
-          )}
-        </div>
-      </form>
 
-      <h2 className="text-xl font-bold mt-10 mb-4">Existing Property Type</h2>
-      <Table className="border border-black">
-        <TableHeader>
-          <TableRow>
-            <TableHead className="border border-black text-center">
-              Order
-            </TableHead>
-            <TableHead className="border border-black text-center">
-              Property Type
-            </TableHead>
-            <TableHead className="border border-black text-center">
-              Status
-            </TableHead>
-            <TableHead className="border border-black text-center">
-              Actions
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {properties.length > 0 ? (
-            properties.map((property, index) => (
-              <TableRow key={property._id} className="border border-black">
-                <TableCell className="border border-black text-center">
-                  {index + 1}
-                </TableCell>
-                <TableCell className="border border-black text-center">
-                  {property.propertyType}
-                </TableCell>
+        <form
+          onSubmit={handleSubmitForProperty}
+          className="p-6 md:p-8 space-y-6"
+        >
+          <div className="space-y-2 max-w-xl">
+            <Label className="text-slate-700 font-medium">Property Type</Label>
+            <Input
+              name="propertyType"
+              className="h-11 rounded-xl border-slate-200 focus-visible:ring-blue-500 bg-slate-50/50"
+              placeholder="Enter property type (e.g. Apartment, Villa)"
+              type="text"
+              value={formData.propertyType}
+              onChange={handleInputChangeForProperty}
+            />
+          </div>
+          <div className="flex flex-wrap gap-3 pt-2">
+            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-11 px-8 shadow-sm transition-all font-medium">
+              {editProperty ? "Update Property Type" : "Add Property Type"}
+            </Button>
+            {editProperty && (
+              <Button
+                type="button"
+                variant="outline"
+                className="bg-white hover:bg-slate-50 text-slate-700 border-slate-200 rounded-xl h-11 px-6 shadow-sm transition-all"
+                onClick={() => {
+                  setEditProperty(null);
+                  setFormData({
+                    propertyType: "",
+                  });
+                }}
+              >
+                Cancel Edit
+              </Button>
+            )}
+          </div>
+        </form>
+      </div>
+
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-white">
+          <div>
+            <h2 className="text-xl font-bold text-slate-800">Existing Property Types</h2>
+            <p className="text-sm text-slate-500 mt-1">Manage and view all property classifications.</p>
+          </div>
+          <div className="bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full">
+            {properties.length} Types
+          </div>
+        </div>
+        
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader className="bg-slate-50 border-b border-slate-100">
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="text-center w-24 text-slate-600 font-semibold">
+                  Order
+                </TableHead>
+                <TableHead className="text-slate-600 font-semibold">
+                  Property Type
+                </TableHead>
+                <TableHead className="text-center text-slate-600 font-semibold">
+                  Status
+                </TableHead>
+                <TableHead className="text-center text-slate-600 font-semibold">
+                  Actions
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {properties.length > 0 ? (
+                properties.map((property, index) => (
+                  <TableRow key={property._id} className="group border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+                    <TableCell className="text-center text-slate-500 font-medium">
+                      #{index + 1}
+                    </TableCell>
+                    <TableCell className="font-medium text-slate-900">
+                      {property.propertyType}
+                    </TableCell>
                 {/* Status */}
                 <TableCell>
                   <div className="flex items-center justify-center space-x-2">
@@ -255,56 +274,71 @@ const PropertyType = ({
                       id={`status-${property._id}`}
                       checked={property.isActive}
                       onCheckedChange={(checked) => handleStatusChange(property._id, checked)}
+                      className="data-[state=checked]:bg-green-500"
                     />
-                    <Label htmlFor={`status-${property._id}`} className="cursor-pointer">
+                    <Label htmlFor={`status-${property._id}`} className={`text-sm cursor-pointer ${property.isActive ? 'text-green-700 font-medium' : 'text-slate-500'}`}>
                       {property.isActive ? 'Active' : 'Inactive'}
                     </Label>
                   </div>
                 </TableCell>
-                <TableCell className="border border-black text-center">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleEditForProperty(property)}
-                    className="mr-2 "
-                  >
-                    <PencilIcon />
-                  </Button>
-                  <Button
-                    size="icon"
-                    onClick={() => {
-                      setShowDeleteModal(true);
-                      setPropertyToDelete(property._id);
-                    }}
-                    variant="destructive"
-                  >
-                    <Trash2Icon />
-                  </Button>
+                <TableCell className="text-center">
+                  <div className="flex items-center justify-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleEditForProperty(property)}
+                      className="h-9 w-9 text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors rounded-lg"
+                      title="Edit"
+                    >
+                      <PencilIcon className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        setShowDeleteModal(true);
+                        setPropertyToDelete(property._id);
+                      }}
+                      className="h-9 w-9 text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors rounded-lg"
+                      title="Delete"
+                    >
+                      <Trash2Icon className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan="5" className="text-center py-4">
-                No property types found
+              <TableCell colSpan="4" className="text-center py-12 text-slate-500">
+                <div className="flex flex-col items-center justify-center space-y-2">
+                  <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center">
+                    <svg className="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                  </div>
+                  <p>No property types found</p>
+                </div>
               </TableCell>
             </TableRow>
           )}
         </TableBody>
       </Table>
+        </div>
+      </div>
       {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader>
-            <DialogTitle>Delete Property Type</DialogTitle>
+            <DialogTitle className="text-xl text-slate-800">Delete Property Type</DialogTitle>
           </DialogHeader>
-          <p>Are you sure you want to delete this property type?</p>
-          <DialogFooter>
-            <Button variant="secondary" onClick={cancelDeleteForProperty}>
+          <p className="text-slate-600 mt-2">Are you sure you want to delete this property type? This action cannot be undone.</p>
+          <DialogFooter className="mt-6 flex gap-3 sm:justify-end">
+            <Button variant="outline" className="rounded-xl" onClick={cancelDeleteForProperty}>
               Cancel
             </Button>
-            <Button variant="destructive" onClick={confirmDeleteForProperty}>
-              Delete
+            <Button variant="destructive" className="rounded-xl shadow-sm" onClick={confirmDeleteForProperty}>
+              Yes, Delete
             </Button>
           </DialogFooter>
         </DialogContent>

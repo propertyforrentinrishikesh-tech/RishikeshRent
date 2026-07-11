@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import toast from "react-hot-toast";
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
 import {
   ArrowUpRight,
   BadgeCheck,
@@ -123,7 +124,7 @@ const PropertyExtranet = () => {
                   <ArrowUpRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="border-white/15 text-white bg-white/5 hover:bg-white/10 rounded-2xl h-12">
+              <Button asChild variant="outline" className="border-white/15 text-white bg-white/5 hover:bg-white/10 hover:text-white rounded-2xl h-12">
                 <Link href="/admin/property_booking">
                   Bookings
                   <ArrowUpRight className="ml-2 h-4 w-4" />
@@ -268,6 +269,80 @@ const PropertyExtranet = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Analytics Charts */}
+        {data?.charts && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <Card className="border-slate-200 shadow-lg bg-white/90 backdrop-blur">
+              <CardHeader className="pb-2">
+                <SectionTitle
+                  icon={<Building2 className="h-5 w-5" />}
+                  title="Properties by Type"
+                  subtitle="Distribution of your portfolio"
+                />
+              </CardHeader>
+              <CardContent className="h-[320px] flex items-center justify-center pt-6">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={data.charts.propertiesByType}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={70}
+                      outerRadius={100}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {data.charts.propertiesByType.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#ef4444', '#06b6d4'][index % 10]} />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)', padding: '12px' }} 
+                      itemStyle={{ fontWeight: 'bold' }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            <Card className="border-slate-200 shadow-lg bg-white/90 backdrop-blur lg:col-span-2">
+              <CardHeader className="pb-2">
+                <SectionTitle
+                  icon={<Building2 className="h-5 w-5" />}
+                  title="Properties by Location"
+                  subtitle="Top 10 locations in your portfolio"
+                />
+              </CardHeader>
+              <CardContent className="h-[320px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={data.charts.propertiesByLocation} margin={{ top: 20, right: 30, left: 0, bottom: 60 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                    <XAxis 
+                      dataKey="name" 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{ fontSize: 12, fill: '#64748b' }} 
+                      angle={-45}
+                      textAnchor="end"
+                      interval={0}
+                    />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                    <Tooltip 
+                      cursor={{ fill: '#f8fafc' }} 
+                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }} 
+                    />
+                    <Bar dataKey="value" fill="#3b82f6" radius={[6, 6, 0, 0]} barSize={40}>
+                      {data.charts.propertiesByLocation.map((entry, index) => (
+                         <Cell key={`cell-${index}`} fill={['#3b82f6', '#60a5fa', '#93c5fd'][index % 3]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
           <Card className="border-slate-200 shadow-lg bg-white/90 backdrop-blur xl:col-span-1">

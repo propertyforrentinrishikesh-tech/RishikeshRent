@@ -15,7 +15,7 @@ async function fetchPropertyBySlug(slug) {
     }
 
 }
- 
+
 // Fetch related properties
 async function fetchRelatedProperties(locationType, propertyType, currentId) {
     try {
@@ -32,6 +32,45 @@ async function fetchRelatedProperties(locationType, propertyType, currentId) {
         console.error("Error fetching related properties:", error);
         return [];
     }
+}
+
+export async function generateMetadata({ params }) {
+    const { 'property-slug': slug } = await params;
+    const property = await fetchPropertyBySlug(slug);
+
+    if (!property) {
+        return {
+            title: 'Property Not Found - Rishikesh Rent',
+        };
+    }
+
+    const title = property.metaTitle || property.propertyName;
+    const description = property.metaDescription || property.description || `View details for ${property.propertyName} located in ${property.locationType}.`;
+    const imageUrl = property.mainImage?.url;
+
+    return {
+        title,
+        description,
+        openGraph: {
+            title,
+            description,
+            images: imageUrl ? [
+                {
+                    url: imageUrl,
+                    width: 1200,
+                    height: 630,
+                    alt: property.propertyName,
+                },
+            ] : [],
+            type: 'website',
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title,
+            description,
+            images: imageUrl ? [imageUrl] : [],
+        },
+    };
 }
 
 export default async function PropertyPage({ params }) {

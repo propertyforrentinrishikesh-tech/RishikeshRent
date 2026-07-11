@@ -16,7 +16,7 @@ const ImageBanner = ({
         {/* Left content */}
         <div>
           <h2 className="text-2xl md:text-4xl font-bold mb-4">Find suitable budget accommodation</h2>
-          <p className="text-gray-600 text-sm md:text-lg mb-6">Finding the right home for you and your family—or securing a peaceful space for your solo journey—should be as rewarding as the time you spend in Rishikesh.  Whether you are looking for a spacious, secure home for your loved ones or a quiet, well-connected retreat for your personal exploration, our platform ensures every listing is verified for quality and peace of mind.</p>
+          <p className="text-gray-600 mb-6">Finding the right home for you and your family—or securing a peaceful space for your solo journey—should be as rewarding as the time you spend in Rishikesh.  Whether you are looking for a spacious, secure home for your loved ones or a quiet, well-connected retreat for your personal exploration, our platform ensures every listing is verified for quality and peace of mind.</p>
 
 
           <div className="space-y-6">

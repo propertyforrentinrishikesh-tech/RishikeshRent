@@ -33,17 +33,17 @@ const data = {
             url: "/admin/property_extranet",
             icon: Boxes,
         },
-        { divider: true },  
+        // { divider: true },  
         // {
         //     name: "Manage Menu Section",
         //     url: "/admin/property_extranet/manage_menu",
         //     icon: Plus,
         // },
-        {
-            name: "Manage Sub Menu Section",
-            url: "/admin/property_extranet/manage_sub_menu",
-            icon: Plus,
-        },
+        // {
+        //     name: "Manage Sub Menu Section",
+        //     url: "/admin/property_extranet/manage_sub_menu",
+        //     icon: Plus,
+        // },
         { divider: true },
         {
             name: "Property Dashboard",

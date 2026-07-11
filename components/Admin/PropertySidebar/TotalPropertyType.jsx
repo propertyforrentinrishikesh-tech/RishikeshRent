@@ -161,16 +161,16 @@ const TotalPropertyType = ({ propertyTypes = [], locationType = [], subLocationT
 
     // ─── Render ─────────────────────────────────────────────────────────────────
     return (
-        <div className="p-4 space-y-4">
+        <div className="max-w-7xl mx-auto w-full p-4 md:p-6 space-y-6">
 
             {/* Header */}
             <div className="flex items-center justify-between flex-wrap gap-3">
                 <div>
-                    <h1 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                        <BarChart3 className="w-6 h-6 text-violet-600" />
+                    <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                        <BarChart3 className="w-7 h-7 text-violet-600" />
                         Total Property Count
                     </h1>
-                    <p className="text-slate-500 text-xs mt-0.5">Properties grouped by sub-location</p>
+                    <p className="text-slate-500 text-sm mt-1">Properties grouped by sub-location.</p>
                 </div>
                 <Button variant="outline" size="sm" onClick={fetchAll}
                     className="flex items-center gap-1.5 text-xs">
@@ -187,18 +187,18 @@ const TotalPropertyType = ({ propertyTypes = [], locationType = [], subLocationT
                     { label: "Inactive", value: totalCount - activeCount, color: "bg-slate-500", icon: <EyeOff className="w-4 h-4" /> },
                     { label: "Trending", value: trendingCount, color: "bg-amber-500", icon: <TrendingUp className="w-4 h-4" /> },
                 ].map((s) => (
-                    <div key={s.label} className="bg-white rounded-xl border border-slate-100 shadow-sm p-3 flex items-center gap-3">
-                        <div className={`${s.color} text-white rounded-lg p-2`}>{s.icon}</div>
+                    <div key={s.label} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex items-center gap-4 transition-all hover:shadow-md">
+                        <div className={`${s.color} text-white rounded-xl p-3 flex-shrink-0 shadow-sm`}>{s.icon}</div>
                         <div>
-                            <p className="text-xl font-bold text-slate-800">{s.value}</p>
-                            <p className="text-xs text-slate-500">{s.label}</p>
+                            <p className="text-2xl font-bold text-slate-800">{s.value}</p>
+                            <p className="text-sm font-medium text-slate-500">{s.label}</p>
                         </div>
                     </div>
                 ))}
             </div>
 
             {/* Filters */}
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-3">
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
                 <div className="flex items-center gap-2 mb-2.5">
                     <Filter className="w-3.5 h-3.5 text-slate-500" />
                     <span className="text-sm font-semibold text-slate-700">Filter Count By</span>
@@ -236,8 +236,8 @@ const TotalPropertyType = ({ propertyTypes = [], locationType = [], subLocationT
             </div>
 
             {/* Count Table */}
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                <div className="px-4 py-3 border-b border-slate-100 bg-gradient-to-r from-violet-50 to-purple-50 flex items-center justify-between">
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div className="px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-violet-50 to-purple-50 flex items-center justify-between">
                     <h2 className="text-sm font-bold text-violet-800 flex items-center gap-2">
                         <Hash className="w-4 h-4" /> Property Count by Sub-Location
                     </h2>

@@ -45,11 +45,11 @@ const data = {
         //     icon: Plus,
         // },
         { divider: true },
-        // {
-        //     name: "Hostel Dashboard",
-        //     url: "/admin/hostel_dashboard",
-        //     icon: Boxes,
-        // },
+        {
+            name: "Hostel Details",
+            url: "/admin/hostel_details",
+            icon: Boxes,
+        },
         // { divider: true },
 
         // {

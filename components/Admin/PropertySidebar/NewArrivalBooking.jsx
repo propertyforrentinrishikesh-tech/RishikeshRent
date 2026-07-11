@@ -40,10 +40,10 @@ const NewArrivalBooking = () => {
             setLoading(true);
             const query = new URLSearchParams();
             if (filterStatus !== "All") query.append("status", filterStatus);
-            
+
             const res = await fetch(`/api/property/newarrival?${query.toString()}`);
             const json = await res.json();
-            
+
             if (res.ok && json.success) {
                 setBookings(json.data);
             } else {
@@ -120,15 +120,15 @@ const NewArrivalBooking = () => {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="max-w-7xl mx-auto w-full p-4 md:p-6 space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between flex-wrap gap-3">
                 <div>
-                    <h1 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                        <MessageSquare className="w-6 h-6 text-teal-600" />
+                    <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                        <MessageSquare className="w-7 h-7 text-teal-600" />
                         Hostel Bookings
                     </h1>
-                    <p className="text-slate-500 text-xs mt-0.5">Manage all hostel registrations and details</p>
+                    <p className="text-slate-500 text-sm mt-1">Manage all hostel registrations and details.</p>
                 </div>
                 <Button variant="outline" size="sm" onClick={fetchBookings}
                     className="flex items-center gap-1.5 text-xs">
@@ -148,11 +148,11 @@ const NewArrivalBooking = () => {
                         { label: "Pending", value: pendingCount, color: "bg-amber-600", icon: <AlertCircle className="w-4 h-4" /> },
                         { label: "This Page", value: filteredBookings.length, color: "bg-violet-600", icon: <Hash className="w-4 h-4" /> },
                     ].map((s) => (
-                        <div key={s.label} className="bg-white rounded-xl border border-slate-100 shadow-sm p-3 flex items-center gap-3">
-                            <div className={`${s.color} text-white rounded-lg p-2 flex-shrink-0`}>{s.icon}</div>
+                        <div key={s.label} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex items-center gap-4 transition-all hover:shadow-md">
+                            <div className={`${s.color} text-white rounded-xl p-3 flex-shrink-0 shadow-sm`}>{s.icon}</div>
                             <div>
-                                <p className="text-xl font-bold text-slate-800">{s.value}</p>
-                                <p className="text-xs text-slate-500">{s.label}</p>
+                                <p className="text-2xl font-bold text-slate-800">{s.value}</p>
+                                <p className="text-sm font-medium text-slate-500">{s.label}</p>
                             </div>
                         </div>
                     ));
@@ -160,8 +160,8 @@ const NewArrivalBooking = () => {
             </div>
 
             {/* Filters */}
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-3">
-                <div className="flex items-center gap-2 mb-2.5">
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+                <div className="flex items-center gap-2 mb-4">
                     <Filter className="w-3.5 h-3.5 text-slate-500" />
                     <span className="text-sm font-semibold text-slate-700">Filter Bookings</span>
                     {hasFilters && (
@@ -210,7 +210,7 @@ const NewArrivalBooking = () => {
             </div>
 
             {/* Table */}
-            <Card className="border-0 shadow-sm overflow-hidden">
+            <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left">
                         <thead className="bg-slate-50 text-slate-500 font-medium border-b border-slate-100">
@@ -243,31 +243,31 @@ const NewArrivalBooking = () => {
                             ) : (
                                 filteredBookings.map((booking) => (
                                     <tr key={booking._id} className="hover:bg-slate-50/50 transition-colors">
-                                        <td className="px-6 py-4 font-mono text-xs text-slate-600">
+                                        <td className="px-2 py-4 font-mono text-xs text-slate-600">
                                             {booking.caseIdNumber || booking._id.slice(-6)}
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-2 py-4">
                                             <div className="font-semibold text-slate-900">{booking.propertyName}</div>
-                                            <div className="text-xs text-slate-500 mt-0.5">{booking.propertyType} • {booking.propertyFor}</div>
+                                            <div className="text-xs text-slate-500 mt-0.5">{booking.propertyCategory ? `${booking.propertyCategory} • ` : ''}{booking.propertyType} • {booking.propertyFor}</div>
                                         </td>
-                                        <td className="px-6 py-4 text-slate-600">
+                                        <td className="px-2 py-4 text-slate-600">
                                             <div className="flex items-center gap-1.5">
                                                 <MapPin className="h-3.5 w-3.5 text-slate-400" />
                                                 {booking.locationType}
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 text-slate-600">
+                                        <td className="px-2 py-4 text-slate-600">
                                             <div className="font-medium text-slate-900">₹{booking.rentPrice || booking.monthlyRent || 0}</div>
                                             {(booking.securityDeposit?.amount || booking.totalSecurityDepositAmount) && (
                                                 <div className="text-xs text-slate-500">Dep: ₹{booking.securityDeposit?.amount || booking.totalSecurityDepositAmount}</div>
                                             )}
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <Select 
-                                                value={booking.status || "Pending"} 
+                                        <td className="px-1 py-4">
+                                            <Select
+                                                value={booking.status || "Pending"}
                                                 onValueChange={(val) => handleStatusChange(val, booking._id)}
                                             >
-                                                <SelectTrigger className={`h-8 border-0 text-xs font-semibold rounded-full px-3 w-fit focus:ring-0 ${getStatusColor(booking.status || 'Pending')}`}>
+                                                <SelectTrigger className={`h-8 border-0 text-xs font-semibold rounded px-1 w-fit focus:ring-0 ${getStatusColor(booking.status || 'Pending')}`}>
                                                     <SelectValue />
                                                 </SelectTrigger>
                                                 <SelectContent>
@@ -277,13 +277,13 @@ const NewArrivalBooking = () => {
                                                 </SelectContent>
                                             </Select>
                                         </td>
-                                        <td className="px-6 py-4 text-slate-500 text-xs">
+                                        <td className="px-1 py-4 text-slate-500 text-xs">
                                             {format(new Date(booking.createdAt), "dd MMM, yyyy")}
                                         </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <Button 
-                                                variant="outline" 
-                                                size="sm" 
+                                        <td className="px-1 py-4 text-right">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
                                                 onClick={() => setSelectedBooking(booking)}
                                                 className="gap-2"
                                             >
@@ -301,26 +301,18 @@ const NewArrivalBooking = () => {
 
             {/* View Modal */}
             {selectedBooking && (
-                <div className="fixed inset-0 bg-black/60 z-[100] flex justify-center items-start pt-10 pb-10 overflow-y-auto px-4 backdrop-blur-sm">
+                <div className="fixed inset-0 z-[100] flex justify-center items-start pt-10 pb-10 overflow-y-auto px-4 backdrop-blur-sm">
                     <div className="bg-white rounded-2xl max-w-4xl w-full shadow-2xl relative my-auto animate-in fade-in zoom-in-95 duration-200">
                         {/* Modal Header */}
                         <div className="sticky top-0 z-10 bg-white border-b border-slate-100 p-6 flex justify-between items-center rounded-t-2xl">
                             <div>
                                 <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
                                     {selectedBooking.propertyName}
-                                    <Select 
-                                        value={selectedBooking.status || "Pending"} 
-                                        onValueChange={(val) => handleStatusChange(val, selectedBooking._id)}
-                                    >
-                                        <SelectTrigger className={`h-8 border-0 text-sm font-semibold rounded-full px-3 w-fit focus:ring-0 ${getStatusColor(selectedBooking.status || 'Pending')}`}>
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="Pending">Pending</SelectItem>
-                                            <SelectItem value="Approved">Approved</SelectItem>
-                                            <SelectItem value="Rejected">Rejected</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                                    {selectedBooking.propertyCategory && (
+                                        <Badge variant="secondary" className="bg-orange-100 text-orange-700 hover:bg-orange-200">
+                                            {selectedBooking.propertyCategory}
+                                        </Badge>
+                                    )}
                                 </h2>
                                 <p className="text-slate-500 mt-1 text-sm font-mono flex gap-4">
                                     <span>Case ID: {selectedBooking.caseIdNumber || selectedBooking._id.slice(-6)}</span>
@@ -335,7 +327,9 @@ const NewArrivalBooking = () => {
                         {/* Modal Content */}
                         <div className="p-6 space-y-8">
                             {/* Images Grid */}
+                            <h3 className="text-lg font-semibold text-slate-900 border-b border-slate-100 pb-2 mb-2">Images</h3>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                {/* <p className="text-xl font-semibold text-slate-500 uppercase">Images</p> */}
                                 {[
                                     { label: 'Primary', data: selectedBooking.mainImage || selectedBooking.primaryImage },
                                     { label: 'Building', data: selectedBooking.galleryImages?.[0] || selectedBooking.outsideBuilding },
@@ -344,7 +338,6 @@ const NewArrivalBooking = () => {
                                     { label: 'Other', data: selectedBooking.galleryImages?.[3] || selectedBooking.otherImage },
                                 ].map((img, i) => img.data?.url && (
                                     <div key={i} className="space-y-2">
-                                        <p className="text-xs font-semibold text-slate-500 uppercase">{img.label}</p>
                                         <div className="relative aspect-video rounded-xl overflow-hidden border border-slate-200">
                                             <Image src={img.data.url} alt={img.label} fill className="object-cover" />
                                         </div>
@@ -360,7 +353,7 @@ const NewArrivalBooking = () => {
                                         <div className="space-y-3 text-sm">
                                             <div className="flex justify-between">
                                                 <span className="text-slate-500 flex items-center gap-2"><Building2 className="w-4 h-4" /> Type</span>
-                                                <span className="font-medium text-slate-900">{selectedBooking.propertyType} for {selectedBooking.propertyFor}</span>
+                                                <span className="font-medium text-slate-900">{selectedBooking.propertyCategory ? `${selectedBooking.propertyCategory} - ` : ''}{selectedBooking.propertyType} for {selectedBooking.propertyFor}</span>
                                             </div>
                                             <div className="flex justify-between">
                                                 <span className="text-slate-500 flex items-center gap-2"><MapPin className="w-4 h-4" /> Location</span>
@@ -381,14 +374,14 @@ const NewArrivalBooking = () => {
                                         <h3 className="text-lg font-semibold text-slate-900 border-b border-slate-100 pb-2 mb-4">Pricing & Terms</h3>
                                         <div className="space-y-3 text-sm bg-slate-50 p-4 rounded-xl border border-slate-100">
                                             <div className="flex justify-between items-center">
-                                                <span className="text-slate-500">Monthly Rent</span>
-                                                <span className="text-lg font-bold text-slate-900">₹{selectedBooking.rentPrice || selectedBooking.monthlyRent || 0}</span>
+                                                <span className="text-slate-500">Rent ({selectedBooking.rentBasis || 'Monthly'})</span>
+                                                <span className="text-lg font-bold text-slate-900">₹{selectedBooking.rentPrice || selectedBooking.monthlyRent || 0}{selectedBooking.rentBasis === 'Per Day' ? ' / Day' : ''}</span>
                                             </div>
                                             <div className="flex justify-between items-center">
                                                 <span className="text-slate-500">Security Deposit</span>
                                                 <span className="font-medium text-slate-900">
-                                                    {selectedBooking.securityDeposit?.months || selectedBooking.securityDeposit || 0} Month(s) 
-                                                    {(selectedBooking.securityDeposit?.amount || selectedBooking.totalSecurityDepositAmount) && ` (₹${selectedBooking.securityDeposit?.amount || selectedBooking.totalSecurityDepositAmount})`}
+                                                    {selectedBooking.securityDeposit?.months || selectedBooking.securityDeposit || 0} Month(s)
+                                                    {(selectedBooking.securityDeposit?.amount || selectedBooking.totalSecurityDepositAmount) ? ` (₹${selectedBooking.securityDeposit?.amount || selectedBooking.totalSecurityDepositAmount})` : ''}
                                                 </span>
                                             </div>
                                             <div className="flex justify-between items-center">
@@ -404,9 +397,9 @@ const NewArrivalBooking = () => {
                                         <h3 className="text-lg font-semibold text-slate-900 border-b border-slate-100 pb-2 mb-4">Address</h3>
                                         <p className="text-sm text-slate-700 leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-100">
                                             {selectedBooking.contactAddress || [
-                                                selectedBooking.address1, 
-                                                selectedBooking.address2, 
-                                                selectedBooking.address3, 
+                                                selectedBooking.address1,
+                                                selectedBooking.address2,
+                                                selectedBooking.address3,
                                                 selectedBooking.address4
                                             ].filter(Boolean).join(", ") || "-"}
                                             {(selectedBooking.landMarkDetails || selectedBooking.landmark) && (
@@ -437,10 +430,13 @@ const NewArrivalBooking = () => {
 
                                     <div>
                                         <h3 className="text-lg font-semibold text-slate-900 border-b border-slate-100 pb-2 mb-4">Rules & Requirements</h3>
-                                        <div className="space-y-2">
-                                            {renderBooleanItem("Couples Welcome", selectedBooking.tenantTypeAllowed?.includes("Couples") || selectedBooking.couplesWelcome)}
+                                        <div className="space-y-2 flex flex-wrap gap-2">
+                                            {renderBooleanItem("Couples Welcome", selectedBooking.tenantTypeAllowed?.includes("Couples") || selectedBooking.couplesAllowed)}
                                             {renderBooleanItem("Pets Welcome", selectedBooking.petAllowed === "allowed" || selectedBooking.petsWelcome)}
-                                            {renderBooleanItem("Minimum Stay", selectedBooking.minimumStay ? selectedBooking.minimumStay : (selectedBooking.commitment3to6Months ? "3 to 6 Months" : (selectedBooking.commitment11Months ? "11 Months" : false)))}
+                                            {renderBooleanItem("Month Basis Also", selectedBooking.monthBasisAlso)}
+                                            {renderBooleanItem("3-6 Months Commitment", selectedBooking.commitment03To06)}
+                                            {renderBooleanItem("11 Months Commitment", selectedBooking.commitment11)}
+                                            {renderBooleanItem("Minimum Stay", selectedBooking.minimumStay ? selectedBooking.minimumStay : false)}
                                         </div>
                                         {(selectedBooking.highlights?.length > 0 || selectedBooking.specialNote) && (
                                             <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-lg">
