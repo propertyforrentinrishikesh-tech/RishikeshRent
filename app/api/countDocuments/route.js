@@ -13,10 +13,11 @@ export async function GET() {
         await connectDB();
         
         // Fetch all counts in parallel
-        const [properties, hostels, propertyRegistrations, locations, users] = await Promise.all([
+        const [properties, hostels, propertyRegistrations, newArrivals, locations, users] = await Promise.all([
             PropertyDetails.countDocuments({}),
             PropertyDetails.countDocuments({ status: "Approved", propertyCategory: "pg-hostel" }),
             PropertyRegistration.countDocuments({}),
+            PropertyDetails.countDocuments({ $or: [{ status: "Pending" }] }),
             // Location.countDocuments({}),         // Adjust model name as needed
             // User.countDocuments({})              // Example of another model count
         ]);
@@ -27,6 +28,7 @@ export async function GET() {
                 properties,
                 hostels,
                 propertyRegistrations,
+                newArrivals,
                 // locations,
                 // users
                 // Add more counts as needed

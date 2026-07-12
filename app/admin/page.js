@@ -23,6 +23,7 @@ const Page = () => {
     properties: 0,
     hostels: 0,
     propertyRegistrations: 0,
+    newArrivals: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -58,7 +59,7 @@ const Page = () => {
 
                 <span className="text-xl font-bold text-slate-900">CommandCenter</span>
               </div>
-              <div className="flex items-center gap-4">
+              {/* <div className="flex items-center gap-4">
                 <div className="h-8 w-8 rounded-full bg-slate-200 overflow-hidden border border-slate-300">
                   <Image
                     src={session?.user?.image || "/user.png"}
@@ -68,7 +69,7 @@ const Page = () => {
                     className="w-full h-full object-cover"
                   />
                 </div>
-              </div>
+              </div> */}
             </div>
           </header>
 
@@ -89,13 +90,17 @@ const Page = () => {
                   </p>
                 </div>
               </div>
-              <div className="relative z-10 flex gap-4 items-center shrink-0 w-full md:w-auto">
+              <div className="relative z-10 grid grid-cols-2 md:grid-cols-2 gap-4 items-center shrink-0 w-full md:w-auto">
                 <Link href="/admin/property_extranet" className="px-6 py-3 bg-white text-slate-900 font-bold text-sm rounded-lg flex items-center justify-center gap-2 hover:bg-white/90 transition-colors shadow-lg active:scale-95 w-full md:w-auto">
                   Properties
                   <ArrowUpRight className="w-4 h-4" />
                 </Link>
                 <Link href="/admin/hostel_extranet" className="px-6 py-3 bg-white/10 backdrop-blur-md border border-white/20 text-white font-bold text-sm rounded-lg flex items-center justify-center gap-2 hover:bg-white/20 transition-colors active:scale-95 w-full md:w-auto">
                   Hostels
+                  <ArrowUpRight className="w-4 h-4" />
+                </Link>
+                <Link href="/admin/property_dashboard" className="px-6 py-3 bg-white/10 backdrop-blur-md border border-white/20 text-white font-bold text-sm rounded-lg flex items-center justify-center gap-2 hover:bg-white/20 transition-colors active:scale-95 w-full md:w-auto">
+                  New Arrival Bookings
                   <ArrowUpRight className="w-4 h-4" />
                 </Link>
               </div>
@@ -127,7 +132,7 @@ const Page = () => {
                   <div className="flex justify-between items-start">
                     <div className="space-y-2">
                       <div className="text-white/80 text-xs font-bold uppercase tracking-wider">Total Hostels</div>
-                      <div className="text-5xl font-bold text-white">{loading ? "..." :formatNumber(counts.hostels)}</div>
+                      <div className="text-5xl font-bold text-white">{loading ? "..." : formatNumber(counts.hostels)}</div>
                       <div className="text-white/60 text-xs">All hostel listings live right now</div>
                     </div>
                     <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center text-white shrink-0">
@@ -137,12 +142,12 @@ const Page = () => {
                 </div>
 
                 {/* Stat Card 3: Emerald Green */}
-                <div className="bg-[#10b981] rounded-3xl p-8 relative overflow-hidden group shadow-lg cursor-pointer" onClick={() => router.push('/admin/partner_queries')}>
+                <div className="bg-[#10b981] rounded-3xl p-8 relative overflow-hidden group shadow-lg cursor-pointer" onClick={() => router.push('/admin/property_dashboard')}>
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full duration-1000 transition-transform"></div>
                   <div className="flex justify-between items-start">
                     <div className="space-y-2">
-                      <div className="text-white/80 text-xs font-bold uppercase tracking-wider">Total Enquiries</div>
-                      <div className="text-5xl font-bold text-white">{loading ? "..." : formatNumber(counts.propertyRegistrations)}</div>
+                      <div className="text-white/80 text-xs font-bold uppercase tracking-wider">New Arrival Booking Enquiries</div>
+                      <div className="text-5xl font-bold text-white">{loading ? "..." : formatNumber(counts.newArrivals)}</div>
                       <div className="text-white/60 text-xs">New property registrations awaiting action</div>
                     </div>
                     <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center text-white shrink-0">
@@ -152,6 +157,29 @@ const Page = () => {
                 </div>
 
               </div>
+              {/* Secondary Stats Row */}
+              {/* <div className="grid grid-cols-2 md:grid-cols-5 gap-6 pt-2">
+                <div className="bg-white border border-slate-200 rounded-xl p-6 group shadow-sm">
+                  <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">Blogs</div>
+                  <div className="text-3xl font-bold text-slate-900 mt-2">...</div>
+                </div>
+                <div className="bg-white border border-slate-200 rounded-xl p-6 group shadow-sm">
+                  <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">News</div>
+                  <div className="text-3xl font-bold text-slate-900 mt-2">...</div>
+                </div>
+                <div className="bg-white border border-slate-200 rounded-xl p-6 group shadow-sm">
+                  <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">FAQs</div>
+                  <div className="text-3xl font-bold text-slate-900 mt-2">...</div>
+                </div>
+                <div className="bg-white border border-slate-200 rounded-xl p-6 group shadow-sm">
+                  <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">Webpages</div>
+                  <div className="text-3xl font-bold text-slate-900 mt-2">...</div>
+                </div>
+                <div className="bg-white border border-slate-200 rounded-xl p-6 group shadow-sm">
+                  <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">Admins</div>
+                  <div className="text-3xl font-bold text-slate-900 mt-2">...</div>
+                </div>
+              </div> */}
 
               {/* Secondary Stats Row */}
               {/* <div className="grid grid-cols-2 md:grid-cols-5 gap-6 pt-2">
