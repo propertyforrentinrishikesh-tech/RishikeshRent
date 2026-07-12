@@ -15,14 +15,13 @@ import TotalPropertyType from "@/components/Admin/PropertySidebar/TotalPropertyT
 import SearchProperty from "@/components/Admin/PropertySidebar/SearchProperty";
 import PropertyEnquiry from "@/components/Admin/PropertySidebar/PropertyEnquiry";
 import PropertyDetailEnquiry from "@/components/Admin/PropertySidebar/PropertyDetailEnquiry";
-import NewArrivalBooking from "./NewArrivalBooking";
-const PropertiesDashboard = () => {
+const HostelDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [propertyTypes, setPropertyTypes] = useState([]);
   const [locationType, setLocationType] = useState([]);
   const [subLocationType, setSubLocationType] = useState([]);
   const [galiType, setGaliType] = useState([]);
-  const [activeParent, setActiveParent] = useState("new_booking_arrival");
+  const [activeParent, setActiveParent] = useState("hostels");
   const [activeChild, setActiveChild] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -82,82 +81,32 @@ const PropertiesDashboard = () => {
     setLocationType,
     setSubLocationType,
     setGaliType,
-    type: "property",
+    type: "hostel",
   };
 
   // ================= SIDEBAR CONFIG =================
   const sectionConfig = [
     {
-      key: "new_booking_arrival",
-      label: "New Arrival Bookings",
-      component: () => <NewArrivalBooking {...sharedProps} />,
-    },
-    {
-      key: "property_type",
-      label: "Create Property Type",
-      component: () => <PropertyType {...sharedProps} />,
-    },
-
-    {
-      key: "location",
-      label: "Create New Location",
+      key: "hostels",
+      label: "Hostels Details",
       children: [
         {
-          key: "create_location",
-          label: "Create New Location",
-          component: () => <CreateLocation {...sharedProps} />,
-        },
-        {
-          key: "sub_location",
-          label: "Add Sub Location",
-          component: () => <CreateSubLocation {...sharedProps} />,
-        },
-        {
-          key: "gali",
-          label: "Add Gali / Mohalla",
-          component: () => <CreateGali {...sharedProps} />,
-        },
-      ],
-    },
-
-    {
-      key: "create_property_details",
-      label: "Create Property Details",
-      component: () => <PropertyDetails {...sharedProps} />,
-    },
-
-    {
-      key: "property",
-      label: "Property Details",
-      children: [
-        {
-          key: "all_property",
-          label: "Total Property Type",
+          key: "all_hostels",
+          label: "All Hostels",
           component: () => <AllProperties {...sharedProps} />,
         },
         {
           key: "available",
-          label: "All Property",
+          label: "Available Hostels",
           component: () => <TotalPropertyType {...sharedProps} />,
         },
         {
           key: "search",
-          label: "Search Property",
+          label: "Search Hostels",
           component: () => <SearchProperty {...sharedProps} />,
-        },
-        {
-          key: "enquiry",
-          label: "Property Enquiry",
-          component: () => <PropertyEnquiry {...sharedProps} />,
-        },
-        {
-          key: "detail_enquiry",
-          label: "Property Detail Enquiry",
-          component: () => <PropertyDetailEnquiry {...sharedProps} />,
-        },
+        }
       ],
     },
-
   ];
 
   // ================= RENDER ACTIVE COMPONENT =================
@@ -292,4 +241,4 @@ const PropertiesDashboard = () => {
   );
 };
 
-export default PropertiesDashboard;
+export default HostelDashboard;

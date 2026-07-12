@@ -178,12 +178,12 @@ Contact: ${contactMethod === 'email' ? email : phone}`;
     try {
       const res = await fetch(`/api/property/propertyDetails?page=${page}&limit=15&showOnFront=true`);
       const data = await res.json();
-      // console.log("Product API response:", data);
       const products = Array.isArray(data?.data)
-        ? data.data
-        : Array.isArray(data)
-          ? data
-          : [];
+      ? data.data
+      : Array.isArray(data)
+      ? data
+      : [];
+      // console.log("Product API response:", products);
 
       if (products.length === 0) {
         setHasMore(false);

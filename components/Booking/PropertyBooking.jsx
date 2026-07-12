@@ -19,10 +19,6 @@ export default function PropertyBooking({ property }) {
     [property?.galiType, property?.subLocationType, property?.locationType].filter(Boolean).join(" ") ||
     "Address not available";
   const propertyPrice = Number(property?.maxRentPrice || property?.rentPrice || 0);
-  const fullRentAmount = propertyPrice;
-  const advanceAmount = Math.round(propertyPrice * 0.25);
-  const customAmountMin = Math.max(Math.ceil(propertyPrice * 0.1), 1);
-  const customAmountMax = propertyPrice;
   const slugify = (text) =>
     text
       ?.toString()
@@ -311,7 +307,14 @@ export default function PropertyBooking({ property }) {
             <div className="grid gap-3 sm:grid-cols-2 lg:w-[28rem]">
               <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Property</p>
-                <p className="mt-1 text-base font-bold text-slate-900">{propertyName}</p>
+                <div className="mt-1 flex items-center gap-2 flex-wrap">
+                  <p className="text-base font-bold text-slate-900">{propertyName}</p>
+                  {property?.propertyCategory && (
+                    <span className="inline-block bg-purple-500 text-white text-[10px] font-bold px-2 py-0.5 rounded capitalize">
+                      {property.propertyCategory.replace(/-/g, ' ')}
+                    </span>
+                  )}
+                </div>
                 <p className="mt-1 text-sm text-slate-500 line-clamp-2">{propertyAddress}</p>
               </div>
               <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 shadow-sm">
@@ -581,8 +584,15 @@ export default function PropertyBooking({ property }) {
               </div>
 
               <div className="mt-5 space-y-2 text-slate-900">
-                <h2 className="text-md mb-3"><span className="text-md font-bold">
-                  Property Name: </span>{propertyName}</h2>
+                <h2 className="text-md mb-3 flex items-center flex-wrap gap-2">
+                  <span className="text-md font-bold">Property Name: </span>
+                  {propertyName}
+                  {property?.propertyCategory && (
+                    <span className="inline-block bg-purple-500 text-white text-[10px] font-bold px-2 py-0.5 rounded capitalize">
+                      {property.propertyCategory.replace(/-/g, ' ')}
+                    </span>
+                  )}
+                </h2>
                 <div className="text-md text-slate-700"><span className="font-bold text-md text-slate-900">Address :</span> {propertyAddress}</div>
                 <div className="pt-2">
                   <div className="grid grid-cols-2 gap-3 text-sm">

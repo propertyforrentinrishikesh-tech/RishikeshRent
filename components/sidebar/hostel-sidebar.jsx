@@ -44,12 +44,12 @@ const data = {
         //     url: "/admin/hostel_extranet/manage_sub_menu",
         //     icon: Plus,
         // },
-        { divider: true },
-        {
-            name: "Hostel Details",
-            url: "/admin/hostel_details",
-            icon: Boxes,
-        },
+        // { divider: true },
+        // {
+        //     name: "Hostel Details",
+        //     url: "/admin/hostel_details",
+        //     icon: Boxes,
+        // },
         // { divider: true },
 
         // {
@@ -57,13 +57,13 @@ const data = {
         //     url: "/admin/hostel_banner",
         //     icon: Plus,
         // },
-        // { divider: true },
+        { divider: true },
 
-        // {
-        //     name: "Hostel Booking",
-        //     url: "/admin/hostel_booking",
-        //     icon: Plus,
-        // },
+        {
+            name: "Hostel Dashboard",
+            url: "/admin/hostel_dashboard",
+            icon: Plus,
+        },
     ],
 }
 

@@ -1,8 +1,8 @@
-import HostelDetails from "@/components/Admin/HostelSidebar/HostelDetails";
+import HostelDashboard from "@/components/Admin/HostelSidebar/HostelDashboard"
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 
 
-const  HostelDetailsPage = () => {
+const  HostelDashboardPage = () => {
     return (
         <SidebarInset>
             <header className="flex h-16 shrink-0 items-center gap-2">
@@ -11,11 +11,11 @@ const  HostelDetailsPage = () => {
                 </div>
             </header>
             <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-                <h1 className="text-4xl px-12 font-semibold">Hostels Dashboard</h1>
-                <HostelDetails />
+                <h1 className="text-4xl px-12 font-semibold">Property Banner</h1>
+                <HostelDashboard />
             </div>
         </SidebarInset>
     )
 }
 
-export default HostelDetailsPage
+export default HostelDashboardPage

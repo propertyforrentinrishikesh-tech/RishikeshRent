@@ -5,8 +5,10 @@ async function fetchProperties(searchParams) {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
     const params = new URLSearchParams();
     params.append('limit', '12');
+    params.append('showOnFront', 'true');
     
     if (searchParams?.propertyType) params.append('propertyType', searchParams.propertyType);
+    if (searchParams?.propertyCategory) params.append('propertyCategory', searchParams.propertyCategory);
     if (searchParams?.locationType) params.append('locationType', searchParams.locationType);
     if (searchParams?.propertyFor) params.append('propertyFor', searchParams.propertyFor);
     if (searchParams?.maxRent) params.append('maxRent', searchParams.maxRent);

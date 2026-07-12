@@ -24,6 +24,7 @@ export const PropertyDetail = ({ property: initialProperty, relatedProperties = 
     // Use passed property data or fallback to mock if null/undefined
     const property = initialProperty ? {
         name: initialProperty.propertyName,
+        propertyCategory: initialProperty.propertyCategory,
         type: initialProperty.propertyType,
         address: `${initialProperty.galiType || ''} ${initialProperty.subLocationType || ''} ${initialProperty.locationType || ''}`.trim() || initialProperty.contactAddress,
         beds: initialProperty.numberOfBedrooms || initialProperty.numberOfRooms || 0,
@@ -75,7 +76,11 @@ export const PropertyDetail = ({ property: initialProperty, relatedProperties = 
         { id: "policies", label: "Policies", icon: Shield },
         { id: "location", label: "Location", icon: MapPin },
     ];
-    const bookingUrl = property.slug ? `/properties/booking/${property.slug}` : "/";
+    const bookingUrl = property.propertyNameSlug
+        ? `/properties/booking/${property.propertyNameSlug}`
+        : property.name
+            ? `/properties/booking/${slugify(property.name)}`
+            : "/";
 
     // Gallery state and helpers
     const [galleryOpen, setGalleryOpen] = useState(false);
@@ -220,9 +225,16 @@ export const PropertyDetail = ({ property: initialProperty, relatedProperties = 
                 <div className="max-w-8xl mx-auto px-4 md:px-8">
                     <div className="flex items-end justify-between py-6">
                         <div>
-                            <span className="inline-block bg-emerald-500 text-black text-xs font-bold px-3 py-1 rounded-md mb-3">
-                                {property.type}
-                            </span>
+                            <div className="flex gap-2 flex-wrap mb-3">
+                                <span className="inline-block bg-emerald-500 text-black text-xs font-bold px-3 py-1 rounded-md">
+                                    {property.type}
+                                </span>
+                                {initialProperty.propertyCategory && (
+                                    <span className="inline-block bg-purple-500 text-white text-xs font-bold px-3 py-1 rounded-md capitalize">
+                                        {initialProperty.propertyCategory.replace(/-/g, ' ')}
+                                    </span>
+                                )}
+                            </div>
                             <h1 className="text-3xl md:text-4xl font-bold text-black mb-2">{property.name}</h1>
                             <div className="flex items-center text-black text-sm gap-2 w-60 text-wrap">
                                 <MapPin className="w-4 h-4" />

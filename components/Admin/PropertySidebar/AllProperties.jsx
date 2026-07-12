@@ -83,7 +83,7 @@ const getYouTubeId = (url) => {
 };
 
 // ─── Main Component ────────────────────────────────────────────────────────────
-const AllProperties = ({ propertyTypes = [], locationType = [], subLocationType = [], galiType = [] }) => {
+const AllProperties = ({ propertyTypes = [], locationType = [], subLocationType = [], galiType = [], type = "property" }) => {
     const [properties, setProperties] = useState([]);
     const [loading, setLoading] = useState(true);
     const [totalProperties, setTotalProperties] = useState(0);
@@ -131,7 +131,15 @@ const AllProperties = ({ propertyTypes = [], locationType = [], subLocationType 
             setLoading(true);
             const params = new URLSearchParams({ page: currentPage, limit: ITEMS_PER_PAGE });
             if (appliedFilters.search) params.set("search", appliedFilters.search);
-            if (appliedFilters.propertyType !== "all") params.set("propertyType", appliedFilters.propertyType);
+            
+            if (type === "hostel") {
+                params.set("status", "Approved");
+                params.set("isActive", "true");
+                params.set("propertyCategory", "pg-hostel");
+            } else {
+                if (appliedFilters.propertyType !== "all") params.set("propertyType", appliedFilters.propertyType);
+            }
+            
             if (appliedFilters.mainLocation !== "all") params.set("locationType", appliedFilters.mainLocation);
             if (appliedFilters.subLocation !== "all") params.set("subLocationType", appliedFilters.subLocation);
             if (appliedFilters.propertyFor) params.set("propertyFor", appliedFilters.propertyFor);
@@ -751,9 +759,19 @@ const PropertyViewModal = ({ property, onToggleActive, onToggleTrending,onToggle
                                         {property.propertyFor}
                                     </span>
                                 )}
+                                {property.propertyCategory && (
+                                    <span className="text-xs bg-purple-500 text-white px-2 py-0.5 rounded-full capitalize">
+                                        {property.propertyCategory}
+                                    </span>
+                                )}
                                 {property.propertyType && (
                                     <span className="text-xs bg-white/20 text-white px-2 py-0.5 rounded-full">
                                         {property.propertyType}
+                                    </span>
+                                )}
+                                {property.status && (
+                                    <span className={`text-xs px-2 py-0.5 rounded-full ${property.status === 'Approved' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'}`}>
+                                        {property.status}
                                     </span>
                                 )}
                             </div>
@@ -812,8 +830,10 @@ const PropertyViewModal = ({ property, onToggleActive, onToggleTrending,onToggle
                 <Section title="Basic Information" icon={<Info className="w-4 h-4" />}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
                         <InfoRow label="Property Name" value={property.propertyName} />
+                        <InfoRow label="Property Category" value={property.propertyCategory} />
                         <InfoRow label="Property Type" value={property.propertyType} />
                         <InfoRow label="Property For" value={property.propertyFor} capitalize />
+                        <InfoRow label="Status" value={property.status} />
                         <InfoRow label="Location" value={property.locationType} />
                         <InfoRow label="Sub Location" value={property.subLocationType} />
                         <InfoRow label="Gali / Mohalla" value={property.galiType} />

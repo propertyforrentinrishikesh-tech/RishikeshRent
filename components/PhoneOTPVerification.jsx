@@ -49,11 +49,11 @@ export default function PhoneOTPVerification({ phoneNumber: propPhoneNumber, onV
                     size: 'invisible',
                     callback: (response) => {
                         // reCAPTCHA solved
-                        console.log('reCAPTCHA solved');
+                        // console.log('reCAPTCHA solved');
                     },
                     'expired-callback': () => {
                         // Response expired
-                        console.log('reCAPTCHA expired');
+                        // console.log('reCAPTCHA expired');
                     }
                 }
             );

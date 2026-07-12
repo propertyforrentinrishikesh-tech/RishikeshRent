@@ -117,7 +117,7 @@ const COLOR_MAP = {
 };
 
 // ─── Main Component ────────────────────────────────────────────────────────────
-const SearchProperty = ({ propertyTypes = [], locationType = [], subLocationType = [] }) => {
+const SearchProperty = ({ propertyTypes = [], locationType = [], subLocationType = [], type = "property" }) => {
     // ── Draft filter state ──────────────────────────────────────────────────────
     const [draftPropertyFor, setDraftPropertyFor] = useState("all");
     const [draftMainLocation, setDraftMainLocation] = useState("all");
@@ -170,11 +170,23 @@ const SearchProperty = ({ propertyTypes = [], locationType = [], subLocationType
             if (draftPropertyFor !== "all") params.set("propertyFor", draftPropertyFor);
             if (draftMainLocation !== "all") params.set("locationType", draftMainLocation);
             if (draftSubLocation !== "all") params.set("subLocationType", draftSubLocation);
-            if (draftPropertyType !== "all") params.set("propertyType", draftPropertyType);
+            
+            if (type === "hostel") {
+                params.set("status", "Approved");
+                params.set("isActive", "true");
+                params.set("propertyCategory", "pg-hostel");
+            } else {
+                if (draftPropertyType !== "all") params.set("propertyType", draftPropertyType);
+                if (resultPropertyType !== "all") params.set("propertyType", resultPropertyType);
+            }
+            
             if (draftMinRent > 0) params.set("minRent", draftMinRent);
             if (draftMaxRent < 100000) params.set("maxRent", draftMaxRent);
-            if (resultStatus !== "all") params.set("isActive", resultStatus === "active" ? "true" : "false");
-            if (resultPropertyType !== "all") params.set("propertyType", resultPropertyType);
+            
+            // Allow overriding isActive if searching specifically from Search UI unless type is hostel
+            if (type !== "hostel" && resultStatus !== "all") {
+                params.set("isActive", resultStatus === "active" ? "true" : "false");
+            }
 
             const res = await fetch(`/api/property/propertyDetails?${params.toString()}`);
             const data = await res.json();
@@ -810,9 +822,19 @@ const PropertyViewModal = ({ property, onToggleActive, onToggleTrending, togglin
                                         {property.propertyFor}
                                     </span>
                                 )}
+                                {property.propertyCategory && (
+                                    <span className="text-xs bg-purple-500 text-white px-2 py-0.5 rounded-full capitalize">
+                                        {property.propertyCategory}
+                                    </span>
+                                )}
                                 {property.propertyType && (
                                     <span className="text-xs bg-white/20 text-white px-2 py-0.5 rounded-full">
                                         {property.propertyType}
+                                    </span>
+                                )}
+                                {property.status && (
+                                    <span className={`text-xs px-2 py-0.5 rounded-full ${property.status === 'Approved' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'}`}>
+                                        {property.status}
                                     </span>
                                 )}
                             </div>
@@ -863,8 +885,10 @@ const PropertyViewModal = ({ property, onToggleActive, onToggleTrending, togglin
                 <Section title="Basic Information" icon={<Info className="w-4 h-4" />}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
                         <InfoRow label="Property Name" value={property.propertyName} />
+                        <InfoRow label="Property Category" value={property.propertyCategory} />
                         <InfoRow label="Property Type" value={property.propertyType} />
                         <InfoRow label="Property For" value={property.propertyFor} capitalize />
+                        <InfoRow label="Status" value={property.status} />
                         <InfoRow label="Location" value={property.locationType} />
                         <InfoRow label="Sub Location" value={property.subLocationType} />
                         <InfoRow label="Gali / Mohalla" value={property.galiType} />

@@ -3,7 +3,7 @@ import { AppSidebar } from '@/components/sidebar/hostel-sidebar'
 import { SidebarProvider } from '@/components/ui/sidebar'
 
 export const metadata = {
-    title: "Hostel Details Page",
+    title: "Hostel Dashboard",
 }
 
 export default function RootLayout({

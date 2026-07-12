@@ -126,12 +126,7 @@ const HostelExtranet = () => {
                   <ArrowUpRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="border-white/15 text-white bg-white/5 hover:bg-white/10 rounded-2xl h-12">
-                <Link href="/admin/hostel_booking">
-                  Bookings
-                  <ArrowUpRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
+              
             </div>
           </div>
         </div>

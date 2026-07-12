@@ -6,14 +6,37 @@ import PropertyDetails from "@/models/Property/PropertyDetails";
 async function fetchPropertyBySlug(slug) {
     try {
         await connectDB();
-        const property = await PropertyDetails.findOne({ propertyNameSlug: slug }).select("-contactNumbers -ownerName -emailAddresses -brokerName");
+        let property = await PropertyDetails.findOne({ propertyNameSlug: slug })
+            .select("-contactNumbers -ownerName -emailAddresses -brokerName")
+            .lean();
+        
+        if (!property) {
+            // Fallback for older or new properties without a slug
+            const allProperties = await PropertyDetails.find({}).select("propertyName").lean();
+            
+            const slugify = (text) =>
+                text?.toString()
+                    .trim()
+                    .toLowerCase()
+                    .replace(/\s+/g, '-')
+                    .replace(/[^\w-]+/g, '')
+                    .replace(/--+/g, '-');
+                    
+            const matchedProp = allProperties.find(p => slugify(p.propertyName) === slug);
+            
+            if (matchedProp) {
+                property = await PropertyDetails.findById(matchedProp._id)
+                    .select("-contactNumbers -ownerName -emailAddresses -brokerName")
+                    .lean();
+            }
+        }
+
         // Convert Mongoose document to plain POJO
         return property ? JSON.parse(JSON.stringify(property)) : null;
     } catch (error) {
         console.error("Error fetching property details:", error);
         return null;
     }
-
 }
 
 // Fetch related properties

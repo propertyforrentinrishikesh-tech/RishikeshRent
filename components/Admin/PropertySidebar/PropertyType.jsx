@@ -33,7 +33,7 @@ const PropertyType = ({
   const [formData, setFormData] = useState({
     propertyType: "",
   });
-  console.log(propertyTypes)
+  // console.log(propertyTypes)
   useEffect(() => {
     setProperties(propertyTypes || []);
   }, [propertyTypes]);

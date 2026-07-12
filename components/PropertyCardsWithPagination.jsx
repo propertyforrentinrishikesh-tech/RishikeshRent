@@ -53,6 +53,11 @@ const PropertyCardsWithPagination = ({
   const [propertyType, setPropertyType] = useState('');
   const [locations, setLocations] = useState([]);
   const [propertyTypes, setPropertyTypes] = useState([]);
+  const [propertyCategory, setPropertyCategory] = useState('');
+  const [propertyCategories, setPropertyCategories] = useState([
+    { propertyCategory: 'home-rental', label: 'Home Rental' },
+    { propertyCategory: 'pg-hostel', label: 'PG / Hostel' },
+  ]);
   const [isLoading, setIsLoading] = useState(false);
   const [checkInDate, setCheckInDate] = useState('');
   const [guestCount, setGuestCount] = useState(1);
@@ -125,6 +130,7 @@ const PropertyCardsWithPagination = ({
       // Filters (query params)
       if (propertyFor) params.append('propertyFor', slugify(propertyFor));
       if (propertyType) params.append('propertyType', slugify(propertyType));
+      if (propertyCategory) params.append('propertyCategory', slugify(propertyCategory));
       if (location) params.append('locationType', slugify(location));
       if (maxPrice) params.append('maxRent', maxPrice);
 
@@ -156,6 +162,7 @@ const PropertyCardsWithPagination = ({
     if (params.get('locationType')) setLocation(params.get('locationType'));
     if (params.get('propertyFor')) setPropertyFor(params.get('propertyFor'));
     if (params.get('propertyType')) setPropertyType(params.get('propertyType'));
+    if (params.get('propertyCategory')) setPropertyCategory(params.get('propertyCategory'));
     if (params.get('checkInDate')) setCheckInDate(params.get('checkInDate'));
     if (params.get('guests')) setGuestCount(parseInt(params.get('guests')));
     if (params.get('maxRent')) setMaxPrice(params.get('maxRent'));
@@ -230,6 +237,27 @@ const PropertyCardsWithPagination = ({
                     {propertyTypes.map((type, index) => (
                       <SelectItem key={`type-${index}`} value={type.propertyType}>
                         {type.propertyType || `Type ${index + 1}`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Property Category */}
+              <div className="w-full md:w-1/4 h-12 flex items-center border rounded-xl hover:border-gray-300 transition-colors bg-gray-50/50">
+                <Building2 className="text-gray-400 w-5 h-5 ml-4 shrink-0" />
+                <Select
+                  value={propertyCategory}
+                  onValueChange={(value) => setPropertyCategory(value)}
+                  disabled={isLoading}
+                >
+                  <SelectTrigger className="w-full h-full bg-transparent border-none shadow-none text-sm font-medium focus:ring-0 focus:outline-none focus:ring-offset-0 focus-visible:ring-0 focus-visible:outline-none text-gray-700">
+                    <SelectValue placeholder="Property Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {propertyCategories.map((type, index) => (
+                      <SelectItem key={`cat-${index}`} value={type.propertyCategory}>
+                        {type.label}
                       </SelectItem>
                     ))}
                   </SelectContent>

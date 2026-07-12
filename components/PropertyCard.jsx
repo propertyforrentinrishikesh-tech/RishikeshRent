@@ -46,6 +46,11 @@ const PropertyCard = ({
         <span className="bg-emerald-500 text-white text-[12px] font-bold px-2 py-1 rounded">
           ✓ Verified
         </span>
+        {item?.propertyCategory && (
+          <span className="bg-purple-500 text-white text-[12px] font-bold px-2 py-1 rounded capitalize shadow-sm">
+            {item.propertyCategory.replace(/-/g, ' ')}
+          </span>
+        )}
       </div>
       <div className="flex flex-col flex-grow pt-4 px-2 pb-1">
         {/* Middle Row: Location and Price (replacing Duration) */}

@@ -176,7 +176,7 @@ const Page = ({ section = "frontend" }) => {
     if (session?.user?.isSubAdmin && section === "frontend") {
         return window.location.replace("/admin/send_promotional_emails")
     }
-console.log(menuItems)
+// console.log(menuItems)
     return (
 
                 <div className="flex flex-1 flex-col gap-4 p-4 pt-0">

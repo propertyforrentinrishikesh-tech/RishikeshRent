@@ -126,9 +126,9 @@ const NewArrivalBooking = () => {
                 <div>
                     <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
                         <MessageSquare className="w-7 h-7 text-teal-600" />
-                        Hostel Bookings
+                        New Arrival Booking For Both Hostel and PG
                     </h1>
-                    <p className="text-slate-500 text-sm mt-1">Manage all hostel registrations and details.</p>
+                    <p className="text-slate-500 text-sm mt-1">Manage all hostel and PG registrations and details.</p>
                 </div>
                 <Button variant="outline" size="sm" onClick={fetchBookings}
                     className="flex items-center gap-1.5 text-xs">
