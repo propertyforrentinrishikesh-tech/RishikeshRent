@@ -218,7 +218,7 @@ const SearchSection = () => {
             </div>
             {/* Property Category */}
             <div className="w-full md:w-1/4 h-12 flex items-center border rounded-xl hover:border-gray-300 transition-colors bg-gray-50/50">
-              <Building2 className="text-gray-400 w-5 h-5 ml-4 shrink-0" />
+              <Building2 className="text-gray-400 w-5 h-5 ml-3 shrink-0" />
               <Select
                 value={propertyCategory}
                 onValueChange={(value) => setPropertyCategory(value)}

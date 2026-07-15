@@ -2,7 +2,7 @@ import connectDB from "@/lib/connectDB";
 import Webpage from "@/models/Webpage";
 import { NextResponse } from "next/server";
 
-const ALLOWED_TEMPLATE_TYPES = new Set(["design1", "design2", "design3"]);
+const ALLOWED_TEMPLATE_TYPES = new Set(["design1", "design2", "design3", "design4", "design5", "design6", "design7"]);
 
 const sanitizeTemplateType = (templateType) => {
   if (ALLOWED_TEMPLATE_TYPES.has(templateType)) return templateType;
@@ -87,6 +87,8 @@ export async function PATCH(request) {
   }
 }
 
+import { deleteFileFromCloudinary } from "@/utils/cloudinary";
+
 export async function DELETE(request) {
   try {
     await connectDB();
@@ -96,11 +98,63 @@ export async function DELETE(request) {
       return NextResponse.json({ error: "Webpage id is required" }, { status: 400 });
     }
 
-    const deleted = await Webpage.findByIdAndDelete(body.id);
-    if (!deleted) {
+    const webpage = await Webpage.findById(body.id);
+    if (!webpage) {
       return NextResponse.json({ error: "Webpage not found" }, { status: 404 });
     }
 
+    // Collect all image keys to delete from Cloudinary
+    const imageKeys = new Set();
+    const addKey = (img) => {
+      if (img && img.key && typeof img.key === 'string' && img.key.trim() !== '') {
+        imageKeys.add(img.key);
+      }
+    };
+
+    // Check top-level image fields
+    addKey(webpage.imageFirst);
+    addKey(webpage.bannerImage);
+    addKey(webpage.mainProfileImage);
+    addKey(webpage.paragraphFirstImage);
+    addKey(webpage.paragraphSecondImage);
+    addKey(webpage.advertisementImage);
+    addKey(webpage.sideThumbImage);
+
+    // Check arrays
+    if (Array.isArray(webpage.imageGallery)) {
+      webpage.imageGallery.forEach(addKey);
+    }
+    if (Array.isArray(webpage.paragraphSections)) {
+      webpage.paragraphSections.forEach(sec => {
+        addKey(sec.firstImage);
+        addKey(sec.secondImage);
+      });
+    }
+    if (Array.isArray(webpage.gridCards)) {
+      webpage.gridCards.forEach(card => {
+        addKey(card.image);
+        if (Array.isArray(card.bentoImages)) {
+          card.bentoImages.forEach(addKey);
+        }
+      });
+    }
+    if (Array.isArray(webpage.teamCards)) {
+      webpage.teamCards.forEach(card => {
+        addKey(card.image);
+      });
+    }
+
+    // Delete images from Cloudinary
+    for (const key of imageKeys) {
+      try {
+        await deleteFileFromCloudinary(key);
+      } catch (err) {
+        console.error(`Failed to delete Cloudinary image with key ${key}:`, err);
+      }
+    }
+
+    await Webpage.findByIdAndDelete(body.id);
+    
     return NextResponse.json({ message: "Webpage deleted successfully" }, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: "Failed to delete webpage", message: error.message }, { status: 500 });

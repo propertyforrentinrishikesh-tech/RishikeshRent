@@ -70,6 +70,7 @@ import {
     Car,
     Wifi,
     Lock,
+    Edit,
 } from "lucide-react";
 
 const ITEMS_PER_PAGE = 15;
@@ -83,7 +84,7 @@ const getYouTubeId = (url) => {
 };
 
 // ─── Main Component ────────────────────────────────────────────────────────────
-const AllProperties = ({ propertyTypes = [], locationType = [], subLocationType = [], galiType = [], type = "property" }) => {
+const AllProperties = ({ propertyTypes = [], locationType = [], subLocationType = [], galiType = [], type = "property", setEditingProperty, setActiveParent, setActiveChild }) => {
     const [properties, setProperties] = useState([]);
     const [loading, setLoading] = useState(true);
     const [totalProperties, setTotalProperties] = useState(0);
@@ -162,6 +163,16 @@ const AllProperties = ({ propertyTypes = [], locationType = [], subLocationType 
 
     useEffect(() => { fetchProperties(); }, [fetchProperties]);
     useEffect(() => { setCurrentPage(1); }, [appliedFilters]);
+
+    const handleEditClick = (property) => {
+        if (setEditingProperty && setActiveParent) {
+            setEditingProperty(property);
+            setActiveParent("create_property_details");
+            if (setActiveChild) setActiveChild(null);
+        } else {
+            toast.error("Edit functionality is not available.");
+        }
+    };
 
     // ─── Handle Search button click ──────────────────────────────────────────
     const handleSearch = () => {
@@ -270,7 +281,6 @@ const AllProperties = ({ propertyTypes = [], locationType = [], subLocationType 
             setTogglingId(null);
         }
     };
-
 
     // ─── Delete ─────────────────────────────────────────────────────────────────
     const handleDelete = async () => {
@@ -627,6 +637,12 @@ const AllProperties = ({ propertyTypes = [], locationType = [], subLocationType 
                                             {/* Actions */}
                                             <TableCell>
                                                 <div className="flex items-center justify-center gap-1.5">
+                                                    <button
+                                                        onClick={() => handleEditClick(property)}
+                                                        className="p-1 rounded-lg text-green-700 hover:bg-green-50 border border-black transition-all"
+                                                        title="Edit Details">
+                                                        <Edit className="w-6 h-6" />
+                                                    </button>
                                                     <button
                                                         onClick={() => { setSelectedProperty(property); setIsViewDialogOpen(true); }}
                                                         className="p-1 rounded-lg text-blue-700 hover:bg-blue-50 border border-black transition-all"

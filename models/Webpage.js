@@ -15,6 +15,50 @@ const HighlightSchema = new Schema(
   { _id: false }
 );
 
+const YoutubeShortSchema = new Schema(
+  {
+    url: { type: String, default: "" },
+  },
+  { _id: false }
+);
+
+const YoutubeVideoSchema = new Schema(
+  {
+    url: { type: String, default: "" },
+  },
+  { _id: false }
+);
+
+const GridCardSchema = new Schema(
+  {
+    image: { type: ImageSchema, default: () => ({}) },
+    chipName: { type: String, default: "" },
+    title: { type: String, default: "" },
+    link: { type: String, default: "" },
+    gallerySlug: { type: String, default: "" },
+    galleryDescription: { type: String, default: "" },
+    galleryDate: { type: String, default: "" },
+    postedBy: { type: String, default: "" },
+    bentoImages: { type: [ImageSchema], default: [] },
+    youtubeShorts: { type: [YoutubeShortSchema], default: [] },
+    youtubeVideos: { type: [YoutubeVideoSchema], default: [] },
+  },
+  { _id: false }
+);
+
+const TeamCardSchema = new Schema(
+  {
+    image: { type: ImageSchema, default: () => ({}) },
+    name: { type: String, default: "" },
+    designation: { type: String, default: "" },
+    phone: { type: String, default: "" },
+    facebook: { type: String, default: "" },
+    instagram: { type: String, default: "" },
+    youtube: { type: String, default: "" },
+  },
+  { _id: false }
+);
+
 const ParagraphSectionSchema = new Schema(
   {
     title: { type: String, default: "" },
@@ -42,15 +86,32 @@ const AccordionTagSchema = new Schema(
   { _id: false }
 );
 
+const NoticeSchema = new Schema(
+  {
+    title: { type: String, default: "" },
+    description: { type: String, default: "" },
+    type: { type: String, default: "warning" },
+  },
+  { _id: false }
+);
+
+const SearchLocationSchema = new Schema(
+  {
+    locationName: { type: String, default: "" },
+    count: { type: String, default: "" },
+  },
+  { _id: false }
+);
+
 const WebpageSchema = new Schema(
   {
     title: { type: String, required: true, trim: true },
     slug: { type: String, required: true, unique: true, trim: true, lowercase: true },
     active: { type: Boolean, default: true },
-    section:{type:String,required:true},
+    section: { type: String, required: true },
     templateType: {
       type: String,
-      enum: ["design1", "design2", "design3"],
+      enum: ["design1", "design2", "design3", "design4", "design5", "design6", "design7"],
       default: "design1",
     },
     firstTitle: { type: String, default: "" },
@@ -88,6 +149,23 @@ const WebpageSchema = new Schema(
     googleUrl: { type: String, default: "" },
     mainProfileImage: { type: ImageSchema, default: () => ({}) },
     imageGallery: { type: [ImageSchema], default: [] },
+    notices: { type: [NoticeSchema], default: [] },
+    boldParagraph: { type: String, default: "" },
+    searchLocations: { type: [SearchLocationSchema], default: [] },
+    design5Chip: { type: String, default: "" },
+    design5MainHeading: { type: String, default: "" },
+    gridCards: { type: [GridCardSchema], default: [] },
+    design6Chip: { type: String, default: "" },
+    design6ExploreLink: { type: String, default: "" },
+    design6MainHeading: { type: String, default: "" },
+    design6SubHeading: { type: String, default: "" },
+    design6Author: { type: String, default: "" },
+    design6MidHeading: { type: String, default: "" },
+    design6MidLink: { type: String, default: "" },
+    teamCards: { type: [TeamCardSchema], default: [] },
+    design7Chip: { type: String, default: "" },
+    design7ExploreLink: { type: String, default: "" },
+    design7MainHeading: { type: String, default: "" },
   },
   { timestamps: true }
 );

@@ -55,8 +55,8 @@ import {
     Users,
     Clock,
     Bath,
-    X,
     XCircle,
+    Edit,
 } from "lucide-react";
 
 // ─── YouTube ID helper ─────────────────────────────────────────────────────────
@@ -68,7 +68,7 @@ const getYouTubeId = (url) => {
 };
 
 // ─── Main Component ────────────────────────────────────────────────────────────
-const TotalPropertyType = ({ propertyTypes = [], locationType = [], subLocationType = [], type = "property" }) => {
+const TotalPropertyType = ({ propertyTypes = [], locationType = [], subLocationType = [], type = "property", setEditingProperty, setActiveParent, setActiveChild }) => {
     const [allProperties, setAllProperties] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filterMainLocation, setFilterMainLocation] = useState("all");
@@ -106,6 +106,16 @@ const TotalPropertyType = ({ propertyTypes = [], locationType = [], subLocationT
     }, [filterMainLocation, filterPropertyType]);
 
     useEffect(() => { fetchAll(); }, [fetchAll]);
+
+    const handleEditClick = (property) => {
+        if (setEditingProperty && setActiveParent) {
+            setEditingProperty(property);
+            setActiveParent("create_property_details");
+            if (setActiveChild) setActiveChild(null);
+        } else {
+            toast.error("Edit functionality is not available.");
+        }
+    };
 
     // ─── Group by sub-location ─────────────────────────────────────────────────
     const grouped = React.useMemo(() => {
@@ -326,6 +336,7 @@ const TotalPropertyType = ({ propertyTypes = [], locationType = [], subLocationT
                                                 <SubGroupViewButton
                                                     group={group}
                                                     onView={(p) => { setSelectedProperty(p); setIsViewDialogOpen(true); }}
+                                                    onEdit={handleEditClick}
                                                 />
                                             </TableCell>
                                         </TableRow>
@@ -381,7 +392,7 @@ const TotalPropertyType = ({ propertyTypes = [], locationType = [], subLocationT
 };
 
 // ─── Sub-group view button with dropdown list ──────────────────────────────────
-const SubGroupViewButton = ({ group, onView }) => {
+const SubGroupViewButton = ({ group, onView, onEdit }) => {
     const [open, setOpen] = useState(false);
     return (
         <>
@@ -426,7 +437,18 @@ const SubGroupViewButton = ({ group, onView }) => {
                                         )}
                                     </div>
                                 </div>
-                                <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-violet-500" />
+                                <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                                    {onEdit && (
+                                        <button
+                                            onClick={() => { onEdit(p); setOpen(false); }}
+                                            className="p-1.5 rounded-lg text-green-600 hover:bg-green-100 transition-colors border border-transparent hover:border-green-200"
+                                            title="Edit Property"
+                                        >
+                                            <Edit className="w-5 h-5" />
+                                        </button>
+                                    )}
+                                    <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-violet-500 cursor-pointer" onClick={() => { onView(p); setOpen(false); }} />
+                                </div>
                             </div>
                         ))}
                     </div>

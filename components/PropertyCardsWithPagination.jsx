@@ -172,7 +172,7 @@ const PropertyCardsWithPagination = ({
       {/* Dynamic Banners Section */}
       {banners && banners.length > 0 && (
         <div className="w-full">
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col">
             {banners.map((banner, idx) => (
               <div key={banner._id || idx} className="w-full overflow-hidden">
                 <Image
@@ -181,7 +181,7 @@ const PropertyCardsWithPagination = ({
                   loading="lazy"
                   src={banner.image?.url || banner.image}
                   alt={`Banner ${idx + 1}`}
-                  className="w-full md:h-96 object-contain rounded"
+                  className="w-full h-48 md:h-52 md:object-cover rounded"
                 />
               </div>
             ))}

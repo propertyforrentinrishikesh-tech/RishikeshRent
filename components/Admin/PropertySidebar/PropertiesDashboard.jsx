@@ -72,6 +72,8 @@ const PropertiesDashboard = () => {
     fetchData();
   }, []);
 
+  const [editingProperty, setEditingProperty] = useState(null);
+
   // ================= SHARED PROPS =================
   const sharedProps = {
     propertyTypes,
@@ -83,6 +85,10 @@ const PropertiesDashboard = () => {
     setSubLocationType,
     setGaliType,
     type: "property",
+    editingProperty,
+    setEditingProperty,
+    setActiveParent,
+    setActiveChild,
   };
 
   // ================= SIDEBAR CONFIG =================

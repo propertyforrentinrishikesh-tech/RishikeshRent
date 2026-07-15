@@ -19,6 +19,10 @@ const TEMPLATE_OPTIONS = [
     { value: "design1", label: "Design 1" },
     { value: "design2", label: "Design 2" },
     { value: "design3", label: "Design 3" },
+    { value: "design4", label: "Design 4" },
+    { value: "design5", label: "Design 5" },
+    { value: "design6", label: "Design 6" },
+    { value: "design7", label: "Design 7" },
 ];
 
 const getTemplateLabel = (templateType) => {
@@ -67,11 +71,6 @@ const CreateWebpages = ({ id, section = "frontend" }) => {
         setIsEditing(false);
     };
 
-    // QR Modal state
-    const [qrModalOpen, setQrModalOpen] = useState(false);
-    const [qrModalUrl, setQrModalUrl] = useState("");
-    const [qrModalTitle, setQrModalTitle] = useState("");
-    
     // Slugify utility (copied from ProductProfile)
     function slugify(str) {
         return str

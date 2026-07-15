@@ -61,6 +61,7 @@ import {
     ChevronRight,
     SlidersHorizontal,
     Hash,
+    Edit,
 } from "lucide-react";
 
 // ─── YouTube ID helper ─────────────────────────────────────────────────────────
@@ -117,7 +118,7 @@ const COLOR_MAP = {
 };
 
 // ─── Main Component ────────────────────────────────────────────────────────────
-const SearchProperty = ({ propertyTypes = [], locationType = [], subLocationType = [], type = "property" }) => {
+const SearchProperty = ({ propertyTypes = [], locationType = [], subLocationType = [], type = "property", setEditingProperty, setActiveParent, setActiveChild }) => {
     // ── Draft filter state ──────────────────────────────────────────────────────
     const [draftPropertyFor, setDraftPropertyFor] = useState("all");
     const [draftMainLocation, setDraftMainLocation] = useState("all");
@@ -148,6 +149,16 @@ const SearchProperty = ({ propertyTypes = [], locationType = [], subLocationType
     const [selectedProperty, setSelectedProperty] = useState(null);
     const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
     const [togglingId, setTogglingId] = useState(null);
+
+    const handleEditClick = (property) => {
+        if (setEditingProperty && setActiveParent) {
+            setEditingProperty(property);
+            setActiveParent("create_property_details");
+            if (setActiveChild) setActiveChild(null);
+        } else {
+            toast.error("Edit functionality is not available.");
+        }
+    };
 
     // ── Sub-locations filtered by main location ─────────────────────────────────
     const filteredSubLocations = draftMainLocation !== "all"
@@ -663,12 +674,20 @@ const SearchProperty = ({ propertyTypes = [], locationType = [], subLocationType
                                                             className="data-[state=checked]:bg-amber-500" />
                                                     </TableCell>
                                                     <TableCell className="text-center">
-                                                        <button
-                                                            onClick={() => { setSelectedProperty(property); setIsViewDialogOpen(true); }}
-                                                            className="p-1.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-white transition-all shadow-sm"
-                                                            title="View Details">
-                                                            <Eye className="w-4 h-4" />
-                                                        </button>
+                                                        <div className="flex items-center justify-center gap-1.5">
+                                                            <button
+                                                                onClick={() => handleEditClick(property)}
+                                                                className="p-1.5 rounded-lg text-green-700 hover:bg-green-50 border border-green-200 transition-all shadow-sm"
+                                                                title="Edit Details">
+                                                                <Edit className="w-4 h-4" />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => { setSelectedProperty(property); setIsViewDialogOpen(true); }}
+                                                                className="p-1.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-white transition-all shadow-sm"
+                                                                title="View Details">
+                                                                <Eye className="w-4 h-4" />
+                                                            </button>
+                                                        </div>
                                                     </TableCell>
                                                 </TableRow>
                                             );
