@@ -45,7 +45,7 @@ const initialAccordionTags = [{ left: '', right: '' }];
 const initialNotices = [{ title: "", description: "", type: "warning" }];
 const initialSearchLocations = [{ locationName: "", count: "" }];
 const initialGridCards = [{ image: { url: '', key: '' }, chipName: '', title: '', link: '', galleryDate: '', postedBy: '', galleryDescription: '', bentoImages: [], youtubeShorts: [], youtubeVideos: [] }];
-const initialTeamCards = [{ image: { url: '', key: '' }, name: '', designation: '', phone: '', facebook: '',instagram:'',youtube:'' }];
+const initialTeamCards = [{ image: { url: '', key: '' }, name: '', designation: '', phone: '', facebook: '', instagram: '', youtube: '' }];
 const TEMPLATE_OPTIONS = [
   { value: "design1", label: "Design 1" },
   { value: "design2", label: "Design 2" },
@@ -345,9 +345,9 @@ const EditWebpages = ({ activityId }) => {
           throw new Error(data.error || 'Unknown error');
         }
       });
-      
+
       const uploadedImages = await Promise.all(uploadPromises);
-      
+
       setForm((prev) => {
         const newCards = [...prev.gridCards];
         const bentoImages = newCards[cardIndex].bentoImages || [];
@@ -690,33 +690,36 @@ const EditWebpages = ({ activityId }) => {
         </div>
         {(isDesignOneOrTwo || isDesignThree || isDesignFour || isDesignFive || isDesignSix || isDesignSeven) && (
           <>
-            <div className="mb-4">
-              <label className="block mb-2 font-semibold">Top Section View</label>
-              <div className="inline-flex rounded-md border border-gray-300 overflow-hidden">
-                <button
-                  type="button"
-                  onClick={() => setTopSectionView('all')}
-                  className={`px-4 py-2 font-semibold ${topSectionView === 'all' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
-                >
-                  All Inputs
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTopSectionView('bannerOnly')}
-                  className={`px-4 py-2 font-semibold ${topSectionView === 'bannerOnly' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
-                >
-                  Banner Image Only
-                </button>
-              </div>
-            </div>
-
-            {topSectionView === 'all' && (
-              <>
-                {/* Main Short Tag Line */}
-                <div className="mb-4">
-                  <label className="block mb-1 font-semibold">Main Short Tag Line</label>
-                  <input type="text" name="firstTitle" value={form.firstTitle} onChange={handleChange} placeholder="Type Here" className="w-full rounded-md p-3 bg-gray-200 font-semibold text-black" />
+            {!isDesignFour && !isDesignFive && !isDesignSix && !isDesignSeven && (
+              <div className="mb-4">
+                <label className="block mb-2 font-semibold">Top Section View</label>
+                <div className="inline-flex rounded-md border border-gray-300 overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setTopSectionView('all')}
+                    className={`px-4 py-2 font-semibold ${topSectionView === 'all' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
+                  >
+                    All Inputs
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTopSectionView('bannerOnly')}
+                    className={`px-4 py-2 font-semibold ${topSectionView === 'bannerOnly' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
+                  >
+                    Banner Image Only
+                  </button>
                 </div>
+              </div>
+            )}
+
+            {(topSectionView === 'all' || isDesignFour || isDesignFive || isDesignSix || isDesignSeven) && (
+              <>
+                {/* Main Top Title Tag Line */}
+                <div className="mb-4">
+                  <label className="block mb-1 font-semibold">Main Top Title Tag Line</label>
+                  <input type="text" name="secondTitle" value={form.secondTitle} onChange={handleChange} placeholder="Type Here" className="w-full rounded-md p-3 bg-gray-200 font-semibold" />
+                </div>
+
                 {/* Main Top Image (Cloudinary Upload) */}
                 {!isDesignThree && (
                   <div className="mb-4">
@@ -755,12 +758,12 @@ const EditWebpages = ({ activityId }) => {
                     )}
                   </div>
                 )}
-                {/* Main Top Title Tag Line */}
-                <div className="mb-4">
-                  <label className="block mb-1 font-semibold">Main Top Title Tag Line</label>
-                  <input type="text" name="secondTitle" value={form.secondTitle} onChange={handleChange} placeholder="Type Here" className="w-full rounded-md p-3 bg-gray-200 font-semibold" />
-                </div>
+                {/* Main Short Tag Line */}
 
+                <div className="mb-4">
+                  <label className="block mb-1 font-semibold">Main Short Tag Line</label>
+                  <input type="text" name="firstTitle" value={form.firstTitle} onChange={handleChange} placeholder="Type Here" className="w-full rounded-md p-3 bg-gray-200 font-semibold text-black" />
+                </div>
                 {/* Create Tag */}
                 {!isDesignFour && !isDesignFive && !isDesignSix && !isDesignSeven && (
                   <div className="mb-4">
@@ -801,7 +804,7 @@ const EditWebpages = ({ activityId }) => {
             )}
 
             {/* Main Top Banner Image (Cloudinary Upload) */}
-            {(topSectionView === 'bannerOnly') && (
+            {(topSectionView === 'bannerOnly' && !isDesignFour && !isDesignFive && !isDesignSix && !isDesignSeven) && (
               <div className="mb-4">
                 <label className="block mb-1 font-semibold">Main Top Banner Image</label>
                 <input
@@ -1522,7 +1525,7 @@ const EditWebpages = ({ activityId }) => {
                 <button type="button" onClick={() => {
                   setForm((prev) => {
                     const nextCards = [...(prev.teamCards || [])];
-                    nextCards.push({ image: { url: '', key: '' }, name: '', designation: '', phone: '', facebook: '',instagram:'',youtube:''});
+                    nextCards.push({ image: { url: '', key: '' }, name: '', designation: '', phone: '', facebook: '', instagram: '', youtube: '' });
                     return { ...prev, teamCards: nextCards };
                   });
                 }} className="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold mt-2">
@@ -1538,7 +1541,7 @@ const EditWebpages = ({ activityId }) => {
             {/* Design 7 Content */}
             <div className="mb-4 mt-4 border-t border-slate-100 pt-6">
               <h3 className="text-xl font-bold mb-4">Design 7 Sections</h3>
-               
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="block mb-1 font-semibold">Top Chip Text</label>
@@ -1549,7 +1552,7 @@ const EditWebpages = ({ activityId }) => {
                   <input type="text" name="design7ExploreLink" value={form.design7ExploreLink} onChange={handleChange} placeholder="/explore" className="w-full rounded-md p-3 bg-gray-200 font-semibold text-black" />
                 </div>
               </div>
-              
+
               <div className="mb-4">
                 <label className="block mb-1 font-semibold">Main Heading</label>
                 <input type="text" name="design7MainHeading" value={form.design7MainHeading} onChange={handleChange} placeholder="The latest news and insights..." className="w-full rounded-md p-3 bg-gray-200 font-semibold text-black" />
@@ -1599,7 +1602,7 @@ const EditWebpages = ({ activityId }) => {
                           });
                         }} placeholder="e.g. Fintech" className="w-full rounded-md p-3 bg-white border border-gray-300 font-semibold text-black" />
                       </div>
-                      
+
                       <div>
                         <label className="block mb-1 font-semibold text-sm">Hover Title (Link Text)</label>
                         <input type="text" value={card.title} onChange={(e) => {
@@ -1610,12 +1613,12 @@ const EditWebpages = ({ activityId }) => {
                           });
                         }} placeholder="e.g. Compliance Consulting" className="w-full rounded-md p-3 bg-white border border-gray-300 font-semibold text-black" />
                       </div>
-                    
+
                       {/* Expandable Gallery Detail Section */}
                       <div className="md:col-span-2 mt-4 border border-blue-200 rounded-lg p-4 bg-blue-50">
                         <h3 className="font-bold text-md mb-3 text-blue-800">Gallery Detail Page Content</h3>
                         <p className="text-xs text-blue-600 mb-4">Filling this out will generate a detail page at <strong>/gallery/{card.gallerySlug || "<auto-generated>"}</strong></p>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                           <div>
                             <label className="block mb-1 font-semibold text-sm">Date</label>
@@ -1741,7 +1744,7 @@ const EditWebpages = ({ activityId }) => {
                     </div>
                   </div>
                 ))}
-                
+
                 <button type="button" onClick={() => {
                   setForm((prev) => {
                     const nextGridCards = [...(prev.gridCards || [])];

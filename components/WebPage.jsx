@@ -198,8 +198,8 @@ const PopularDestinations = () => {
       setHotelsLoading(true);
       try {
         const [hotelsRes, catsRes] = await Promise.all([
-          fetch("/api/createHotel"),
-          fetch("/api/hotelCategory"),
+          fetch("/api/property/createHotel"),
+          fetch("/api/property/hotelCategory"),
         ]);
         const hotelsData = await hotelsRes.json();
         const catsData = await catsRes.json();
@@ -213,7 +213,7 @@ const PopularDestinations = () => {
       }
     };
 
-    fetchHotels();
+    // fetchHotels();
   }, []);
 
   const filteredHotels =
@@ -307,7 +307,7 @@ const PopularDestinations = () => {
 };
 
 const WebPage = ({ data }) => {
-  // console.log(data)
+  console.log(data)
   const [openAccordion, setOpenAccordion] = useState(0);
   const isDesignTwo = data.templateType === "design1";
   const isDesignThree = data.templateType === "design3";
@@ -369,8 +369,8 @@ const WebPage = ({ data }) => {
         >
           <div className="absolute inset-0 bg-black/5"></div>
           <div className="relative z-10 text-white">
-            <h1 className="text-4xl md:text-5xl font-bold mb-2">{data.secondTitle || data.title}</h1>
-            <p className="text-md md:text-lg font-semibold">Home : {data.firstTitle || data.title}</p>
+            <h1 className="text-4xl md:text-5xl font-bold mb-2">{data.secondTitle||""}</h1>
+            <p className="text-md md:text-lg font-semibold">Home : {data.firstTitle ||""}</p>
           </div>
         </div>
 
@@ -518,8 +518,8 @@ const WebPage = ({ data }) => {
         >
           <div className="absolute inset-0 bg-black/40"></div>
           <div className="relative z-10 text-white">
-            <h1 className="text-4xl md:text-5xl font-bold mb-2">{data.secondTitle || data.title}</h1>
-            <p className="text-md md:text-lg font-semibold">Home : {data.firstTitle || data.title}</p>
+        <h1 className="text-4xl md:text-5xl font-bold mb-2">{data.secondTitle||""}</h1>
+            <p className="text-md md:text-lg font-semibold">{data.firstTitle ||""}</p>
           </div>
         </div>
 
@@ -604,8 +604,8 @@ const WebPage = ({ data }) => {
         >
           <div className="absolute inset-0 bg-black/5"></div>
           <div className="relative z-10 text-white">
-            <h1 className="text-4xl md:text-5xl font-bold mb-2">{data.secondTitle || data.title}</h1>
-            <p className="text-md md:text-lg font-semibold">Home : {data.firstTitle || data.title}</p>
+            <h1 className="text-4xl md:text-5xl font-bold mb-2">{data.secondTitle||""}</h1>
+            <p className="text-md md:text-lg font-semibold">{data.firstTitle|""}</p>
           </div>
         </div>
 
@@ -756,8 +756,8 @@ const WebPage = ({ data }) => {
         >
           <div className="absolute inset-0 bg-black/40"></div>
           <div className="relative z-10 text-white">
-            <h1 className="text-4xl md:text-5xl font-bold mb-2">{data.secondTitle || data.title}</h1>
-            <p className="text-md md:text-lg font-semibold">Home : {data.firstTitle || data.title}</p>
+            <h1 className="text-4xl md:text-5xl font-bold mb-2">{data.secondTitle||""}</h1>
+            <p className="text-md md:text-lg font-semibold">{data.firstTitle ||""}</p>
           </div>
         </div>
 
@@ -829,7 +829,7 @@ const WebPage = ({ data }) => {
           
         </div>
 
-        <PopularDestinations />
+        {/* <PopularDestinations /> */}
       </div>
     );
   }
